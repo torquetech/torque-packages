@@ -214,14 +214,14 @@ def load(path: str) -> Config:
 
     entry_points = metadata.entry_points()
 
-    if "torque.components" in entry_points:
-        config["component_types"] = {i.name: i for i in entry_points["torque.components"]}
+    if "torque.components.v1" in entry_points:
+        config["component_types"] = {i.name: i for i in entry_points["torque.components.v1"]}
 
     else:
         config["component_types"] = {}
 
-    if "torque.links" in entry_points:
-        config["link_types"] = {i.name: i for i in entry_points["torque.links"]}
+    if "torque.links.v1" in entry_points:
+        config["link_types"] = {i.name: i for i in entry_points["torque.links.v1"]}
 
     else:
         config["link_types"] = {}
