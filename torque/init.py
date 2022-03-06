@@ -46,6 +46,6 @@ def run(arguments: Namespace):
 
     install_torque(package)
 
-    with open(f"{arguments.path}/.torque/.gitignore", "w", encoding="utf8") as file:
+    with open(".torque/.gitignore", "w", encoding="utf8") as file:
         print("cache", file=file)
         print("**/__pycache__", file=file)
