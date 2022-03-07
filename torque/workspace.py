@@ -24,12 +24,16 @@ def initialize_venv(target: str):
         "VIRTUAL_ENV": ".torque/cache/venv",
     }
 
-    subprocess.run([".torque/cache/venv/bin/python",
-                    "-m", "pip",
-                    "install", "-U",
-                    "pip", "wheel", "setuptools"],
-                   env=env,
-                   check=True)
+    try:
+        subprocess.run([".torque/cache/venv/bin/python",
+                        "-m", "pip",
+                        "install", "-U",
+                        "pip", "wheel", "setuptools"],
+                       env=env,
+                       check=True)
+
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("failed to install venv") from exc
 
     with open(".torque/cache/install_deps", "w", encoding="utf8"):
         pass
@@ -55,4 +59,8 @@ def install_torque(package: str):
 
     cmd += [package]
 
-    subprocess.run(cmd, env=env, check=True)
+    try:
+        subprocess.run(cmd, env=env, check=True)
+
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("failed to install torque-workspace package") from exc
