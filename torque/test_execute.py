@@ -6,16 +6,17 @@
 
 from threading import Lock
 
-from torque import model
 from torque import exceptions
 from torque import execute
+from torque import model
+from torque import types
 
 
-class Component(model.ComponentType):
+class Component(types.Component):
     """TODO"""
 
 
-class Link(model.LinkType):
+class Link(types.Link):
     """TODO"""
 
 

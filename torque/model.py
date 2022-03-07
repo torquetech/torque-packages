@@ -4,42 +4,10 @@
 
 """TODO"""
 
-from abc import ABC, abstractmethod
-from collections import namedtuple
-
 from torque import exceptions
 
 
 Types = dict[str, object]
-
-Parameter = namedtuple("Parameter", ["name", "description", "default_value"])
-Option = namedtuple("Option", ["name", "description", "default_value"])
-
-
-class ComponentType(ABC):
-    # pylint: disable=R0903
-
-    """TODO"""
-
-    parameters: list[Parameter] = []
-    configuration: list[Option] = []
-
-    @abstractmethod
-    def on_build(self):
-        """TODO"""
-
-
-class LinkType(ABC):
-    # pylint: disable=R0903
-
-    """TODO"""
-
-    parameters: list[Parameter] = []
-    configuration: list[Option] = []
-
-    @abstractmethod
-    def on_build(self):
-        """TODO"""
 
 
 class Cluster:
