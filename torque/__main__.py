@@ -9,23 +9,13 @@ import os
 import sys
 import traceback
 
-from torque.package import install_deps
+from torque import package
 
 # pylint: disable=C0413
 if os.path.isfile(".torque/cache/install_deps"):
-    install_deps(True, True)
+    package.install_deps(True, True)
 
-
-from torque.commands import init
-from torque.commands import package
-from torque.commands import cluster
-from torque.commands import component
-from torque.commands import link
-from torque.commands import build
-from torque.commands import push
-from torque.commands import generate
-from torque.commands import install
-from torque.commands import uninstall
+from torque import commands
 
 
 def main() -> int:
@@ -43,25 +33,25 @@ def main() -> int:
                             metavar="PATH",
                             help="layout file to use")
 
-        commands = {
-            "init": init,
-            "package": package,
-            "cluster": cluster,
-            "component": component,
-            "link": link,
-            "build": build,
-            "push": push,
-            "generate": generate,
-            "install": install,
-            "uninstall": uninstall
+        cmds = {
+            "init": commands.init,
+            "package": commands.package,
+            "cluster": commands.cluster,
+            "component": commands.component,
+            "link": commands.link,
+            "build": commands.build,
+            "push": commands.push,
+            "generate": commands.generate,
+            "install": commands.install,
+            "uninstall": commands.uninstall
         }
 
-        for cmd in commands.values():
+        for cmd in cmds.values():
             cmd.add_arguments(subparsers)
 
         args = parser.parse_args()
 
-        commands[args.main_cmd].run(args)
+        cmds[args.main_cmd].run(args)
 
         return 0
 

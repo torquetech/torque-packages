@@ -160,7 +160,7 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    cmd = {
+    cmds = {
         "create": _create,
         "remove": _remove,
         "show": _show,
@@ -169,4 +169,4 @@ def run(arguments: argparse.Namespace):
         "list_types": _list_types
     }
 
-    cmd[arguments.link_cmd](arguments)
+    cmds[arguments.link_cmd](arguments)

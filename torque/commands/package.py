@@ -81,10 +81,10 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    cmd = {
+    cmds = {
         "install": _install,
         "remove": _remove,
         "list": _list
     }
 
-    cmd[arguments.package_cmd](arguments)
+    cmds[arguments.package_cmd](arguments)
