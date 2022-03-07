@@ -16,12 +16,12 @@ class Link(model.LinkType):
     """TODO"""
 
 
-_modules = {
+_types = {
     "components.v1": {
-        "component_type", Component
+        "component_type": Component
     },
     "links.v1": {
-        "link_type", Link
+        "link_type": Link
     }
 }
 
@@ -42,7 +42,7 @@ def _has_cycles(dag: model.DAG) -> bool:
 def test_test1():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
     dag.create_cluster("cluster2")
@@ -72,7 +72,7 @@ def test_test1():
 def test_test2():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     try:
         dag.create_cluster("cluster1")
@@ -87,7 +87,7 @@ def test_test2():
 def test_test3():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -104,7 +104,7 @@ def test_test3():
 def test_test4():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -124,7 +124,7 @@ def test_test4():
 def test_test5():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -143,7 +143,7 @@ def test_test5():
 def test_test6():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -161,7 +161,7 @@ def test_test6():
 def test_test7():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -179,7 +179,7 @@ def test_test7():
 def test_test8():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -197,7 +197,7 @@ def test_test8():
 def test_test9():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -217,7 +217,7 @@ def test_test9():
 def test_test10():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     assert not _has_cycles(dag)
 
@@ -225,7 +225,7 @@ def test_test10():
 def test_test11():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 

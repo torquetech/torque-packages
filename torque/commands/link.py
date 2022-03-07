@@ -89,7 +89,7 @@ def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
     dag, _ = layout.load(arguments.layout)
-    link_types = dag.modules["links.v1"]
+    link_types = dag.types["links.v1"]
 
     if arguments.name not in link_types:
         raise RuntimeError(f"{arguments.name}: link type not found")
@@ -103,7 +103,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     dag, _ = layout.load(arguments.layout)
-    link_types = dag.modules["links.v1"]
+    link_types = dag.types["links.v1"]
 
     for link in link_types:
         print(f"{link}: {link_types[link]}")

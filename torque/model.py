@@ -10,7 +10,7 @@ from collections import namedtuple
 from torque import exceptions
 
 
-Modules = dict[str, object]
+Types = dict[str, object]
 
 Parameter = namedtuple("Parameter", ["name", "description", "default_value"])
 Option = namedtuple("Option", ["name", "description", "default_value"])
@@ -142,12 +142,12 @@ class Component:
 class DAG:
     """TODO"""
 
-    def __init__(self, revision: int, modules: Modules):
+    def __init__(self, revision: int, types: Types):
         self.revision = revision
         self.clusters = {}
         self.components = {}
         self.links = {}
-        self.modules = modules
+        self.types = types
 
     def create_cluster(self, name: str) -> Cluster:
         """TODO"""
@@ -186,7 +186,7 @@ class DAG:
         if cluster not in self.clusters:
             raise exceptions.ClusterNotFound(cluster)
 
-        if component_type not in self.modules["components.v1"]:
+        if component_type not in self.types["components.v1"]:
             raise exceptions.ComponentTypeNotFound(component_type)
 
         component = Component(name, cluster, component_type, params)
@@ -232,7 +232,7 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        if link_type not in self.modules["links.v1"]:
+        if link_type not in self.types["links.v1"]:
             raise exceptions.LinkTypeNotFound(link_type)
 
         self.components[destination].add_inbound_link(source, name)

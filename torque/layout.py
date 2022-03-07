@@ -107,10 +107,10 @@ def _from_link(link: model.Link) -> dict[str: object]:
     }
 
 
-def _generate_dag(dag_layout: dict[str, object], modules: model.Modules) -> model.DAG:
+def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DAG:
     """TODO"""
 
-    dag = model.DAG(dag_layout["revision"], modules)
+    dag = model.DAG(dag_layout["revision"], types)
 
     for cluster in dag_layout["clusters"]:
         dag.create_cluster(cluster["name"])
@@ -137,7 +137,7 @@ def _generate_dag(dag_layout: dict[str, object], modules: model.Modules) -> mode
     return dag
 
 
-def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles):
+def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
     """TODO"""
 
     layout = {
@@ -160,26 +160,26 @@ def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles
     _LAYOUT_SCHEMA.validate(layout)
 
     profiles = {i["name"]: _to_profile(i) for i in layout["profiles"]}
-    modules = {}
+    types = {}
 
     entry_points = metadata.entry_points()
 
     if "torque.components.v1" in entry_points:
-        modules["components.v1"] = {i.name: i.load() for i in entry_points["torque.components.v1"]}
+        types["components.v1"] = {i.name: i.load() for i in entry_points["torque.components.v1"]}
 
     else:
-        modules["components.v1"] = {}
+        types["components.v1"] = {}
 
     if "torque.links.v1" in entry_points:
-        modules["links.v1"] = {i.name: i.load() for i in entry_points["torque.links.v1"]}
+        types["links.v1"] = {i.name: i.load() for i in entry_points["torque.links.v1"]}
 
     else:
-        modules["links.v1"] = {}
+        types["links.v1"] = {}
 
-    if extra_modules:
-        modules = modules | extra_modules
+    if extra_types:
+        types = types | extra_types
 
-    dag = _generate_dag(layout["dag"], modules)
+    dag = _generate_dag(layout["dag"], types)
 
     return dag, profiles
 

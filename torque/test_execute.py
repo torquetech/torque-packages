@@ -19,12 +19,12 @@ class Link(model.LinkType):
     """TODO"""
 
 
-_modules = {
+_types = {
     "components.v1": {
-        "component_type", Component
+        "component_type": Component
     },
     "links.v1": {
-        "link_type", Link
+        "link_type": Link
     }
 }
 
@@ -76,7 +76,7 @@ def _has_cycles(dag: model.DAG) -> bool:
 def test_test1():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 
@@ -105,7 +105,7 @@ def test_test1():
 def test_test2():
     """TODO"""
 
-    dag = model.DAG(0, _modules)
+    dag = model.DAG(0, _types)
 
     dag.create_cluster("cluster1")
 

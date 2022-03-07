@@ -83,7 +83,7 @@ def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
     dag, _ = layout.load(arguments.layout)
-    component_types = dag.modules["components.v1"]
+    component_types = dag.types["components.v1"]
 
     if arguments.name not in component_types:
         raise RuntimeError(f"{arguments.name}: component type not found")
@@ -97,7 +97,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     dag, _ = layout.load(arguments.layout)
-    component_types = dag.modules["components.v1"]
+    component_types = dag.types["components.v1"]
 
     for component in component_types:
         print(f"{component}: {component_types[component]}")
