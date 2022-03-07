@@ -50,7 +50,11 @@ def install_deps(force: bool, upgrade: bool):
     if upgrade:
         cmd += ["--upgrade"]
 
-    subprocess.run(cmd, env=env, check=True)
+    try:
+        subprocess.run(cmd, env=env, check=True)
+
+    except subprocess.CalledProcessError as exc:
+        raise exceptions.ExecuteFailed("pip") from exc
 
     try:
         os.unlink(".torque/cache/install_deps")
@@ -91,7 +95,11 @@ def install_package(package: str, force: bool, upgrade: bool):
         package
     ]
 
-    subprocess.run(cmd, env=env, check=True)
+    try:
+        subprocess.run(cmd, env=env, check=True)
+
+    except subprocess.CalledProcessError as exc:
+        raise exceptions.ExecuteFailed("pip") from exc
 
     install_deps(force, upgrade)
 

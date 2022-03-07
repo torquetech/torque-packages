@@ -73,3 +73,7 @@ class PackageNotFound(TorqueException):
 
 class PackageInUse(TorqueException):
     """TODO"""
+
+
+class ExecuteFailed(TorqueException):
+    """TODO"""
