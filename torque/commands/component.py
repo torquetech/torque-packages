@@ -13,7 +13,7 @@ from torque import layout
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    dag, configs = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -37,13 +37,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{arguments.type}: component type not found") from exc
 
-    layout.store(arguments.layout, dag, profiles)
+    layout.store(arguments.layout, dag, configs)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    dag, configs = layout.load(arguments.layout)
 
     try:
         dag.remove_component(arguments.name)
@@ -54,7 +54,7 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.ComponentStillConnected as exc:
         raise RuntimeError(f"{arguments.name}: component still connected") from exc
 
-    layout.store(arguments.layout, dag, profiles)
+    layout.store(arguments.layout, dag, configs)
 
 
 def _show(arguments: argparse.Namespace):

@@ -14,15 +14,15 @@ from importlib import metadata
 from torque import model
 
 
-Profile = namedtuple("Profile", ["name", "uri", "secret"])
-Profiles = dict[str, Profile]
+Configuration = namedtuple("Option", ["name", "uri", "secret"])
+Configurations = dict[str, Configuration]
 
 
 _LAYOUT_SCHEMA = schema.Schema({
-    "profiles": [{
+    "configurations": [{
         "name": str,
         "uri": str,
-        "secret": str
+        "secret": schema.Or(str, None)
     }],
     "dag": {
         "revision": int,
@@ -52,19 +52,19 @@ _LAYOUT_SCHEMA = schema.Schema({
 })
 
 
-def _to_profile(profile: dict[str, object]) -> Profile:
+def _to_config(config: dict[str, object]) -> Configuration:
     """TODO"""
 
-    return Profile(profile["name"],
-                   profile["uri"],
-                   profile["secret"])
+    return Configuration(config["name"],
+                         config["uri"],
+                         config["secret"])
 
 
-def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
+def _from_configs(configs: Configurations) -> list[dict[str, object]]:
     """TODO"""
 
     return [
-        {"name": i.name, "uri": i.uri, "secret": i.secret} for i in profiles.values()
+        {"name": i.name, "uri": i.uri, "secret": i.secret} for i in configs.values()
     ]
 
 
@@ -137,11 +137,11 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
     return dag
 
 
-def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
+def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configurations):
     """TODO"""
 
     layout = {
-        "profiles": [],
+        "configurations": [],
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -159,7 +159,7 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
 
     _LAYOUT_SCHEMA.validate(layout)
 
-    profiles = {i["name"]: _to_profile(i) for i in layout["profiles"]}
+    configs = {i["name"]: _to_config(i) for i in layout["configurations"]}
     types = {}
 
     entry_points = metadata.entry_points()
@@ -181,14 +181,14 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
 
     dag = _generate_dag(layout["dag"], types)
 
-    return dag, profiles
+    return dag, configs
 
 
-def store(path: str, dag: model.DAG, profiles: Profiles):
+def store(path: str, dag: model.DAG, configs: Configurations):
     """TODO"""
 
     layout = {
-        "profiles": [],
+        "configurations": [],
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -204,7 +204,7 @@ def store(path: str, dag: model.DAG, profiles: Profiles):
     dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
     dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
 
-    layout["profiles"] = _from_profiles(profiles)
+    layout["configurations"] = _from_configs(configs)
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
         yaml.safe_dump(layout,

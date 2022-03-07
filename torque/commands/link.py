@@ -13,7 +13,7 @@ from torque import layout
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    dag, configs = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -46,13 +46,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.CycleDetected as exc:
         raise RuntimeError(f"{arguments.name}: cycle detected") from exc
 
-    layout.store(arguments.layout, dag, profiles)
+    layout.store(arguments.layout, dag, configs)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    dag, configs = layout.load(arguments.layout)
 
     try:
         dag.remove_link(arguments.name)
@@ -60,7 +60,7 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.LinkNotFound as exc:
         raise RuntimeError(f"{arguments.name}: link not found") from exc
 
-    layout.store(arguments.layout, dag, profiles)
+    layout.store(arguments.layout, dag, configs)
 
 
 def _show(arguments: argparse.Namespace):

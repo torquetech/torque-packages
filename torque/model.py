@@ -22,7 +22,7 @@ class ComponentType(ABC):
     """TODO"""
 
     parameters: list[Parameter] = []
-    options: list[Option] = []
+    configuration: list[Option] = []
 
     @abstractmethod
     def on_build(self):
@@ -35,7 +35,7 @@ class LinkType(ABC):
     """TODO"""
 
     parameters: list[Parameter] = []
-    options: list[Option] = []
+    configuration: list[Option] = []
 
     @abstractmethod
     def on_build(self):
@@ -72,6 +72,7 @@ class Link:
         self.destination = destination
         self.link_type = link_type
         self.params = params
+        self.config = None
 
     def __repr__(self) -> str:
         return f"Link({self.name}" \
@@ -92,6 +93,7 @@ class Component:
         self.cluster = cluster
         self.component_type = component_type
         self.params = params
+        self.config = None
 
         self.inbound_links: dict[str, str] = {}
         self.outbound_links: dict[str, str] = {}
