@@ -6,14 +6,14 @@
 
 import argparse
 
-from torque import configuration
 from torque import exceptions
+from torque import layout
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -46,13 +46,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.CycleDetected as exc:
         raise RuntimeError(f"{arguments.name}: cycle detected") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     try:
         dag.remove_link(arguments.name)
@@ -60,13 +60,13 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.LinkNotFound as exc:
         raise RuntimeError(f"{arguments.name}: link not found") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     if arguments.name not in dag.links:
         raise RuntimeError(f"{arguments.name}: link not found")
@@ -79,7 +79,7 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     for link in dag.links.values():
         print(f"{link}")
@@ -88,7 +88,7 @@ def _list(arguments: argparse.Namespace):
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
     link_types = dag.modules["links.v1"]
 
     if arguments.name not in link_types:
@@ -102,7 +102,7 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
     link_types = dag.modules["links.v1"]
 
     for link in link_types:

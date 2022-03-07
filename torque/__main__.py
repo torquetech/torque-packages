@@ -38,10 +38,10 @@ def main() -> int:
         parser = argparse.ArgumentParser(prog="torque", description="torque command line interface.")
         subparsers = parser.add_subparsers(required=True, dest="main_cmd", metavar="command")
 
-        parser.add_argument("--config",
-                            default=".torque/config.yaml",
+        parser.add_argument("--layout",
+                            default=".torque/layout.yaml",
                             metavar="PATH",
-                            help="configuration file to use")
+                            help="layout file to use")
 
         commands = {
             "init": init,

@@ -6,14 +6,14 @@
 
 import argparse
 
-from torque import configuration
 from torque import exceptions
+from torque import layout
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -37,13 +37,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{arguments.type}: component type not found") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     try:
         dag.remove_component(arguments.name)
@@ -54,13 +54,13 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.ComponentStillConnected as exc:
         raise RuntimeError(f"{arguments.name}: component still connected") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     if arguments.name not in dag.components:
         raise RuntimeError(f"{arguments.name}: component not found")
@@ -73,7 +73,7 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     for component in dag.components.values():
         print(f"{component}")
@@ -82,7 +82,7 @@ def _list(arguments: argparse.Namespace):
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
     component_types = dag.modules["components.v1"]
 
     if arguments.name not in component_types:
@@ -96,7 +96,7 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
     component_types = dag.modules["components.v1"]
 
     for component in component_types:

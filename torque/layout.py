@@ -18,7 +18,7 @@ Profile = namedtuple("Profile", ["name", "uri", "secret"])
 Profiles = dict[str, Profile]
 
 
-_CONFIG_SCHEMA = schema.Schema({
+_LAYOUT_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
         "uri": str,
@@ -52,12 +52,12 @@ _CONFIG_SCHEMA = schema.Schema({
 })
 
 
-def _to_profile(config: dict[str, object]) -> Profile:
+def _to_profile(profile: dict[str, object]) -> Profile:
     """TODO"""
 
-    return Profile(config["name"],
-                   config["uri"],
-                   config["secret"])
+    return Profile(profile["name"],
+                   profile["uri"],
+                   profile["secret"])
 
 
 def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
@@ -107,16 +107,15 @@ def _from_link(link: model.Link) -> dict[str: object]:
     }
 
 
-def _generate_dag(config: dict[str, object], modules: model.Modules) -> model.DAG:
+def _generate_dag(dag_layout: dict[str, object], modules: model.Modules) -> model.DAG:
     """TODO"""
 
-    config_dag = config["dag"]
-    dag = model.DAG(config_dag["revision"], modules)
+    dag = model.DAG(dag_layout["revision"], modules)
 
-    for cluster in config_dag["clusters"]:
+    for cluster in dag_layout["clusters"]:
         dag.create_cluster(cluster["name"])
 
-    for component in config_dag["components"]:
+    for component in dag_layout["components"]:
         params = {i["name"]: i["value"] for i in component["params"]}
 
         dag.create_component(component["name"],
@@ -124,7 +123,7 @@ def _generate_dag(config: dict[str, object], modules: model.Modules) -> model.DA
                              component["type"],
                              params)
 
-    for link in config_dag["links"]:
+    for link in dag_layout["links"]:
         params = {i["name"]: i["value"] for i in link["params"]}
 
         dag.create_link(link["name"],
@@ -141,7 +140,7 @@ def _generate_dag(config: dict[str, object], modules: model.Modules) -> model.DA
 def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles):
     """TODO"""
 
-    config = {
+    layout = {
         "profiles": [],
         "dag": {
             "revision": 0,
@@ -153,14 +152,14 @@ def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles
 
     try:
         with open(path, encoding="utf8") as file:
-            config = config | yaml.safe_load(file)
+            layout = layout | yaml.safe_load(file)
 
     except FileNotFoundError:
         pass
 
-    _CONFIG_SCHEMA.validate(config)
+    _LAYOUT_SCHEMA.validate(layout)
 
-    profiles = {i["name"]: _to_profile(i) for i in config["profiles"]}
+    profiles = {i["name"]: _to_profile(i) for i in layout["profiles"]}
     modules = {}
 
     entry_points = metadata.entry_points()
@@ -180,7 +179,7 @@ def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles
     if extra_modules:
         modules = modules | extra_modules
 
-    dag = _generate_dag(config, modules)
+    dag = _generate_dag(layout["dag"], modules)
 
     return dag, profiles
 
@@ -188,7 +187,7 @@ def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles
 def store(path: str, dag: model.DAG, profiles: Profiles):
     """TODO"""
 
-    config = {
+    layout = {
         "profiles": [],
         "dag": {
             "revision": 0,
@@ -198,17 +197,17 @@ def store(path: str, dag: model.DAG, profiles: Profiles):
         }
     }
 
-    config_dag = config["dag"]
+    dag_layout = layout["dag"]
 
-    config_dag["revision"] = dag.revision + 1
-    config_dag["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
-    config_dag["components"] = [_from_component(i) for i in dag.components.values()]
-    config_dag["links"] = [_from_link(i) for i in dag.links.values()]
+    dag_layout["revision"] = dag.revision + 1
+    dag_layout["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
+    dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
+    dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
 
-    config["profiles"] = _from_profiles(profiles)
+    layout["profiles"] = _from_profiles(profiles)
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
-        yaml.safe_dump(config,
+        yaml.safe_dump(layout,
                        stream=file,
                        default_flow_style=False,
                        sort_keys=False)

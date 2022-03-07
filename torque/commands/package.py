@@ -6,8 +6,8 @@
 
 import argparse
 
-from torque import configuration
 from torque import exceptions
+from torque import layout
 from torque import package
 
 
@@ -22,7 +22,7 @@ def _install(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     try:
         package.remove_package(arguments.package,

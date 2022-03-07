@@ -6,14 +6,14 @@
 
 import argparse
 
-from torque import configuration
 from torque import exceptions
+from torque import layout
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     try:
         dag.create_cluster(arguments.name)
@@ -21,13 +21,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.ClusterExists as exc:
         raise RuntimeError(f"{arguments.name}: cluster exists") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = configuration.load(arguments.config)
+    dag, profiles = layout.load(arguments.layout)
 
     try:
         dag.remove_cluster(arguments.name)
@@ -38,7 +38,7 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.ClusterNotEmpty as exc:
         raise RuntimeError(f"{arguments.name}: cluster not empty") from exc
 
-    configuration.store(arguments.config, dag, profiles)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _list(arguments: argparse.Namespace):
@@ -46,7 +46,7 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = configuration.load(arguments.config)
+    dag, _ = layout.load(arguments.layout)
 
     for cluster in dag.clusters.values():
         print(f"{cluster}")
