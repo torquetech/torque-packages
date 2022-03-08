@@ -14,7 +14,7 @@ from torque import options
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, configs = layout.load(arguments.layout)
+    dag, profiles = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -66,13 +66,13 @@ def _create(arguments: argparse.Namespace):
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
-    layout.store(arguments.layout, dag, configs)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, configs = layout.load(arguments.layout)
+    dag, profiles = layout.load(arguments.layout)
 
     try:
         dag.remove_link(arguments.name)
@@ -80,7 +80,7 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.LinkNotFound as exc:
         raise RuntimeError(f"{arguments.name}: link not found") from exc
 
-    layout.store(arguments.layout, dag, configs)
+    layout.store(arguments.layout, dag, profiles)
 
 
 def _show(arguments: argparse.Namespace):

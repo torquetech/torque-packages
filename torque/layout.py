@@ -4,21 +4,18 @@
 
 """TODO"""
 
-import collections
 import importlib
 import os
 import schema
 import yaml
 
+from torque import configuration
+from torque import internal
 from torque import model
 
 
-Configuration = collections.namedtuple("Option", ["name", "uri", "secret"])
-Configurations = dict[str, Configuration]
-
-
 _LAYOUT_SCHEMA = schema.Schema({
-    "configurations": [{
+    "profiles": [{
         "name": str,
         "uri": str,
         "secret": schema.Or(str, None)
@@ -50,25 +47,50 @@ _LAYOUT_SCHEMA = schema.Schema({
     }
 })
 
-_INTERNAL_TYPES = {
-    "components.v1": {},
-    "links.v1": {}
-}
 
-def _to_config(config: dict[str, object]) -> Configuration:
+class Profile:
+    # pylint: disable=R0903
+
     """TODO"""
 
-    return Configuration(config["name"],
-                         config["uri"],
-                         config["secret"])
+    def __init__(self, name: str, uri: str, secret: str, types: model.Types):
+        self.name = name
+        self.uri = uri
+        self.secret = secret
+
+        self.types = types
+
+    def load(self) -> configuration.Configuration:
+        """TODO"""
+
+        return configuration.load(self.uri, self.secret, self.types)
 
 
-def _from_configs(configs: Configurations) -> list[dict[str, object]]:
+Profiles = dict[str, Profile]
+
+
+def _to_profile(profile_layout: dict[str, object], types: model.Types) -> Profile:
     """TODO"""
 
-    return [
-        {"name": i.name, "uri": i.uri, "secret": i.secret} for i in configs.values()
-    ]
+    return Profile(profile_layout["name"],
+                   profile_layout["uri"],
+                   profile_layout["secret"],
+                   types)
+
+
+def _from_profile(profile: Profile) -> dict[str, object]:
+    """TODO"""
+
+    return {
+        "name": profile.name,
+        "uri": profile.uri,
+        "secret": profile.secret
+    }
+
+def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
+    """TODO"""
+
+    return [_from_profile(i) for i in profiles.values()]
 
 
 def _from_cluster(cluster: model.Cluster) -> dict[str: str]:
@@ -143,7 +165,7 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
 def _load_types(extra_types: model.Types):
     """TODO"""
 
-    types = {} | _INTERNAL_TYPES
+    types = {} | internal.TYPES
 
     entry_points = importlib.metadata.entry_points()
 
@@ -171,11 +193,11 @@ def _load_types(extra_types: model.Types):
     return types
 
 
-def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configurations):
+def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
     """TODO"""
 
     layout = {
-        "configurations": [],
+        "profiles": [],
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -195,20 +217,20 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configuratio
 
     types = _load_types(extra_types)
 
-    configs = {
-        i["name"]: _to_config(i, types) for i in layout["configurations"]
+    profiles = {
+        i["name"]: _to_profile(i, types) for i in layout["profiles"]
     }
 
     dag = _generate_dag(layout["dag"], types)
 
-    return dag, configs
+    return dag, profiles
 
 
-def store(path: str, dag: model.DAG, configs: Configurations):
+def store(path: str, dag: model.DAG, profiles: Profiles):
     """TODO"""
 
     layout = {
-        "configurations": [],
+        "profiles": [],
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -224,7 +246,7 @@ def store(path: str, dag: model.DAG, configs: Configurations):
     dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
     dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
 
-    layout["configurations"] = _from_configs(configs)
+    layout["profiles"] = _from_profiles(profiles)
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
         yaml.safe_dump(layout,

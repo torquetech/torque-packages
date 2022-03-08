@@ -81,3 +81,7 @@ class ExecuteFailed(TorqueException):
 
 class OptionRequired(TorqueException):
     """TODO"""
+
+
+class ProtocolNotSupported(TorqueException):
+    """TODO"""
