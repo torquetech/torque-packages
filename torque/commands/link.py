@@ -8,6 +8,7 @@ import argparse
 
 from torque import exceptions
 from torque import layout
+from torque import types
 
 
 def _create(arguments: argparse.Namespace):
@@ -18,18 +19,34 @@ def _create(arguments: argparse.Namespace):
     if arguments.params:
         params = arguments.params.split(",")
         params = [i.split("=") for i in params]
+        params = {i[0]: "".join(i[1:]) for i in params}
 
     else:
         params = {}
 
     try:
+        link_types = dag.types["links.v1"]
+
+        if arguments.type not in link_types:
+            raise exceptions.LinkTypeNotFound(arguments.type)
+
+        link_type = link_types[arguments.type]
+
+        params = types.process_options(link_type.parameters, params)
+
         dag.create_link(arguments.name,
                         arguments.source,
                         arguments.destination,
                         arguments.type,
-                        {i[0]: "".join(i[1:]) for i in params})
+                        params.processed)
 
         dag.verify()
+
+        for default in params.defaults:
+            print(f"WARNING: {default}: default parameter used")
+
+        for unused in params.unused:
+            print(f"WARNING: {unused}: unused parameter")
 
     except exceptions.LinkExists as exc:
         raise RuntimeError(f"{arguments.name}: link exists") from exc
@@ -45,6 +62,9 @@ def _create(arguments: argparse.Namespace):
 
     except exceptions.CycleDetected as exc:
         raise RuntimeError(f"{arguments.name}: cycle detected") from exc
+
+    except exceptions.OptionRequired as exc:
+        raise RuntimeError(f"{exc}: parameter required") from exc
 
     layout.store(arguments.layout, dag, configs)
 
