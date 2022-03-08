@@ -4,17 +4,16 @@
 
 """TODO"""
 
+import collections
+import importlib
 import os
 import schema
 import yaml
 
-from collections import namedtuple
-from importlib import metadata
-
 from torque import model
 
 
-Configuration = namedtuple("Option", ["name", "uri", "secret"])
+Configuration = collections.namedtuple("Option", ["name", "uri", "secret"])
 Configurations = dict[str, Configuration]
 
 
@@ -51,6 +50,10 @@ _LAYOUT_SCHEMA = schema.Schema({
     }
 })
 
+_INTERNAL_TYPES = {
+    "components.v1": {},
+    "links.v1": {}
+}
 
 def _to_config(config: dict[str, object]) -> Configuration:
     """TODO"""
@@ -137,6 +140,37 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
     return dag
 
 
+def _load_types(extra_types: model.Types):
+    """TODO"""
+
+    types = {} | _INTERNAL_TYPES
+
+    entry_points = importlib.metadata.entry_points()
+
+    if "torque.components.v1" in entry_points:
+        for i in entry_points["torque.components.v1"]:
+            # pylint: disable=W0703
+            try:
+                types["components.v1"][i.name] = i.load()
+
+            except Exception as exc:
+                print(f"WARNING: {i.name}: unable to load type: {exc}")
+
+    if "torque.links.v1" in entry_points:
+        for i in entry_points["torque.links.v1"]:
+            # pylint: disable=W0703
+            try:
+                types["links.v1"][i.name] = i.load()
+
+            except Exception as exc:
+                print(f"WARNING: {i.name}: unable to load type: {exc}")
+
+    if extra_types:
+        types = types | extra_types
+
+    return types
+
+
 def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configurations):
     """TODO"""
 
@@ -159,35 +193,11 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configuratio
 
     _LAYOUT_SCHEMA.validate(layout)
 
-    configs = {i["name"]: _to_config(i) for i in layout["configurations"]}
-    types = {}
+    types = _load_types(extra_types)
 
-    entry_points = metadata.entry_points()
-
-    types["components.v1"] = {}
-
-    if "torque.components.v1" in entry_points:
-        for i in entry_points["torque.components.v1"]:
-            # pylint: disable=W0703
-            try:
-                types["components.v1"][i.name] = i.load()
-
-            except Exception as exc:
-                print(f"WARNING: {i.name}: unable to load type: {exc}")
-
-    types["links.v1"] = {}
-
-    if "torque.links.v1" in entry_points:
-        for i in entry_points["torque.links.v1"]:
-            # pylint: disable=W0703
-            try:
-                types["links.v1"][i.name] = i.load()
-
-            except Exception as exc:
-                print(f"WARNING: {i.name}: unable to load type: {exc}")
-
-    if extra_types:
-        types = types | extra_types
+    configs = {
+        i["name"]: _to_config(i, types) for i in layout["configurations"]
+    }
 
     dag = _generate_dag(layout["dag"], types)
 
