@@ -77,3 +77,7 @@ class PackageInUse(TorqueException):
 
 class ExecuteFailed(TorqueException):
     """TODO"""
+
+
+class OptionRequired(TorqueException):
+    """TODO"""
