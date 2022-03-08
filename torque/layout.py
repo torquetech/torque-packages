@@ -164,17 +164,27 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Configuratio
 
     entry_points = metadata.entry_points()
 
-    if "torque.components.v1" in entry_points:
-        types["components.v1"] = {i.name: i.load() for i in entry_points["torque.components.v1"]}
+    types["components.v1"] = {}
 
-    else:
-        types["components.v1"] = {}
+    if "torque.components.v1" in entry_points:
+        for i in entry_points["torque.components.v1"]:
+            # pylint: disable=W0703
+            try:
+                types["components.v1"][i.name] = i.load()
+
+            except Exception as exc:
+                print(f"WARNING: {i.name}: unable to load type: {exc}")
+
+    types["links.v1"] = {}
 
     if "torque.links.v1" in entry_points:
-        types["links.v1"] = {i.name: i.load() for i in entry_points["torque.links.v1"]}
+        for i in entry_points["torque.links.v1"]:
+            # pylint: disable=W0703
+            try:
+                types["links.v1"][i.name] = i.load()
 
-    else:
-        types["links.v1"] = {}
+            except Exception as exc:
+                print(f"WARNING: {i.name}: unable to load type: {exc}")
 
     if extra_types:
         types = types | extra_types
