@@ -8,7 +8,7 @@ import argparse
 
 from torque import exceptions
 from torque import layout
-from torque import types
+from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -32,7 +32,7 @@ def _create(arguments: argparse.Namespace):
 
         link_type = link_types[arguments.type]
 
-        params = types.process_options(link_type.parameters, params)
+        params = options.process(link_type.parameters, params)
 
         dag.create_link(arguments.name,
                         arguments.source,
