@@ -43,6 +43,17 @@ def _remove(arguments: argparse.Namespace):
         raise RuntimeError(f"{arguments.name}: cluster not empty") from exc
 
 
+def _show(arguments: argparse.Namespace):
+    """TODO"""
+
+    _layout = layout.load(arguments.layout)
+
+    if arguments.name not in _layout.dag.clusters:
+        raise RuntimeError(f"{arguments.name}: cluster not found")
+
+    print(f"{_layout.dag.clusters[arguments.name]}")
+
+
 def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
@@ -69,6 +80,9 @@ def add_arguments(subparsers):
     remove_parser = subparsers.add_parser("remove", description="remove cluster", help="remove cluster")
     remove_parser.add_argument("name", help="cluster name")
 
+    show_parser = subparsers.add_parser("show", description="show cluster", help="show cluster")
+    show_parser.add_argument("name", help="cluster name")
+
     subparsers.add_parser("list", description="list clusters", help="list clusters")
 
 
@@ -78,6 +92,7 @@ def run(arguments: argparse.Namespace):
     cmds = {
         "create": _create,
         "remove": _remove,
+        "show": _show,
         "list": _list
     }
 
