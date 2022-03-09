@@ -10,7 +10,7 @@ from torque import exceptions
 
 
 RawOptions = dict[str, str]
-Options = namedtuple("Options", ["processed", "defaults", "unused"])
+Options = namedtuple("Options", ["processed", "defaults", "unused", "raw"])
 
 OptionSpec = namedtuple("OptionSpec", ["name", "description", "default_value", "process_fn"])
 OptionsSpec = list[OptionSpec]
@@ -22,6 +22,7 @@ def process(options_spec: OptionsSpec, raw_options: RawOptions) -> Options:
     spec_keys = {i.name for i in options_spec}
     raw_keys = set(raw_options.keys())
 
+    raw = raw_options
     unused = list(raw_keys - spec_keys)
     defaults = list(spec_keys - raw_keys)
 
@@ -43,4 +44,4 @@ def process(options_spec: OptionsSpec, raw_options: RawOptions) -> Options:
 
         processed[name] = value
 
-    return Options(processed, defaults, unused)
+    return Options(processed, defaults, unused, raw)

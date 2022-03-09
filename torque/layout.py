@@ -105,7 +105,7 @@ def _from_params(params: dict[str, str]) -> list[dict[str, str]]:
     """TODO"""
 
     return [
-        {"name": name, "value": value} for name, value in params.items()
+        {"name": name, "value": value} for name, value in params.raw.items()
     ]
 
 
