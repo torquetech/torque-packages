@@ -13,24 +13,28 @@ from torque import layout
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     try:
-        dag.create_cluster(arguments.name)
+        _layout.dag.create_cluster(arguments.name)
+
+        _layout.dag.revision += 1
+        _layout.store()
 
     except exceptions.ClusterExists as exc:
         raise RuntimeError(f"{arguments.name}: cluster exists") from exc
-
-    layout.store(arguments.layout, dag, profiles)
 
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     try:
-        dag.remove_cluster(arguments.name)
+        _layout.dag.remove_cluster(arguments.name)
+
+        _layout.dag.revision += 1
+        _layout.store()
 
     except exceptions.ClusterNotFound as exc:
         raise RuntimeError(f"{arguments.name}: cluster not found") from exc
@@ -38,17 +42,15 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.ClusterNotEmpty as exc:
         raise RuntimeError(f"{arguments.name}: cluster not empty") from exc
 
-    layout.store(arguments.layout, dag, profiles)
-
 
 def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
-    for cluster in dag.clusters.values():
+    for cluster in _layout.dag.clusters.values():
         print(f"{cluster}")
 
 

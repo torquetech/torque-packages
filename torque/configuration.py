@@ -4,17 +4,11 @@
 
 """TODO"""
 
-import re
 import schema
-import yaml
 
-from torque import exceptions
-from torque import internal
-from torque import model
 from torque import options
 
 
-_PROTO = r"^([^:]+)://"
 _CONFIG_SCHEMA = schema.Schema({
     "providers": [{
         "name": str,
@@ -50,18 +44,21 @@ _CONFIG_SCHEMA = schema.Schema({
 })
 
 
-def _proto_file(uri: str, secret: str) -> dict[str, object]:
-    # pylint: disable=W0613
-
+def _from_configuration(configuration: dict[str, str]) -> dict[str, str]:
     """TODO"""
 
-    with open(uri, encoding="utf8") as file:
-        return yaml.safe_load(file)
+    return [
+        {"name": name, "value": value} for name, value in configuration.items()
+    ]
 
 
-internal.TYPES["proto.v1"]["file"] = _proto_file
-# internal.TYPES["proto.v1"]["https"] = _proto_https
-# internal.TYPES["proto.v1"]["http"] = _proto_http
+def _from_object(name: str, configuration: dict[str, object]) -> dict[str, object]:
+    """TODO"""
+
+    return {
+        "name": name,
+        "configuration": _from_configuration(configuration)
+    }
 
 
 class Configuration:
@@ -118,23 +115,9 @@ def _to_raw_options(config: list[dict[str, str]]) -> options.RawOptions:
     return options.RawOptions({i["name"]: i["value"] for i in config})
 
 
-def load(uri: str, secret: str, types: model.Types) -> Configuration:
+def create(config: dict[str, object]) -> Configuration:
     """TODO"""
 
-    proto = "file"
-    match = re.match(_PROTO, uri)
-
-    if match:
-        proto = match[1]
-
-    protos = types["proto.v1"]
-
-    if proto not in protos:
-        raise exceptions.ProtocolNotSupported(proto)
-
-    proto_handler = protos[proto]
-
-    config = proto_handler(uri, secret)
     _CONFIG_SCHEMA.validate(config)
 
     config["providers"] = {

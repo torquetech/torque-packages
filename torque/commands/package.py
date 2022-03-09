@@ -22,12 +22,12 @@ def _install(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     try:
         package.remove_package(arguments.package,
-                               dag.used_component_types(),
-                               dag.used_link_types())
+                               _layout.dag.used_component_types(),
+                               _layout.dag.used_link_types())
 
     except exceptions.PackageNotFound as exc:
         raise RuntimeError(f"{arguments.package}: package not found") from exc

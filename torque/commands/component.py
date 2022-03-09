@@ -13,7 +13,7 @@ from torque import layout
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -24,10 +24,13 @@ def _create(arguments: argparse.Namespace):
         params = {}
 
     try:
-        component = dag.create_component(arguments.name,
-                                         arguments.cluster,
-                                         arguments.type,
-                                         params)
+        component = _layout.dag.create_component(arguments.name,
+                                                 arguments.cluster,
+                                                 arguments.type,
+                                                 params)
+
+        _layout.dag.revision += 1
+        _layout.store()
 
         for default in component.params.defaults:
             print(f"WARNING: {default}: default parameter used")
@@ -47,16 +50,17 @@ def _create(arguments: argparse.Namespace):
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
-    layout.store(arguments.layout, dag, profiles)
-
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     try:
-        dag.remove_component(arguments.name)
+        _layout.dag.remove_component(arguments.name)
+
+        _layout.dag.revision += 1
+        _layout.store()
 
     except exceptions.ComponentNotFound as exc:
         raise RuntimeError(f"{arguments.name}: component not found") from exc
@@ -64,18 +68,16 @@ def _remove(arguments: argparse.Namespace):
     except exceptions.ComponentStillConnected as exc:
         raise RuntimeError(f"{arguments.name}: component still connected") from exc
 
-    layout.store(arguments.layout, dag, profiles)
-
 
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
-    if arguments.name not in dag.components:
+    if arguments.name not in _layout.dag.components:
         raise RuntimeError(f"{arguments.name}: component not found")
 
-    print(f"{dag.components[arguments.name]}")
+    print(f"{_layout.dag.components[arguments.name]}")
 
 
 def _list(arguments: argparse.Namespace):
@@ -83,17 +85,17 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
-    for component in dag.components.values():
+    for component in _layout.dag.components.values():
         print(f"{component}")
 
 
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
-    component_types = dag.types["components.v1"]
+    _layout = layout.load(arguments.layout)
+    component_types = _layout.dag.types["components.v1"]
 
     if arguments.name not in component_types:
         raise RuntimeError(f"{arguments.name}: component type not found")
@@ -106,8 +108,8 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
-    component_types = dag.types["components.v1"]
+    _layout = layout.load(arguments.layout)
+    component_types = _layout.dag.types["components.v1"]
 
     for component in component_types:
         print(f"{component}: {component_types[component]}")

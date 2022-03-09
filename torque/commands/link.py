@@ -13,7 +13,7 @@ from torque import layout
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     if arguments.params:
         params = arguments.params.split(",")
@@ -24,13 +24,16 @@ def _create(arguments: argparse.Namespace):
         params = {}
 
     try:
-        link = dag.create_link(arguments.name,
-                               arguments.source,
-                               arguments.destination,
-                               arguments.type,
-                               params)
+        link = _layout.dag.create_link(arguments.name,
+                                       arguments.source,
+                                       arguments.destination,
+                                       arguments.type,
+                                       params)
 
-        dag.verify()
+        _layout.dag.verify()
+
+        _layout.dag.revision += 1
+        _layout.store()
 
         for default in link.params.defaults:
             print(f"WARNING: {default}: default parameter used")
@@ -56,32 +59,31 @@ def _create(arguments: argparse.Namespace):
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
-    layout.store(arguments.layout, dag, profiles)
-
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, profiles = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
     try:
-        dag.remove_link(arguments.name)
+        _layout.dag.remove_link(arguments.name)
+
+        _layout.dag.revision += 1
+        _layout.store()
 
     except exceptions.LinkNotFound as exc:
         raise RuntimeError(f"{arguments.name}: link not found") from exc
-
-    layout.store(arguments.layout, dag, profiles)
 
 
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
-    if arguments.name not in dag.links:
+    if arguments.name not in _layout.dag.links:
         raise RuntimeError(f"{arguments.name}: link not found")
 
-    print(f"{dag.links[arguments.name]}")
+    print(f"{_layout.dag.links[arguments.name]}")
 
 
 def _list(arguments: argparse.Namespace):
@@ -89,17 +91,17 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
+    _layout = layout.load(arguments.layout)
 
-    for link in dag.links.values():
+    for link in _layout.dag.links.values():
         print(f"{link}")
 
 
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
-    link_types = dag.types["links.v1"]
+    _layout = layout.load(arguments.layout)
+    link_types = _layout.dag.types["links.v1"]
 
     if arguments.name not in link_types:
         raise RuntimeError(f"{arguments.name}: link type not found")
@@ -112,8 +114,8 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    dag, _ = layout.load(arguments.layout)
-    link_types = dag.types["links.v1"]
+    _layout = layout.load(arguments.layout)
+    link_types = _layout.dag.types["links.v1"]
 
     for link in link_types:
         print(f"{link}: {link_types[link]}")

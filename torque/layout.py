@@ -9,11 +9,29 @@ import os
 import schema
 import yaml
 
-from torque import configuration
-from torque import internal
 from torque import model
 
 
+def _proto_file(uri: str, secret: str) -> dict[str, object]:
+    # pylint: disable=W0613
+
+    """TODO"""
+
+    return open(uri, encoding="utf8")
+
+
+_TYPES = {
+    "proto.v1": {
+        "file": _proto_file,
+        # "https": _proto_https
+        # "http": _proto_http
+    },
+    "components.v1": {},
+    "links.v1": {}
+}
+
+
+_PROTO = r"^([^:]+)://"
 _LAYOUT_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
@@ -53,29 +71,24 @@ class Profile:
 
     """TODO"""
 
-    def __init__(self, name: str, uri: str, secret: str, types: model.Types):
+    def __init__(self, name: str, uri: str, secret: str):
         self.name = name
         self.uri = uri
         self.secret = secret
 
-        self.types = types
-
-    def load(self) -> configuration.Configuration:
-        """TODO"""
-
-        return configuration.load(self.uri, self.secret, self.types)
+    def __repr__(self) -> str:
+        return f"Profile({self.name}, uri={self.uri}, secret={self.secret})"
 
 
 Profiles = dict[str, Profile]
 
 
-def _to_profile(profile_layout: dict[str, object], types: model.Types) -> Profile:
+def _to_profile(profile_layout: dict[str, object]) -> Profile:
     """TODO"""
 
     return Profile(profile_layout["name"],
                    profile_layout["uri"],
-                   profile_layout["secret"],
-                   types)
+                   profile_layout["secret"])
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -86,6 +99,7 @@ def _from_profile(profile: Profile) -> dict[str, object]:
         "uri": profile.uri,
         "secret": profile.secret
     }
+
 
 def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
     """TODO"""
@@ -165,7 +179,7 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
 def _load_types(extra_types: model.Types):
     """TODO"""
 
-    types = {} | internal.TYPES
+    types = {} | _TYPES
 
     entry_points = importlib.metadata.entry_points()
 
@@ -193,6 +207,52 @@ def _load_types(extra_types: model.Types):
     return types
 
 
+def _store(path: str, dag: model.DAG, profiles: Profiles):
+    """TODO"""
+
+    layout = {
+        "profiles": [],
+        "dag": {
+            "revision": 0,
+            "clusters": [],
+            "components": [],
+            "links": []
+        }
+    }
+
+    dag_layout = layout["dag"]
+
+    dag_layout["revision"] = dag.revision
+    dag_layout["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
+    dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
+    dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
+
+    layout["profiles"] = _from_profiles(profiles)
+
+    with open(f"{path}.tmp", "w", encoding="utf8") as file:
+        yaml.safe_dump(layout,
+                       stream=file,
+                       default_flow_style=False,
+                       sort_keys=False)
+
+    os.replace(f"{path}.tmp", path)
+
+
+class Layout:
+    """TODO"""
+
+    def __init__(self, path: str, dag: model.DAG, profiles: Profiles, types: model.Types):
+        self.path = path
+        self.dag = dag
+        self.profiles = profiles
+        self.types = types
+
+    def store(self):
+        """TODO"""
+
+        _store(self.path, self.dag, self.profiles)
+
+
 def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
     """TODO"""
 
@@ -218,40 +278,9 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
     types = _load_types(extra_types)
 
     profiles = {
-        i["name"]: _to_profile(i, types) for i in layout["profiles"]
+        i["name"]: _to_profile(i) for i in layout["profiles"]
     }
 
     dag = _generate_dag(layout["dag"], types)
 
-    return dag, profiles
-
-
-def store(path: str, dag: model.DAG, profiles: Profiles):
-    """TODO"""
-
-    layout = {
-        "profiles": [],
-        "dag": {
-            "revision": 0,
-            "clusters": [],
-            "components": [],
-            "links": []
-        }
-    }
-
-    dag_layout = layout["dag"]
-
-    dag_layout["revision"] = dag.revision + 1
-    dag_layout["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
-    dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
-    dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
-
-    layout["profiles"] = _from_profiles(profiles)
-
-    with open(f"{path}.tmp", "w", encoding="utf8") as file:
-        yaml.safe_dump(layout,
-                       stream=file,
-                       default_flow_style=False,
-                       sort_keys=False)
-
-    os.replace(f"{path}.tmp", path)
+    return Layout(path, dag, profiles, types)
