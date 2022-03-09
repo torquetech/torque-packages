@@ -7,14 +7,10 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
 
-from torque.exceptions import DuplicateCluster
-from torque.exceptions import DuplicateComponent
-from torque.exceptions import DuplicateLink
-from torque.exceptions import ClusterNotFound
-from torque.exceptions import CycleDetected
-from torque.exceptions import ComponentNotFound
-from torque.exceptions import LinkAlreadyExists
+from torque import exceptions
 
+
+Modules = dict[str, object]
 
 Parameter = namedtuple("Parameter", ["name", "description", "default_value"])
 Option = namedtuple("Option", ["name", "description", "default_value"])
@@ -63,26 +59,39 @@ class Link:
 
     """TODO"""
 
-    def __init__(self, name: str, source: str, destination: str, link_type: str):
+    def __init__(self,
+                 name: str,
+                 source: str,
+                 destination: str,
+                 link_type: str,
+                 params: dict[str, str]):
+        # pylint: disable=R0913
+
         self.name = name
         self.source = source
         self.destination = destination
         self.link_type = link_type
+        self.params = params
 
     def __repr__(self) -> str:
         return f"Link({self.name}" \
-               f", source={self.source.name}" \
-               f", destination={self.destination.name}" \
+               f", source={self.source}" \
+               f", destination={self.destination}" \
                f", link_type={self.link_type})"
 
 
 class Component:
     """TODO"""
 
-    def __init__(self, name: str, cluster: str, component_type: str):
+    def __init__(self,
+                 name: str,
+                 cluster: str,
+                 component_type: str,
+                 params: dict[str, str]):
         self.name = name
         self.cluster = cluster
         self.component_type = component_type
+        self.params = params
 
         self.inbound_links: dict[str, str] = {}
         self.outbound_links: dict[str, str] = {}
@@ -92,7 +101,7 @@ class Component:
         outbound_links = ",".join(self.outbound_links)
 
         return f"Component({self.name}" \
-               f", cluster={self.cluster.name}" \
+               f", cluster={self.cluster}" \
                f", inbound_links=[{inbound_links}]" \
                f", outbound_links=[{outbound_links}]" \
                f", component_type={self.component_type})"
@@ -101,65 +110,151 @@ class Component:
         """TODO"""
 
         if component in self.inbound_links:
-            raise LinkAlreadyExists(component, self.name)
+            raise exceptions.ComponentsAlreadyConnected(component, self.name)
 
         self.inbound_links[component] = link
+
+    def remove_inbound_link(self, component: str):
+        """TODO"""
+
+        if component not in self.inbound_links:
+            raise exceptions.ComponentsNotConnected(component, self.name)
+
+        self.inbound_links.pop(component)
 
     def add_outbound_link(self, component: str, link: str):
         """TODO"""
 
         if component in self.outbound_links:
-            raise LinkAlreadyExists(self.name, component)
+            raise exceptions.ComponentsAlreadyConnected(self.name, component)
 
         self.outbound_links[component] = link
+
+    def remove_outbound_link(self, component: str):
+        """TODO"""
+
+        if component not in self.outbound_links:
+            raise exceptions.ComponentsNotConnected(self.name, component)
+
+        self.outbound_links.pop(component)
 
 
 class DAG:
     """TODO"""
 
-    def __init__(self):
+    def __init__(self, revision: int, modules: Modules):
+        self.revision = revision
         self.clusters = {}
         self.components = {}
         self.links = {}
+        self.modules = modules
 
-    def create_cluster(self, name: str):
+    def create_cluster(self, name: str) -> Cluster:
         """TODO"""
 
         if name in self.clusters:
-            raise DuplicateCluster(name)
+            raise exceptions.ClusterExists(name)
 
-        self.clusters[name] = Cluster(name)
+        cluster = Cluster(name)
+        self.clusters[name] = cluster
 
-    def create_component(self, name: str, cluster: str, component_type: str):
+        return cluster
+
+    def remove_cluster(self, name: str) -> Cluster:
+        """TODO"""
+
+        if name not in self.clusters:
+            raise exceptions.ClusterNotFound(name)
+
+        clusters_in_use = {i.cluster for i in self.components.values()}
+
+        if name in clusters_in_use:
+            raise exceptions.ClusterNotEmpty(name)
+
+        return self.clusters.pop(name)
+
+    def create_component(self,
+                         name: str,
+                         cluster: str,
+                         component_type: str,
+                         params: dict[str, str]) -> Component:
         """TODO"""
 
         if name in self.components:
-            raise DuplicateComponent(name)
+            raise exceptions.ComponentExists(name)
 
         if cluster not in self.clusters:
-            raise ClusterNotFound(cluster)
+            raise exceptions.ClusterNotFound(cluster)
 
-        self.components[name] = Component(name, cluster, component_type)
+        if component_type not in self.modules["components.v1"]:
+            raise exceptions.ComponentTypeNotFound(component_type)
 
-    def create_link(self, name: str, source: str, destination: str, link_type: str):
+        component = Component(name, cluster, component_type, params)
+        self.components[name] = component
+
+        return component
+
+    def remove_component(self, name: str) -> Component:
+        """TODO"""
+
+        if name not in self.components:
+            raise exceptions.ComponentNotFound(name)
+
+        component = self.components[name]
+
+        if len(component.inbound_links) != 0:
+            raise exceptions.ComponentStillConnected(name)
+
+        if len(component.outbound_links) != 0:
+            raise exceptions.ComponentStillConnected(name)
+
+        return self.components.pop(name)
+
+    def create_link(self,
+                    name: str,
+                    source: str,
+                    destination: str,
+                    link_type: str,
+                    params: dict[str, str]) -> Link:
+        # pylint: disable=R0913
+
         """TODO"""
 
         if name in self.links:
-            raise DuplicateLink(name)
+            raise exceptions.LinkExists(name)
 
         if source == destination:
-            raise CycleDetected(name)
+            raise exceptions.CycleDetected(name)
 
         if source not in self.components:
-            raise ComponentNotFound(source)
+            raise exceptions.ComponentNotFound(source)
 
         if destination not in self.components:
-            raise ComponentNotFound(destination)
+            raise exceptions.ComponentNotFound(destination)
 
-        self.links[name] = Link(name, source, destination, link_type)
+        if link_type not in self.modules["links.v1"]:
+            raise exceptions.LinkTypeNotFound(link_type)
 
         self.components[destination].add_inbound_link(source, name)
         self.components[source].add_outbound_link(destination, name)
+
+        link = Link(name, source, destination, link_type, params)
+        self.links[name] = link
+
+        return link
+
+    def remove_link(self, name: str) -> Link:
+        """TODO"""
+
+        if name not in self.links:
+            raise exceptions.LinkNotFound(name)
+
+        link = self.links[name]
+
+        self.components[link.destination].remove_inbound_link(link.source)
+        self.components[link.source].remove_outbound_link(link.destination)
+
+        return self.links.pop(name)
 
     def _dfs_check(self,
                    visited_components: set[str],
@@ -181,7 +276,7 @@ class DAG:
 
         return False
 
-    def has_cycles(self) -> bool:
+    def _has_cycles(self) -> bool:
         """TODO"""
 
         seen_components: set[str] = set()
@@ -195,3 +290,19 @@ class DAG:
                 return True
 
         return False
+
+    def verify(self):
+        """TODO"""
+
+        if self._has_cycles():
+            raise exceptions.CycleDetected()
+
+    def used_component_types(self) -> set[str]:
+        """TODO"""
+
+        return {i.component_type for i in self.components.values()}
+
+    def used_link_types(self) -> set[str]:
+        """TODO"""
+
+        return {i.link_type for i in self.links.values()}

@@ -4,51 +4,75 @@
 
 """TODO"""
 
-from torque.model import DAG
+from torque import exceptions
+from torque import model
 
-from torque.exceptions import DuplicateCluster
-from torque.exceptions import DuplicateComponent
-from torque.exceptions import DuplicateLink
-from torque.exceptions import ClusterNotFound
-from torque.exceptions import CycleDetected
-from torque.exceptions import ComponentNotFound
-from torque.exceptions import LinkAlreadyExists
+
+class Component(model.ComponentType):
+    """TODO"""
+
+
+class Link(model.LinkType):
+    """TODO"""
+
+
+_modules = {
+    "components.v1": {
+        "component_type", Component
+    },
+    "links.v1": {
+        "link_type", Link
+    }
+}
+
+
+def _has_cycles(dag: model.DAG) -> bool:
+    """TODO"""
+
+    try:
+        dag.verify()
+        return False
+
+    except exceptions.CycleDetected:
+        pass
+
+    return True
 
 
 def test_test1():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
     dag.create_cluster("cluster2")
     dag.create_cluster("cluster3")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
-    dag.create_component("component3", "cluster1", "component_type")
-    dag.create_component("component4", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component3", "cluster1", "component_type", {})
+    dag.create_component("component4", "cluster1", "component_type", {})
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component1", "component3", "link_type")
-    dag.create_link("link3", "component2", "component3", "link_type")
-    dag.create_link("link4", "component3", "component4", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", {})
+    dag.create_link("link2", "component1", "component3", "link_type", {})
+    dag.create_link("link3", "component2", "component3", "link_type", {})
+    dag.create_link("link4", "component3", "component4", "link_type", {})
 
-    assert dag.has_cycles() is False
+    assert _has_cycles(dag) is False
 
-    dag.create_link("link5", "component4", "component2", "link_type")
+    dag.create_link("link5", "component4", "component2", "link_type", {})
 
-    assert dag.has_cycles() is True
+    assert _has_cycles(dag) is True
 
-    dag.create_link("link6", "component4", "component1", "link_type")
+    dag.create_link("link6", "component4", "component1", "link_type", {})
 
-    assert dag.has_cycles() is True
+    assert _has_cycles(dag) is True
 
 
 def test_test2():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     try:
         dag.create_cluster("cluster1")
@@ -56,160 +80,160 @@ def test_test2():
 
         assert False
 
-    except DuplicateCluster:
+    except exceptions.ClusterExists:
         pass
 
 
 def test_test3():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
     try:
-        dag.create_component("component1", "cluster1", "component_type")
-        dag.create_component("component1", "cluster1", "component_type")
+        dag.create_component("component1", "cluster1", "component_type", {})
+        dag.create_component("component1", "cluster1", "component_type", {})
 
         assert False
 
-    except DuplicateComponent:
+    except exceptions.ComponentExists:
         pass
 
 
 def test_test4():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
 
     try:
-        dag.create_link("link1", "component1", "component2", "link_type")
-        dag.create_link("link1", "component1", "component2", "link_type")
+        dag.create_link("link1", "component1", "component2", "link_type", {})
+        dag.create_link("link1", "component1", "component2", "link_type", {})
 
         assert False
 
-    except DuplicateLink:
+    except exceptions.LinkExists:
         pass
 
 
 def test_test5():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
 
     try:
-        dag.create_component("component4", "cluster2", "component_type")
+        dag.create_component("component4", "cluster2", "component_type", {})
 
         assert False
 
-    except ClusterNotFound:
+    except exceptions.ClusterNotFound:
         pass
 
 
 def test_test6():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
 
     try:
-        dag.create_link("link1", "_component", "component1", "link_type")
+        dag.create_link("link1", "_component", "component1", "link_type", {})
 
         assert False
 
-    except ComponentNotFound:
+    except exceptions.ComponentNotFound:
         pass
 
 
 def test_test7():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
 
     try:
-        dag.create_link("link1", "component1", "_component", "link_type")
+        dag.create_link("link1", "component1", "_component", "link_type", {})
 
         assert False
 
-    except ComponentNotFound:
+    except exceptions.ComponentNotFound:
         pass
 
 
 def test_test8():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
 
     try:
-        dag.create_link("link1", "component1", "component1", "link_type")
+        dag.create_link("link1", "component1", "component1", "link_type", {})
 
         assert False
 
-    except CycleDetected:
+    except exceptions.CycleDetected:
         pass
 
 
 def test_test9():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
 
     try:
-        dag.create_link("link1", "component1", "component2", "link_type")
-        dag.create_link("link2", "component1", "component2", "link_type")
+        dag.create_link("link1", "component1", "component2", "link_type", {})
+        dag.create_link("link2", "component1", "component2", "link_type", {})
 
         assert False
 
-    except LinkAlreadyExists:
+    except exceptions.ComponentsAlreadyConnected:
         pass
 
 
 def test_test10():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
-    assert not dag.has_cycles()
+    assert not _has_cycles(dag)
 
 
 def test_test11():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
-    dag.create_component("component3", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component3", "cluster1", "component_type", {})
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component2", "component1", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", {})
+    dag.create_link("link2", "component2", "component1", "link_type", {})
 
-    assert dag.has_cycles()
+    assert _has_cycles(dag)

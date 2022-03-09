@@ -17,7 +17,7 @@ class ClusterNotFound(TorqueException):
     """TODO"""
 
 
-class DuplicateCluster(TorqueException):
+class ClusterExists(TorqueException):
     """TODO"""
 
 
@@ -25,7 +25,7 @@ class ComponentNotFound(TorqueException):
     """TODO"""
 
 
-class DuplicateComponent(TorqueException):
+class ComponentExists(TorqueException):
     """TODO"""
 
 
@@ -33,7 +33,11 @@ class ComponentStillConnected(TorqueException):
     """TODO"""
 
 
-class DuplicateLink(TorqueException):
+class LinkNotFound(TorqueException):
+    """TODO"""
+
+
+class LinkExists(TorqueException):
     """TODO"""
 
 
@@ -41,12 +45,31 @@ class CycleDetected(TorqueException):
     """TODO"""
 
 
-class LinkNotFound(TorqueException):
-    """TODO"""
-
-
-class LinkAlreadyExists(TorqueException):
+class ComponentsAlreadyConnected(TorqueException):
     """TODO"""
 
     def __init__(self, source: str, destination: str):
         super().__init__(f"{source}:{destination}")
+
+
+class ComponentsNotConnected(TorqueException):
+    """TODO"""
+
+    def __init__(self, source: str, destination: str):
+        super().__init__(f"{source}:{destination}")
+
+
+class ComponentTypeNotFound(TorqueException):
+    """TODO"""
+
+
+class LinkTypeNotFound(TorqueException):
+    """TODO"""
+
+
+class PackageNotFound(TorqueException):
+    """TODO"""
+
+
+class PackageInUse(TorqueException):
+    """TODO"""

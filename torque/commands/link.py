@@ -7,140 +7,106 @@
 import argparse
 
 from torque import configuration
-
-from torque.exceptions import TorqueException
-from torque.exceptions import LinkAlreadyExists
+from torque import exceptions
 
 
-def _create(arguments: argparse.Namespace, config: configuration.Config):
+def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    components = config["components"]
+    dag, profiles = configuration.load(arguments.config)
 
-    link_types = config["link_types"]
-    links = config["links"]
+    if arguments.params:
+        params = arguments.params.split(",")
+        params = [i.split("=") for i in params]
 
-    if arguments.name in links:
-        raise RuntimeError(f"{arguments.name}: link exists")
-
-    if arguments.type not in link_types:
-        raise RuntimeError(f"{arguments.type}: link type not found")
-
-    if arguments.source not in components:
-        raise RuntimeError(f"{arguments.source}: component not found")
-
-    if arguments.destination not in components:
-        raise RuntimeError(f"{arguments.destination}: component not found")
-
-    if arguments.source == arguments.destination:
-        raise RuntimeError("can't connect component to itself")
-
-    params = arguments.params.split(",")
-    params = [i.split("=") for i in params]
-
-    # link_type = link_types[arguments.type].load()
-    link = configuration.Link(arguments.name,
-                              arguments.source,
-                              arguments.destination,
-                              arguments.type,
-                              {i[0]: configuration.Param(i[0], "".join(i[1:])) for i in params})
-
-    links[arguments.name] = link
+    else:
+        params = {}
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.create_link(arguments.name,
+                        arguments.source,
+                        arguments.destination,
+                        arguments.type,
+                        {i[0]: "".join(i[1:]) for i in params})
 
-    except LinkAlreadyExists as exc:
-        raise RuntimeError("components already connected") from exc
+        dag.verify()
 
-    except TorqueException as exc:
-        raise RuntimeError("DAG is broken") from exc
+    except exceptions.LinkExists as exc:
+        raise RuntimeError(f"{arguments.name}: link exists") from exc
+
+    except exceptions.ComponentNotFound as exc:
+        raise RuntimeError(f"{exc}: component not found") from exc
+
+    except exceptions.LinkTypeNotFound as exc:
+        raise RuntimeError(f"{arguments.type}: link type not found") from exc
+
+    except exceptions.ComponentsAlreadyConnected as exc:
+        raise RuntimeError(f"{arguments.name}: components already connected") from exc
+
+    except exceptions.CycleDetected as exc:
+        raise RuntimeError(f"{arguments.name}: cycle detected") from exc
+
+    configuration.store(arguments.config, dag, profiles)
 
 
-def _remove(arguments: argparse.Namespace, config: configuration.Config):
+def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    links = config["links"]
-
-    if arguments.name not in links:
-        raise RuntimeError(f"{arguments.name}: link not found")
-
-    links.pop(arguments.name)
+    dag, profiles = configuration.load(arguments.config)
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.remove_link(arguments.name)
 
-    except TorqueException as exc:
-        raise RuntimeError("DAG is broken") from exc
+    except exceptions.LinkNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: link not found") from exc
+
+    configuration.store(arguments.config, dag, profiles)
 
 
-def _show(arguments: argparse.Namespace, config: configuration.Config):
+def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    links = config["links"]
+    dag, _ = configuration.load(arguments.config)
 
-    if arguments.name not in links:
+    if arguments.name not in dag.links:
         raise RuntimeError(f"{arguments.name}: link not found")
 
-    link = links[arguments.name]
-
-    print(f"name: {link.name}")
-    print(f"source: {link.source}")
-    print(f"destination: {link.destination}")
-    print(f"type: {link.type}")
-
-    if len(link.params) == 0:
-        return
-
-    print("params:")
-    for param in link.params.values():
-        print(f"  name: {param.name}, value: {param.value}")
+    print(f"{dag.links[arguments.name]}")
 
 
-def _list(arguments: argparse.Namespace, config: configuration.Config):
+def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    links = config["links"]
+    dag, _ = configuration.load(arguments.config)
 
-    for link in links.values():
-        print(f"{link.name}")
+    for link in dag.links.values():
+        print(f"{link}")
 
 
-def _show_type(arguments: argparse.Namespace, config: configuration.Config):
+def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    link_types = config["link_types"]
+    dag, _ = configuration.load(arguments.config)
+    link_types = dag.modules["links.v1"]
 
     if arguments.name not in link_types:
         raise RuntimeError(f"{arguments.name}: link type not found")
 
-    link = link_types[arguments.name]
-    link = link.load()
-
-    print(f"{arguments.name}:")
-
-    print("  parameters:")
-    for param in link.parameters:
-        print(f"    {param.name}: {param.description}, default: {param.default_value}")
-
-    print("  options:")
-    for option in link.options:
-        print(f"    {option.name}: {option.description}, default: {option.default_value}")
+    print(f"{arguments.name}: {link_types[arguments.name]}")
 
 
-def _list_types(arguments: argparse.Namespace, config: configuration.Config):
+def _list_types(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    link_types = config["link_types"]
+    dag, _ = configuration.load(arguments.config)
+    link_types = dag.modules["links.v1"]
 
-    for component in link_types.values():
-        print(component.name)
+    for link in link_types:
+        print(f"{link}: {link_types[link]}")
 
 
 def add_arguments(subparsers):
@@ -194,8 +160,6 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    config = configuration.load(arguments.config)
-
     cmd = {
         "create": _create,
         "remove": _remove,
@@ -205,4 +169,4 @@ def run(arguments: argparse.Namespace):
         "list_types": _list_types
     }
 
-    cmd[arguments.link_cmd](arguments, config)
+    cmd[arguments.link_cmd](arguments)

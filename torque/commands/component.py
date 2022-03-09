@@ -7,131 +7,100 @@
 import argparse
 
 from torque import configuration
-
-from torque.exceptions import TorqueException
-from torque.exceptions import ComponentNotFound
-from torque.exceptions import ClusterNotFound
+from torque import exceptions
 
 
-def _create(arguments: argparse.Namespace, config: configuration.Config):
+def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    component_types = config["component_types"]
-    components = config["components"]
+    dag, profiles = configuration.load(arguments.config)
 
-    if arguments.name in components:
-        raise RuntimeError(f"{arguments.name}: component exists")
+    if arguments.params:
+        params = arguments.params.split(",")
+        params = [i.split("=") for i in params]
 
-    if arguments.type not in component_types:
-        raise RuntimeError(f"{arguments.type}: component type not found")
-
-    params = arguments.params.split(",")
-    params = [i.split("=") for i in params]
-
-    # component_type = component_types[arguments.type].load()
-    component = configuration.Component(arguments.name,
-                                        arguments.cluster,
-                                        arguments.type,
-                                        {i[0]: configuration.Param(i[0], "".join(i[1:])) for i in params})
-
-    components[arguments.name] = component
+    else:
+        params = {}
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.create_component(arguments.name,
+                             arguments.cluster,
+                             arguments.type,
+                             {i[0]: "".join(i[1:]) for i in params})
 
-    except ClusterNotFound as exc:
+    except exceptions.ComponentExists as exc:
+        raise RuntimeError(f"{arguments.name}: component exists") from exc
+
+    except exceptions.ClusterNotFound as exc:
         raise RuntimeError(f"{arguments.cluster}: cluster not found") from exc
 
-    except TorqueException as exc:
-        raise RuntimeError("DAG is broken") from exc
+    except exceptions.ComponentTypeNotFound as exc:
+        raise RuntimeError(f"{arguments.type}: component type not found") from exc
+
+    configuration.store(arguments.config, dag, profiles)
 
 
-def _remove(arguments: argparse.Namespace, config: configuration.Config):
+def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    components = config["components"]
-
-    if arguments.name not in components:
-        raise RuntimeError(f"{arguments.name}: component not found")
-
-    components.pop(arguments.name)
+    dag, profiles = configuration.load(arguments.config)
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.remove_component(arguments.name)
 
-    except ComponentNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: component connected") from exc
+    except exceptions.ComponentNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: component not found") from exc
 
-    except TorqueException as exc:
-        raise RuntimeError("DAG is broken") from exc
+    except exceptions.ComponentStillConnected as exc:
+        raise RuntimeError(f"{arguments.name}: component still connected") from exc
+
+    configuration.store(arguments.config, dag, profiles)
 
 
-def _show(arguments: argparse.Namespace, config: configuration.Config):
+def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    components = config["components"]
+    dag, _ = configuration.load(arguments.config)
 
-    if arguments.name not in components:
+    if arguments.name not in dag.components:
         raise RuntimeError(f"{arguments.name}: component not found")
 
-    component = components[arguments.name]
-
-    print(f"name: {component.name}")
-    print(f"cluster: {component.cluster}")
-    print(f"type: {component.type}")
-
-    if len(component.params) == 0:
-        return
-
-    print("params:")
-    for param in component.params.values():
-        print(f"  name: {param.name}, value: {param.value}")
+    print(f"{dag.components[arguments.name]}")
 
 
-def _list(arguments: argparse.Namespace, config: configuration.Config):
+def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    components = config["components"]
+    dag, _ = configuration.load(arguments.config)
 
-    for component in components.values():
-        print(f"{component.name}")
+    for component in dag.components.values():
+        print(f"{component}")
 
 
-def _show_type(arguments: argparse.Namespace, config: configuration.Config):
+def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    component_types = config["component_types"]
+    dag, _ = configuration.load(arguments.config)
+    component_types = dag.modules["components.v1"]
 
     if arguments.name not in component_types:
         raise RuntimeError(f"{arguments.name}: component type not found")
 
-    component = component_types[arguments.name]
-    component = component.load()
-
-    print(f"{arguments.name}:")
-
-    print("  parameters:")
-    for param in component.parameters:
-        print(f"    {param.name}: {param.description}, default: {param.default_value}")
-
-    print("  options:")
-    for option in component.options:
-        print(f"    {option.name}: {option.description}, default: {option.default_value}")
+    print(f"{arguments.name}: {component_types[arguments.name]}")
 
 
-def _list_types(arguments: argparse.Namespace, config: configuration.Config):
+def _list_types(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    component_types = config["component_types"]
+    dag, _ = configuration.load(arguments.config)
+    component_types = dag.modules["components.v1"]
 
-    for component in component_types.values():
-        print(component.name)
+    for component in component_types:
+        print(f"{component}: {component_types[component]}")
 
 
 def add_arguments(subparsers):
@@ -184,8 +153,6 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    config = configuration.load(arguments.config)
-
     cmd = {
         "create": _create,
         "remove": _remove,
@@ -195,4 +162,4 @@ def run(arguments: argparse.Namespace):
         "list_types": _list_types
     }
 
-    cmd[arguments.component_cmd](arguments, config)
+    cmd[arguments.component_cmd](arguments)

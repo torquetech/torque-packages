@@ -20,7 +20,7 @@ def _link_helper(_, data: tuple) -> bool:
     return callback(source, destination, link)
 
 
-def execute_from_roots(worker_count: int, dag: DAG, component_callback, link_callback):
+def from_roots(worker_count: int, dag: DAG, component_callback, link_callback):
     """TODO"""
 
     jobs = []
@@ -43,7 +43,7 @@ def execute_from_roots(worker_count: int, dag: DAG, component_callback, link_cal
     runner.execute(jobs)
 
 
-def execute_from_leafs(worker_count: int, dag: DAG, component_callback, link_callback):
+def from_leafs(worker_count: int, dag: DAG, component_callback, link_callback):
     """TODO"""
 
     jobs = []

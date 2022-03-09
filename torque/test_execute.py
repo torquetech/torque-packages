@@ -6,10 +6,27 @@
 
 from threading import Lock
 
-from torque.model import DAG
+from torque import model
+from torque import exceptions
+from torque import execute
 
-from torque.execute import execute_from_roots
-from torque.execute import execute_from_leafs
+
+class Component(model.ComponentType):
+    """TODO"""
+
+
+class Link(model.LinkType):
+    """TODO"""
+
+
+_modules = {
+    "components.v1": {
+        "component_type", Component
+    },
+    "links.v1": {
+        "link_type", Link
+    }
+}
 
 
 class JobRunner:
@@ -36,38 +53,51 @@ class JobRunner:
             self.completed_links.append(link)
             return True
 
-    def verify(self, dag: DAG):
+    def verify(self, dag: model.DAG):
         """TODO"""
 
         assert sorted(self.completed_components) == sorted(dag.components)
         assert sorted(self.completed_links) == sorted(dag.links)
 
 
+def _has_cycles(dag: model.DAG) -> bool:
+    """TODO"""
+
+    try:
+        dag.verify()
+        return False
+
+    except exceptions.CycleDetected:
+        pass
+
+    return True
+
+
 def test_test1():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component")
-    dag.create_component("component2", "cluster1", "component_type")
-    dag.create_component("component3", "cluster1", "component_type")
-    dag.create_component("component4", "cluster1", "component_type")
-    dag.create_component("component5", "cluster1", "component_type")
-    dag.create_component("component6", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component3", "cluster1", "component_type", {})
+    dag.create_component("component4", "cluster1", "component_type", {})
+    dag.create_component("component5", "cluster1", "component_type", {})
+    dag.create_component("component6", "cluster1", "component_type", {})
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component2", "component3", "link_type")
-    dag.create_link("link3", "component2", "component4", "link_type")
-    dag.create_link("link4", "component3", "component5", "link_type")
-    dag.create_link("link5", "component4", "component5", "link_type")
-    dag.create_link("link6", "component5", "component6", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", {})
+    dag.create_link("link2", "component2", "component3", "link_type", {})
+    dag.create_link("link3", "component2", "component4", "link_type", {})
+    dag.create_link("link4", "component3", "component5", "link_type", {})
+    dag.create_link("link5", "component4", "component5", "link_type", {})
+    dag.create_link("link6", "component5", "component6", "link_type", {})
 
-    assert dag.has_cycles() is False
+    assert _has_cycles(dag) is False
 
     runner = JobRunner()
-    execute_from_roots(1, dag, runner.on_component, runner.on_link)
+    execute.from_roots(1, dag, runner.on_component, runner.on_link)
 
     runner.verify(dag)
 
@@ -75,27 +105,27 @@ def test_test1():
 def test_test2():
     """TODO"""
 
-    dag = DAG()
+    dag = model.DAG(0, _modules)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type")
-    dag.create_component("component2", "cluster1", "component_type")
-    dag.create_component("component3", "cluster1", "component_type")
-    dag.create_component("component4", "cluster1", "component_type")
-    dag.create_component("component5", "cluster1", "component_type")
-    dag.create_component("component6", "cluster1", "component_type")
+    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component3", "cluster1", "component_type", {})
+    dag.create_component("component4", "cluster1", "component_type", {})
+    dag.create_component("component5", "cluster1", "component_type", {})
+    dag.create_component("component6", "cluster1", "component_type", {})
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component2", "component3", "link_type")
-    dag.create_link("link3", "component2", "component4", "link_type")
-    dag.create_link("link4", "component3", "component5", "link_type")
-    dag.create_link("link5", "component4", "component5", "link_type")
-    dag.create_link("link6", "component5", "component6", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", {})
+    dag.create_link("link2", "component2", "component3", "link_type", {})
+    dag.create_link("link3", "component2", "component4", "link_type", {})
+    dag.create_link("link4", "component3", "component5", "link_type", {})
+    dag.create_link("link5", "component4", "component5", "link_type", {})
+    dag.create_link("link6", "component5", "component6", "link_type", {})
 
-    assert dag.has_cycles() is False
+    assert _has_cycles(dag) is False
 
     runner = JobRunner()
-    execute_from_leafs(1, dag, runner.on_component, runner.on_link)
+    execute.from_leafs(1, dag, runner.on_component, runner.on_link)
 
     runner.verify(dag)

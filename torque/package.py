@@ -10,6 +10,8 @@ import subprocess
 
 from importlib import metadata
 
+from torque import exceptions
+
 
 _URI = r"^[^:]+://"
 
@@ -100,19 +102,19 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
     dist = metadata.Distribution.at(f".torque/system/{package}.dist-info")
 
     if not dist.files:
-        raise RuntimeError(f"{package}: package not found")
+        raise exceptions.PackageNotFound(package)
 
-    component_types = list(filter(lambda x: x.group == "torque.components", dist.entry_points))
-    component_types = {i.name for i in component_types}
+    component_types = filter(lambda x: x.group == "torque.components.v1", dist.entry_points)
+    component_types = {i.name for i in list(component_types)}
 
     if len(component_types & used_component_types) != 0:
-        raise RuntimeError(f"{package}: package in use")
+        raise exceptions.PackageInUse(package)
 
-    link_types = list(filter(lambda x: x.group == "torque.links", dist.entry_points))
-    link_types = {i.name for i in link_types}
+    link_types = filter(lambda x: x.group == "torque.links.v1", dist.entry_points)
+    link_types = {i.name for i in list(link_types)}
 
     if len(link_types & used_link_types) != 0:
-        raise RuntimeError(f"{package}: package in use")
+        raise exceptions.PackageInUse(package)
 
     files = set()
 

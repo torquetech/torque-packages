@@ -7,56 +7,49 @@
 import argparse
 
 from torque import configuration
-
-from torque.exceptions import DuplicateCluster
-from torque.exceptions import ClusterNotFound
+from torque import exceptions
 
 
-def _create(arguments: argparse.Namespace, config: configuration.Config):
+def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    clusters = config["clusters"]
-
-    if arguments.name in clusters:
-        raise RuntimeError(f"{arguments.name}: cluster exists")
-
-    clusters[arguments.name] = configuration.Cluster(arguments.name)
+    dag, profiles = configuration.load(arguments.config)
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.create_cluster(arguments.name)
 
-    except DuplicateCluster as exc:
+    except exceptions.ClusterExists as exc:
         raise RuntimeError(f"{arguments.name}: cluster exists") from exc
 
+    configuration.store(arguments.config, dag, profiles)
 
-def _remove(arguments: argparse.Namespace, config: configuration.Config):
+
+def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    clusters = config["clusters"]
-
-    if arguments.name not in clusters:
-        raise RuntimeError(f"{arguments.name}: cluster not found")
-
-    clusters.pop(arguments.name)
+    dag, profiles = configuration.load(arguments.config)
 
     try:
-        configuration.generate_dag(config)
-        configuration.store(arguments.config, config)
+        dag.remove_cluster(arguments.name)
 
-    except ClusterNotFound as exc:
+    except exceptions.ClusterNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: cluster not found") from exc
+
+    except exceptions.ClusterNotEmpty as exc:
         raise RuntimeError(f"{arguments.name}: cluster not empty") from exc
 
+    configuration.store(arguments.config, dag, profiles)
 
-def _list(arguments: argparse.Namespace, config: configuration.Config):
+
+def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    clusters = config["clusters"]
+    dag, _ = configuration.load(arguments.config)
 
-    for cluster in clusters.values():
-        print(f"{cluster.name}")
+    for cluster in dag.clusters.values():
+        print(f"{cluster}")
 
 
 def add_arguments(subparsers):
@@ -80,12 +73,10 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    config = configuration.load(arguments.config)
-
     cmd = {
         "create": _create,
         "remove": _remove,
         "list": _list
     }
 
-    cmd[arguments.cluster_cmd](arguments, config)
+    cmd[arguments.cluster_cmd](arguments)

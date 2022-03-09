@@ -4,7 +4,7 @@
 
 """TODO"""
 
-from argparse import Namespace
+import argparse
 
 
 def add_arguments(subparsers):
@@ -13,7 +13,7 @@ def add_arguments(subparsers):
     parser = subparsers.add_parser("install", description="install targets", help="install targets")
 
 
-def run(arguments: Namespace):
+def run(arguments: argparse.Namespace):
     """TODO"""
 
     print(arguments)

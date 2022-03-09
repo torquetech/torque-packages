@@ -5,57 +5,54 @@
 """TODO"""
 
 import os
+import schema
 import yaml
 
 from collections import namedtuple
 from importlib import metadata
-from schema import Schema
 
-from torque.model import DAG
+from torque import model
 
 
 Profile = namedtuple("Profile", ["name", "uri", "secret"])
-Cluster = namedtuple("Cluster", ["name"])
-Component = namedtuple("Component", ["name", "cluster", "type", "params"])
-Link = namedtuple("Link", ["name", "source", "destination", "type", "params"])
-Param = namedtuple("Param", ["name", "value"])
-
-Config = dict[str, object]
+Profiles = dict[str, Profile]
 
 
-config_schema = Schema({
-    "revision": int,
+_CONFIG_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
         "uri": str,
         "secret": str
     }],
-    "clusters": [{
-        "name": str
-    }],
-    "components": [{
-        "name": str,
-        "cluster": str,
-        "type": str,
-        "params": [{
+    "dag": {
+        "revision": int,
+        "clusters": [{
+            "name": str
+        }],
+        "components": [{
             "name": str,
-            "value": str
-        }]
-    }],
-    "links": [{
-        "name": str,
-        "source": str,
-        "destination": str,
-        "type": str,
-        "params": [{
+            "cluster": str,
+            "type": str,
+            "params": [{
+                "name": str,
+                "value": str
+            }]
+        }],
+        "links": [{
             "name": str,
-            "value": str
+            "source": str,
+            "destination": str,
+            "type": str,
+            "params": [{
+                "name": str,
+                "value": str
+            }]
         }]
-    }]
+    }
 })
 
 
-def _to_profile(config: Config) -> Profile:
+def _to_profile(config: dict[str, object]) -> Profile:
     """TODO"""
 
     return Profile(config["name"],
@@ -63,55 +60,15 @@ def _to_profile(config: Config) -> Profile:
                    config["secret"])
 
 
-def _to_cluster(config: Config) -> Cluster:
+def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
     """TODO"""
 
-    return Cluster(config["name"])
+    return [
+        {"name": i.name, "uri": i.uri, "secret": i.secret} for i in profiles.values()
+    ]
 
 
-def _to_param(config: Config) -> Param:
-    """TODO"""
-
-    return Param(config["name"],
-                 config["value"])
-
-
-def _to_params(config: Config) -> list[Param]:
-    """TODO"""
-
-    return {i["name"]: _to_param(i) for i in config}
-
-
-def _to_component(config: Config) -> Component:
-    """TODO"""
-
-    return Component(config["name"],
-                     config["cluster"],
-                     config["type"],
-                     _to_params(config["params"]))
-
-
-def _to_link(config: Config) -> Link:
-    """TODO"""
-
-    return Link(config["name"],
-                config["source"],
-                config["destination"],
-                config["type"],
-                _to_params(config["params"]))
-
-
-def _from_profile(profile: Profile) -> Config:
-    """TODO"""
-
-    return {
-        "name": profile.name,
-        "uri": profile.uri,
-        "secret": profile.secret
-    }
-
-
-def _from_cluster(cluster: Cluster) -> Config:
+def _from_cluster(cluster: model.Cluster) -> dict[str: str]:
     """TODO"""
 
     return {
@@ -119,130 +76,139 @@ def _from_cluster(cluster: Cluster) -> Config:
     }
 
 
-def _from_param(param: Param) -> Config:
-    """TODO"""
-
-    return {
-        "name": param.name,
-        "value": param.value
-    }
-
-
-def _from_params(params: dict[str, Param]) -> Config:
+def _from_params(params: dict[str, str]) -> list[dict[str, str]]:
     """TODO"""
 
     return [
-        _from_param(i) for i in params.values()
+        {"name": name, "value": value} for name, value in params.items()
     ]
 
 
-def _from_component(component: Component) -> Config:
+def _from_component(component: model.Component) -> dict[str: object]:
     """TODO"""
 
     return {
         "name": component.name,
         "cluster": component.cluster,
-        "type": component.type,
+        "type": component.component_type,
         "params": _from_params(component.params)
     }
 
 
-def _from_link(link: Link) -> Config:
+def _from_link(link: model.Link) -> dict[str: object]:
     """TODO"""
 
     return {
         "name": link.name,
         "source": link.source,
         "destination": link.destination,
-        "type": link.type,
+        "type": link.link_type,
         "params": _from_params(link.params)
     }
 
 
-def generate_dag(config: Config) -> DAG:
+def _generate_dag(config: dict[str, object], modules: model.Modules) -> model.DAG:
     """TODO"""
 
-    dag = DAG()
+    config_dag = config["dag"]
+    dag = model.DAG(config_dag["revision"], modules)
 
-    for cluster in config["clusters"].values():
-        dag.create_cluster(cluster.name)
+    for cluster in config_dag["clusters"]:
+        dag.create_cluster(cluster["name"])
 
-    for component in config["components"].values():
-        dag.create_component(component.name,
-                             component.cluster,
-                             component.type)
+    for component in config_dag["components"]:
+        params = {i["name"]: i["value"] for i in component["params"]}
 
-    for link in config["links"].values():
-        dag.create_link(link.name,
-                        link.source,
-                        link.destination,
-                        link.type)
+        dag.create_component(component["name"],
+                             component["cluster"],
+                             component["type"],
+                             params)
 
-    if dag.has_cycles():
-        raise RuntimeError("cycle detected")
+    for link in config_dag["links"]:
+        params = {i["name"]: i["value"] for i in link["params"]}
+
+        dag.create_link(link["name"],
+                        link["source"],
+                        link["destination"],
+                        link["type"],
+                        params)
+
+    dag.verify()
 
     return dag
 
 
-def load(path: str) -> Config:
+def load(path: str, extra_modules: model.Modules = None) -> (model.DAG, Profiles):
     """TODO"""
 
-    stored_config = {
-        "revision": 0,
+    config = {
         "profiles": [],
-        "clusters": [],
-        "components": [],
-        "links": []
+        "dag": {
+            "revision": 0,
+            "clusters": [],
+            "components": [],
+            "links": []
+        }
     }
 
     try:
         with open(path, encoding="utf8") as file:
-            stored_config = stored_config | yaml.safe_load(file)
+            config = config | yaml.safe_load(file)
 
     except FileNotFoundError:
         pass
 
-    config_schema.validate(stored_config)
+    _CONFIG_SCHEMA.validate(config)
 
-    config = {}
-
-    config["revision"] = stored_config["revision"]
-    config["profiles"] = {i["name"]: _to_profile(i) for i in stored_config["profiles"]}
-    config["clusters"] = {i["name"]: _to_cluster(i) for i in stored_config["clusters"]}
-    config["components"] = {i["name"]: _to_component(i) for i in stored_config["components"]}
-    config["links"] = {i["name"]: _to_link(i) for i in stored_config["links"]}
+    profiles = {i["name"]: _to_profile(i) for i in config["profiles"]}
+    modules = {}
 
     entry_points = metadata.entry_points()
 
     if "torque.components.v1" in entry_points:
-        config["component_types"] = {i.name: i for i in entry_points["torque.components.v1"]}
+        modules["components.v1"] = {i.name: i.load() for i in entry_points["torque.components.v1"]}
 
     else:
-        config["component_types"] = {}
+        modules["components.v1"] = {}
 
     if "torque.links.v1" in entry_points:
-        config["link_types"] = {i.name: i for i in entry_points["torque.links.v1"]}
+        modules["links.v1"] = {i.name: i.load() for i in entry_points["torque.links.v1"]}
 
     else:
-        config["link_types"] = {}
+        modules["links.v1"] = {}
 
-    return config
+    if extra_modules:
+        modules = modules | extra_modules
+
+    dag = _generate_dag(config, modules)
+
+    return dag, profiles
 
 
-def store(path: str, config: Config):
+def store(path: str, dag: model.DAG, profiles: Profiles):
     """TODO"""
 
-    stored_config = {}
+    config = {
+        "profiles": [],
+        "dag": {
+            "revision": 0,
+            "clusters": [],
+            "components": [],
+            "links": []
+        }
+    }
 
-    stored_config["revision"] = config["revision"] + 1
+    config_dag = config["dag"]
 
-    stored_config["profiles"] = [_from_profile(i) for i in config["profiles"].values()]
-    stored_config["clusters"] = [_from_cluster(i) for i in config["clusters"].values()]
-    stored_config["components"] = [_from_component(i) for i in config["components"].values()]
-    stored_config["links"] = [_from_link(i) for i in config["links"].values()]
+    config_dag["revision"] = dag.revision + 1
+    config_dag["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
+    config_dag["components"] = [_from_component(i) for i in dag.components.values()]
+    config_dag["links"] = [_from_link(i) for i in dag.links.values()]
+
+    config["profiles"] = _from_profiles(profiles)
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
-        yaml.safe_dump(stored_config,
+        yaml.safe_dump(config,
                        stream=file,
                        default_flow_style=False,
                        sort_keys=False)

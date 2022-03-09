@@ -7,35 +7,41 @@
 import argparse
 
 from torque import configuration
+from torque import exceptions
+from torque import package
 
-from torque.package import install_package, remove_package, list_packages
 
-
-def _install(arguments: argparse.Namespace, config: configuration.Config):
+def _install(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    install_package(arguments.package, arguments.force, arguments.upgrade)
+    package.install_package(arguments.package, arguments.force, arguments.upgrade)
 
 
-def _remove(arguments: argparse.Namespace, config: configuration.Config):
+def _remove(arguments: argparse.Namespace):
+    """TODO"""
+
+    dag, _ = configuration.load(arguments.config)
+
+    try:
+        package.remove_package(arguments.package,
+                               dag.used_component_types(),
+                               dag.used_link_types())
+
+    except exceptions.PackageNotFound as exc:
+        raise RuntimeError(f"{arguments.package}: package not found") from exc
+
+    except exceptions.PackageInUse as exc:
+        raise RuntimeError(f"{arguments.package}: package in use") from exc
+
+
+def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    used_component_types = {i.type for i in config["components"].values()}
-    used_link_types = {i.type for i in config["links"].values()}
-
-    remove_package(arguments.package, used_component_types, used_link_types)
-
-
-def _list(arguments: argparse.Namespace, config: configuration.Config):
-    # pylint: disable=W0613
-
-    """TODO"""
-
-    list_packages()
+    package.list_packages()
 
 
 def add_arguments(subparsers):
@@ -75,12 +81,10 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace):
     """TODO"""
 
-    config = configuration.load(arguments.config)
-
     cmd = {
         "install": _install,
         "remove": _remove,
         "list": _list
     }
 
-    cmd[arguments.package_cmd](arguments, config)
+    cmd[arguments.package_cmd](arguments)
