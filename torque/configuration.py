@@ -4,7 +4,9 @@
 
 """TODO"""
 
+import io
 import schema
+import yaml
 
 from torque import options
 
@@ -109,6 +111,30 @@ class Configuration:
             return options.RawOptions()
 
         return links[name]
+
+    def dump(self, stream: io.TextIOWrapper):
+        """TODO"""
+
+        config = {
+            "providers": [],
+            "dag": {}
+        }
+
+        providers = self.config["providers"]
+        config["providers"] = [_from_object(*i) for i in providers.items()]
+
+        dag = self.config["dag"]
+        dag_config = config["dag"]
+
+        dag_config["revision"] = dag["revision"]
+        dag_config["clusters"] = [_from_object(*i) for i in dag["clusters"].items()]
+        dag_config["components"] = [_from_object(*i) for i in dag["components"].items()]
+        dag_config["links"] = [_from_object(*i) for i in dag["links"].items()]
+
+        yaml.safe_dump(config,
+                       stream=stream,
+                       default_flow_style=False,
+                       sort_keys=False)
 
 
 def _to_raw_options(config: list[dict[str, str]]) -> options.RawOptions:

@@ -36,6 +36,7 @@ def main() -> int:
         cmds = {
             "init": commands.init,
             "package": commands.package,
+            "profile": commands.profile,
             "cluster": commands.cluster,
             "component": commands.component,
             "link": commands.link,

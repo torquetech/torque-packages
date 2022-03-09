@@ -85,3 +85,11 @@ class OptionRequired(TorqueException):
 
 class ProtocolNotSupported(TorqueException):
     """TODO"""
+
+
+class ProfileExists(TorqueException):
+    """TODO"""
+
+
+class ProfileNotFound(TorqueException):
+    """TODO"""

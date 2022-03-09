@@ -6,9 +6,12 @@
 
 import importlib
 import os
+import re
 import schema
 import yaml
 
+from torque import configuration
+from torque import exceptions
 from torque import model
 
 
@@ -246,6 +249,57 @@ class Layout:
         self.dag = dag
         self.profiles = profiles
         self.types = types
+
+    def create_profile(self, name: str, uri: str, secret: str) -> Profile:
+        """TODO"""
+
+        if name in self.profiles:
+            raise exceptions.ProfileExists(name)
+
+        if not re.match(_PROTO, uri) and not os.path.isabs(uri):
+            uri = os.path.join(os.getenv("TORQUE_CWD"), uri)
+            uri = os.path.abspath(uri)
+            uri = os.path.relpath(uri)
+
+        profile = Profile(name, uri, secret)
+
+        self.profiles[name] = profile
+        return profile
+
+    def remove_profile(self, name: str) -> Profile:
+        """TODO"""
+
+        if name not in self.profiles:
+            raise exceptions.ProfileNotFound(name)
+
+        return self.profiles.pop(name)
+
+    def load_profile(self, name: str) -> configuration.Configuration:
+        """TODO"""
+
+        if name not in self.profiles:
+            raise exceptions.ProfileNotFound(name)
+
+        profile = self.profiles[name]
+
+        proto = "file"
+        match = re.match(_PROTO, profile.uri)
+
+        if match:
+            proto = match[1]
+
+        protos = self.types["proto.v1"]
+
+        if proto not in protos:
+            raise exceptions.ProtocolNotSupported(proto)
+
+        proto_handler = protos[proto]
+        config = None
+
+        with proto_handler(profile.uri, profile.secret) as file:
+            config = yaml.safe_load(file)
+
+        return configuration.create(config)
 
     def store(self):
         """TODO"""
