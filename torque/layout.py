@@ -69,6 +69,15 @@ _LAYOUT_SCHEMA = schema.Schema({
 })
 
 
+class DefaultProfile:
+    # pylint: disable=R0903
+
+    """TODO"""
+
+    def __repr__(self) -> str:
+        return "Profile(default)"
+
+
 class Profile:
     # pylint: disable=R0903
 
@@ -107,7 +116,9 @@ def _from_profile(profile: Profile) -> dict[str, object]:
 def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
     """TODO"""
 
-    return [_from_profile(i) for i in profiles.values()]
+    profile_list = filter(lambda x: not isinstance(x, DefaultProfile), profiles.values())
+
+    return [_from_profile(i) for i in profile_list]
 
 
 def _from_cluster(cluster: model.Cluster) -> dict[str: str]:
@@ -210,6 +221,50 @@ def _load_types(extra_types: model.Types):
     return types
 
 
+def _load_defaults(dag: model.DAG) -> configuration.Configuration:
+    """TODO"""
+
+    config = {
+        "providers": [],
+        "dag": {
+            "revision": dag.revision,
+            "clusters": [],
+            "components": [],
+            "links": []
+        }
+    }
+
+    clusters = config["dag"]["clusters"]
+    components = config["dag"]["components"]
+    links = config["dag"]["links"]
+
+    component_types = dag.types["components.v1"]
+    link_types = dag.types["links.v1"]
+
+    for cluster in dag.clusters.values():
+        clusters.append({"name": cluster.name, "configuration": []})
+
+    for component in dag.components.values():
+        component_type = component_types[component.component_type]
+        component_config = []
+
+        for i in component_type.configuration:
+            component_config.append({"name": i.name, "value": i.default_value})
+
+        components.append({"name": component.name, "configuration": component_config})
+
+    for link in dag.links.values():
+        link_type = link_types[link.link_type]
+        link_config = []
+
+        for i in link_type.configuration:
+            link_config.append({"name": i.name, "value": i.default_value})
+
+        links.append({"name": link.name, "configuration": link_config})
+
+    return configuration.create(config, True)
+
+
 def _store(path: str, dag: model.DAG, profiles: Profiles):
     """TODO"""
 
@@ -280,6 +335,9 @@ class Layout:
         if name not in self.profiles:
             raise exceptions.ProfileNotFound(name)
 
+        if name == "default":
+            return _load_defaults(self.dag)
+
         profile = self.profiles[name]
 
         proto = "file"
@@ -299,7 +357,7 @@ class Layout:
         with proto_handler(profile.uri, profile.secret) as file:
             config = yaml.safe_load(file)
 
-        return configuration.create(config)
+        return configuration.create(config, False)
 
     def store(self):
         """TODO"""
@@ -332,6 +390,10 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
     types = _load_types(extra_types)
 
     profiles = {
+        "default": DefaultProfile()
+    }
+
+    profiles = profiles | {
         i["name"]: _to_profile(i) for i in layout["profiles"]
     }
 

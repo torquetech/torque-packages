@@ -11,39 +11,42 @@ import yaml
 from torque import options
 
 
-_CONFIG_SCHEMA = schema.Schema({
-    "providers": [{
-        "name": str,
-        "configuration": [{
-            "name": str,
-            "value": str
-        }]
-    }],
-    "dag": {
-        "revision": int,
-        "clusters": [{
+def _config_schema(allow_null_values: bool) -> schema.Schema:
+    """TODO"""
+
+    return schema.Schema({
+        "providers": [{
             "name": str,
             "configuration": [{
                 "name": str,
-                "value": str
+                "value": str if not allow_null_values else schema.Or(str, None)
             }]
         }],
-        "components": [{
-            "name": str,
-            "configuration": [{
+        "dag": {
+            "revision": int,
+            "clusters": [{
                 "name": str,
-                "value": str
-            }]
-        }],
-        "links": [{
-            "name": str,
-            "configuration": [{
+                "configuration": [{
+                    "name": str,
+                    "value": str if not allow_null_values else schema.Or(str, None)
+                }]
+            }],
+            "components": [{
                 "name": str,
-                "value": str
+                "configuration": [{
+                    "name": str,
+                    "value": str if not allow_null_values else schema.Or(str, None)
+                }]
+            }],
+            "links": [{
+                "name": str,
+                "configuration": [{
+                    "name": str,
+                    "value": str if not allow_null_values else schema.Or(str, None)
+                }]
             }]
-        }]
-    }
-})
+        }
+    })
 
 
 def _from_configuration(configuration: dict[str, str]) -> dict[str, str]:
@@ -141,10 +144,10 @@ def _to_raw_options(config: list[dict[str, str]]) -> options.RawOptions:
     return options.RawOptions({i["name"]: i["value"] for i in config})
 
 
-def create(config: dict[str, object]) -> Configuration:
+def create(config: dict[str, object], allow_null_values: bool) -> Configuration:
     """TODO"""
 
-    _CONFIG_SCHEMA.validate(config)
+    _config_schema(allow_null_values).validate(config)
 
     config["providers"] = {
         i["name"]: _to_raw_options(i["configuration"]) for i in config["providers"]
