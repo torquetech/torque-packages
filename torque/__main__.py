@@ -33,7 +33,7 @@ def find_workspace_root():
         os.chdir("..")
 
 
-def pass_through_command(argv, verbose: bool):
+def pass_through_command(argv, cwd: str, verbose: bool):
     """TODO"""
 
     cmd = [
@@ -45,7 +45,8 @@ def pass_through_command(argv, verbose: bool):
 
     env = {
         "VIRTUAL_ENV": ".torque/cache/venv",
-        "PYTHONPATH": ".torque/system"
+        "PYTHONPATH": ".torque/system",
+        "TORQUE_CWD": cwd
     }
 
     if verbose:
@@ -74,13 +75,15 @@ def main() -> int:
 
                 return 0
 
+        cwd = os.getcwd()
+
         if not find_workspace_root():
             raise RuntimeError("workspace root not found!")
 
         if not os.path.isfile(".torque/cache/venv/bin/python"):
             workspace.initialize_venv(".")
 
-        pass_through_command(sys.argv[1:], verbose)
+        pass_through_command(sys.argv[1:], cwd, verbose)
 
         return 0
 
