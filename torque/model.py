@@ -5,6 +5,7 @@
 """TODO"""
 
 from torque import exceptions
+from torque import options
 
 
 Types = dict[str, object]
@@ -32,7 +33,7 @@ class Link:
                  source: str,
                  destination: str,
                  link_type: str,
-                 params: dict[str, str]):
+                 params: options.Options):
         # pylint: disable=R0913
 
         self.name = name
@@ -56,7 +57,7 @@ class Component:
                  name: str,
                  cluster: str,
                  component_type: str,
-                 params: dict[str, str]):
+                 params: options.Options):
         self.name = name
         self.cluster = cluster
         self.component_type = component_type
@@ -126,8 +127,8 @@ class DAG:
             raise exceptions.ClusterExists(name)
 
         cluster = Cluster(name)
-        self.clusters[name] = cluster
 
+        self.clusters[name] = cluster
         return cluster
 
     def remove_cluster(self, name: str) -> Cluster:
@@ -156,12 +157,15 @@ class DAG:
         if cluster not in self.clusters:
             raise exceptions.ClusterNotFound(cluster)
 
-        if component_type not in self.types["components.v1"]:
+        types = self.types["components.v1"]
+
+        if component_type not in types:
             raise exceptions.ComponentTypeNotFound(component_type)
 
+        params = options.process(types[component_type].parameters, params)
         component = Component(name, cluster, component_type, params)
-        self.components[name] = component
 
+        self.components[name] = component
         return component
 
     def remove_component(self, name: str) -> Component:
@@ -202,15 +206,18 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        if link_type not in self.types["links.v1"]:
+        types = self.types["links.v1"]
+
+        if link_type not in types:
             raise exceptions.LinkTypeNotFound(link_type)
+
+        params = options.process(types[link_type].parameters, params)
+        link = Link(name, source, destination, link_type, params)
 
         self.components[destination].add_inbound_link(source, name)
         self.components[source].add_outbound_link(destination, name)
 
-        link = Link(name, source, destination, link_type, params)
         self.links[name] = link
-
         return link
 
     def remove_link(self, name: str) -> Link:

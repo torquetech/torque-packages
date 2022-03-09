@@ -8,7 +8,6 @@ import argparse
 
 from torque import exceptions
 from torque import layout
-from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -25,27 +24,18 @@ def _create(arguments: argparse.Namespace):
         params = {}
 
     try:
-        link_types = dag.types["links.v1"]
-
-        if arguments.type not in link_types:
-            raise exceptions.LinkTypeNotFound(arguments.type)
-
-        link_type = link_types[arguments.type]
-
-        params = options.process(link_type.parameters, params)
-
-        dag.create_link(arguments.name,
-                        arguments.source,
-                        arguments.destination,
-                        arguments.type,
-                        params.processed)
+        link = dag.create_link(arguments.name,
+                               arguments.source,
+                               arguments.destination,
+                               arguments.type,
+                               params)
 
         dag.verify()
 
-        for default in params.defaults:
+        for default in link.params.defaults:
             print(f"WARNING: {default}: default parameter used")
 
-        for unused in params.unused:
+        for unused in link.params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
     except exceptions.LinkExists as exc:

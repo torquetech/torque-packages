@@ -8,7 +8,6 @@ import argparse
 
 from torque import exceptions
 from torque import layout
-from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -25,24 +24,15 @@ def _create(arguments: argparse.Namespace):
         params = {}
 
     try:
-        component_types = dag.types["components.v1"]
+        component = dag.create_component(arguments.name,
+                                         arguments.cluster,
+                                         arguments.type,
+                                         params)
 
-        if arguments.type not in component_types:
-            raise exceptions.ComponentTypeNotFound(arguments.type)
-
-        component_type = component_types[arguments.type]
-
-        params = options.process(component_type.parameters, params)
-
-        dag.create_component(arguments.name,
-                             arguments.cluster,
-                             arguments.type,
-                             params.processed)
-
-        for default in params.defaults:
+        for default in component.params.defaults:
             print(f"WARNING: {default}: default parameter used")
 
-        for unused in params.unused:
+        for unused in component.params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
     except exceptions.ComponentExists as exc:
