@@ -8,9 +8,6 @@ from torque import exceptions
 from torque import options
 
 
-Types = dict[str, object]
-
-
 class Cluster:
     # pylint: disable=R0903
 
@@ -113,12 +110,11 @@ class Component:
 class DAG:
     """TODO"""
 
-    def __init__(self, revision: int, types: Types):
+    def __init__(self, revision: int):
         self.revision = revision
         self.clusters = {}
         self.components = {}
         self.links = {}
-        self.types = types
 
     def create_cluster(self, name: str) -> Cluster:
         """TODO"""
@@ -148,7 +144,7 @@ class DAG:
                          name: str,
                          cluster: str,
                          component_type: str,
-                         params: dict[str, str]) -> Component:
+                         params: options.Options) -> Component:
         """TODO"""
 
         if name in self.components:
@@ -157,12 +153,6 @@ class DAG:
         if cluster not in self.clusters:
             raise exceptions.ClusterNotFound(cluster)
 
-        types = self.types["components.v1"]
-
-        if component_type not in types:
-            raise exceptions.ComponentTypeNotFound(component_type)
-
-        params = options.process(types[component_type].parameters, params)
         component = Component(name, cluster, component_type, params)
 
         self.components[name] = component
@@ -189,7 +179,7 @@ class DAG:
                     source: str,
                     destination: str,
                     link_type: str,
-                    params: dict[str, str]) -> Link:
+                    params: options.Options) -> Link:
         # pylint: disable=R0913
 
         """TODO"""
@@ -206,12 +196,6 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        types = self.types["links.v1"]
-
-        if link_type not in types:
-            raise exceptions.LinkTypeNotFound(link_type)
-
-        params = options.process(types[link_type].parameters, params)
         link = Link(name, source, destination, link_type, params)
 
         self.components[destination].add_inbound_link(source, name)

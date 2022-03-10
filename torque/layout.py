@@ -12,7 +12,9 @@ import yaml
 
 from torque import configuration
 from torque import exceptions
+from torque import interface
 from torque import model
+from torque import options
 
 
 def _proto_file(uri: str, secret: str) -> dict[str, object]:
@@ -24,7 +26,7 @@ def _proto_file(uri: str, secret: str) -> dict[str, object]:
 
 
 _TYPES = {
-    "proto.v1": {
+    "protocols.v1": {
         "file": _proto_file,
         # "https": _proto_https
         # "http": _proto_http
@@ -95,6 +97,43 @@ class Profile:
 Profiles = dict[str, Profile]
 
 
+class Types:
+    """TODO"""
+
+    def __init__(self, types: dict[str, object]):
+        self.types = types
+
+    def component(self, component_type: str) -> interface.Component:
+        """TODO"""
+
+        components = self.types["components.v1"]
+
+        if component_type not in components:
+            raise exceptions.ComponentTypeNotFound(component_type)
+
+        return components[component_type]
+
+    def link(self, link_type: str) -> interface.Link:
+        """TODO"""
+
+        links = self.types["links.v1"]
+
+        if link_type not in links:
+            raise exceptions.LinkTypeNotFound(link_type)
+
+        return links[link_type]
+
+    def proto(self, protocol: str) -> callable:
+        """TODO"""
+
+        protocols = self.types["protocols.v1"]
+
+        if protocol not in protocols:
+            raise exceptions.ProtocolNotFound(protocol)
+
+        return protocols[protocol]
+
+
 def _to_profile(profile_layout: dict[str, object]) -> Profile:
     """TODO"""
 
@@ -160,16 +199,52 @@ def _from_link(link: model.Link) -> dict[str: object]:
     }
 
 
-def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DAG:
+def _load_types_for(source: str) -> dict[str, object]:
     """TODO"""
 
-    dag = model.DAG(dag_layout["revision"], types)
+    entry_points = importlib.metadata.entry_points()
+
+    if source not in entry_points:
+        return {}
+
+    types = {}
+
+    for i in entry_points[source]:
+        # pylint: disable=W0703
+        try:
+            types[i.name] = i.load()
+
+        except Exception as exc:
+            print(f"WARNING: {i.name}: unable to load type: {exc}")
+
+    return types
+
+
+def _load_types():
+    """TODO"""
+
+    types = {} | _TYPES
+
+    types["components.v1"] |= _load_types_for("torque.components.v1")
+    types["links.v1"] |= _load_types_for("torque.links.v1")
+    types["protocols.v1"] |= _load_types_for("torque.protocols.v1")
+
+    return types
+
+
+def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
+    """TODO"""
+
+    dag = model.DAG(dag_layout["revision"])
 
     for cluster in dag_layout["clusters"]:
         dag.create_cluster(cluster["name"])
 
     for component in dag_layout["components"]:
-        params = {i["name"]: i["value"] for i in component["params"]}
+        raw_params = {i["name"]: i["value"] for i in component["params"]}
+
+        component_type = types.component(component["type"])
+        params = options.process(component_type.parameters, raw_params)
 
         dag.create_component(component["name"],
                              component["cluster"],
@@ -177,7 +252,10 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
                              params)
 
     for link in dag_layout["links"]:
-        params = {i["name"]: i["value"] for i in link["params"]}
+        raw_params = {i["name"]: i["value"] for i in link["params"]}
+
+        link_type = types.link(link["type"])
+        params = options.process(link_type.parameters, raw_params)
 
         dag.create_link(link["name"],
                         link["source"],
@@ -190,38 +268,7 @@ def _generate_dag(dag_layout: dict[str, object], types: model.Types) -> model.DA
     return dag
 
 
-def _load_types(extra_types: model.Types):
-    """TODO"""
-
-    types = {} | _TYPES
-
-    entry_points = importlib.metadata.entry_points()
-
-    if "torque.components.v1" in entry_points:
-        for i in entry_points["torque.components.v1"]:
-            # pylint: disable=W0703
-            try:
-                types["components.v1"][i.name] = i.load()
-
-            except Exception as exc:
-                print(f"WARNING: {i.name}: unable to load type: {exc}")
-
-    if "torque.links.v1" in entry_points:
-        for i in entry_points["torque.links.v1"]:
-            # pylint: disable=W0703
-            try:
-                types["links.v1"][i.name] = i.load()
-
-            except Exception as exc:
-                print(f"WARNING: {i.name}: unable to load type: {exc}")
-
-    if extra_types:
-        types = types | extra_types
-
-    return types
-
-
-def _load_defaults(dag: model.DAG) -> configuration.Configuration:
+def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
     """TODO"""
 
     config = {
@@ -238,29 +285,26 @@ def _load_defaults(dag: model.DAG) -> configuration.Configuration:
     components = config["dag"]["components"]
     links = config["dag"]["links"]
 
-    component_types = dag.types["components.v1"]
-    link_types = dag.types["links.v1"]
-
     for cluster in dag.clusters.values():
         clusters.append({"name": cluster.name, "configuration": []})
 
     for component in dag.components.values():
-        component_type = component_types[component.component_type]
-        component_config = []
-
-        for i in component_type.configuration:
-            component_config.append({"name": i.name, "value": i.default_value})
-
-        components.append({"name": component.name, "configuration": component_config})
+        component_type = types.component(component.component_type)
+        components.append({
+            "name": component.name,
+            "configuration": [
+                {"name": i.name, "value": i.default_value} for i in component_type.configuration
+            ]
+        })
 
     for link in dag.links.values():
-        link_type = link_types[link.link_type]
-        link_config = []
-
-        for i in link_type.configuration:
-            link_config.append({"name": i.name, "value": i.default_value})
-
-        links.append({"name": link.name, "configuration": link_config})
+        link_type = types.link(link.link_type)
+        links.append({
+            "name": link.name,
+            "configuration": [
+                {"name": i.name, "value": i.default_value} for i in link_type.configuration
+            ]
+        })
 
     return configuration.create(config, True)
 
@@ -299,7 +343,7 @@ def _store(path: str, dag: model.DAG, profiles: Profiles):
 class Layout:
     """TODO"""
 
-    def __init__(self, path: str, dag: model.DAG, profiles: Profiles, types: model.Types):
+    def __init__(self, path: str, dag: model.DAG, profiles: Profiles, types: Types):
         self.path = path
         self.dag = dag
         self.profiles = profiles
@@ -336,7 +380,7 @@ class Layout:
             raise exceptions.ProfileNotFound(name)
 
         if name == "default":
-            return _load_defaults(self.dag)
+            return _load_defaults(self.dag, self.types)
 
         profile = self.profiles[name]
 
@@ -346,15 +390,10 @@ class Layout:
         if match:
             proto = match[1]
 
-        protos = self.types["proto.v1"]
-
-        if proto not in protos:
-            raise exceptions.ProtocolNotSupported(proto)
-
-        proto_handler = protos[proto]
+        handler = self.types.proto(proto)
         config = None
 
-        with proto_handler(profile.uri, profile.secret) as file:
+        with handler(profile.uri, profile.secret) as file:
             config = yaml.safe_load(file)
 
         return configuration.create(config, False)
@@ -365,7 +404,7 @@ class Layout:
         _store(self.path, self.dag, self.profiles)
 
 
-def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
+def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profiles):
     """TODO"""
 
     layout = {
@@ -387,7 +426,12 @@ def load(path: str, extra_types: model.Types = None) -> (model.DAG, Profiles):
 
     _LAYOUT_SCHEMA.validate(layout)
 
-    types = _load_types(extra_types)
+    types = _load_types()
+
+    if extra_types:
+        types = types | extra_types
+
+    types = Types(types)
 
     profiles = {
         "default": DefaultProfile()

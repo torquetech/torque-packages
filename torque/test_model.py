@@ -6,25 +6,6 @@
 
 from torque import exceptions
 from torque import model
-from torque import types
-
-
-class Component(types.Component):
-    """TODO"""
-
-
-class Link(types.Link):
-    """TODO"""
-
-
-_types = {
-    "components.v1": {
-        "component_type": Component
-    },
-    "links.v1": {
-        "link_type": Link
-    }
-}
 
 
 def _has_cycles(dag: model.DAG) -> bool:
@@ -43,29 +24,29 @@ def _has_cycles(dag: model.DAG) -> bool:
 def test_test1():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
     dag.create_cluster("cluster2")
     dag.create_cluster("cluster3")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
-    dag.create_component("component3", "cluster1", "component_type", {})
-    dag.create_component("component4", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
+    dag.create_component("component3", "cluster1", "component_type", None)
+    dag.create_component("component4", "cluster1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", {})
-    dag.create_link("link2", "component1", "component3", "link_type", {})
-    dag.create_link("link3", "component2", "component3", "link_type", {})
-    dag.create_link("link4", "component3", "component4", "link_type", {})
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component1", "component3", "link_type", None)
+    dag.create_link("link3", "component2", "component3", "link_type", None)
+    dag.create_link("link4", "component3", "component4", "link_type", None)
 
     assert _has_cycles(dag) is False
 
-    dag.create_link("link5", "component4", "component2", "link_type", {})
+    dag.create_link("link5", "component4", "component2", "link_type", None)
 
     assert _has_cycles(dag) is True
 
-    dag.create_link("link6", "component4", "component1", "link_type", {})
+    dag.create_link("link6", "component4", "component1", "link_type", None)
 
     assert _has_cycles(dag) is True
 
@@ -73,7 +54,7 @@ def test_test1():
 def test_test2():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     try:
         dag.create_cluster("cluster1")
@@ -88,13 +69,13 @@ def test_test2():
 def test_test3():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
     try:
-        dag.create_component("component1", "cluster1", "component_type", {})
-        dag.create_component("component1", "cluster1", "component_type", {})
+        dag.create_component("component1", "cluster1", "component_type", None)
+        dag.create_component("component1", "cluster1", "component_type", None)
 
         assert False
 
@@ -105,16 +86,16 @@ def test_test3():
 def test_test4():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
 
     try:
-        dag.create_link("link1", "component1", "component2", "link_type", {})
-        dag.create_link("link1", "component1", "component2", "link_type", {})
+        dag.create_link("link1", "component1", "component2", "link_type", None)
+        dag.create_link("link1", "component1", "component2", "link_type", None)
 
         assert False
 
@@ -125,15 +106,15 @@ def test_test4():
 def test_test5():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
 
     try:
-        dag.create_component("component4", "cluster2", "component_type", {})
+        dag.create_component("component4", "cluster2", "component_type", None)
 
         assert False
 
@@ -144,14 +125,14 @@ def test_test5():
 def test_test6():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
 
     try:
-        dag.create_link("link1", "_component", "component1", "link_type", {})
+        dag.create_link("link1", "_component", "component1", "link_type", None)
 
         assert False
 
@@ -162,14 +143,14 @@ def test_test6():
 def test_test7():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
 
     try:
-        dag.create_link("link1", "component1", "_component", "link_type", {})
+        dag.create_link("link1", "component1", "_component", "link_type", None)
 
         assert False
 
@@ -180,14 +161,14 @@ def test_test7():
 def test_test8():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
 
     try:
-        dag.create_link("link1", "component1", "component1", "link_type", {})
+        dag.create_link("link1", "component1", "component1", "link_type", None)
 
         assert False
 
@@ -198,16 +179,16 @@ def test_test8():
 def test_test9():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
 
     try:
-        dag.create_link("link1", "component1", "component2", "link_type", {})
-        dag.create_link("link2", "component1", "component2", "link_type", {})
+        dag.create_link("link1", "component1", "component2", "link_type", None)
+        dag.create_link("link2", "component1", "component2", "link_type", None)
 
         assert False
 
@@ -218,7 +199,7 @@ def test_test9():
 def test_test10():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     assert not _has_cycles(dag)
 
@@ -226,15 +207,15 @@ def test_test10():
 def test_test11():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
-    dag.create_component("component3", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
+    dag.create_component("component3", "cluster1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", {})
-    dag.create_link("link2", "component2", "component1", "link_type", {})
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component2", "component1", "link_type", None)
 
     assert _has_cycles(dag)

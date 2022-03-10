@@ -9,25 +9,6 @@ from threading import Lock
 from torque import exceptions
 from torque import execute
 from torque import model
-from torque import types
-
-
-class Component(types.Component):
-    """TODO"""
-
-
-class Link(types.Link):
-    """TODO"""
-
-
-_types = {
-    "components.v1": {
-        "component_type": Component
-    },
-    "links.v1": {
-        "link_type": Link
-    }
-}
 
 
 class JobRunner:
@@ -77,23 +58,23 @@ def _has_cycles(dag: model.DAG) -> bool:
 def test_test1():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
-    dag.create_component("component3", "cluster1", "component_type", {})
-    dag.create_component("component4", "cluster1", "component_type", {})
-    dag.create_component("component5", "cluster1", "component_type", {})
-    dag.create_component("component6", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
+    dag.create_component("component3", "cluster1", "component_type", None)
+    dag.create_component("component4", "cluster1", "component_type", None)
+    dag.create_component("component5", "cluster1", "component_type", None)
+    dag.create_component("component6", "cluster1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", {})
-    dag.create_link("link2", "component2", "component3", "link_type", {})
-    dag.create_link("link3", "component2", "component4", "link_type", {})
-    dag.create_link("link4", "component3", "component5", "link_type", {})
-    dag.create_link("link5", "component4", "component5", "link_type", {})
-    dag.create_link("link6", "component5", "component6", "link_type", {})
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component2", "component3", "link_type", None)
+    dag.create_link("link3", "component2", "component4", "link_type", None)
+    dag.create_link("link4", "component3", "component5", "link_type", None)
+    dag.create_link("link5", "component4", "component5", "link_type", None)
+    dag.create_link("link6", "component5", "component6", "link_type", None)
 
     assert _has_cycles(dag) is False
 
@@ -106,23 +87,23 @@ def test_test1():
 def test_test2():
     """TODO"""
 
-    dag = model.DAG(0, _types)
+    dag = model.DAG(0)
 
     dag.create_cluster("cluster1")
 
-    dag.create_component("component1", "cluster1", "component_type", {})
-    dag.create_component("component2", "cluster1", "component_type", {})
-    dag.create_component("component3", "cluster1", "component_type", {})
-    dag.create_component("component4", "cluster1", "component_type", {})
-    dag.create_component("component5", "cluster1", "component_type", {})
-    dag.create_component("component6", "cluster1", "component_type", {})
+    dag.create_component("component1", "cluster1", "component_type", None)
+    dag.create_component("component2", "cluster1", "component_type", None)
+    dag.create_component("component3", "cluster1", "component_type", None)
+    dag.create_component("component4", "cluster1", "component_type", None)
+    dag.create_component("component5", "cluster1", "component_type", None)
+    dag.create_component("component6", "cluster1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", {})
-    dag.create_link("link2", "component2", "component3", "link_type", {})
-    dag.create_link("link3", "component2", "component4", "link_type", {})
-    dag.create_link("link4", "component3", "component5", "link_type", {})
-    dag.create_link("link5", "component4", "component5", "link_type", {})
-    dag.create_link("link6", "component5", "component6", "link_type", {})
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component2", "component3", "link_type", None)
+    dag.create_link("link3", "component2", "component4", "link_type", None)
+    dag.create_link("link4", "component3", "component5", "link_type", None)
+    dag.create_link("link5", "component4", "component5", "link_type", None)
+    dag.create_link("link6", "component5", "component6", "link_type", None)
 
     assert _has_cycles(dag) is False
 

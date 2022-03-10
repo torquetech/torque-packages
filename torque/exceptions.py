@@ -83,7 +83,7 @@ class OptionRequired(TorqueException):
     """TODO"""
 
 
-class ProtocolNotSupported(TorqueException):
+class ProtocolNotFound(TorqueException):
     """TODO"""
 
 

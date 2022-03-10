@@ -8,6 +8,7 @@ import argparse
 
 from torque import exceptions
 from torque import layout
+from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -16,14 +17,17 @@ def _create(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     if arguments.params:
-        params = arguments.params.split(",")
-        params = [i.split("=") for i in params]
-        params = {i[0]: "".join(i[1:]) for i in params}
+        raw_params = arguments.params.split(",")
+        raw_params = [i.split("=") for i in raw_params]
+        raw_params = {i[0]: "".join(i[1:]) for i in raw_params}
 
     else:
-        params = {}
+        raw_params = {}
 
     try:
+        component_type = _layout.types.component(arguments.type)
+        params = options.process(component_type.parameters, raw_params)
+
         component = _layout.dag.create_component(arguments.name,
                                                  arguments.cluster,
                                                  arguments.type,
@@ -57,7 +61,8 @@ def _remove(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        _layout.dag.remove_component(arguments.name)
+        component = _layout.dag.remove_component(arguments.name)
+        component_type = _layout.types.component(component.component_type)
 
         _layout.dag.revision += 1
         _layout.store()
