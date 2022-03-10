@@ -36,6 +36,8 @@ def _create(arguments: argparse.Namespace):
 
         _layout.dag.verify()
 
+        link_type.on_create(_layout.dag, link)
+
         _layout.dag.revision += 1
         _layout.store()
 
@@ -72,6 +74,8 @@ def _remove(arguments: argparse.Namespace):
     try:
         link = _layout.dag.remove_link(arguments.name)
         link_type = _layout.types.link(link.link_type)
+
+        link_type.on_remove(_layout.dag, link)
 
         _layout.dag.revision += 1
         _layout.store()

@@ -6,6 +6,7 @@
 
 from abc import ABC, abstractmethod
 
+from torque import model
 from torque import options
 
 
@@ -16,6 +17,16 @@ class Component(ABC):
 
     parameters: options.OptionsSpec = []
     configuration: options.OptionsSpec = []
+
+    @staticmethod
+    @abstractmethod
+    def on_create(dag: model.DAG, component: model.Component):
+        """TODO"""
+
+    @staticmethod
+    @abstractmethod
+    def on_remove(dag: model.DAG, component: model.Component):
+        """TODO"""
 
     @abstractmethod
     def on_build(self):
@@ -29,6 +40,16 @@ class Link(ABC):
 
     parameters: options.OptionsSpec = []
     configuration: options.OptionsSpec = []
+
+    @staticmethod
+    @abstractmethod
+    def on_create(dag: model.DAG, link: model.Link):
+        """TODO"""
+
+    @staticmethod
+    @abstractmethod
+    def on_remove(dag: model.DAG, link: model.Link):
+        """TODO"""
 
     @abstractmethod
     def on_build(self):
