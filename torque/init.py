@@ -24,7 +24,7 @@ def add_arguments(subparsers):
 
     init_parser.add_argument("--package",
                              metavar="package",
-                             default="git+https://github.com/torquetech/torque-workspace@v1",
+                             default="git+https://github.com/torquetech/torque-workspace@stable",
                              help="torque-workspace package to install, default: %(default)s")
 
     init_parser.add_argument("path", help="path to initialize torque in")
