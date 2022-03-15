@@ -161,13 +161,13 @@ def add_arguments(subparsers):
                           description="list components",
                           help="list components")
 
-    show_type_parser = subparsers.add_parser("show_type",
+    show_type_parser = subparsers.add_parser("show-type",
                                              description="show component type",
                                              help="show component type")
 
     show_type_parser.add_argument("name", help="component type name")
 
-    subparsers.add_parser("list_types",
+    subparsers.add_parser("list-types",
                           description="list component types",
                           help="list component types")
 
@@ -180,8 +180,8 @@ def run(arguments: argparse.Namespace):
         "remove": _remove,
         "show": _show,
         "list": _list,
-        "show_type": _show_type,
-        "list_types": _list_types
+        "show-type": _show_type,
+        "list-types": _list_types
     }
 
     cmds[arguments.component_cmd](arguments)

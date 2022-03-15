@@ -168,13 +168,13 @@ def add_arguments(subparsers):
                           description="list links",
                           help="list links")
 
-    show_type_parser = subparsers.add_parser("show_type",
+    show_type_parser = subparsers.add_parser("show-type",
                                              description="show link type",
                                              help="show link type")
 
     show_type_parser.add_argument("name", help="link type name")
 
-    subparsers.add_parser("list_types",
+    subparsers.add_parser("list-types",
                           description="list link types",
                           help="list link types")
 
@@ -187,8 +187,8 @@ def run(arguments: argparse.Namespace):
         "remove": _remove,
         "show": _show,
         "list": _list,
-        "show_type": _show_type,
-        "list_types": _list_types
+        "show-type": _show_type,
+        "list-types": _list_types
     }
 
     cmds[arguments.link_cmd](arguments)
