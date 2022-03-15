@@ -24,11 +24,16 @@ def _create(arguments: argparse.Namespace):
     else:
         raw_params = {}
 
+    name = arguments.name
+
+    if not name:
+        name = f"{arguments.source}-{arguments.destination}"
+
     try:
         link_type = _layout.types.link(arguments.type)
         params = options.process(link_type.parameters(), raw_params)
 
-        link = _layout.dag.create_link(arguments.name,
+        link = _layout.dag.create_link(name,
                                        arguments.source,
                                        arguments.destination,
                                        arguments.type,
@@ -147,7 +152,7 @@ def add_arguments(subparsers):
                                           help="create link")
 
     create_parser.add_argument("--params", "-p", help="link params")
-    create_parser.add_argument("name", help="link name")
+    create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("source", help="source component")
     create_parser.add_argument("destination", help="destination component")
     create_parser.add_argument("type", help="link type")
