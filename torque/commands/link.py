@@ -26,7 +26,7 @@ def _create(arguments: argparse.Namespace):
 
     try:
         link_type = _layout.types.link(arguments.type)
-        params = options.process(link_type.parameters, raw_params)
+        params = options.process(link_type.parameters(), raw_params)
 
         link = _layout.dag.create_link(arguments.name,
                                        arguments.source,

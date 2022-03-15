@@ -259,7 +259,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
 
         component_type = types.component(component["type"])
-        params = options.process(component_type.parameters, raw_params)
+        params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
                              component["cluster"],
@@ -270,7 +270,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
         raw_params = {i["name"]: i["value"] for i in link["params"]}
 
         link_type = types.link(link["type"])
-        params = options.process(link_type.parameters, raw_params)
+        params = options.process(link_type.parameters(), raw_params)
 
         dag.create_link(link["name"],
                         link["source"],
@@ -308,7 +308,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         components.append({
             "name": component.name,
             "configuration": [
-                {"name": i.name, "value": i.default_value} for i in component_type.configuration
+                {"name": i.name, "value": i.default_value} for i in component_type.configuration()
             ]
         })
 
@@ -317,7 +317,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         links.append({
             "name": link.name,
             "configuration": [
-                {"name": i.name, "value": i.default_value} for i in link_type.configuration
+                {"name": i.name, "value": i.default_value} for i in link_type.configuration()
             ]
         })
 

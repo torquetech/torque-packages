@@ -26,7 +26,7 @@ def _create(arguments: argparse.Namespace):
 
     try:
         component_type = _layout.types.component(arguments.type)
-        params = options.process(component_type.parameters, raw_params)
+        params = options.process(component_type.parameters(), raw_params)
 
         component = _layout.dag.create_component(arguments.name,
                                                  arguments.cluster,
