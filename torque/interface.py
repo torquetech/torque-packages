@@ -10,10 +10,16 @@ from torque import model
 from torque import options
 
 
+Tags = list[str]
+
+
 class Component(ABC):
     # pylint: disable=R0903
 
     """TODO"""
+
+    inbound_tags: Tags = []
+    outbound_tags: Tags = []
 
     @staticmethod
     @abstractmethod
