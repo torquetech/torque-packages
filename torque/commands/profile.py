@@ -5,8 +5,8 @@
 """TODO"""
 
 import argparse
-import schema
 import sys
+import schema
 
 from torque import exceptions
 from torque import layout
