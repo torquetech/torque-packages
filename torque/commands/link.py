@@ -73,7 +73,7 @@ def _remove(arguments: argparse.Namespace):
 
     try:
         link = _layout.dag.remove_link(arguments.name)
-        link_type = _layout.types.link(link.link_type)
+        link_type = _layout.types.link(link.type)
 
         link_type.on_remove(_layout.dag, link)
 

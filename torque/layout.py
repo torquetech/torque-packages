@@ -197,7 +197,7 @@ def _from_component(component: model.Component) -> dict[str: object]:
     return {
         "name": component.name,
         "cluster": component.cluster,
-        "type": component.component_type,
+        "type": component.type,
         "params": _from_params(component.params)
     }
 
@@ -209,7 +209,7 @@ def _from_link(link: model.Link) -> dict[str: object]:
         "name": link.name,
         "source": link.source,
         "destination": link.destination,
-        "type": link.link_type,
+        "type": link.type,
         "params": _from_params(link.params)
     }
 
@@ -304,7 +304,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         clusters.append({"name": cluster.name, "configuration": []})
 
     for component in dag.components.values():
-        component_type = types.component(component.component_type)
+        component_type = types.component(component.type)
         components.append({
             "name": component.name,
             "configuration": [
@@ -313,7 +313,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         })
 
     for link in dag.links.values():
-        link_type = types.link(link.link_type)
+        link_type = types.link(link.type)
         links.append({
             "name": link.name,
             "configuration": [

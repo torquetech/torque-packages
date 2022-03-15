@@ -29,14 +29,14 @@ class Link:
                  name: str,
                  source: str,
                  destination: str,
-                 link_type: str,
+                 type: str,
                  params: options.Options):
-        # pylint: disable=R0913
+        # pylint: disable=R0913,W0622
 
         self.name = name
         self.source = source
         self.destination = destination
-        self.link_type = link_type
+        self.type = type
         self.params = params
         self.config = None
 
@@ -44,7 +44,7 @@ class Link:
         return f"Link({self.name}" \
                f", source={self.source}" \
                f", destination={self.destination}" \
-               f", link_type={self.link_type})"
+               f", type={self.type})"
 
 
 class Component:
@@ -53,11 +53,13 @@ class Component:
     def __init__(self,
                  name: str,
                  cluster: str,
-                 component_type: str,
+                 type: str,
                  params: options.Options):
+        # pylint: disable=W0622
+
         self.name = name
         self.cluster = cluster
-        self.component_type = component_type
+        self.type = type
         self.params = params
         self.config = None
 
@@ -72,7 +74,7 @@ class Component:
                f", cluster={self.cluster}" \
                f", inbound_links=[{inbound_links}]" \
                f", outbound_links=[{outbound_links}]" \
-               f", component_type={self.component_type})"
+               f", type={self.type})"
 
     def add_inbound_link(self, component: str, link: str):
         """TODO"""
@@ -143,8 +145,10 @@ class DAG:
     def create_component(self,
                          name: str,
                          cluster: str,
-                         component_type: str,
+                         type: str,
                          params: options.Options) -> Component:
+        # pylint: disable=W0622
+
         """TODO"""
 
         if name in self.components:
@@ -153,7 +157,7 @@ class DAG:
         if cluster not in self.clusters:
             raise exceptions.ClusterNotFound(cluster)
 
-        component = Component(name, cluster, component_type, params)
+        component = Component(name, cluster, type, params)
 
         self.components[name] = component
         return component
@@ -178,9 +182,9 @@ class DAG:
                     name: str,
                     source: str,
                     destination: str,
-                    link_type: str,
+                    type: str,
                     params: options.Options) -> Link:
-        # pylint: disable=R0913
+        # pylint: disable=R0913,W0622
 
         """TODO"""
 
@@ -196,7 +200,7 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        link = Link(name, source, destination, link_type, params)
+        link = Link(name, source, destination, type, params)
 
         self.components[destination].add_inbound_link(source, name)
         self.components[source].add_outbound_link(destination, name)
@@ -261,9 +265,9 @@ class DAG:
     def used_component_types(self) -> set[str]:
         """TODO"""
 
-        return {i.component_type for i in self.components.values()}
+        return {i.type for i in self.components.values()}
 
     def used_link_types(self) -> set[str]:
         """TODO"""
 
-        return {i.link_type for i in self.links.values()}
+        return {i.type for i in self.links.values()}
