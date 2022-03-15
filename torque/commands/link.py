@@ -110,12 +110,13 @@ def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
     _layout = layout.load(arguments.layout)
-    link_types = _layout.dag.types["links.v1"]
 
-    if arguments.name not in link_types:
-        raise RuntimeError(f"{arguments.name}: link type not found")
+    try:
+        link_type = _layout.types.link(arguments.name)
+        print(f"{arguments.name}: {link_type}")
 
-    print(f"{arguments.name}: {link_types[arguments.name]}")
+    except exceptions.LinkTypeNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: link type not found") from exc
 
 
 def _list_types(arguments: argparse.Namespace):
@@ -124,7 +125,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     _layout = layout.load(arguments.layout)
-    link_types = _layout.dag.types["links.v1"]
+    link_types = _layout.types.links()
 
     for link in link_types:
         print(f"{link}: {link_types[link]}")

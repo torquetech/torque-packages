@@ -103,10 +103,25 @@ class Types:
     def __init__(self, types: dict[str, object]):
         self.types = types
 
+    def components(self) -> dict[str, object]:
+        """TODO"""
+
+        return self.types["components.v1"]
+
+    def links(self) -> dict[str, object]:
+        """TODO"""
+
+        return self.types["links.v1"]
+
+    def protos(self) -> dict[str, object]:
+        """TODO"""
+
+        return self.types["protocols.v1"]
+
     def component(self, component_type: str) -> interface.Component:
         """TODO"""
 
-        components = self.types["components.v1"]
+        components = self.components()
 
         if component_type not in components:
             raise exceptions.ComponentTypeNotFound(component_type)
@@ -116,7 +131,7 @@ class Types:
     def link(self, link_type: str) -> interface.Link:
         """TODO"""
 
-        links = self.types["links.v1"]
+        links = self.links()
 
         if link_type not in links:
             raise exceptions.LinkTypeNotFound(link_type)
@@ -126,7 +141,7 @@ class Types:
     def proto(self, protocol: str) -> callable:
         """TODO"""
 
-        protocols = self.types["protocols.v1"]
+        protocols = self.protos()
 
         if protocol not in protocols:
             raise exceptions.ProtocolNotFound(protocol)
