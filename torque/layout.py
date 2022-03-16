@@ -44,16 +44,16 @@ _LAYOUT_SCHEMA = schema.Schema({
         "secret": schema.Or(str, None)
     }],
     "config": {
-        "default_cluster": schema.Or(str, None)
+        "default_group": schema.Or(str, None)
     },
     "dag": {
         "revision": int,
-        "clusters": [{
+        "groups": [{
             "name": str
         }],
         "components": [{
             "name": str,
-            "cluster": str,
+            "group": str,
             "type": str,
             "params": [{
                 "name": str,
@@ -157,8 +157,8 @@ class Config:
 
     """TODO"""
 
-    def __init__(self, default_cluster: str):
-        self.default_cluster = default_cluster
+    def __init__(self, default_group: str):
+        self.default_group = default_group
 
 
 def _to_profile(profile_layout: dict[str, object]) -> Profile:
@@ -172,7 +172,7 @@ def _to_profile(profile_layout: dict[str, object]) -> Profile:
 def _to_config(config_layout: dict[str, str]) -> Config:
     """TODO"""
 
-    return Config(config_layout["default_cluster"])
+    return Config(config_layout["default_group"])
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -197,15 +197,15 @@ def _from_config(config: Config) -> dict[str, str]:
     """TODO"""
 
     return {
-        "default_cluster": config.default_cluster
+        "default_group": config.default_group
     }
 
 
-def _from_cluster(cluster: model.Cluster) -> dict[str: str]:
+def _from_group(group: model.Group) -> dict[str: str]:
     """TODO"""
 
     return {
-        "name": cluster.name
+        "name": group.name
     }
 
 
@@ -222,7 +222,7 @@ def _from_component(component: model.Component) -> dict[str: object]:
 
     return {
         "name": component.name,
-        "cluster": component.cluster,
+        "group": component.group,
         "type": component.type,
         "params": _from_params(component.params)
     }
@@ -278,8 +278,8 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
 
     dag = model.DAG(dag_layout["revision"])
 
-    for cluster in dag_layout["clusters"]:
-        dag.create_cluster(cluster["name"])
+    for group in dag_layout["groups"]:
+        dag.create_group(group["name"])
 
     for component in dag_layout["components"]:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
@@ -288,7 +288,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
         params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
-                             component["cluster"],
+                             component["group"],
                              component["type"],
                              params)
 
@@ -316,18 +316,18 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         "providers": [],
         "dag": {
             "revision": dag.revision,
-            "clusters": [],
+            "groups": [],
             "components": [],
             "links": []
         }
     }
 
-    clusters = config["dag"]["clusters"]
+    groups = config["dag"]["groups"]
     components = config["dag"]["components"]
     links = config["dag"]["links"]
 
-    for cluster in dag.clusters.values():
-        clusters.append({"name": cluster.name, "configuration": []})
+    for group in dag.groups.values():
+        groups.append({"name": group.name, "configuration": []})
 
     for component in dag.components.values():
         component_type = types.component(component.type)
@@ -356,11 +356,11 @@ def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
     layout = {
         "profiles": [],
         "config": {
-            "default_cluster": None
+            "default_group": None
         },
         "dag": {
             "revision": 0,
-            "clusters": [],
+            "groups": [],
             "components": [],
             "links": []
         }
@@ -372,7 +372,7 @@ def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
     dag_layout = layout["dag"]
 
     dag_layout["revision"] = dag.revision
-    dag_layout["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
+    dag_layout["groups"] = [_from_group(i) for i in dag.groups.values()]
     dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
     dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
 
@@ -463,11 +463,11 @@ def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profil
     layout = {
         "profiles": [],
         "config": {
-            "default_cluster": None
+            "default_group": None
         },
         "dag": {
             "revision": 0,
-            "clusters": [],
+            "groups": [],
             "components": [],
             "links": []
         }

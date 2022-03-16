@@ -8,7 +8,7 @@ from torque import exceptions
 from torque import options
 
 
-class Cluster:
+class Group:
     # pylint: disable=R0903
 
     """TODO"""
@@ -17,7 +17,7 @@ class Cluster:
         self.name = name
 
     def __repr__(self) -> str:
-        return f"Cluster({self.name})"
+        return f"Group({self.name})"
 
 
 class Link:
@@ -52,13 +52,13 @@ class Component:
 
     def __init__(self,
                  name: str,
-                 cluster: str,
+                 group: str,
                  type: str,
                  params: options.Options):
         # pylint: disable=W0622
 
         self.name = name
-        self.cluster = cluster
+        self.group = group
         self.type = type
         self.params = params
         self.config = None
@@ -71,7 +71,7 @@ class Component:
         outbound_links = ",".join(self.outbound_links)
 
         return f"Component({self.name}" \
-               f", cluster={self.cluster}" \
+               f", group={self.group}" \
                f", inbound_links=[{inbound_links}]" \
                f", outbound_links=[{outbound_links}]" \
                f", type={self.type})"
@@ -114,37 +114,37 @@ class DAG:
 
     def __init__(self, revision: int):
         self.revision = revision
-        self.clusters = {}
+        self.groups = {}
         self.components = {}
         self.links = {}
 
-    def create_cluster(self, name: str) -> Cluster:
+    def create_group(self, name: str) -> Group:
         """TODO"""
 
-        if name in self.clusters:
-            raise exceptions.ClusterExists(name)
+        if name in self.groups:
+            raise exceptions.GroupExists(name)
 
-        cluster = Cluster(name)
+        group = Group(name)
 
-        self.clusters[name] = cluster
-        return cluster
+        self.groups[name] = group
+        return group
 
-    def remove_cluster(self, name: str) -> Cluster:
+    def remove_group(self, name: str) -> Group:
         """TODO"""
 
-        if name not in self.clusters:
-            raise exceptions.ClusterNotFound(name)
+        if name not in self.groups:
+            raise exceptions.GroupNotFound(name)
 
-        clusters_in_use = {i.cluster for i in self.components.values()}
+        groups_in_use = {i.group for i in self.components.values()}
 
-        if name in clusters_in_use:
-            raise exceptions.ClusterNotEmpty(name)
+        if name in groups_in_use:
+            raise exceptions.GroupNotEmpty(name)
 
-        return self.clusters.pop(name)
+        return self.groups.pop(name)
 
     def create_component(self,
                          name: str,
-                         cluster: str,
+                         group: str,
                          type: str,
                          params: options.Options) -> Component:
         # pylint: disable=W0622
@@ -154,10 +154,10 @@ class DAG:
         if name in self.components:
             raise exceptions.ComponentExists(name)
 
-        if cluster not in self.clusters:
-            raise exceptions.ClusterNotFound(cluster)
+        if group not in self.groups:
+            raise exceptions.GroupNotFound(group)
 
-        component = Component(name, cluster, type, params)
+        component = Component(name, group, type, params)
 
         self.components[name] = component
         return component
@@ -272,7 +272,7 @@ class DAG:
 
         return {i.type for i in self.links.values()}
 
-    def has_cluster(self, name: str) -> bool:
+    def has_group(self, name: str) -> bool:
         """TODO"""
 
-        return name in self.clusters
+        return name in self.groups

@@ -24,21 +24,21 @@ def _create(arguments: argparse.Namespace):
     else:
         raw_params = {}
 
-    if arguments.cluster:
-        cluster = arguments.cluster
+    if arguments.group:
+        group = arguments.group
 
     else:
-        cluster = _layout.config.default_cluster
+        group = _layout.config.default_group
 
-    if not cluster:
-        raise RuntimeError("cluster not specified")
+    if not group:
+        raise RuntimeError("group not specified")
 
     try:
         component_type = _layout.types.component(arguments.type)
         params = options.process(component_type.parameters(), raw_params)
 
         component = _layout.dag.create_component(arguments.name,
-                                                 cluster,
+                                                 group,
                                                  arguments.type,
                                                  params)
 
@@ -56,8 +56,8 @@ def _create(arguments: argparse.Namespace):
     except exceptions.ComponentExists as exc:
         raise RuntimeError(f"{arguments.name}: component exists") from exc
 
-    except exceptions.ClusterNotFound as exc:
-        raise RuntimeError(f"{arguments.cluster}: cluster not found") from exc
+    except exceptions.GroupNotFound as exc:
+        raise RuntimeError(f"{arguments.group}: group not found") from exc
 
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{arguments.type}: component type not found") from exc
@@ -150,7 +150,7 @@ def add_arguments(subparsers):
                                           help="create component")
 
     create_parser.add_argument("--params", "-p", help="component params")
-    create_parser.add_argument("--cluster", help="component cluster membership")
+    create_parser.add_argument("--group", help="component group membership")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 

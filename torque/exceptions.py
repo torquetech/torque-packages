@@ -9,15 +9,15 @@ class TorqueException(Exception):
     """TODO"""
 
 
-class ClusterNotEmpty(TorqueException):
+class GroupNotEmpty(TorqueException):
     """TODO"""
 
 
-class ClusterNotFound(TorqueException):
+class GroupNotFound(TorqueException):
     """TODO"""
 
 
-class ClusterExists(TorqueException):
+class GroupExists(TorqueException):
     """TODO"""
 
 

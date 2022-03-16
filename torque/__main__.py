@@ -37,7 +37,7 @@ def main() -> int:
             "init": commands.init,
             "package": commands.package,
             "profile": commands.profile,
-            "cluster": commands.cluster,
+            "group": commands.group,
             "component": commands.component,
             "link": commands.link,
             "build": commands.build,

@@ -24,7 +24,7 @@ def _config_schema(allow_null_values: bool) -> schema.Schema:
         }],
         "dag": {
             "revision": int,
-            "clusters": [{
+            "groups": [{
                 "name": str,
                 "configuration": [{
                     "name": str,
@@ -82,16 +82,16 @@ class Configuration:
 
         return providers[name]
 
-    def get_cluster(self, name: str) -> options.RawOptions:
+    def get_group(self, name: str) -> options.RawOptions:
         """TODO"""
 
         dag_config = self.config["dag"]
-        clusters = dag_config["clusters"]
+        groups = dag_config["groups"]
 
-        if name not in clusters:
+        if name not in groups:
             return options.RawOptions()
 
-        return clusters[name]
+        return groups[name]
 
     def get_component(self, name: str) -> options.RawOptions:
         """TODO"""
@@ -130,7 +130,7 @@ class Configuration:
         dag_config = config["dag"]
 
         dag_config["revision"] = dag["revision"]
-        dag_config["clusters"] = [_from_object(*i) for i in dag["clusters"].items()]
+        dag_config["groups"] = [_from_object(*i) for i in dag["groups"].items()]
         dag_config["components"] = [_from_object(*i) for i in dag["components"].items()]
         dag_config["links"] = [_from_object(*i) for i in dag["links"].items()]
 
@@ -155,8 +155,8 @@ def create(config: dict[str, object], allow_null_values: bool) -> Configuration:
 
     dag_config = config["dag"]
 
-    dag_config["clusters"] = {
-        i["name"]: _to_raw_options(i["configuration"]) for i in dag_config["clusters"]
+    dag_config["groups"] = {
+        i["name"]: _to_raw_options(i["configuration"]) for i in dag_config["groups"]
     }
 
     dag_config["components"] = {
