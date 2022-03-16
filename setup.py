@@ -18,8 +18,8 @@ with open(os.path.join(CURDIR, "README.md"), "r", encoding="utf-8") as f:
 setup(
     name="torque-workspace",
     version="0.1",
-    author="Hrvoje Zeba",
-    author_email="hrvoje@torquetech.dev",
+    author="Torque Team",
+    author_email="team@torquetech.dev",
     description="",
     long_description=README,
     long_description_content_type="text/markdown",
