@@ -24,12 +24,21 @@ def _create(arguments: argparse.Namespace):
     else:
         raw_params = {}
 
+    if arguments.cluster:
+        cluster = arguments.cluster
+
+    else:
+        cluster = _layout.config.default_cluster
+
+    if not cluster:
+        raise RuntimeError("cluster not specified")
+
     try:
         component_type = _layout.types.component(arguments.type)
         params = options.process(component_type.parameters(), raw_params)
 
         component = _layout.dag.create_component(arguments.name,
-                                                 arguments.cluster,
+                                                 cluster,
                                                  arguments.type,
                                                  params)
 
@@ -141,8 +150,8 @@ def add_arguments(subparsers):
                                           help="create component")
 
     create_parser.add_argument("--params", "-p", help="component params")
+    create_parser.add_argument("--cluster", help="component cluster membership")
     create_parser.add_argument("name", help="component name")
-    create_parser.add_argument("cluster", help="component cluster membership")
     create_parser.add_argument("type", help="component type")
 
     remove_parser = subparsers.add_parser("remove",
