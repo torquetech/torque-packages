@@ -271,3 +271,8 @@ class DAG:
         """TODO"""
 
         return {i.type for i in self.links.values()}
+
+    def has_cluster(self, name: str) -> bool:
+        """TODO"""
+
+        return name in self.clusters

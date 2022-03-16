@@ -43,6 +43,9 @@ _LAYOUT_SCHEMA = schema.Schema({
         "uri": str,
         "secret": schema.Or(str, None)
     }],
+    "config": {
+        "default_cluster": schema.Or(str, None)
+    },
     "dag": {
         "revision": int,
         "clusters": [{
@@ -149,12 +152,27 @@ class Types:
         return protocols[protocol]
 
 
+class Config:
+    # pylint: disable=R0903
+
+    """TODO"""
+
+    def __init__(self, default_cluster: str):
+        self.default_cluster = default_cluster
+
+
 def _to_profile(profile_layout: dict[str, object]) -> Profile:
     """TODO"""
 
     return Profile(profile_layout["name"],
                    profile_layout["uri"],
                    profile_layout["secret"])
+
+
+def _to_config(config_layout: dict[str, str]) -> Config:
+    """TODO"""
+
+    return Config(config_layout["default_cluster"])
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -173,6 +191,14 @@ def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
     profile_list = filter(lambda x: not isinstance(x, DefaultProfile), profiles.values())
 
     return [_from_profile(i) for i in profile_list]
+
+
+def _from_config(config: Config) -> dict[str, str]:
+    """TODO"""
+
+    return {
+        "default_cluster": config.default_cluster
+    }
 
 
 def _from_cluster(cluster: model.Cluster) -> dict[str: str]:
@@ -324,11 +350,14 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
     return configuration.create(config, True)
 
 
-def _store(path: str, dag: model.DAG, profiles: Profiles):
+def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
     """TODO"""
 
     layout = {
         "profiles": [],
+        "config": {
+            "default_cluster": None
+        },
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -337,14 +366,15 @@ def _store(path: str, dag: model.DAG, profiles: Profiles):
         }
     }
 
+    layout["profiles"] = _from_profiles(profiles)
+    layout["config"] = _from_config(config)
+
     dag_layout = layout["dag"]
 
     dag_layout["revision"] = dag.revision
     dag_layout["clusters"] = [_from_cluster(i) for i in dag.clusters.values()]
     dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
     dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
-
-    layout["profiles"] = _from_profiles(profiles)
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
         yaml.safe_dump(layout,
@@ -358,10 +388,18 @@ def _store(path: str, dag: model.DAG, profiles: Profiles):
 class Layout:
     """TODO"""
 
-    def __init__(self, path: str, dag: model.DAG, profiles: Profiles, types: Types):
+    def __init__(self,
+                 path: str,
+                 profiles: Profiles,
+                 config: Config,
+                 dag: model.DAG,
+                 types: Types):
+        # pylint: disable=R0913
+
         self.path = path
-        self.dag = dag
         self.profiles = profiles
+        self.config = config
+        self.dag = dag
         self.types = types
 
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
@@ -416,7 +454,7 @@ class Layout:
     def store(self):
         """TODO"""
 
-        _store(self.path, self.dag, self.profiles)
+        _store(self.path, self.profiles, self.config, self.dag)
 
 
 def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profiles):
@@ -424,6 +462,9 @@ def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profil
 
     layout = {
         "profiles": [],
+        "config": {
+            "default_cluster": None
+        },
         "dag": {
             "revision": 0,
             "clusters": [],
@@ -456,6 +497,8 @@ def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profil
         i["name"]: _to_profile(i) for i in layout["profiles"]
     }
 
+    config = _to_config(layout["config"])
+
     dag = _generate_dag(layout["dag"], types)
 
-    return Layout(path, dag, profiles, types)
+    return Layout(path, profiles, config, dag, types)

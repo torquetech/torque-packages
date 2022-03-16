@@ -18,6 +18,9 @@ def _create(arguments: argparse.Namespace):
     try:
         _layout.dag.create_cluster(arguments.name)
 
+        if arguments.set_default:
+            _layout.config.default_cluster = arguments.name
+
         _layout.dag.revision += 1
         _layout.store()
 
@@ -41,6 +44,19 @@ def _remove(arguments: argparse.Namespace):
 
     except exceptions.ClusterNotEmpty as exc:
         raise RuntimeError(f"{arguments.name}: cluster not empty") from exc
+
+
+def _set_default(arguments: argparse.Namespace):
+    """TODO"""
+
+    _layout = layout.load(arguments.layout)
+
+    if not _layout.dag.has_cluster(arguments.name):
+        raise RuntimeError(f"{arguments.name}: cluster not found")
+
+    _layout.config.default_cluster = arguments.name
+
+    _layout.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -74,13 +90,29 @@ def add_arguments(subparsers):
 
     subparsers = parser.add_subparsers(required=True, dest="cluster_cmd", metavar="command")
 
-    create_parser = subparsers.add_parser("create", description="create cluster", help="create cluster")
+    create_parser = subparsers.add_parser("create",
+                                          description="create cluster",
+                                          help="create cluster")
+
+    create_parser.add_argument("--set-default", action="store_true", help="set default")
     create_parser.add_argument("name", help="cluster name")
 
-    remove_parser = subparsers.add_parser("remove", description="remove cluster", help="remove cluster")
+    remove_parser = subparsers.add_parser("remove",
+                                          description="remove cluster",
+                                          help="remove cluster")
+
     remove_parser.add_argument("name", help="cluster name")
 
-    show_parser = subparsers.add_parser("show", description="show cluster", help="show cluster")
+    set_default_parser = subparsers.add_parser("set-default",
+                                               description="set default cluster",
+                                               help="set default cluster")
+
+    set_default_parser.add_argument("name", help="cluster name")
+
+    show_parser = subparsers.add_parser("show",
+                                        description="show cluster",
+                                        help="show cluster")
+
     show_parser.add_argument("name", help="cluster name")
 
     subparsers.add_parser("list", description="list clusters", help="list clusters")
@@ -92,6 +124,7 @@ def run(arguments: argparse.Namespace):
     cmds = {
         "create": _create,
         "remove": _remove,
+        "set-default": _set_default,
         "show": _show,
         "list": _list
     }
