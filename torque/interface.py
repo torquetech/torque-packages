@@ -14,8 +14,6 @@ Tags = list[str]
 
 
 class Component(ABC):
-    # pylint: disable=R0903
-
     """TODO"""
 
     inbound_tags: Tags = []
@@ -55,8 +53,6 @@ class Component(ABC):
 
 
 class Link(ABC):
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self,
