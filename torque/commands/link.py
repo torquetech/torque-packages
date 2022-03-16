@@ -10,6 +10,22 @@ from torque import exceptions
 from torque import layout
 
 
+def _generate_unique_name(names: set[str], name: str) -> str:
+    """TODO"""
+
+    if name in names:
+        i = 1
+        new_name = f"{name}_{i}"
+
+        while new_name in names:
+            new_name = f"{name}_{i}"
+            i += 1
+
+        name = new_name
+
+    return name
+
+
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
@@ -23,10 +39,13 @@ def _create(arguments: argparse.Namespace):
     else:
         raw_params = {}
 
-    name = arguments.name
-
-    if not name:
+    if not arguments.name:
         name = f"{arguments.source}-{arguments.destination}"
+
+    else:
+        name = arguments.name
+
+    name = _generate_unique_name(set(_layout.dag.links.keys()), name)
 
     try:
         link = _layout.create_link(name,
