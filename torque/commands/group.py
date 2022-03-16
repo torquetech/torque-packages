@@ -16,12 +16,7 @@ def _create(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        _layout.dag.create_group(arguments.name)
-
-        if arguments.set_default:
-            _layout.config.default_group = arguments.name
-
-        _layout.dag.revision += 1
+        _layout.create_group(arguments.name, arguments.set_default)
         _layout.store()
 
     except exceptions.GroupExists as exc:
@@ -34,9 +29,7 @@ def _remove(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        _layout.dag.remove_group(arguments.name)
-
-        _layout.dag.revision += 1
+        _layout.remove_group(arguments.name)
         _layout.store()
 
     except exceptions.GroupNotFound as exc:
@@ -51,12 +44,12 @@ def _set_default(arguments: argparse.Namespace):
 
     _layout = layout.load(arguments.layout)
 
-    if not _layout.dag.has_group(arguments.name):
-        raise RuntimeError(f"{arguments.name}: group not found")
+    try:
+        _layout.set_default_group(arguments.name)
+        _layout.store()
 
-    _layout.config.default_group = arguments.name
-
-    _layout.store()
+    except exceptions.GroupNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: group not found") from exc
 
 
 def _show(arguments: argparse.Namespace):

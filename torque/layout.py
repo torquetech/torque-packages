@@ -469,6 +469,30 @@ class Layout:
 
         return configuration.create(config, False)
 
+    def create_group(self, name: str, set_default: bool):
+        """TODO"""
+
+        self.dag.create_group(name)
+
+        if set_default:
+            self.config.default_group = name
+
+        self.dag.revision += 1
+
+    def remove_group(self, name: str):
+        """TODO"""
+
+        self.dag.remove_group(name)
+        self.dag.revision += 1
+
+    def set_default_group(self, name: str):
+        """TODO"""
+
+        if not self.dag.has_group(name):
+            raise exceptions.GroupNotFound(name)
+
+        self.config.default_group = name
+
     def create_component(self, name: str, group: str, type: str, raw_params: options.RawOptions) -> model.Component:
         # pylint: disable=W0622
 
