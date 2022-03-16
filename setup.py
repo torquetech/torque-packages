@@ -28,7 +28,9 @@ setup(
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[
-        "pyyaml"
+        "pyyaml",
+        "wheel",
+        "setuptools"
     ],
     entry_points={
         "console_scripts": [
