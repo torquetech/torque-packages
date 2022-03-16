@@ -402,6 +402,24 @@ class Layout:
         self.dag = dag
         self.types = types
 
+    def _component_instance(self, component: model.Component, config: options.Options) -> interface.Component:
+        """TODO"""
+
+        component_type = self.types.component(component.type)
+
+        return component_type(component.name, component.group, component.params, config)
+
+    def _link_instance(self,
+                       link: model.Link,
+                       config: options.Options,
+                       source: interface.Component,
+                       destination: interface.Component) -> interface.Link:
+        """TODO"""
+
+        link_type = self.types.link(link.type)
+
+        return link_type(link.name, link.params, config, source, destination)
+
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
         """TODO"""
 
@@ -451,6 +469,77 @@ class Layout:
 
         return configuration.create(config, False)
 
+    def create_component(self, name: str, group: str, type: str, raw_params: options.RawOptions) -> model.Component:
+        # pylint: disable=W0622
+
+        """TODO"""
+
+        component_type = self.types.component(type)
+        params = options.process(component_type.parameters(), raw_params)
+
+        component = self.dag.create_component(name, group, type, params)
+
+        instance = self._component_instance(component, None)
+        instance.on_create()
+
+        self.dag.revision += 1
+
+        return component
+
+    def remove_component(self, name: str) -> model.Component:
+        """TODO"""
+
+        component = self.dag.remove_component(name)
+
+        instance = self._component_instance(component, None)
+        instance.on_remove()
+
+        self.dag.revision += 1
+
+        return component
+
+    def create_link(self,
+                    name: str,
+                    source: str,
+                    destination: str,
+                    type: str,
+                    raw_params: options.RawOptions) -> model.Link:
+        # pylint: disable=W0622,R0913
+
+        """TODO"""
+
+        link_type = self.types.link(type)
+        params = options.process(link_type.parameters(), raw_params)
+
+        link = self.dag.create_link(name, source, destination, type, params)
+
+        self.dag.verify()
+
+        source = self._component_instance(self.dag.components[link.source], None)
+        destination = self._component_instance(self.dag.components[link.destination], None)
+
+        instance = self._link_instance(link, None, source, destination)
+        instance.on_create()
+
+        self.dag.revision += 1
+
+        return link
+
+    def remove_link(self, name: str) -> model.Link:
+        """TODO"""
+
+        link = self.dag.remove_link(name)
+
+        source = self._component_instance(self.dag.components[link.source], None)
+        destination = self._component_instance(self.dag.components[link.destination], None)
+
+        instance = self._link_instance(link, None, source, destination)
+        instance.on_remove()
+
+        self.dag.revision += 1
+
+        return link
+
     def store(self):
         """TODO"""
 
@@ -498,7 +587,6 @@ def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profil
     }
 
     config = _to_config(layout["config"])
-
     dag = _generate_dag(layout["dag"], types)
 
     return Layout(path, profiles, config, dag, types)

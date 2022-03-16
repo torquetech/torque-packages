@@ -8,7 +8,6 @@ import argparse
 
 from torque import exceptions
 from torque import layout
-from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -30,27 +29,19 @@ def _create(arguments: argparse.Namespace):
         name = f"{arguments.source}-{arguments.destination}"
 
     try:
-        link_type = _layout.types.link(arguments.type)
-        params = options.process(link_type.parameters(), raw_params)
-
-        link = _layout.dag.create_link(name,
-                                       arguments.source,
-                                       arguments.destination,
-                                       arguments.type,
-                                       params)
-
-        _layout.dag.verify()
-
-        link_type.on_create(_layout.dag, link)
-
-        _layout.dag.revision += 1
-        _layout.store()
+        link = _layout.create_link(name,
+                                   arguments.source,
+                                   arguments.destination,
+                                   arguments.type,
+                                   raw_params)
 
         for default in link.params.defaults:
             print(f"WARNING: {default}: default parameter used")
 
         for unused in link.params.unused:
             print(f"WARNING: {unused}: unused parameter")
+
+        _layout.store()
 
     except exceptions.LinkExists as exc:
         raise RuntimeError(f"{arguments.name}: link exists") from exc
@@ -77,12 +68,7 @@ def _remove(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        link = _layout.dag.remove_link(arguments.name)
-        link_type = _layout.types.link(link.type)
-
-        link_type.on_remove(_layout.dag, link)
-
-        _layout.dag.revision += 1
+        _layout.remove_link(arguments.name)
         _layout.store()
 
     except exceptions.LinkNotFound as exc:

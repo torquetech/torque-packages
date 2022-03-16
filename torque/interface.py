@@ -4,9 +4,9 @@
 
 """TODO"""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 
-from torque import model
 from torque import options
 
 
@@ -21,9 +21,19 @@ class Component(ABC):
     inbound_tags: Tags = []
     outbound_tags: Tags = []
 
+    def __init__(self,
+                 name: str,
+                 group: str,
+                 params: options.Options,
+                 config: options.Options):
+        self.name = name
+        self.group = group
+        self.params = params
+        self.config = config
+
     @staticmethod
     @abstractmethod
-    def parameteres() -> list[options.OptionsSpec]:
+    def parameters() -> list[options.OptionsSpec]:
         """TODO"""
 
     @staticmethod
@@ -31,14 +41,12 @@ class Component(ABC):
     def configuration() -> list[options.OptionsSpec]:
         """TODO"""
 
-    @staticmethod
     @abstractmethod
-    def on_create(dag: model.DAG, component: model.Component):
+    def on_create(self):
         """TODO"""
 
-    @staticmethod
     @abstractmethod
-    def on_remove(dag: model.DAG, component: model.Component):
+    def on_remove(self):
         """TODO"""
 
     @abstractmethod
@@ -51,9 +59,23 @@ class Link(ABC):
 
     """TODO"""
 
+    def __init__(self,
+                 name: str,
+                 params: options.Options,
+                 config: options.Options,
+                 source: Component,
+                 destination: Component):
+        # pylint: disable=R0913
+
+        self.name = name
+        self.params = params
+        self.config = config
+        self.source = source
+        self.destination = destination
+
     @staticmethod
     @abstractmethod
-    def parameteres() -> list[options.OptionsSpec]:
+    def parameters() -> list[options.OptionsSpec]:
         """TODO"""
 
     @staticmethod
@@ -61,14 +83,12 @@ class Link(ABC):
     def configuration() -> list[options.OptionsSpec]:
         """TODO"""
 
-    @staticmethod
     @abstractmethod
-    def on_create(dag: model.DAG, link: model.Link):
+    def on_create(self):
         """TODO"""
 
-    @staticmethod
     @abstractmethod
-    def on_remove(dag: model.DAG, link: model.Link):
+    def on_remove(self):
         """TODO"""
 
     @abstractmethod

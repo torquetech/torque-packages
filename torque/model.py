@@ -20,33 +20,6 @@ class Group:
         return f"Group({self.name})"
 
 
-class Link:
-    # pylint: disable=R0903
-
-    """TODO"""
-
-    def __init__(self,
-                 name: str,
-                 source: str,
-                 destination: str,
-                 type: str,
-                 params: options.Options):
-        # pylint: disable=R0913,W0622
-
-        self.name = name
-        self.source = source
-        self.destination = destination
-        self.type = type
-        self.params = params
-        self.config = None
-
-    def __repr__(self) -> str:
-        return f"Link({self.name}" \
-               f", source={self.source}" \
-               f", destination={self.destination}" \
-               f", type={self.type})"
-
-
 class Component:
     """TODO"""
 
@@ -61,7 +34,6 @@ class Component:
         self.group = group
         self.type = type
         self.params = params
-        self.config = None
 
         self.inbound_links: dict[str, str] = {}
         self.outbound_links: dict[str, str] = {}
@@ -107,6 +79,32 @@ class Component:
             raise exceptions.ComponentsNotConnected(self.name, component)
 
         self.outbound_links.pop(component)
+
+
+class Link:
+    # pylint: disable=R0903
+
+    """TODO"""
+
+    def __init__(self,
+                 name: str,
+                 source: str,
+                 destination: str,
+                 type: str,
+                 params: options.Options):
+        # pylint: disable=R0913,W0622
+
+        self.name = name
+        self.source = source
+        self.destination = destination
+        self.type = type
+        self.params = params
+
+    def __repr__(self) -> str:
+        return f"Link({self.name}" \
+               f", source={self.source}" \
+               f", destination={self.destination}" \
+               f", type={self.type})"
 
 
 class DAG:

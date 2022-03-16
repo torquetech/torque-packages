@@ -8,7 +8,6 @@ import argparse
 
 from torque import exceptions
 from torque import layout
-from torque import options
 
 
 def _create(arguments: argparse.Namespace):
@@ -34,24 +33,15 @@ def _create(arguments: argparse.Namespace):
         raise RuntimeError("group not specified")
 
     try:
-        component_type = _layout.types.component(arguments.type)
-        params = options.process(component_type.parameters(), raw_params)
-
-        component = _layout.dag.create_component(arguments.name,
-                                                 group,
-                                                 arguments.type,
-                                                 params)
-
-        component_type.on_create(_layout.dag, component)
-
-        _layout.dag.revision += 1
-        _layout.store()
+        component = _layout.create_component(arguments.name, group, arguments.type, raw_params)
 
         for default in component.params.defaults:
             print(f"WARNING: {default}: default parameter used")
 
         for unused in component.params.unused:
             print(f"WARNING: {unused}: unused parameter")
+
+        _layout.store()
 
     except exceptions.ComponentExists as exc:
         raise RuntimeError(f"{arguments.name}: component exists") from exc
@@ -72,12 +62,8 @@ def _remove(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        component = _layout.dag.remove_component(arguments.name)
-        component_type = _layout.types.component(component.type)
+        _layout.remove_component(arguments.name)
 
-        component_type.on_remove(_layout.dag, component)
-
-        _layout.dag.revision += 1
         _layout.store()
 
     except exceptions.ComponentNotFound as exc:

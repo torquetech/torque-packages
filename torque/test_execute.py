@@ -62,19 +62,19 @@ def test_test1():
 
     dag.create_group("group1")
 
-    dag.create_component("component1", "group1", "component_type")
-    dag.create_component("component2", "group1", "component_type")
-    dag.create_component("component3", "group1", "component_type")
-    dag.create_component("component4", "group1", "component_type")
-    dag.create_component("component5", "group1", "component_type")
-    dag.create_component("component6", "group1", "component_type")
+    dag.create_component("component1", "group1", "component_type", None)
+    dag.create_component("component2", "group1", "component_type", None)
+    dag.create_component("component3", "group1", "component_type", None)
+    dag.create_component("component4", "group1", "component_type", None)
+    dag.create_component("component5", "group1", "component_type", None)
+    dag.create_component("component6", "group1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component2", "component3", "link_type")
-    dag.create_link("link3", "component2", "component4", "link_type")
-    dag.create_link("link4", "component3", "component5", "link_type")
-    dag.create_link("link5", "component4", "component5", "link_type")
-    dag.create_link("link6", "component5", "component6", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component2", "component3", "link_type", None)
+    dag.create_link("link3", "component2", "component4", "link_type", None)
+    dag.create_link("link4", "component3", "component5", "link_type", None)
+    dag.create_link("link5", "component4", "component5", "link_type", None)
+    dag.create_link("link6", "component5", "component6", "link_type", None)
 
     assert _has_cycles(dag) is False
 
@@ -91,19 +91,19 @@ def test_test2():
 
     dag.create_group("group1")
 
-    dag.create_component("component1", "group1", "component_type")
-    dag.create_component("component2", "group1", "component_type")
-    dag.create_component("component3", "group1", "component_type")
-    dag.create_component("component4", "group1", "component_type")
-    dag.create_component("component5", "group1", "component_type")
-    dag.create_component("component6", "group1", "component_type")
+    dag.create_component("component1", "group1", "component_type", None)
+    dag.create_component("component2", "group1", "component_type", None)
+    dag.create_component("component3", "group1", "component_type", None)
+    dag.create_component("component4", "group1", "component_type", None)
+    dag.create_component("component5", "group1", "component_type", None)
+    dag.create_component("component6", "group1", "component_type", None)
 
-    dag.create_link("link1", "component1", "component2", "link_type")
-    dag.create_link("link2", "component2", "component3", "link_type")
-    dag.create_link("link3", "component2", "component4", "link_type")
-    dag.create_link("link4", "component3", "component5", "link_type")
-    dag.create_link("link5", "component4", "component5", "link_type")
-    dag.create_link("link6", "component5", "component6", "link_type")
+    dag.create_link("link1", "component1", "component2", "link_type", None)
+    dag.create_link("link2", "component2", "component3", "link_type", None)
+    dag.create_link("link3", "component2", "component4", "link_type", None)
+    dag.create_link("link4", "component3", "component5", "link_type", None)
+    dag.create_link("link5", "component4", "component5", "link_type", None)
+    dag.create_link("link6", "component5", "component6", "link_type", None)
 
     assert _has_cycles(dag) is False
 
