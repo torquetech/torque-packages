@@ -16,9 +16,6 @@ Tags = list[str]
 class Component(ABC):
     """TODO"""
 
-    inbound_tags: Tags = []
-    outbound_tags: Tags = []
-
     def __init__(self,
                  name: str,
                  group: str,
@@ -37,6 +34,14 @@ class Component(ABC):
     @staticmethod
     @abstractmethod
     def configuration() -> list[options.OptionsSpec]:
+        """TODO"""
+
+    @abstractmethod
+    def inbound_tags(self) -> Tags:
+        """TODO"""
+
+    @abstractmethod
+    def outbound_tags(self) -> Tags:
         """TODO"""
 
     @abstractmethod
