@@ -28,12 +28,12 @@ class Component(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> list[options.OptionsSpec]:
+    def parameters() -> options.OptionsSpec:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> list[options.OptionsSpec]:
+    def configuration() -> options.OptionsSpec:
         """TODO"""
 
     @abstractmethod
@@ -76,12 +76,12 @@ class Link(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> list[options.OptionsSpec]:
+    def parameters() -> options.OptionsSpec:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> list[options.OptionsSpec]:
+    def configuration() -> options.OptionsSpec:
         """TODO"""
 
     @abstractmethod
