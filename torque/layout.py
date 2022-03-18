@@ -261,7 +261,7 @@ def _load_types_for(source: str) -> dict[str, object]:
     return types
 
 
-def _load_types():
+def _load_types() -> Types:
     """TODO"""
 
     types = {} | _TYPES
@@ -270,7 +270,7 @@ def _load_types():
     types["links.v1"] |= _load_types_for("torque.links.v1")
     types["protocols.v1"] |= _load_types_for("torque.protocols.v1")
 
-    return types
+    return Types(types)
 
 
 def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
@@ -570,7 +570,7 @@ class Layout:
         _store(self.path, self.profiles, self.config, self.dag)
 
 
-def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profiles):
+def load(path: str) -> (model.DAG, Profiles):
     """TODO"""
 
     layout = {
@@ -596,11 +596,6 @@ def load(path: str, extra_types: dict[str, object] = None) -> (model.DAG, Profil
     _LAYOUT_SCHEMA.validate(layout)
 
     types = _load_types()
-
-    if extra_types:
-        types = types | extra_types
-
-    types = Types(types)
 
     profiles = {
         "default": DefaultProfile()
