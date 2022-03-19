@@ -4,6 +4,8 @@
 
 """TODO"""
 
+import io
+
 from abc import ABC
 from abc import abstractmethod
 
@@ -11,6 +13,7 @@ from torque import options
 
 
 Tags = list[str]
+Target = dict[str, object]
 
 
 class Component(ABC):
@@ -95,3 +98,37 @@ class Link(ABC):
     @abstractmethod
     def on_build(self):
         """TODO"""
+
+
+class Protocol(ABC):
+    # pylint: disable=R0903
+
+    """TODO"""
+
+    @staticmethod
+    @abstractmethod
+    def fetch(uri: str, secret: str) -> io.TextIOWrapper:
+        """TODO"""
+
+
+class DSLInstruction(ABC):
+    # pylint: disable=R0903
+
+    """TODO"""
+
+
+class DSLGenerator(ABC):
+    # pylint: disable=R0903
+
+    """TODO"""
+
+    @staticmethod
+    @abstractmethod
+    def generate(instruction: DSLInstruction) -> Target:
+        """TODO"""
+
+
+class DSL:
+    # pylint: disable=R0903
+
+    """TODO"""

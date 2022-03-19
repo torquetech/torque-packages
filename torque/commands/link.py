@@ -122,7 +122,7 @@ def _show_type(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        link_type = _layout.types.link(arguments.name)
+        link_type = _layout.exts.link(arguments.name)
         print(f"{arguments.name}: {link_type}")
 
     except exceptions.LinkTypeNotFound as exc:
@@ -135,7 +135,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     _layout = layout.load(arguments.layout)
-    link_types = _layout.types.links()
+    link_types = _layout.exts.links()
 
     for link in link_types:
         print(f"{link}: {link_types[link]}")

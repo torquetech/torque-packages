@@ -101,7 +101,7 @@ def _show_type(arguments: argparse.Namespace):
     _layout = layout.load(arguments.layout)
 
     try:
-        component_type = _layout.types.component(arguments.name)
+        component_type = _layout.exts.component(arguments.name)
         print(f"{arguments.name}: {component_type}")
 
     except exceptions.ComponentTypeNotFound as exc:
@@ -114,7 +114,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     _layout = layout.load(arguments.layout)
-    component_types = _layout.types.components()
+    component_types = _layout.exts.components()
 
     for component in component_types:
         print(f"{component}: {component_types[component]}")

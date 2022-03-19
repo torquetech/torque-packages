@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import importlib
 import os
 import re
 import schema
@@ -12,28 +11,11 @@ import yaml
 
 from torque import configuration
 from torque import exceptions
-from torque import interface
+from torque import extensions
 from torque import model
 from torque import options
 
-
-def _proto_file(uri: str, secret: str) -> dict[str, object]:
-    # pylint: disable=W0613
-
-    """TODO"""
-
-    return open(uri, encoding="utf8")
-
-
-_TYPES = {
-    "protocols.v1": {
-        "file": _proto_file,
-        # "https": _proto_https
-        # "http": _proto_http
-    },
-    "components.v1": {},
-    "links.v1": {}
-}
+from torque.v1 import interfaces
 
 
 _PROTO = r"^([^:]+)://"
@@ -98,58 +80,6 @@ class Profile:
 
 
 Profiles = dict[str, Profile]
-
-
-class Types:
-    """TODO"""
-
-    def __init__(self, types: dict[str, object]):
-        self.types = types
-
-    def components(self) -> dict[str, object]:
-        """TODO"""
-
-        return self.types["components.v1"]
-
-    def links(self) -> dict[str, object]:
-        """TODO"""
-
-        return self.types["links.v1"]
-
-    def protos(self) -> dict[str, object]:
-        """TODO"""
-
-        return self.types["protocols.v1"]
-
-    def component(self, component_type: str) -> interface.Component:
-        """TODO"""
-
-        components = self.components()
-
-        if component_type not in components:
-            raise exceptions.ComponentTypeNotFound(component_type)
-
-        return components[component_type]
-
-    def link(self, link_type: str) -> interface.Link:
-        """TODO"""
-
-        links = self.links()
-
-        if link_type not in links:
-            raise exceptions.LinkTypeNotFound(link_type)
-
-        return links[link_type]
-
-    def proto(self, protocol: str) -> callable:
-        """TODO"""
-
-        protocols = self.protos()
-
-        if protocol not in protocols:
-            raise exceptions.ProtocolNotFound(protocol)
-
-        return protocols[protocol]
 
 
 class Config:
@@ -240,40 +170,7 @@ def _from_link(link: model.Link) -> dict[str: object]:
     }
 
 
-def _load_types_for(source: str) -> dict[str, object]:
-    """TODO"""
-
-    entry_points = importlib.metadata.entry_points()
-
-    if source not in entry_points:
-        return {}
-
-    types = {}
-
-    for i in entry_points[source]:
-        # pylint: disable=W0703
-        try:
-            types[i.name] = i.load()
-
-        except Exception as exc:
-            print(f"WARNING: {i.name}: unable to load type: {exc}")
-
-    return types
-
-
-def _load_types() -> Types:
-    """TODO"""
-
-    types = {} | _TYPES
-
-    types["components.v1"] |= _load_types_for("torque.components.v1")
-    types["links.v1"] |= _load_types_for("torque.links.v1")
-    types["protocols.v1"] |= _load_types_for("torque.protocols.v1")
-
-    return Types(types)
-
-
-def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
+def _generate_dag(dag_layout: dict[str, object], exts: extensions.Extensions) -> model.DAG:
     """TODO"""
 
     dag = model.DAG(dag_layout["revision"])
@@ -284,7 +181,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
     for component in dag_layout["components"]:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
 
-        component_type = types.component(component["type"])
+        component_type = exts.component(component["type"])
         params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
@@ -295,7 +192,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
     for link in dag_layout["links"]:
         raw_params = {i["name"]: i["value"] for i in link["params"]}
 
-        link_type = types.link(link["type"])
+        link_type = exts.link(link["type"])
         params = options.process(link_type.parameters(), raw_params)
 
         dag.create_link(link["name"],
@@ -309,7 +206,7 @@ def _generate_dag(dag_layout: dict[str, object], types: Types) -> model.DAG:
     return dag
 
 
-def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
+def _load_defaults(dag: model.DAG, exts: extensions.Extensions) -> configuration.Configuration:
     """TODO"""
 
     config = {
@@ -330,7 +227,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         groups.append({"name": group.name, "configuration": []})
 
     for component in dag.components.values():
-        component_type = types.component(component.type)
+        component_type = exts.component(component.type)
         components.append({
             "name": component.name,
             "configuration": [
@@ -339,7 +236,7 @@ def _load_defaults(dag: model.DAG, types: Types) -> configuration.Configuration:
         })
 
     for link in dag.links.values():
-        link_type = types.link(link.type)
+        link_type = exts.link(link.type)
         links.append({
             "name": link.name,
             "configuration": [
@@ -393,32 +290,53 @@ class Layout:
                  profiles: Profiles,
                  config: Config,
                  dag: model.DAG,
-                 types: Types):
+                 exts: extensions.Extensions):
         # pylint: disable=R0913
 
         self.path = path
         self.profiles = profiles
         self.config = config
         self.dag = dag
-        self.types = types
+        self.exts = exts
 
-    def _component_instance(self, component: model.Component, config: options.Options) -> interface.Component:
+    def _component_instance(self, component: model.Component, config: options.Options) -> interfaces.Component:
         """TODO"""
 
-        component_type = self.types.component(component.type)
+        component_type = self.exts.component(component.type)
 
         return component_type(component.name, component.group, component.params, config)
 
     def _link_instance(self,
                        link: model.Link,
                        config: options.Options,
-                       source: interface.Component,
-                       destination: interface.Component) -> interface.Link:
+                       source: interfaces.Component,
+                       destination: interfaces.Component) -> interfaces.Link:
         """TODO"""
 
-        link_type = self.types.link(link.type)
+        link_type = self.exts.link(link.type)
 
         return link_type(link.name, link.params, config, source, destination)
+
+    def _initialize_dsl(self):
+        """TODO"""
+
+        if hasattr(interfaces.DSL, '_initialized'):
+            return
+
+        for ext_name, ext in self.exts.dsl_extensions().items():
+            for name, cls in ext.items():
+                if hasattr(interfaces.DSL, name):
+                    raise exceptions.DuplicateDSLEntry(ext_name, name)
+
+                setattr(interfaces.DSL, name, cls)
+
+        setattr(interfaces.DSL, '_initialized', True)
+
+    def load_dsl(self) -> interfaces.DSL:
+        """TODO"""
+
+        self._initialize_dsl()
+        return interfaces.DSL()
 
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
         """TODO"""
@@ -451,7 +369,7 @@ class Layout:
             raise exceptions.ProfileNotFound(name)
 
         if name == "default":
-            return _load_defaults(self.dag, self.types)
+            return _load_defaults(self.dag, self.exts)
 
         profile = self.profiles[name]
 
@@ -461,7 +379,7 @@ class Layout:
         if match:
             proto = match[1]
 
-        handler = self.types.proto(proto)
+        handler = self.exts.protocol(proto)
         config = None
 
         with handler(profile.uri, profile.secret) as file:
@@ -498,7 +416,7 @@ class Layout:
 
         """TODO"""
 
-        component_type = self.types.component(type)
+        component_type = self.exts.component(type)
         params = options.process(component_type.parameters(), raw_params)
 
         component = self.dag.create_component(name, group, type, params)
@@ -532,7 +450,7 @@ class Layout:
 
         """TODO"""
 
-        link_type = self.types.link(type)
+        link_type = self.exts.link(type)
         params = options.process(link_type.parameters(), raw_params)
 
         link = self.dag.create_link(name, source, destination, type, params)
@@ -593,9 +511,8 @@ def load(path: str) -> (model.DAG, Profiles):
     except FileNotFoundError:
         pass
 
-    _LAYOUT_SCHEMA.validate(layout)
-
-    types = _load_types()
+    layout = _LAYOUT_SCHEMA.validate(layout)
+    exts = extensions.load()
 
     profiles = {
         "default": DefaultProfile()
@@ -606,6 +523,6 @@ def load(path: str) -> (model.DAG, Profiles):
     }
 
     config = _to_config(layout["config"])
-    dag = _generate_dag(layout["dag"], types)
+    dag = _generate_dag(layout["dag"], exts)
 
-    return Layout(path, profiles, config, dag, types)
+    return Layout(path, profiles, config, dag, exts)
