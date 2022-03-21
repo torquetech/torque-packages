@@ -35,19 +35,19 @@ def install_deps(force: bool, upgrade: bool):
         with open(".torque/requires.txt", encoding="utf8") as file:
             requires += [i.strip() for i in file]
 
-    with open(".torque/cache/requires.txt", "w", encoding="utf8") as req:
+    with open(".torque/local/requires.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requires))
 
     requires += [""]
 
     env = {
-        "VIRTUAL_ENV": ".torque/cache/venv"
+        "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
-        ".torque/cache/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/cache/requires.txt"
+        "install", "-r", ".torque/local/requires.txt"
     ]
 
     if force:
@@ -70,12 +70,12 @@ def install_package(package: str, force: bool, upgrade: bool):
         package = os.path.abspath(package)
 
     env = {
-        "VIRTUAL_ENV": ".torque/cache/venv",
+        "VIRTUAL_ENV": ".torque/local/venv",
         "PYTHONPATH": ".torque/system"
     }
 
     cmd = [
-        ".torque/cache/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "pip",
         "install"
     ]
