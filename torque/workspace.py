@@ -17,17 +17,17 @@ def initialize_venv(target: str):
     subprocess.run([sys.executable,
                     "-m", "venv",
                     "--prompt", "torque",
-                    f"{target}/.torque/cache/venv"],
+                    f"{target}/.torque/local/venv"],
                    check=True)
 
     os.chdir(target)
 
     env = {
-        "VIRTUAL_ENV": ".torque/cache/venv",
+        "VIRTUAL_ENV": ".torque/local/venv",
     }
 
     try:
-        subprocess.run([".torque/cache/venv/bin/python",
+        subprocess.run([".torque/local/venv/bin/python",
                         "-m", "pip",
                         "install", "-U",
                         "pip", "wheel", "setuptools"],
@@ -37,7 +37,7 @@ def initialize_venv(target: str):
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("failed to install venv") from exc
 
-    with open(".torque/cache/install_deps", "w", encoding="utf8"):
+    with open(".torque/local/install_deps", "w", encoding="utf8"):
         pass
 
 
@@ -87,21 +87,21 @@ def install_deps():
         with open(".torque/requires.txt", encoding="utf8") as file:
             requires += [i.strip() for i in file]
 
-    with open(".torque/cache/requires.txt", "w", encoding="utf8") as req:
+    with open(".torque/local/requires.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requires))
 
     requires += [""]
 
     env = {
-        "VIRTUAL_ENV": ".torque/cache/venv"
+        "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
-        ".torque/cache/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/cache/requires.txt",
+        "install", "-r", ".torque/local/requires.txt",
         "--force-reinstall", "--upgrade"
     ]
 
     subprocess.run(cmd, env=env, check=True)
-    os.unlink(".torque/cache/install_deps")
+    os.unlink(".torque/local/install_deps")

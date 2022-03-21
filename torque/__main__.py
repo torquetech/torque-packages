@@ -37,14 +37,14 @@ def pass_through_command(argv, cwd: str, verbose: bool):
     """TODO"""
 
     cmd = [
-        ".torque/cache/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "torque"
     ]
 
     cmd += argv
 
     env = {
-        "VIRTUAL_ENV": ".torque/cache/venv",
+        "VIRTUAL_ENV": ".torque/local/venv",
         "PYTHONPATH": ".torque/system",
         "TORQUE_CWD": cwd
     }
@@ -80,10 +80,10 @@ def main() -> int:
         if not find_workspace_root():
             raise RuntimeError("workspace root not found!")
 
-        if not os.path.isfile(".torque/cache/venv/bin/python"):
+        if not os.path.isfile(".torque/local/venv/bin/python"):
             workspace.initialize_venv(".")
 
-        if os.path.isfile(".torque/cache/install_deps"):
+        if os.path.isfile(".torque/local/install_deps"):
             workspace.install_deps()
 
         pass_through_command(sys.argv[1:], cwd, verbose)
