@@ -10,6 +10,7 @@ import schema
 
 from torque import dsl
 from torque import exceptions
+from torque import links
 from torque import protocols
 
 from torque.v1 import interfaces
@@ -74,6 +75,7 @@ _DEFAULT_EXTENSIONS = {
         "components": {
         },
         "links": {
+            "torquetech.dev/dependency": links.DependencyLink
         },
         "protocols": {
             "file": protocols.FileProtocol

@@ -158,9 +158,11 @@ def add_arguments(subparsers):
 
     create_parser.add_argument("--params", "-p", help="link params")
     create_parser.add_argument("--name", help="link name")
+    create_parser.add_argument("--type",
+                               default="torquetech.dev/dependency",
+                               help="link type, default: %(default)s")
     create_parser.add_argument("source", help="source component")
     create_parser.add_argument("destination", help="destination component")
-    create_parser.add_argument("type", help="link type")
 
     remove_parser = subparsers.add_parser("remove",
                                           description="remove link",
