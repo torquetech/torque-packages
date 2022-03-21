@@ -49,14 +49,20 @@ class ComponentsAlreadyConnected(TorqueException):
     """TODO"""
 
     def __init__(self, source: str, destination: str):
-        super().__init__(f"{source}:{destination}")
+        super().__init__("")
+
+        self.source = source
+        self.destination = destination
 
 
 class ComponentsNotConnected(TorqueException):
     """TODO"""
 
     def __init__(self, source: str, destination: str):
-        super().__init__(f"{source}:{destination}")
+        super().__init__("")
+
+        self.source = source
+        self.destination = destination
 
 
 class ComponentTypeNotFound(TorqueException):
