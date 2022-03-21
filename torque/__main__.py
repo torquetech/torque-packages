@@ -83,6 +83,9 @@ def main() -> int:
         if not os.path.isfile(".torque/cache/venv/bin/python"):
             workspace.initialize_venv(".")
 
+        if os.path.isfile(".torque/cache/install_deps"):
+            workspace.install_deps()
+
         pass_through_command(sys.argv[1:], cwd, verbose)
 
         return 0

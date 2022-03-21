@@ -8,6 +8,8 @@ import os
 import subprocess
 import sys
 
+from importlib import metadata
+
 
 def initialize_venv(target: str):
     """TODO"""
@@ -64,3 +66,42 @@ def install_torque(package: str):
 
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("failed to install torque-workspace package") from exc
+
+
+def install_deps():
+    """TODO"""
+
+    requires = []
+
+    for entry in os.listdir(".torque/system"):
+        if not entry.endswith(".dist-info"):
+            continue
+
+        dist = metadata.Distribution.at(f".torque/system/{entry}")
+        dist_requires = dist.metadata.get_all("Requires-Dist")
+
+        if dist_requires:
+            requires += dist_requires
+
+    if os.path.isfile(".torque/requires.txt"):
+        with open(".torque/requires.txt", encoding="utf8") as file:
+            requires += [i.strip() for i in file]
+
+    with open(".torque/cache/requires.txt", "w", encoding="utf8") as req:
+        req.write("\n".join(requires))
+
+    requires += [""]
+
+    env = {
+        "VIRTUAL_ENV": ".torque/cache/venv"
+    }
+
+    cmd = [
+        ".torque/cache/venv/bin/python",
+        "-m", "pip",
+        "install", "-r", ".torque/cache/requires.txt",
+        "--force-reinstall", "--upgrade"
+    ]
+
+    subprocess.run(cmd, env=env, check=True)
+    os.unlink(".torque/cache/install_deps")
