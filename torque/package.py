@@ -31,8 +31,14 @@ def install_deps(force: bool, upgrade: bool):
         if dist_requires:
             requires += dist_requires
 
+    if os.path.isfile(".torque/requires.txt"):
+        with open(".torque/requires.txt", encoding="utf8") as file:
+            requires += [i.strip() for i in file]
+
     with open(".torque/cache/requires.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requires))
+
+    requires += [""]
 
     env = {
         "VIRTUAL_ENV": ".torque/cache/venv"
@@ -55,12 +61,6 @@ def install_deps(force: bool, upgrade: bool):
 
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
-
-    try:
-        os.unlink(".torque/cache/install_deps")
-
-    except FileNotFoundError:
-        pass
 
 
 def install_package(package: str, force: bool, upgrade: bool):

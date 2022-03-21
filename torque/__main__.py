@@ -9,12 +9,6 @@ import os
 import sys
 import traceback
 
-from torque import package
-
-# pylint: disable=C0413
-if os.path.isfile(".torque/cache/install_deps"):
-    package.install_deps(True, True)
-
 from torque import commands
 
 
