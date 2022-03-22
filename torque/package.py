@@ -40,7 +40,7 @@ def install_deps(force: bool, upgrade: bool):
 
     requires += [""]
 
-    env = {
+    env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv"
     }
 
@@ -69,7 +69,7 @@ def install_package(package: str, force: bool, upgrade: bool):
     if re.match(_URI, package) is None and os.path.exists(package):
         package = os.path.abspath(package)
 
-    env = {
+    env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv",
         "PYTHONPATH": ".torque/system"
     }
