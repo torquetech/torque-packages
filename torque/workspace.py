@@ -373,10 +373,10 @@ class Workspace:
         if match:
             proto = match[1]
 
-        handler = self.exts.protocol(proto)
+        protocol = self.exts.protocol(proto)
         config = None
 
-        with handler(profile.uri, profile.secret) as file:
+        with protocol().fetch(profile.uri, profile.secret) as file:
             config = yaml.safe_load(file)
 
         return configuration.create(config, False)
