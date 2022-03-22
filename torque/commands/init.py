@@ -10,9 +10,7 @@ from argparse import Namespace
 def add_arguments(subparsers):
     """TODO"""
 
-    subparsers.add_parser("init",
-                          description="initialize workspace",
-                          help="initialize workspace")
+    subparsers.add_parser("init", help="initialize workspace")
 
 
 # pylint: disable=W0613

@@ -16,7 +16,7 @@ def _install(arguments: argparse.Namespace):
 
     """TODO"""
 
-    package.install_package(arguments.package, arguments.force, arguments.upgrade)
+    package.install_package(arguments.uri, arguments.force, arguments.upgrade)
 
 
 def _remove(arguments: argparse.Namespace):
@@ -25,15 +25,15 @@ def _remove(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
-        package.remove_package(arguments.package,
+        package.remove_package(arguments.name,
                                ws.dag.used_component_types(),
                                ws.dag.used_link_types())
 
     except exceptions.PackageNotFound as exc:
-        raise RuntimeError(f"{arguments.package}: package not found") from exc
+        raise RuntimeError(f"{arguments.name}: package not found") from exc
 
     except exceptions.PackageInUse as exc:
-        raise RuntimeError(f"{arguments.package}: package in use") from exc
+        raise RuntimeError(f"{arguments.name}: package in use") from exc
 
 
 def _list(arguments: argparse.Namespace):
@@ -47,35 +47,18 @@ def _list(arguments: argparse.Namespace):
 def add_arguments(subparsers):
     """TODO"""
 
-    parser = subparsers.add_parser("package",
-                                   description="package management",
-                                   help="package management")
-
+    parser = subparsers.add_parser("package", help="package management")
     subparsers = parser.add_subparsers(required=True, dest="package_cmd", metavar="command")
 
-    install_parser = subparsers.add_parser("install",
-                                           description="install package",
-                                           help="install package")
+    install_parser = subparsers.add_parser("install", help="install package")
+    install_parser.add_argument("--upgrade", action="store_true", help="upgrade package")
+    install_parser.add_argument("--force", action="store_true", help="force install")
+    install_parser.add_argument("uri", help="package uri")
 
-    install_parser.add_argument("--upgrade", "-u",
-                                action="store_true",
-                                help="upgrade package")
+    remove_parser = subparsers.add_parser("remove", help="remove package")
+    remove_parser.add_argument("name", help="package name")
 
-    install_parser.add_argument("--force", "-f",
-                                action="store_true",
-                                help="force install")
-
-    install_parser.add_argument("package", help="package to install")
-
-    remove_parser = subparsers.add_parser("remove",
-                                          description="remove package",
-                                          help="remove package")
-
-    remove_parser.add_argument("package", help="package to remove")
-
-    subparsers.add_parser("list",
-                          description="list installed packages",
-                          help="list installed packages")
+    subparsers.add_parser("list", help="list installed packages")
 
 
 def run(arguments: argparse.Namespace):

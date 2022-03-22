@@ -77,43 +77,25 @@ def _list(arguments: argparse.Namespace):
 def add_arguments(subparsers):
     """TODO"""
 
-    parser = subparsers.add_parser("profile",
-                                   description="profile handling utilities",
-                                   help="profile management")
+    parser = subparsers.add_parser("profile", help="profile management")
+    subparsers = parser.add_subparsers(required=True, dest="profile_cmd", metavar="command")
 
-    subparsers = parser.add_subparsers(required=True,
-                                       dest="profile_cmd",
-                                       metavar="command")
-
-    create_parser = subparsers.add_parser("create",
-                                          description="create profile",
-                                          help="create profile")
+    create_parser = subparsers.add_parser("create", help="create profile")
 
     create_parser.add_argument("--secret", help="configuration uri secret")
     create_parser.add_argument("name", help="profile name")
     create_parser.add_argument("uri", help="configuration uri")
 
-    remove_parser = subparsers.add_parser("remove",
-                                          description="remove profile",
-                                          help="remove profile")
-
+    remove_parser = subparsers.add_parser("remove", help="remove profile")
     remove_parser.add_argument("name", help="profile name")
 
-    show_parser = subparsers.add_parser("show",
-                                        description="show profile",
-                                        help="show profile")
-
+    show_parser = subparsers.add_parser("show", help="show profile")
     show_parser.add_argument("name", help="profile name")
 
-    export_parser = subparsers.add_parser("export",
-                                          description="export profile",
-                                          help="export profile")
-
+    export_parser = subparsers.add_parser("export", help="export profile")
     export_parser.add_argument("name", help="profile name")
 
-    subparsers.add_parser("list",
-                          description="list profiles",
-                          help="list profiles")
+    subparsers.add_parser("list", help="list profiles")
 
 
 def run(arguments: argparse.Namespace):

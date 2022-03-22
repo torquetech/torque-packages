@@ -123,48 +123,27 @@ def _list_types(arguments: argparse.Namespace):
 def add_arguments(subparsers):
     """TODO"""
 
-    parser = subparsers.add_parser("component",
-                                   description="component handling utilities",
-                                   help="component management")
+    parser = subparsers.add_parser("component", help="component management")
+    subparsers = parser.add_subparsers(required=True, dest="component_cmd", metavar="command")
 
-    subparsers = parser.add_subparsers(required=True,
-                                       dest="component_cmd",
-                                       metavar="command")
-
-    create_parser = subparsers.add_parser("create",
-                                          description="create component",
-                                          help="create component")
-
+    create_parser = subparsers.add_parser("create", help="create component")
     create_parser.add_argument("--params", "-p", help="component params")
     create_parser.add_argument("--group", help="component group membership")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 
-    remove_parser = subparsers.add_parser("remove",
-                                          description="remove component",
-                                          help="remove component")
-
+    remove_parser = subparsers.add_parser("remove", help="remove component")
     remove_parser.add_argument("name", help="component name")
 
-    show_parser = subparsers.add_parser("show",
-                                        description="show component",
-                                        help="show component")
-
+    show_parser = subparsers.add_parser("show", help="show component")
     show_parser.add_argument("name", help="component name")
 
-    subparsers.add_parser("list",
-                          description="list components",
-                          help="list components")
+    subparsers.add_parser("list", help="list components")
 
-    show_type_parser = subparsers.add_parser("show-type",
-                                             description="show component type",
-                                             help="show component type")
-
+    show_type_parser = subparsers.add_parser("show-type", help="show component type")
     show_type_parser.add_argument("name", help="component type name")
 
-    subparsers.add_parser("list-types",
-                          description="list component types",
-                          help="list component types")
+    subparsers.add_parser("list-types", help="list component types")
 
 
 def run(arguments: argparse.Namespace):

@@ -77,35 +77,20 @@ def _list(arguments: argparse.Namespace):
 def add_arguments(subparsers):
     """TODO"""
 
-    parser = subparsers.add_parser("group",
-                                   description="group handling utilities",
-                                   help="group management")
-
+    parser = subparsers.add_parser("group", help="group management")
     subparsers = parser.add_subparsers(required=True, dest="group_cmd", metavar="command")
 
-    create_parser = subparsers.add_parser("create",
-                                          description="create group",
-                                          help="create group")
-
+    create_parser = subparsers.add_parser("create", help="create group")
     create_parser.add_argument("--set-default", action="store_true", help="set default")
     create_parser.add_argument("name", help="group name")
 
-    remove_parser = subparsers.add_parser("remove",
-                                          description="remove group",
-                                          help="remove group")
-
+    remove_parser = subparsers.add_parser("remove", help="remove group")
     remove_parser.add_argument("name", help="group name")
 
-    set_default_parser = subparsers.add_parser("set-default",
-                                               description="set default group",
-                                               help="set default group")
-
+    set_default_parser = subparsers.add_parser("set-default", help="set default group")
     set_default_parser.add_argument("name", help="group name")
 
-    show_parser = subparsers.add_parser("show",
-                                        description="show group",
-                                        help="show group")
-
+    show_parser = subparsers.add_parser("show", help="show group")
     show_parser.add_argument("name", help="group name")
 
     subparsers.add_parser("list", description="list groups", help="list groups")

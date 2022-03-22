@@ -144,18 +144,10 @@ def _list_types(arguments: argparse.Namespace):
 def add_arguments(subparsers):
     """TODO"""
 
-    parser = subparsers.add_parser("link",
-                                   description="link handling utilities",
-                                   help="link management")
+    parser = subparsers.add_parser("link", help="link management")
+    subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
 
-    subparsers = parser.add_subparsers(required=True,
-                                       dest="link_cmd",
-                                       metavar="command")
-
-    create_parser = subparsers.add_parser("create",
-                                          description="create link",
-                                          help="create link")
-
+    create_parser = subparsers.add_parser("create", help="create link")
     create_parser.add_argument("--params", "-p", help="link params")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",
@@ -164,31 +156,18 @@ def add_arguments(subparsers):
     create_parser.add_argument("source", help="source component")
     create_parser.add_argument("destination", help="destination component")
 
-    remove_parser = subparsers.add_parser("remove",
-                                          description="remove link",
-                                          help="remove link")
-
+    remove_parser = subparsers.add_parser("remove", help="remove link")
     remove_parser.add_argument("name", help="link name")
 
-    show_parser = subparsers.add_parser("show",
-                                        description="show link",
-                                        help="show link")
-
+    show_parser = subparsers.add_parser("show", help="show link")
     show_parser.add_argument("name", help="link name")
 
-    subparsers.add_parser("list",
-                          description="list links",
-                          help="list links")
+    subparsers.add_parser("list", help="list links")
 
-    show_type_parser = subparsers.add_parser("show-type",
-                                             description="show link type",
-                                             help="show link type")
-
+    show_type_parser = subparsers.add_parser("show-type", help="show link type")
     show_type_parser.add_argument("name", help="link type name")
 
-    subparsers.add_parser("list-types",
-                          description="list link types",
-                          help="list link types")
+    subparsers.add_parser("list-types", help="list link types")
 
 
 def run(arguments: argparse.Namespace):
