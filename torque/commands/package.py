@@ -7,7 +7,7 @@
 import argparse
 
 from torque import exceptions
-from torque import layout
+from torque import workspace
 from torque import package
 
 
@@ -22,12 +22,12 @@ def _install(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
         package.remove_package(arguments.package,
-                               _layout.dag.used_component_types(),
-                               _layout.dag.used_link_types())
+                               ws.dag.used_component_types(),
+                               ws.dag.used_link_types())
 
     except exceptions.PackageNotFound as exc:
         raise RuntimeError(f"{arguments.package}: package not found") from exc

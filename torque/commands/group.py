@@ -7,17 +7,17 @@
 import argparse
 
 from torque import exceptions
-from torque import layout
+from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.create_group(arguments.name, arguments.set_default)
-        _layout.store()
+        ws.create_group(arguments.name, arguments.set_default)
+        ws.store()
 
     except exceptions.GroupExists as exc:
         raise RuntimeError(f"{arguments.name}: group exists") from exc
@@ -26,11 +26,11 @@ def _create(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.remove_group(arguments.name)
-        _layout.store()
+        ws.remove_group(arguments.name)
+        ws.store()
 
     except exceptions.GroupNotFound as exc:
         raise RuntimeError(f"{arguments.name}: group not found") from exc
@@ -42,11 +42,11 @@ def _remove(arguments: argparse.Namespace):
 def _set_default(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.set_default_group(arguments.name)
-        _layout.store()
+        ws.set_default_group(arguments.name)
+        ws.store()
 
     except exceptions.GroupNotFound as exc:
         raise RuntimeError(f"{arguments.name}: group not found") from exc
@@ -55,12 +55,12 @@ def _set_default(arguments: argparse.Namespace):
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    if arguments.name not in _layout.dag.groups:
+    if arguments.name not in ws.dag.groups:
         raise RuntimeError(f"{arguments.name}: group not found")
 
-    print(f"{_layout.dag.groups[arguments.name]}")
+    print(f"{ws.dag.groups[arguments.name]}")
 
 
 def _list(arguments: argparse.Namespace):
@@ -68,9 +68,9 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    for group in _layout.dag.groups.values():
+    for group in ws.dag.groups.values():
         print(f"{group}")
 
 

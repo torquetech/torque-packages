@@ -22,10 +22,10 @@ def main() -> int:
         parser = argparse.ArgumentParser(prog="torque", description="torque command line interface.")
         subparsers = parser.add_subparsers(required=True, dest="main_cmd", metavar="command")
 
-        parser.add_argument("--layout",
-                            default=".torque/layout.yaml",
+        parser.add_argument("--workspace",
+                            default=".torque/workspace.yaml",
                             metavar="PATH",
-                            help="layout file to use")
+                            help="workspace file to use")
 
         cmds = {
             "init": commands.init,

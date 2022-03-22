@@ -9,17 +9,17 @@ import sys
 import schema
 
 from torque import exceptions
-from torque import layout
+from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.create_profile(arguments.name, arguments.uri, arguments.secret)
-        _layout.store()
+        ws.create_profile(arguments.name, arguments.uri, arguments.secret)
+        ws.store()
 
     except exceptions.ProfileExists as exc:
         raise RuntimeError(f"{arguments.name}: profile exists") from exc
@@ -28,11 +28,11 @@ def _create(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.remove_profile(arguments.name)
-        _layout.store()
+        ws.remove_profile(arguments.name)
+        ws.store()
 
     except exceptions.ProfileNotFound as exc:
         raise RuntimeError(f"{arguments.name}: profile not found") from exc
@@ -41,21 +41,21 @@ def _remove(arguments: argparse.Namespace):
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    if arguments.name not in _layout.profiles:
+    if arguments.name not in ws.profiles:
         raise RuntimeError(f"{arguments.name}: profile not found")
 
-    print(f"{_layout.profiles[arguments.name]}")
+    print(f"{ws.profiles[arguments.name]}")
 
 
 def _export(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        config = _layout.load_profile(arguments.name)
+        config = ws.load_profile(arguments.name)
         config.dump(sys.stdout)
 
     except exceptions.ProfileNotFound as exc:
@@ -68,9 +68,9 @@ def _export(arguments: argparse.Namespace):
 def _list(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    for profile in _layout.profiles.values():
+    for profile in ws.profiles.values():
         print(f"{profile}")
 
 

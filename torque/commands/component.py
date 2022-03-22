@@ -7,13 +7,13 @@
 import argparse
 
 from torque import exceptions
-from torque import layout
+from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     if arguments.params:
         raw_params = arguments.params.split(",")
@@ -27,13 +27,13 @@ def _create(arguments: argparse.Namespace):
         group = arguments.group
 
     else:
-        group = _layout.config.default_group
+        group = ws.config.default_group
 
     if not group:
         raise RuntimeError("group not specified")
 
     try:
-        component = _layout.create_component(arguments.name, group, arguments.type, raw_params)
+        component = ws.create_component(arguments.name, group, arguments.type, raw_params)
 
         for default in component.params.defaults:
             print(f"WARNING: {default}: default parameter used")
@@ -41,7 +41,7 @@ def _create(arguments: argparse.Namespace):
         for unused in component.params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
-        _layout.store()
+        ws.store()
 
     except exceptions.ComponentExists as exc:
         raise RuntimeError(f"{arguments.name}: component exists") from exc
@@ -59,12 +59,12 @@ def _create(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.remove_component(arguments.name)
+        ws.remove_component(arguments.name)
 
-        _layout.store()
+        ws.store()
 
     except exceptions.ComponentNotFound as exc:
         raise RuntimeError(f"{arguments.name}: component not found") from exc
@@ -76,12 +76,12 @@ def _remove(arguments: argparse.Namespace):
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    if arguments.name not in _layout.dag.components:
+    if arguments.name not in ws.dag.components:
         raise RuntimeError(f"{arguments.name}: component not found")
 
-    print(f"{_layout.dag.components[arguments.name]}")
+    print(f"{ws.dag.components[arguments.name]}")
 
 
 def _list(arguments: argparse.Namespace):
@@ -89,19 +89,19 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    for component in _layout.dag.components.values():
+    for component in ws.dag.components.values():
         print(f"{component}")
 
 
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        component_type = _layout.exts.component(arguments.name)
+        component_type = ws.exts.component(arguments.name)
         print(f"{arguments.name}: {component_type}")
 
     except exceptions.ComponentTypeNotFound as exc:
@@ -113,8 +113,8 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
-    component_types = _layout.exts.components()
+    ws = workspace.load(arguments.workspace)
+    component_types = ws.exts.components()
 
     for component in component_types:
         print(f"{component}: {component_types[component]}")

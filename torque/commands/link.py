@@ -7,7 +7,7 @@
 import argparse
 
 from torque import exceptions
-from torque import layout
+from torque import workspace
 
 
 def _generate_unique_name(names: set[str], name: str) -> str:
@@ -29,7 +29,7 @@ def _generate_unique_name(names: set[str], name: str) -> str:
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     if arguments.params:
         raw_params = arguments.params.split(",")
@@ -45,14 +45,14 @@ def _create(arguments: argparse.Namespace):
     else:
         name = arguments.name
 
-    name = _generate_unique_name(set(_layout.dag.links.keys()), name)
+    name = _generate_unique_name(set(ws.dag.links.keys()), name)
 
     try:
-        link = _layout.create_link(name,
-                                   arguments.source,
-                                   arguments.destination,
-                                   arguments.type,
-                                   raw_params)
+        link = ws.create_link(name,
+                              arguments.source,
+                              arguments.destination,
+                              arguments.type,
+                              raw_params)
 
         for default in link.params.defaults:
             print(f"WARNING: {default}: default parameter used")
@@ -60,7 +60,7 @@ def _create(arguments: argparse.Namespace):
         for unused in link.params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
-        _layout.store()
+        ws.store()
 
     except exceptions.LinkExists as exc:
         raise RuntimeError(f"{arguments.name}: link exists") from exc
@@ -84,11 +84,11 @@ def _create(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        _layout.remove_link(arguments.name)
-        _layout.store()
+        ws.remove_link(arguments.name)
+        ws.store()
 
     except exceptions.LinkNotFound as exc:
         raise RuntimeError(f"{arguments.name}: link not found") from exc
@@ -97,12 +97,12 @@ def _remove(arguments: argparse.Namespace):
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    if arguments.name not in _layout.dag.links:
+    if arguments.name not in ws.dag.links:
         raise RuntimeError(f"{arguments.name}: link not found")
 
-    print(f"{_layout.dag.links[arguments.name]}")
+    print(f"{ws.dag.links[arguments.name]}")
 
 
 def _list(arguments: argparse.Namespace):
@@ -110,19 +110,19 @@ def _list(arguments: argparse.Namespace):
 
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
-    for link in _layout.dag.links.values():
+    for link in ws.dag.links.values():
         print(f"{link}")
 
 
 def _show_type(arguments: argparse.Namespace):
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
+    ws = workspace.load(arguments.workspace)
 
     try:
-        link_type = _layout.exts.link(arguments.name)
+        link_type = ws.exts.link(arguments.name)
         print(f"{arguments.name}: {link_type}")
 
     except exceptions.LinkTypeNotFound as exc:
@@ -134,8 +134,8 @@ def _list_types(arguments: argparse.Namespace):
 
     """TODO"""
 
-    _layout = layout.load(arguments.layout)
-    link_types = _layout.exts.links()
+    ws = workspace.load(arguments.workspace)
+    link_types = ws.exts.links()
 
     for link in link_types:
         print(f"{link}: {link_types[link]}")

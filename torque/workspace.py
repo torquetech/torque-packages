@@ -19,7 +19,7 @@ from torque.v1 import interfaces
 
 
 _PROTO = r"^([^:]+)://"
-_LAYOUT_SCHEMA = schema.Schema({
+_WORKSPACE_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
         "uri": str,
@@ -91,18 +91,18 @@ class Config:
         self.default_group = default_group
 
 
-def _to_profile(profile_layout: dict[str, object]) -> Profile:
+def _to_profile(profile_workspace: dict[str, object]) -> Profile:
     """TODO"""
 
-    return Profile(profile_layout["name"],
-                   profile_layout["uri"],
-                   profile_layout["secret"])
+    return Profile(profile_workspace["name"],
+                   profile_workspace["uri"],
+                   profile_workspace["secret"])
 
 
-def _to_config(config_layout: dict[str, str]) -> Config:
+def _to_config(config_workspace: dict[str, str]) -> Config:
     """TODO"""
 
-    return Config(config_layout["default_group"])
+    return Config(config_workspace["default_group"])
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -170,15 +170,15 @@ def _from_link(link: model.Link) -> dict[str: object]:
     }
 
 
-def _generate_dag(dag_layout: dict[str, object], exts: extensions.Extensions) -> model.DAG:
+def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions) -> model.DAG:
     """TODO"""
 
-    dag = model.DAG(dag_layout["revision"])
+    dag = model.DAG(dag_workspace["revision"])
 
-    for group in dag_layout["groups"]:
+    for group in dag_workspace["groups"]:
         dag.create_group(group["name"])
 
-    for component in dag_layout["components"]:
+    for component in dag_workspace["components"]:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
 
         component_type = exts.component(component["type"])
@@ -189,7 +189,7 @@ def _generate_dag(dag_layout: dict[str, object], exts: extensions.Extensions) ->
                              component["type"],
                              params)
 
-    for link in dag_layout["links"]:
+    for link in dag_workspace["links"]:
         raw_params = {i["name"]: i["value"] for i in link["params"]}
 
         link_type = exts.link(link["type"])
@@ -250,7 +250,7 @@ def _load_defaults(dag: model.DAG, exts: extensions.Extensions) -> configuration
 def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
     """TODO"""
 
-    layout = {
+    workspace = {
         "profiles": [],
         "config": {
             "default_group": None
@@ -263,18 +263,18 @@ def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
         }
     }
 
-    layout["profiles"] = _from_profiles(profiles)
-    layout["config"] = _from_config(config)
+    workspace["profiles"] = _from_profiles(profiles)
+    workspace["config"] = _from_config(config)
 
-    dag_layout = layout["dag"]
+    dag_workspace = workspace["dag"]
 
-    dag_layout["revision"] = dag.revision
-    dag_layout["groups"] = [_from_group(i) for i in dag.groups.values()]
-    dag_layout["components"] = [_from_component(i) for i in dag.components.values()]
-    dag_layout["links"] = [_from_link(i) for i in dag.links.values()]
+    dag_workspace["revision"] = dag.revision
+    dag_workspace["groups"] = [_from_group(i) for i in dag.groups.values()]
+    dag_workspace["components"] = [_from_component(i) for i in dag.components.values()]
+    dag_workspace["links"] = [_from_link(i) for i in dag.links.values()]
 
     with open(f"{path}.tmp", "w", encoding="utf8") as file:
-        yaml.safe_dump(layout,
+        yaml.safe_dump(workspace,
                        stream=file,
                        default_flow_style=False,
                        sort_keys=False)
@@ -282,7 +282,7 @@ def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
     os.replace(f"{path}.tmp", path)
 
 
-class Layout:
+class Workspace:
     """TODO"""
 
     def __init__(self,
@@ -491,7 +491,7 @@ class Layout:
 def load(path: str) -> (model.DAG, Profiles):
     """TODO"""
 
-    layout = {
+    workspace = {
         "profiles": [],
         "config": {
             "default_group": None
@@ -506,12 +506,12 @@ def load(path: str) -> (model.DAG, Profiles):
 
     try:
         with open(path, encoding="utf8") as file:
-            layout = layout | yaml.safe_load(file)
+            workspace = workspace | yaml.safe_load(file)
 
     except FileNotFoundError:
         pass
 
-    layout = _LAYOUT_SCHEMA.validate(layout)
+    workspace = _WORKSPACE_SCHEMA.validate(workspace)
     exts = extensions.load()
 
     profiles = {
@@ -519,10 +519,10 @@ def load(path: str) -> (model.DAG, Profiles):
     }
 
     profiles = profiles | {
-        i["name"]: _to_profile(i) for i in layout["profiles"]
+        i["name"]: _to_profile(i) for i in workspace["profiles"]
     }
 
-    config = _to_config(layout["config"])
-    dag = _generate_dag(layout["dag"], exts)
+    config = _to_config(workspace["config"])
+    dag = _generate_dag(workspace["dag"], exts)
 
-    return Layout(path, profiles, config, dag, exts)
+    return Workspace(path, profiles, config, dag, exts)
