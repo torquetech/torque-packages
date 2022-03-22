@@ -13,8 +13,6 @@ from threading import Thread
 
 
 class Job:
-    # pylint: disable = R0903
-
     """TODO"""
 
     def __init__(self,
@@ -34,8 +32,6 @@ class Job:
 
 
 class Runner:
-    # pylint: disable = R0903
-
     """TODO"""
 
     def __init__(self, worker_count: int):

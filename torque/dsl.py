@@ -8,8 +8,6 @@ from torque.v1 import interfaces
 
 
 class Service(interfaces.DSLInstruction):
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self, name: str, image: str, *args, **kwargs):
@@ -20,8 +18,6 @@ class Service(interfaces.DSLInstruction):
 
 
 class Task(interfaces.DSLInstruction):
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self, name: str, image: str, *args, **kwargs):

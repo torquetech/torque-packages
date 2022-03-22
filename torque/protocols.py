@@ -10,8 +10,6 @@ from torque.v1 import interfaces
 
 
 class FileProtocol(interfaces.Protocol):
-    # pylint: disable=R0903
-
     """TODO"""
 
     @staticmethod

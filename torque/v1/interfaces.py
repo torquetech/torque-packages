@@ -101,8 +101,6 @@ class Link(ABC):
 
 
 class Protocol(ABC):
-    # pylint: disable=R0903
-
     """TODO"""
 
     @staticmethod
@@ -112,14 +110,10 @@ class Protocol(ABC):
 
 
 class DSLInstruction(ABC):
-    # pylint: disable=R0903
-
     """TODO"""
 
 
 class DSLGenerator(ABC):
-    # pylint: disable=R0903
-
     """TODO"""
 
     @staticmethod
@@ -129,6 +123,4 @@ class DSLGenerator(ABC):
 
 
 class DSL:
-    # pylint: disable=R0903
-
     """TODO"""

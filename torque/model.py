@@ -9,8 +9,6 @@ from torque import options
 
 
 class Group:
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self, name: str):
@@ -82,8 +80,6 @@ class Component:
 
 
 class Link:
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self,

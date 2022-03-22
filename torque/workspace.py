@@ -57,8 +57,6 @@ _WORKSPACE_SCHEMA = schema.Schema({
 
 
 class DefaultProfile:
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __repr__(self) -> str:
@@ -66,8 +64,6 @@ class DefaultProfile:
 
 
 class Profile:
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self, name: str, uri: str, secret: str):
@@ -83,8 +79,6 @@ Profiles = dict[str, Profile]
 
 
 class Config:
-    # pylint: disable=R0903
-
     """TODO"""
 
     def __init__(self, default_group: str):
