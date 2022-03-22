@@ -34,11 +34,7 @@ def main() -> int:
             "group": commands.group,
             "component": commands.component,
             "link": commands.link,
-            "build": commands.build,
-            "push": commands.push,
-            "generate": commands.generate,
-            "install": commands.install,
-            "uninstall": commands.uninstall
+            "deployment": commands.deployment
         }
 
         for cmd in cmds.values():

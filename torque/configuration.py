@@ -15,13 +15,13 @@ def _config_schema(allow_null_values: bool) -> schema.Schema:
     """TODO"""
 
     return schema.Schema({
-        "providers": [{
+        "provider": {
             "name": str,
             "configuration": [{
                 "name": str,
                 "value": str if not allow_null_values else schema.Or(str, None)
             }]
-        }],
+        },
         "dag": {
             "revision": int,
             "groups": [{
