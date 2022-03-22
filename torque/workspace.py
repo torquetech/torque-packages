@@ -18,11 +18,12 @@ def initialize_venv(target: str):
                     "-m", "venv",
                     "--prompt", "torque",
                     f"{target}/.torque/local/venv"],
+                   env=os.environ,
                    check=True)
 
     os.chdir(target)
 
-    env = {
+    env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv",
     }
 
@@ -44,7 +45,7 @@ def initialize_venv(target: str):
 def install_torque(package: str):
     """TODO"""
 
-    env = {
+    env = os.environ | {
         "PYTHONPATH": ".torque/system"
     }
 
@@ -92,7 +93,7 @@ def install_deps():
 
     requires += [""]
 
-    env = {
+    env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv"
     }
 

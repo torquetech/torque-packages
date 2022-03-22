@@ -43,7 +43,7 @@ def pass_through_command(argv, cwd: str, verbose: bool):
 
     cmd += argv
 
-    env = {
+    env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv",
         "PYTHONPATH": ".torque/system",
         "TORQUE_CWD": cwd
