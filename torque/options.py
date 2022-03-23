@@ -8,15 +8,14 @@ from collections import namedtuple
 
 from torque import exceptions
 
+from torque.v1 import interfaces
+
 
 RawOptions = dict[str, str]
 Options = namedtuple("Options", ["processed", "defaults", "unused", "raw"])
 
-OptionSpec = namedtuple("OptionSpec", ["name", "description", "default_value", "process_fn"])
-OptionsSpec = list[OptionSpec]
 
-
-def process(options_spec: OptionsSpec, raw_options: RawOptions) -> Options:
+def process(options_spec: interfaces.OptionsSpec, raw_options: RawOptions) -> Options:
     """TODO"""
 
     spec_keys = {i.name for i in options_spec}

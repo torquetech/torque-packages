@@ -8,9 +8,13 @@ import io
 
 from abc import ABC
 from abc import abstractmethod
+from collections import namedtuple
 
-from torque import options
 
+Options = dict[str, str]
+
+OptionSpec = namedtuple("OptionSpec", ["name", "description", "default_value", "process_fn"])
+OptionsSpec = list[OptionSpec]
 
 Tags = list[str]
 Target = dict[str, object]
@@ -22,8 +26,8 @@ class Component(ABC):
     def __init__(self,
                  name: str,
                  group: str,
-                 params: options.Options,
-                 config: options.Options):
+                 params: Options,
+                 config: Options):
         self.name = name
         self.group = group
         self.params = params
@@ -31,12 +35,12 @@ class Component(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> options.OptionsSpec:
+    def parameters() -> OptionsSpec:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> options.OptionsSpec:
+    def configuration() -> OptionsSpec:
         """TODO"""
 
     @abstractmethod
@@ -65,8 +69,8 @@ class Link(ABC):
 
     def __init__(self,
                  name: str,
-                 params: options.Options,
-                 config: options.Options,
+                 params: Options,
+                 config: Options,
                  source: Component,
                  destination: Component):
         # pylint: disable=R0913
@@ -79,12 +83,12 @@ class Link(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> options.OptionsSpec:
+    def parameters() -> OptionsSpec:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> options.OptionsSpec:
+    def configuration() -> OptionsSpec:
         """TODO"""
 
     @abstractmethod

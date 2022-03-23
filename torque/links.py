@@ -4,8 +4,6 @@
 
 """TODO"""
 
-from torque import options
-
 from torque.v1 import interfaces
 
 
@@ -13,16 +11,16 @@ class DependencyLink(interfaces.Link):
     """TODO"""
 
     @staticmethod
-    def parameters() -> options.OptionsSpec:
+    def parameters() -> interfaces.OptionsSpec:
         """TODO"""
 
-        return options.OptionsSpec()
+        return interfaces.OptionsSpec()
 
     @staticmethod
-    def configuration() -> options.OptionsSpec:
+    def configuration() -> interfaces.OptionsSpec:
         """TODO"""
 
-        return options.OptionsSpec()
+        return interfaces.OptionsSpec()
 
     def on_create(self):
         """TODO"""
