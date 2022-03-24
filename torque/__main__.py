@@ -49,9 +49,6 @@ def pass_through_command(argv, cwd: str, verbose: bool):
         "TORQUE_CWD": cwd
     }
 
-    if verbose:
-        env["VERBOSE"] = "1"
-
     subprocess.run(cmd, env=env, check=True)
 
 
