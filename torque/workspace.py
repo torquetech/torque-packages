@@ -407,7 +407,7 @@ class Workspace:
         os.replace(f"{self.path}.tmp", self.path)
 
 
-def load(path: str) -> (model.DAG, Profiles):
+def load(path: str) -> Workspace:
     """TODO"""
 
     workspace = {
