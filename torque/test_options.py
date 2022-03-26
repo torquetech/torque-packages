@@ -7,15 +7,15 @@
 from torque import exceptions
 from torque import options
 
-from torque.v1 import interfaces
+from torque.v1 import options as options_v1
 
 
 def test_test1():
     """TODO"""
 
     spec = [
-        interfaces.OptionSpec("p1", "desc1", "123", int),
-        interfaces.OptionSpec("p2", "desc2", None, float)
+        options_v1.OptionSpec("p1", "desc1", "123", int),
+        options_v1.OptionSpec("p2", "desc2", None, float)
     ]
 
     raw = {
@@ -38,8 +38,8 @@ def test_test2():
     """TODO"""
 
     spec = [
-        interfaces.OptionSpec("p1", "desc1", "123", int),
-        interfaces.OptionSpec("p2", "desc2", None, float)
+        options_v1.OptionSpec("p1", "desc1", "123", int),
+        options_v1.OptionSpec("p2", "desc2", None, float)
     ]
 
     raw = {
@@ -62,8 +62,8 @@ def test_test3():
     """TODO"""
 
     spec = [
-        interfaces.OptionSpec("p1", "desc1", "123", int),
-        interfaces.OptionSpec("p2", "desc2", None, float)
+        options_v1.OptionSpec("p1", "desc1", "123", int),
+        options_v1.OptionSpec("p2", "desc2", None, float)
     ]
 
     raw = {
@@ -81,8 +81,8 @@ def test_test4():
     """TODO"""
 
     spec = [
-        interfaces.OptionSpec("p1", "desc1", "123", int),
-        interfaces.OptionSpec("p2", "desc2", None, float)
+        options_v1.OptionSpec("p1", "desc1", "123", int),
+        options_v1.OptionSpec("p2", "desc2", None, float)
     ]
 
     raw = {

@@ -4,46 +4,41 @@
 
 """TODO"""
 
-import abc
 import importlib
 import schema
 
-from torque import dsl
 from torque import exceptions
 from torque import links
 from torque import protocols
 
-from torque.v1 import interfaces
+from torque.v1 import component as component_v1
+from torque.v1 import link as link_v1
+from torque.v1 import protocol as protocol_v1
+from torque.v1 import provider as provider_v1
 
 
 def _is_component(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, interfaces.Component)
+    return issubclass(obj, component_v1.Component)
 
 
 def _is_link(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, interfaces.Link)
+    return issubclass(obj, link_v1.Link)
 
 
 def _is_protocol(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, interfaces.Protocol)
+    return issubclass(obj, protocol_v1.Protocol)
 
 
-def _is_dsl_instruction(obj: object) -> bool:
+def _is_provider(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, interfaces.DSLInstruction)
-
-
-def _is_dsl_generator(obj: object) -> bool:
-    """TODO"""
-
-    return issubclass(obj, interfaces.DSLGenerator)
+    return issubclass(obj, provider_v1.Provider)
 
 
 _EXTENSION_SCHEMA = schema.Schema({
@@ -57,15 +52,8 @@ _EXTENSION_SCHEMA = schema.Schema({
         schema.Optional("protocols"): {
             schema.Optional(str): _is_protocol
         },
-        schema.Optional("dsl"): {
-            schema.Optional(str): {
-                schema.Optional(str): _is_dsl_instruction
-            }
-        },
         schema.Optional("providers"): {
-            schema.Optional(str): {
-                schema.Optional(str): _is_dsl_generator
-            }
+            schema.Optional(str): _is_provider
         }
     })
 }, ignore_extra_keys=True)
@@ -80,21 +68,7 @@ _DEFAULT_EXTENSIONS = {
         "protocols": {
             "file": protocols.FileProtocol
         },
-        "dsl": {
-            "base": {
-                "Service": dsl.Service,
-                "Task": dsl.Task
-            }
-        },
         "providers": {
-            # "aws-k8s": {
-            #     "Service": ServiceAWS,
-            #     "Task": TaskAWS
-            # },
-            # "docker-compose.dummy_ext": {
-            #     "Service": ServiceDockerCompose,
-            #     "Task": TaskDockerCompose
-            # }
         }
     }
 }
@@ -121,40 +95,50 @@ class Extensions:
 
         return self.exts["v1"]["protocols"]
 
-    def dsl_extensions(self) -> dict[str, object]:
+    def providers(self) -> dict[str, object]:
         """TODO"""
 
-        return self.exts["v1"]["dsl"]
+        return self.exts["v1"]["providers"]
 
-    def component(self, component_type: str) -> interfaces.Component:
+    def component(self, component_type: str) -> component_v1.Component:
         """TODO"""
 
-        _components = self.components()
+        components = self.components()
 
-        if component_type not in _components:
+        if component_type not in components:
             raise exceptions.ComponentTypeNotFound(component_type)
 
-        return _components[component_type]
+        return components[component_type]
 
-    def link(self, link_type: str) -> interfaces.Link:
+    def link(self, link_type: str) -> link_v1.Link:
         """TODO"""
 
-        _links = self.links()
+        links = self.links()
 
-        if link_type not in _links:
+        if link_type not in links:
             raise exceptions.LinkTypeNotFound(link_type)
 
-        return _links[link_type]
+        return links[link_type]
 
-    def protocol(self, protocol: str) -> callable:
+    def protocol(self, protocol: str) -> protocol_v1.Protocol:
         """TODO"""
 
-        _protocols = self.protocols()
+        protocols = self.protocols()
 
-        if protocol not in _protocols:
+        if protocol not in protocols:
             raise exceptions.ProtocolNotFound(protocol)
 
-        return _protocols[protocol]
+        return protocols[protocol]
+
+    def provider(self, provider: str) -> provider_v1.Provider:
+        """TODO"""
+
+        providers = self.providers()
+
+        if provider not in providers:
+            raise exceptions.ProviderNotFound(provider)
+
+        return providers[provider]
 
 
 def _merge(dict1: dict[str, object], dict2: dict[str, object]) -> dict[str, object]:
@@ -168,14 +152,11 @@ def _merge(dict1: dict[str, object], dict2: dict[str, object]) -> dict[str, obje
             else:
                 new_dict[key] = dict2[key]
 
-        elif issubclass(dict2[key], abc.ABC):
+        else:
             if key in new_dict:
                 raise exceptions.DuplicateExtensionEntry(key)
 
             new_dict[key] = dict2[key]
-
-        else:
-            assert False
 
     return new_dict
 

@@ -115,5 +115,9 @@ class DuplicateDSLEntry(TorqueException):
         self.entry = entry
 
 
+class ProviderNotFound(TorqueException):
+    """TODO"""
+
+
 class InvalidName(TorqueException):
     """TODO"""

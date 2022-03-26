@@ -15,7 +15,8 @@ from torque import extensions
 from torque import model
 from torque import options
 
-from torque.v1 import interfaces
+from torque.v1 import component as component_v1
+from torque.v1 import link as link_v1
 
 
 _PROTO = r"^([^:]+)://"
@@ -295,44 +296,28 @@ class Workspace:
         self.dag = dag
         self.exts = exts
 
-    def _component_instance(self, component: model.Component, config: options.Options) -> interfaces.Component:
+    def _create_component(self,
+                          component: model.Component,
+                          config: options.Options) -> component_v1.Component:
         """TODO"""
 
         component_type = self.exts.component(component.type)
 
-        return component_type(component.name, component.group, component.params, config)
+        return component_type(component.name,
+                              component.group,
+                              component.params,
+                              config)
 
-    def _link_instance(self,
-                       link: model.Link,
-                       config: options.Options,
-                       source: interfaces.Component,
-                       destination: interfaces.Component) -> interfaces.Link:
+    def _create_link(self,
+                     link: model.Link,
+                     config: options.Options,
+                     source: component_v1.Component,
+                     destination: component_v1.Component) -> link_v1.Link:
         """TODO"""
 
         link_type = self.exts.link(link.type)
 
         return link_type(link.name, link.params, config, source, destination)
-
-    def _initialize_dsl(self):
-        """TODO"""
-
-        if hasattr(interfaces.DSL, '_initialized'):
-            return
-
-        for ext_name, ext in self.exts.dsl_extensions().items():
-            for name, cls in ext.items():
-                if hasattr(interfaces.DSL, name):
-                    raise exceptions.DuplicateDSLEntry(ext_name, name)
-
-                setattr(interfaces.DSL, name, cls)
-
-        setattr(interfaces.DSL, '_initialized', True)
-
-    def load_dsl(self) -> interfaces.DSL:
-        """TODO"""
-
-        self._initialize_dsl()
-        return interfaces.DSL()
 
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
         """TODO"""
@@ -410,7 +395,11 @@ class Workspace:
 
         self.config.default_group = name
 
-    def create_component(self, name: str, group: str, type: str, raw_params: options.RawOptions) -> model.Component:
+    def create_component(self,
+                         name: str,
+                         group: str,
+                         type: str,
+                         raw_params: options.RawOptions) -> model.Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -423,7 +412,7 @@ class Workspace:
 
         component = self.dag.create_component(name, group, type, params)
 
-        instance = self._component_instance(component, None)
+        instance = self._create_component(component, None)
         instance.on_create()
 
         self.dag.revision += 1
@@ -435,7 +424,7 @@ class Workspace:
 
         component = self.dag.remove_component(name)
 
-        instance = self._component_instance(component, None)
+        instance = self._create_component(component, None)
         instance.on_remove()
 
         self.dag.revision += 1
@@ -462,10 +451,10 @@ class Workspace:
 
         self.dag.verify()
 
-        source = self._component_instance(self.dag.components[link.source], None)
-        destination = self._component_instance(self.dag.components[link.destination], None)
+        source = self._create_component(self.dag.components[link.source], None)
+        destination = self._create_component(self.dag.components[link.destination], None)
 
-        instance = self._link_instance(link, None, source, destination)
+        instance = self._create_link(link, None, source, destination)
         instance.on_create()
 
         self.dag.revision += 1
@@ -477,10 +466,10 @@ class Workspace:
 
         link = self.dag.remove_link(name)
 
-        source = self._component_instance(self.dag.components[link.source], None)
-        destination = self._component_instance(self.dag.components[link.destination], None)
+        source = self._create_component(self.dag.components[link.source], None)
+        destination = self._create_component(self.dag.components[link.destination], None)
 
-        instance = self._link_instance(link, None, source, destination)
+        instance = self._create_link(link, None, source, destination)
         instance.on_remove()
 
         self.dag.revision += 1

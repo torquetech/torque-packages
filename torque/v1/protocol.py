@@ -6,13 +6,14 @@
 
 import io
 
-from torque.v1 import protocol
+from abc import ABC
+from abc import abstractmethod
 
 
-class FileProtocol(protocol.Protocol):
+class Protocol(ABC):
     """TODO"""
 
     @staticmethod
+    @abstractmethod
     def fetch(uri: str, secret: str) -> io.TextIOWrapper:
         """TODO"""
-        return open(uri, encoding="utf8")

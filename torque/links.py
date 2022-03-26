@@ -4,23 +4,24 @@
 
 """TODO"""
 
-from torque.v1 import interfaces
+from torque.v1 import link as link_v1
+from torque.v1 import options as options_v1
 
 
-class DependencyLink(interfaces.Link):
+class DependencyLink(link_v1.Link):
     """TODO"""
 
     @staticmethod
-    def parameters() -> interfaces.OptionsSpec:
+    def parameters() -> options_v1.OptionsSpec:
         """TODO"""
 
-        return interfaces.OptionsSpec()
+        return options_v1.OptionsSpec()
 
     @staticmethod
-    def configuration() -> interfaces.OptionsSpec:
+    def configuration() -> options_v1.OptionsSpec:
         """TODO"""
 
-        return interfaces.OptionsSpec()
+        return options_v1.OptionsSpec()
 
     def on_create(self):
         """TODO"""

@@ -4,24 +4,30 @@
 
 """TODO"""
 
-from torque.v1 import interfaces
 
-
-class Service(interfaces.DSLInstruction):
+class Instruction:
     """TODO"""
 
-    def __init__(self, name: str, image: str, *args, **kwargs):
+
+class Service(Instruction):
+    """TODO"""
+
+    def __init__(self, name: str, image: str):
         # pylint: disable=W0613
 
         self.name = name
         self.image = image
 
 
-class Task(interfaces.DSLInstruction):
+class Task(Instruction):
     """TODO"""
 
-    def __init__(self, name: str, image: str, *args, **kwargs):
-        # pylint: disable=W0613
-
+    def __init__(self, name: str, image: str):
         self.name = name
         self.image = image
+
+
+def fqcn(instruction: Instruction) -> str:
+    """TODO"""
+    assert issubclass(type(instruction), Instruction)
+    return f"{instruction.__class__.__module__}.{instruction.__class__.__name__}"
