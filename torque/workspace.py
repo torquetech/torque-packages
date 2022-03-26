@@ -9,11 +9,11 @@ import re
 import schema
 import yaml
 
-from torque import configuration
 from torque import exceptions
 from torque import extensions
 from torque import model
 from torque import options
+from torque import profile
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
@@ -59,13 +59,6 @@ _WORKSPACE_SCHEMA = schema.Schema({
 })
 
 
-class DefaultProfile:
-    """TODO"""
-
-    def __repr__(self) -> str:
-        return "Profile(default)"
-
-
 class Profile:
     """TODO"""
 
@@ -78,10 +71,7 @@ class Profile:
         return f"Profile({self.name}, uri={self.uri}, secret={self.secret})"
 
 
-Profiles = dict[str, Profile]
-
-
-class Config:
+class Configuration:
     """TODO"""
 
     def __init__(self, default_group: str):
@@ -96,10 +86,10 @@ def _to_profile(profile_workspace: dict[str, object]) -> Profile:
                    profile_workspace["secret"])
 
 
-def _to_config(config_workspace: dict[str, str]) -> Config:
+def _to_config(config_workspace: dict[str, str]) -> Configuration:
     """TODO"""
 
-    return Config(config_workspace["default_group"])
+    return Configuration(config_workspace["default_group"])
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -112,15 +102,13 @@ def _from_profile(profile: Profile) -> dict[str, object]:
     }
 
 
-def _from_profiles(profiles: Profiles) -> list[dict[str, object]]:
+def _from_profiles(profiles: dict[str, Profile]) -> list[dict[str, object]]:
     """TODO"""
 
-    profile_list = filter(lambda x: not isinstance(x, DefaultProfile), profiles.values())
-
-    return [_from_profile(i) for i in profile_list]
+    return [_from_profile(i) for i in profiles.values()]
 
 
-def _from_config(config: Config) -> dict[str, str]:
+def _from_config(config: Configuration) -> dict[str, str]:
     """TODO"""
 
     return {
@@ -203,89 +191,13 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
     return dag
 
 
-def _load_defaults(dag: model.DAG, exts: extensions.Extensions) -> configuration.Configuration:
-    """TODO"""
-
-    config = {
-        "providers": [],
-        "dag": {
-            "revision": dag.revision,
-            "groups": [],
-            "components": [],
-            "links": []
-        }
-    }
-
-    groups = config["dag"]["groups"]
-    components = config["dag"]["components"]
-    links = config["dag"]["links"]
-
-    for group in dag.groups.values():
-        groups.append({"name": group.name, "configuration": []})
-
-    for component in dag.components.values():
-        component_type = exts.component(component.type)
-        components.append({
-            "name": component.name,
-            "configuration": [
-                {"name": i.name, "value": i.default_value} for i in component_type.configuration()
-            ]
-        })
-
-    for link in dag.links.values():
-        link_type = exts.link(link.type)
-        links.append({
-            "name": link.name,
-            "configuration": [
-                {"name": i.name, "value": i.default_value} for i in link_type.configuration()
-            ]
-        })
-
-    return configuration.create(config, True)
-
-
-def _store(path: str, profiles: Profiles, config: Config, dag: model.DAG):
-    """TODO"""
-
-    workspace = {
-        "profiles": [],
-        "config": {
-            "default_group": None
-        },
-        "dag": {
-            "revision": 0,
-            "groups": [],
-            "components": [],
-            "links": []
-        }
-    }
-
-    workspace["profiles"] = _from_profiles(profiles)
-    workspace["config"] = _from_config(config)
-
-    dag_workspace = workspace["dag"]
-
-    dag_workspace["revision"] = dag.revision
-    dag_workspace["groups"] = [_from_group(i) for i in dag.groups.values()]
-    dag_workspace["components"] = [_from_component(i) for i in dag.components.values()]
-    dag_workspace["links"] = [_from_link(i) for i in dag.links.values()]
-
-    with open(f"{path}.tmp", "w", encoding="utf8") as file:
-        yaml.safe_dump(workspace,
-                       stream=file,
-                       default_flow_style=False,
-                       sort_keys=False)
-
-    os.replace(f"{path}.tmp", path)
-
-
 class Workspace:
     """TODO"""
 
     def __init__(self,
                  path: str,
-                 profiles: Profiles,
-                 config: Config,
+                 profiles: dict[str, Profile],
+                 config: Configuration,
                  dag: model.DAG,
                  exts: extensions.Extensions):
         # pylint: disable=R0913
@@ -343,30 +255,20 @@ class Workspace:
 
         return self.profiles.pop(name)
 
-    def load_profile(self, name: str) -> configuration.Configuration:
+    def load_profile(self, name: str) -> profile.Profile:
         """TODO"""
 
         if name not in self.profiles:
             raise exceptions.ProfileNotFound(name)
 
-        if name == "default":
-            return _load_defaults(self.dag, self.exts)
+        p = self.profiles[name]
 
-        profile = self.profiles[name]
+        return profile.load(p.uri, p.secret, self.exts)
 
-        proto = "file"
-        match = re.match(_PROTO, profile.uri)
+    def profile_defaults(self, provider: str) -> dict[str, object]:
+        """TODO"""
 
-        if match:
-            proto = match[1]
-
-        protocol = self.exts.protocol(proto)
-        config = None
-
-        with protocol().fetch(profile.uri, profile.secret) as file:
-            config = yaml.safe_load(file)
-
-        return configuration.create(config, False)
+        return profile.defaults(provider, self.dag, self.exts)
 
     def create_group(self, name: str, set_default: bool):
         """TODO"""
@@ -479,7 +381,30 @@ class Workspace:
     def store(self):
         """TODO"""
 
-        _store(self.path, self.profiles, self.config, self.dag)
+        workspace = {
+            "profiles": _from_profiles(self.profiles),
+            "config": _from_config(self.config),
+            "dag": {
+                "revision": self.dag.revision,
+                "groups": [
+                    _from_group(i) for i in self.dag.groups.values()
+                ],
+                "components": [
+                    _from_component(i) for i in self.dag.components.values()
+                ],
+                "links": [
+                    _from_link(i) for i in self.dag.links.values()
+                ]
+            }
+        }
+
+        with open(f"{self.path}.tmp", "w", encoding="utf8") as file:
+            yaml.safe_dump(workspace,
+                           stream=file,
+                           default_flow_style=False,
+                           sort_keys=False)
+
+        os.replace(f"{self.path}.tmp", self.path)
 
 
 def load(path: str) -> (model.DAG, Profiles):
@@ -509,10 +434,6 @@ def load(path: str) -> (model.DAG, Profiles):
     exts = extensions.load()
 
     profiles = {
-        "default": DefaultProfile()
-    }
-
-    profiles = profiles | {
         i["name"]: _to_profile(i) for i in workspace["profiles"]
     }
 

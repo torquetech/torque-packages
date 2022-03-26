@@ -7,6 +7,7 @@
 import argparse
 import sys
 import schema
+import yaml
 
 from torque import exceptions
 from torque import workspace
@@ -49,22 +50,6 @@ def _show(arguments: argparse.Namespace):
     print(f"{ws.profiles[arguments.name]}")
 
 
-def _export(arguments: argparse.Namespace):
-    """TODO"""
-
-    ws = workspace.load(arguments.workspace)
-
-    try:
-        config = ws.load_profile(arguments.name)
-        config.dump(sys.stdout)
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: profile not found") from exc
-
-    except schema.SchemaError as exc:
-        raise RuntimeError(f"{arguments.name}: invalid configuration") from exc
-
-
 def _list(arguments: argparse.Namespace):
     """TODO"""
 
@@ -72,6 +57,26 @@ def _list(arguments: argparse.Namespace):
 
     for profile in ws.profiles.values():
         print(f"{profile}")
+
+
+def _defaults(arguments: argparse.Namespace):
+    """TODO"""
+
+    ws = workspace.load(arguments.workspace)
+
+    try:
+        defaults = ws.profile_defaults(arguments.provider)
+
+        yaml.safe_dump(defaults,
+                       stream=sys.stdout,
+                       default_flow_style=False,
+                       sort_keys=False)
+
+    except exceptions.ProfileNotFound as exc:
+        raise RuntimeError(f"{arguments.name}: profile not found") from exc
+
+    except schema.SchemaError as exc:
+        raise RuntimeError(f"{arguments.name}: invalid configuration") from exc
 
 
 def add_arguments(subparsers):
@@ -92,10 +97,10 @@ def add_arguments(subparsers):
     show_parser = subparsers.add_parser("show", help="show profile")
     show_parser.add_argument("name", help="profile name")
 
-    export_parser = subparsers.add_parser("export", help="export profile")
-    export_parser.add_argument("name", help="profile name")
-
     subparsers.add_parser("list", help="list profiles")
+
+    defaults_parser = subparsers.add_parser("defaults", help="show defaults")
+    defaults_parser.add_argument("provider", help="provider name")
 
 
 def run(arguments: argparse.Namespace):
@@ -105,8 +110,8 @@ def run(arguments: argparse.Namespace):
         "create": _create,
         "remove": _remove,
         "show": _show,
-        "export": _export,
-        "list": _list
+        "list": _list,
+        "defaults": _defaults
     }
 
     cmds[arguments.profile_cmd](arguments)
