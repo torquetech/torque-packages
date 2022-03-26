@@ -41,11 +41,10 @@ def _create(arguments: argparse.Namespace):
 
     if not arguments.name:
         name = f"{arguments.source}_{arguments.destination}"
+        name = _generate_unique_name(set(ws.dag.links.keys()), name)
 
     else:
         name = arguments.name
-
-    name = _generate_unique_name(set(ws.dag.links.keys()), name)
 
     try:
         link = ws.create_link(name,
