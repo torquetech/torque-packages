@@ -55,6 +55,9 @@ def _create(arguments: argparse.Namespace):
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
+    except exceptions.InvalidName as exc:
+        raise RuntimeError(f"{arguments.name}: invalid name") from exc
+
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""

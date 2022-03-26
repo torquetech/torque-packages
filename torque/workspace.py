@@ -19,6 +19,8 @@ from torque.v1 import interfaces
 
 
 _PROTO = r"^([^:]+)://"
+_NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
+
 _WORKSPACE_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
@@ -384,6 +386,9 @@ class Workspace:
     def create_group(self, name: str, set_default: bool):
         """TODO"""
 
+        if not re.match(_NAME, name):
+            raise exceptions.InvalidName(name)
+
         self.dag.create_group(name)
 
         if set_default:
@@ -409,6 +414,9 @@ class Workspace:
         # pylint: disable=W0622
 
         """TODO"""
+
+        if not re.match(_NAME, name):
+            raise exceptions.InvalidName(name)
 
         component_type = self.exts.component(type)
         params = options.process(component_type.parameters(), raw_params)
@@ -443,6 +451,9 @@ class Workspace:
         # pylint: disable=W0622,R0913
 
         """TODO"""
+
+        if not re.match(_NAME, name):
+            raise exceptions.InvalidName(name)
 
         link_type = self.exts.link(type)
         params = options.process(link_type.parameters(), raw_params)

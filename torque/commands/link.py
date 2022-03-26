@@ -40,7 +40,7 @@ def _create(arguments: argparse.Namespace):
         raw_params = {}
 
     if not arguments.name:
-        name = f"{arguments.source}-{arguments.destination}"
+        name = f"{arguments.source}_{arguments.destination}"
 
     else:
         name = arguments.name
@@ -79,6 +79,9 @@ def _create(arguments: argparse.Namespace):
 
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
+
+    except exceptions.InvalidName as exc:
+        raise RuntimeError(f"{arguments.name}: invalid name") from exc
 
 
 def _remove(arguments: argparse.Namespace):

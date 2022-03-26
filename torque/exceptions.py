@@ -113,3 +113,7 @@ class DuplicateDSLEntry(TorqueException):
 
         self.extension_name = extension_name
         self.entry = entry
+
+
+class InvalidName(TorqueException):
+    """TODO"""

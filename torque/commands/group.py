@@ -22,6 +22,9 @@ def _create(arguments: argparse.Namespace):
     except exceptions.GroupExists as exc:
         raise RuntimeError(f"{arguments.name}: group exists") from exc
 
+    except exceptions.InvalidName as exc:
+        raise RuntimeError(f"{arguments.name}: invalid name") from exc
+
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""
