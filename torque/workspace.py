@@ -424,12 +424,9 @@ def load(path: str) -> Workspace:
         }
     }
 
-    try:
+    if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             workspace = utils.merge_dicts(workspace, yaml.safe_load(file))
-
-    except FileNotFoundError:
-        pass
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
     exts = extensions.load()
