@@ -9,6 +9,7 @@ import re
 import schema
 import yaml
 
+from torque import deployment
 from torque import exceptions
 from torque import extensions
 from torque import model
@@ -30,7 +31,8 @@ _WORKSPACE_SCHEMA = schema.Schema({
         "secret": schema.Or(str, None)
     }],
     "config": {
-        "default_group": schema.Or(str, None)
+        "default_group": schema.Or(str, None),
+        "deployment_config": schema.Or(str, None)
     },
     "dag": {
         "revision": int,
@@ -59,6 +61,15 @@ _WORKSPACE_SCHEMA = schema.Schema({
     }
 })
 
+_DEPLOYMENTS_SCHEMA = schema.Schema({
+    "deployments": [{
+        "name": str,
+        "profile": str,
+        "groups": [str],
+        "components": [str]
+    }]
+})
+
 
 class Profile:
     """TODO"""
@@ -72,11 +83,29 @@ class Profile:
         return f"Profile({self.name}, uri={self.uri}, secret={self.secret})"
 
 
+class Deployment:
+    """TODO"""
+
+    def __init__(self, name: str, profile: str, groups: list[str], components: list[str]):
+        self.name = name
+        self.profile = profile
+        self.groups = groups
+        self.components = components
+
+    def __repr__(self) -> str:
+        return \
+            f"Deployment({self.name}, profile={self.profile}" \
+            f", groups={self.groups}, components={self.components})"
+
+
 class Configuration:
     """TODO"""
 
-    def __init__(self, default_group: str):
+    def __init__(self,
+                 default_group: str,
+                 deployment_config: str):
         self.default_group = default_group
+        self.deployment_config = deployment_config
 
 
 def _to_profile(profile_workspace: dict[str, object]) -> Profile:
@@ -90,7 +119,25 @@ def _to_profile(profile_workspace: dict[str, object]) -> Profile:
 def _to_config(config_workspace: dict[str, str]) -> Configuration:
     """TODO"""
 
-    return Configuration(config_workspace["default_group"])
+    return Configuration(config_workspace["default_group"],
+                         config_workspace["deployment_config"])
+
+
+def _to_deployment(deployment: dict[str, object]) -> Deployment:
+    """TODO"""
+
+    return Deployment(deployment["name"],
+                      deployment["profile"],
+                      deployment["groups"],
+                      deployment["components"])
+
+
+def _to_deployments(deployments: list[dict[str, object]]) -> dict[str, Deployment]:
+    """TODO"""
+
+    return {
+        i["name"]: _to_deployment(i) for i in deployments
+    }
 
 
 def _from_profile(profile: Profile) -> dict[str, object]:
@@ -113,7 +160,8 @@ def _from_config(config: Configuration) -> dict[str, str]:
     """TODO"""
 
     return {
-        "default_group": config.default_group
+        "default_group": config.default_group,
+        "deployment_config": config.deployment_config
     }
 
 
@@ -153,6 +201,17 @@ def _from_link(link: model.Link) -> dict[str: object]:
         "destination": link.destination,
         "type": link.type,
         "params": _from_params(link.params)
+    }
+
+
+def _from_deployment(deployment: Deployment) -> dict[str, object]:
+    """TODO"""
+
+    return {
+        "name": deployment.name,
+        "profile": deployment.profile,
+        "groups": deployment.groups,
+        "components": deployment.components
     }
 
 
@@ -200,7 +259,8 @@ class Workspace:
                  profiles: dict[str, Profile],
                  config: Configuration,
                  dag: model.DAG,
-                 exts: extensions.Extensions):
+                 exts: extensions.Extensions,
+                 deployments: dict[str, Deployment]):
         # pylint: disable=R0913
 
         self.path = path
@@ -208,6 +268,7 @@ class Workspace:
         self.config = config
         self.dag = dag
         self.exts = exts
+        self.deployments = deployments
 
     def _create_component(self,
                           component: model.Component,
@@ -270,6 +331,50 @@ class Workspace:
         """TODO"""
 
         return profile.defaults(provider, self.dag, self.exts)
+
+    def create_deployment(self,
+                          name: str,
+                          profile: str,
+                          groups: list[str],
+                          components: list[str]) -> Deployment:
+        """TODO"""
+
+        if name in self.deployments:
+            raise exceptions.DeploymentExists(name)
+
+        if profile not in self.profiles:
+            raise exceptions.ProfileNotFound(profile)
+
+        for group in groups:
+            if group not in self.dag.groups:
+                raise exceptions.GroupNotFound(group)
+
+        for component in components:
+            if component not in self.dag.components:
+                raise exceptions.ComponentNotFound(component)
+
+        deployment = Deployment(name, profile, groups, components)
+
+        self.deployments[name] = deployment
+        return deployment
+
+    def remove_deployment(self, name: str) -> Deployment:
+        """TODO"""
+
+        if name not in self.deployments:
+            raise exceptions.DeploymentNotFound(name)
+
+        return self.deployments.pop(name)
+
+    def load_deployment(self, name: str) -> deployment.Deployment:
+        """TODO"""
+
+        if name not in self.deployments:
+            raise exceptions.DeploymentNotFound(name)
+
+        d = self.deployments[name]
+
+        return deployment.Deployment(d.name)
 
     def create_group(self, name: str, set_default: bool):
         """TODO"""
@@ -379,7 +484,7 @@ class Workspace:
 
         return link
 
-    def store(self):
+    def _store_workspace(self):
         """TODO"""
 
         workspace = {
@@ -407,6 +512,29 @@ class Workspace:
 
         os.replace(f"{self.path}.tmp", self.path)
 
+    def _store_deployments(self):
+        """TODO"""
+
+        deployments = {
+            "deployments": [
+                _from_deployment(i) for i in self.deployments.values()
+            ]
+        }
+
+        with open(f"{self.config.deployment_config}.tmp", "w", encoding="utf8") as file:
+            yaml.safe_dump(deployments,
+                           stream=file,
+                           default_flow_style=False,
+                           sort_keys=False)
+
+        os.replace(f"{self.config.deployment_config}.tmp", self.config.deployment_config)
+
+    def store(self):
+        """TODO"""
+
+        self._store_workspace()
+        self._store_deployments()
+
 
 def load(path: str) -> Workspace:
     """TODO"""
@@ -414,7 +542,8 @@ def load(path: str) -> Workspace:
     workspace = {
         "profiles": [],
         "config": {
-            "default_group": None
+            "default_group": None,
+            "deployment_config": ".torque/local/deployments.yaml"
         },
         "dag": {
             "revision": 0,
@@ -438,4 +567,14 @@ def load(path: str) -> Workspace:
     config = _to_config(workspace["config"])
     dag = _generate_dag(workspace["dag"], exts)
 
-    return Workspace(path, profiles, config, dag, exts)
+    deployments = {
+        "deployments": []
+    }
+
+    if os.path.exists(config.deployment_config):
+        with open(config.deployment_config, encoding="utf8") as file:
+            deployments = utils.merge_dicts(deployments, yaml.safe_load(file))
+
+    deployments = _to_deployments(deployments["deployments"])
+
+    return Workspace(path, profiles, config, dag, exts, deployments)

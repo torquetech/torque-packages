@@ -111,3 +111,11 @@ class ProviderNotFound(TorqueException):
 
 class InvalidName(TorqueException):
     """TODO"""
+
+
+class DeploymentExists(TorqueException):
+    """TODO"""
+
+
+class DeploymentNotFound(TorqueException):
+    """TODO"""
