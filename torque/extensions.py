@@ -10,6 +10,7 @@ import schema
 from torque import exceptions
 from torque import links
 from torque import protocols
+from torque import utils
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
@@ -141,26 +142,6 @@ class Extensions:
         return providers[provider]
 
 
-def _merge(dict1: dict[str, object], dict2: dict[str, object]) -> dict[str, object]:
-    new_dict = {} | dict1
-
-    for key in dict2.keys():
-        if isinstance(dict2[key], dict):
-            if key in new_dict:
-                new_dict[key] = _merge(new_dict[key], dict2[key])
-
-            else:
-                new_dict[key] = dict2[key]
-
-        else:
-            if key in new_dict:
-                raise exceptions.DuplicateExtensionEntry(key)
-
-            new_dict[key] = dict2[key]
-
-    return new_dict
-
-
 def load() -> Extensions:
     """TODO"""
 
@@ -177,9 +158,9 @@ def load() -> Extensions:
                 extension = entry_point.load()
 
                 extension = _EXTENSION_SCHEMA.validate(extension)
-                extensions = _merge(extensions, extension)
+                extensions = utils.merge_dicts(extensions, extension, False)
 
-            except exceptions.DuplicateExtensionEntry as exc:
+            except exceptions.DuplicateDictEntry as exc:
                 print(f"WARNING: {entry_point.name}({exc}): duplicate entry")
 
             except Exception as exc:

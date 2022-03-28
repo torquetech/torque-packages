@@ -101,7 +101,7 @@ class ProfileNotFound(TorqueException):
     """TODO"""
 
 
-class DuplicateExtensionEntry(TorqueException):
+class DuplicateDictEntry(TorqueException):
     """TODO"""
 
 

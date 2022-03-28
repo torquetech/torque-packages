@@ -14,6 +14,7 @@ from torque import extensions
 from torque import model
 from torque import options
 from torque import profile
+from torque import utils
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
@@ -425,7 +426,7 @@ def load(path: str) -> Workspace:
 
     try:
         with open(path, encoding="utf8") as file:
-            workspace = workspace | yaml.safe_load(file)
+            workspace = utils.merge_dicts(workspace, yaml.safe_load(file))
 
     except FileNotFoundError:
         pass
