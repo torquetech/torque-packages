@@ -1,3 +1,3 @@
 [MESSAGES CONTROL]
-disable = R0801,R0903,C0103,W0621
+disable = R0801,R0903,C0103,W0621,R0912
 max-line-length = 120
