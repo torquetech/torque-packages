@@ -25,9 +25,3 @@ class Task(Instruction):
     def __init__(self, name: str, image: str):
         self.name = name
         self.image = image
-
-
-def fqcn(instruction: Instruction) -> str:
-    """TODO"""
-    assert issubclass(type(instruction), Instruction)
-    return f"{instruction.__class__.__module__}.{instruction.__class__.__name__}"

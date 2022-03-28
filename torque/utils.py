@@ -8,6 +8,12 @@
 from torque import exceptions
 
 
+def fqcn(instance: type) -> str:
+    """TODO"""
+
+    return f"{instance.__class__.__module__}.{instance.__class__.__name__}"
+
+
 def merge_dicts(dict1: dict[str, object],
                 dict2: dict[str, object],
                 allow_overwrites: bool = True) -> dict[str, object]:
