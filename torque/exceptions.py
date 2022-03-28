@@ -105,16 +105,6 @@ class DuplicateDictEntry(TorqueException):
     """TODO"""
 
 
-class DuplicateDSLEntry(TorqueException):
-    """TODO"""
-
-    def __init__(self, extension_name: str, entry: str):
-        super().__init__("")
-
-        self.extension_name = extension_name
-        self.entry = entry
-
-
 class ProviderNotFound(TorqueException):
     """TODO"""
 
