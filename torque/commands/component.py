@@ -33,14 +33,7 @@ def _create(arguments: argparse.Namespace):
         raise RuntimeError("group not specified")
 
     try:
-        component = ws.create_component(arguments.name, group, arguments.type, raw_params)
-
-        for default in component.params.defaults:
-            print(f"WARNING: {default}: default parameter used")
-
-        for unused in component.params.unused:
-            print(f"WARNING: {unused}: unused parameter")
-
+        ws.create_component(arguments.name, group, arguments.type, raw_params)
         ws.store()
 
     except exceptions.ComponentExists as exc:

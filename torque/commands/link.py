@@ -47,18 +47,11 @@ def _create(arguments: argparse.Namespace):
         name = arguments.name
 
     try:
-        link = ws.create_link(name,
-                              arguments.source,
-                              arguments.destination,
-                              arguments.type,
-                              raw_params)
-
-        for default in link.params.defaults:
-            print(f"WARNING: {default}: default parameter used")
-
-        for unused in link.params.unused:
-            print(f"WARNING: {unused}: unused parameter")
-
+        ws.create_link(name,
+                       arguments.source,
+                       arguments.destination,
+                       arguments.type,
+                       raw_params)
         ws.store()
 
     except exceptions.LinkExists as exc:

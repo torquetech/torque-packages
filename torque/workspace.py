@@ -418,6 +418,12 @@ class Workspace:
         component_type = self.exts.component(type)
         params = options.process(component_type.parameters(), raw_params)
 
+        for default in params.defaults:
+            print(f"WARNING: {default}: default parameter used")
+
+        for unused in params.unused:
+            print(f"WARNING: {unused}: unused parameter")
+
         component = self.dag.create_component(name, group, type, params)
 
         instance = self._create_component(component, None)
@@ -454,6 +460,12 @@ class Workspace:
 
         link_type = self.exts.link(type)
         params = options.process(link_type.parameters(), raw_params)
+
+        for default in params.defaults:
+            print(f"WARNING: {default}: default parameter used")
+
+        for unused in params.unused:
+            print(f"WARNING: {unused}: unused parameter")
 
         link = self.dag.create_link(name, source, destination, type, params)
 
