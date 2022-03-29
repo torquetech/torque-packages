@@ -119,3 +119,7 @@ class DeploymentExists(TorqueException):
 
 class DeploymentNotFound(TorqueException):
     """TODO"""
+
+
+class NoComponentsSelected(TorqueException):
+    """TODO"""

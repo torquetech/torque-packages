@@ -65,8 +65,8 @@ _DEPLOYMENTS_SCHEMA = schema.Schema({
     "deployments": [{
         "name": str,
         "profile": str,
-        "groups": [str],
-        "components": [str]
+        "groups": schema.Or([str], None),
+        "components": schema.Or([str], None)
     }]
 })
 
@@ -293,6 +293,39 @@ class Workspace:
 
         return link_type(link.name, link.params, config, source, destination)
 
+    def _collect_components(self, groups: list[str], components: list[str]) -> list[str]:
+        """TODO"""
+
+        if groups is None and components is None:
+            return None
+
+        collected_components = set()
+
+        for group in groups or []:
+            if group not in self.dag.groups:
+                print(f"WARNING: {group}: group not found")
+
+            else:
+                for component in self.dag.components.values():
+                    if component.group != group:
+                        continue
+
+                    collected_components.add(component.name)
+
+        for component in components or []:
+            if component in self.dag.components:
+                collected_components.add(component)
+
+            else:
+                print(f"WARNING: {component}: component not found")
+
+        return list(collected_components)
+
+    def _load_deployment(self, components: list[str], profile: profile.Profile) -> deployment.Deployment:
+        """TODO"""
+
+        return deployment.load(components, profile, self.dag, self.exts)
+
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
         """TODO"""
 
@@ -345,11 +378,11 @@ class Workspace:
         if profile not in self.profiles:
             raise exceptions.ProfileNotFound(profile)
 
-        for group in groups:
+        for group in groups or []:
             if group not in self.dag.groups:
                 raise exceptions.GroupNotFound(group)
 
-        for component in components:
+        for component in components or []:
             if component not in self.dag.components:
                 raise exceptions.ComponentNotFound(component)
 
@@ -372,9 +405,11 @@ class Workspace:
         if name not in self.deployments:
             raise exceptions.DeploymentNotFound(name)
 
-        d = self.deployments[name]
+        deployment = self.deployments[name]
+        components = self._collect_components(deployment.groups, deployment.components)
+        profile = self.load_profile(deployment.profile)
 
-        return deployment.Deployment(d.name)
+        return self._load_deployment(components, profile)
 
     def create_group(self, name: str, set_default: bool):
         """TODO"""

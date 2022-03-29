@@ -29,5 +29,7 @@ class DependencyLink(link_v1.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self):
+    def on_build(self, source_artifacts: list[str]) -> list[str]:
         """TODO"""
+
+        return []

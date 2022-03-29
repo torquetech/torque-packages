@@ -47,5 +47,5 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self):
+    def on_build(self, source_artifacts: list[str]) -> list[str]:
         """TODO"""

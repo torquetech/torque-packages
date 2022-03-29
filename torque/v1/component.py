@@ -53,5 +53,5 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self):
+    def on_build(self) -> list[str]:
         """TODO"""
