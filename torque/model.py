@@ -4,6 +4,8 @@
 
 """TODO"""
 
+from copy import deepcopy
+
 from torque import exceptions
 from torque import options
 
@@ -270,3 +272,40 @@ class DAG:
         """TODO"""
 
         return name in self.groups
+
+    def subset(self, components: list[str]) -> "DAG":
+        """TODO"""
+
+        subset = deepcopy(self)
+
+        if components is None:
+            return subset
+
+        components_to_keep = set()
+        links_to_keep = set()
+
+        while len(components) != 0:
+            component = subset.components[components.pop()]
+
+            if component.name not in components_to_keep:
+                components_to_keep.add(component.name)
+
+                for component_name, link_name in component.inbound_links.items():
+                    links_to_keep.add(link_name)
+                    components.append(component_name)
+
+        components_to_remove = set(subset.components.keys()) - components_to_keep
+        links_to_remove = set(subset.links.keys()) - links_to_keep
+
+        for component_name in components_to_remove:
+            subset.components.pop(component_name)
+
+        for link_name in links_to_remove:
+            subset.links.pop(link_name)
+
+        for component in subset.components.values():
+            for component_name in components_to_remove:
+                component.inbound_links.pop(component_name, None)
+                component.outbound_links.pop(component_name, None)
+
+        return subset
