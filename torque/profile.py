@@ -55,6 +55,11 @@ class Profile:
     def __init__(self, config: dict[str, object]):
         self.config = config
 
+    def revision(self) -> int:
+        """TODO"""
+
+        return self.config["dag"]["revision"]
+
     def provider(self) -> options.RawOptions:
         """TODO"""
 
@@ -138,6 +143,7 @@ def load(uri: str, secret: str, exts: extensions.Extensions) -> Profile:
             provider["name"]: _to_raw(provider["configuration"])
         },
         "dag": {
+            "revision": dag["revision"],
             "groups": {
                 i["name"]: _to_raw(i["configuration"]) for i in dag["groups"]
             },
