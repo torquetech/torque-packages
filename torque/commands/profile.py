@@ -23,7 +23,7 @@ def _create(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.ProfileExists as exc:
-        raise RuntimeError(f"{arguments.name}: profile exists") from exc
+        raise RuntimeError(f"{exc}: profile exists") from exc
 
 
 def _remove(arguments: argparse.Namespace):
@@ -36,7 +36,7 @@ def _remove(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: profile not found") from exc
+        raise RuntimeError(f"{exc}: profile not found") from exc
 
 
 def _show(arguments: argparse.Namespace):
@@ -73,10 +73,10 @@ def _defaults(arguments: argparse.Namespace):
                        sort_keys=False)
 
     except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: profile not found") from exc
+        raise RuntimeError(f"{exc}: profile not found") from exc
 
     except schema.SchemaError as exc:
-        raise RuntimeError(f"{arguments.name}: invalid configuration") from exc
+        raise RuntimeError(f"{exc}: invalid configuration") from exc
 
 
 def add_arguments(subparsers):

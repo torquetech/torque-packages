@@ -37,19 +37,19 @@ def _create(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.ComponentExists as exc:
-        raise RuntimeError(f"{arguments.name}: component exists") from exc
+        raise RuntimeError(f"{exc}: component exists") from exc
 
     except exceptions.GroupNotFound as exc:
-        raise RuntimeError(f"{arguments.group}: group not found") from exc
+        raise RuntimeError(f"{exc}: group not found") from exc
 
     except exceptions.ComponentTypeNotFound as exc:
-        raise RuntimeError(f"{arguments.type}: component type not found") from exc
+        raise RuntimeError(f"{exc}: component type not found") from exc
 
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
     except exceptions.InvalidName as exc:
-        raise RuntimeError(f"{arguments.name}: invalid name") from exc
+        raise RuntimeError(f"{exc}: invalid name") from exc
 
 
 def _remove(arguments: argparse.Namespace):
@@ -63,10 +63,10 @@ def _remove(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.ComponentNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: component not found") from exc
+        raise RuntimeError(f"{exc}: component not found") from exc
 
     except exceptions.ComponentStillConnected as exc:
-        raise RuntimeError(f"{arguments.name}: component still connected") from exc
+        raise RuntimeError(f"{exc}: component still connected") from exc
 
 
 def _show(arguments: argparse.Namespace):
@@ -101,7 +101,7 @@ def _show_type(arguments: argparse.Namespace):
         print(f"{arguments.name}: {component_type}")
 
     except exceptions.ComponentTypeNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: component type not found") from exc
+        raise RuntimeError(f"{exc}: component type not found") from exc
 
 
 def _list_types(arguments: argparse.Namespace):

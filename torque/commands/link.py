@@ -55,25 +55,25 @@ def _create(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.LinkExists as exc:
-        raise RuntimeError(f"{arguments.name}: link exists") from exc
+        raise RuntimeError(f"{exc}: link exists") from exc
 
     except exceptions.ComponentNotFound as exc:
         raise RuntimeError(f"{exc}: component not found") from exc
 
     except exceptions.LinkTypeNotFound as exc:
-        raise RuntimeError(f"{arguments.type}: link type not found") from exc
+        raise RuntimeError(f"{exc}: link type not found") from exc
 
     except exceptions.ComponentsAlreadyConnected as exc:
-        raise RuntimeError(f"{arguments.name}: components already connected") from exc
+        raise RuntimeError(f"{exc}: components already connected") from exc
 
     except exceptions.CycleDetected as exc:
-        raise RuntimeError(f"{arguments.name}: cycle detected") from exc
+        raise RuntimeError(f"{exc}: cycle detected") from exc
 
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
 
     except exceptions.InvalidName as exc:
-        raise RuntimeError(f"{arguments.name}: invalid name") from exc
+        raise RuntimeError(f"{exc}: invalid name") from exc
 
 
 def _remove(arguments: argparse.Namespace):
@@ -86,7 +86,7 @@ def _remove(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.LinkNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: link not found") from exc
+        raise RuntimeError(f"{exc}: link not found") from exc
 
 
 def _show(arguments: argparse.Namespace):
@@ -121,7 +121,7 @@ def _show_type(arguments: argparse.Namespace):
         print(f"{arguments.name}: {link_type}")
 
     except exceptions.LinkTypeNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: link type not found") from exc
+        raise RuntimeError(f"{exc}: link type not found") from exc
 
 
 def _list_types(arguments: argparse.Namespace):

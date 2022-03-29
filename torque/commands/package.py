@@ -30,10 +30,10 @@ def _remove(arguments: argparse.Namespace):
                                ws.dag.used_link_types())
 
     except exceptions.PackageNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: package not found") from exc
+        raise RuntimeError(f"{exc}: package not found") from exc
 
     except exceptions.PackageInUse as exc:
-        raise RuntimeError(f"{arguments.name}: package in use") from exc
+        raise RuntimeError(f"{exc}: package in use") from exc
 
 
 def _list(arguments: argparse.Namespace):

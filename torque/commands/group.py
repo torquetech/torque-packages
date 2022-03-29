@@ -20,10 +20,10 @@ def _create(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.GroupExists as exc:
-        raise RuntimeError(f"{arguments.name}: group exists") from exc
+        raise RuntimeError(f"{exc}: group exists") from exc
 
     except exceptions.InvalidName as exc:
-        raise RuntimeError(f"{arguments.name}: invalid name") from exc
+        raise RuntimeError(f"{exc}: invalid name") from exc
 
 
 def _remove(arguments: argparse.Namespace):
@@ -36,10 +36,10 @@ def _remove(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.GroupNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: group not found") from exc
+        raise RuntimeError(f"{exc}: group not found") from exc
 
     except exceptions.GroupNotEmpty as exc:
-        raise RuntimeError(f"{arguments.name}: group not empty") from exc
+        raise RuntimeError(f"{exc}: group not empty") from exc
 
 
 def _set_default(arguments: argparse.Namespace):
@@ -52,7 +52,7 @@ def _set_default(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.GroupNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: group not found") from exc
+        raise RuntimeError(f"{exc}: group not found") from exc
 
 
 def _show(arguments: argparse.Namespace):

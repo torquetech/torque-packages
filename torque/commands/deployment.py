@@ -36,10 +36,10 @@ def _create(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.DeploymentExists as exc:
-        raise RuntimeError(f"{arguments.name}: deployment exists") from exc
+        raise RuntimeError(f"{exc}: deployment exists") from exc
 
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{arguments.profile}: profile not found") from exc
+    except exceptions.ProfileNotFound as exc:
+        raise RuntimeError(f"{exc}: profile not found") from exc
 
     except exceptions.GroupNotFound as exc:
         raise RuntimeError(f"{exc}: group not found") from exc
@@ -58,7 +58,7 @@ def _remove(arguments: argparse.Namespace):
         ws.store()
 
     except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{arguments.name}: deployment not found") from exc
+        raise RuntimeError(f"{exc}: deployment not found") from exc
 
 
 def _show(arguments: argparse.Namespace):
