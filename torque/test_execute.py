@@ -19,20 +19,19 @@ class JobRunner:
         self.completed_components = []
         self.completed_links = []
 
-    def on_component(self, component: str) -> bool:
+    def on_execute(self, type: str, name: str) -> bool:
         """TODO"""
 
         with self.lock:
-            self.completed_components.append(component)
-            return True
+            if type == "component":
+                self.completed_components.append(name)
 
-    def on_link(self, source: str, destination: str, link: str) -> bool:
-        # pylint: disable=W0613
+            elif type == "link":
+                self.completed_links.append(name)
 
-        """TODO"""
+            else:
+                assert False
 
-        with self.lock:
-            self.completed_links.append(link)
             return True
 
     def verify(self, dag: model.DAG):
@@ -79,7 +78,7 @@ def test_test1():
     assert _has_cycles(dag) is False
 
     runner = JobRunner()
-    execute.from_roots(1, dag, runner.on_component, runner.on_link)
+    execute.from_roots(1, dag, runner.on_execute)
 
     runner.verify(dag)
 
@@ -108,6 +107,6 @@ def test_test2():
     assert _has_cycles(dag) is False
 
     runner = JobRunner()
-    execute.from_leafs(1, dag, runner.on_component, runner.on_link)
+    execute.from_leafs(1, dag, runner.on_execute)
 
     runner.verify(dag)

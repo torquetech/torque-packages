@@ -4,62 +4,59 @@
 
 """TODO"""
 
+from collections.abc import Callable
+
 from torque.model import DAG
 
 from torque.jobs import Job
 from torque.jobs import Runner
 
 
-def _component_helper(_, data: tuple) -> bool:
-    (callback, component) = data
-    return callback(component)
+def _callback_helper(_, data: tuple) -> bool:
+    callback, type, args = data
+    return callback(type, args)
 
 
-def _link_helper(_, data: tuple) -> bool:
-    (callback, source, destination, link) = data
-    return callback(source, destination, link)
-
-
-def from_roots(worker_count: int, dag: DAG, component_callback, link_callback):
+def from_roots(worker_count: int, dag: DAG, callback: Callable[[object], bool]):
     """TODO"""
 
     jobs = []
 
     for component in dag.components:
         depends = [f"link/{link}" for link in dag.components[component].inbound_links.values()]
-        data = [component_callback, component]
+        data = (callback, "component", component)
 
-        job = Job(f"component/{component}", depends, _component_helper, data)
+        job = Job(f"component/{component}", depends, _callback_helper, data)
         jobs.append(job)
 
-        for destination, link in dag.components[component].outbound_links.items():
+        for _, link in dag.components[component].outbound_links.items():
             depends = [f"component/{component}"]
-            data = [link_callback, component, destination, link]
+            data = (callback, "link", link)
 
-            job = Job(f"link/{link}", depends, _link_helper, data)
+            job = Job(f"link/{link}", depends, _callback_helper, data)
             jobs.append(job)
 
     runner = Runner(worker_count)
     runner.execute(jobs)
 
 
-def from_leafs(worker_count: int, dag: DAG, component_callback, link_callback):
+def from_leafs(worker_count: int, dag: DAG, callback: Callable[[object], bool]):
     """TODO"""
 
     jobs = []
 
     for component in dag.components:
         depends = [f"link/{link}" for link in dag.components[component].outbound_links.values()]
-        data = [component_callback, component]
+        data = (callback, "component", component)
 
-        job = Job(f"component/{component}", depends, _component_helper, data)
+        job = Job(f"component/{component}", depends, _callback_helper, data)
         jobs.append(job)
 
-        for source, link in dag.components[component].inbound_links.items():
+        for _, link in dag.components[component].inbound_links.items():
             depends = [f"component/{component}"]
-            data = [link_callback, source, component, link]
+            data = (callback, "link", link)
 
-            job = Job(f"link/{link}", depends, _link_helper, data)
+            job = Job(f"link/{link}", depends, _callback_helper, data)
             jobs.append(job)
 
     runner = Runner(worker_count)
