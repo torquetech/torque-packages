@@ -111,7 +111,7 @@ def _load_provider(profile: profile.Profile,
     config = options.process(provider.configuration(), config)
 
     for default in config.defaults:
-        print(f"WARNING: {name}: {default}: used default parameter")
+        print(f"WARNING: {name}: {default}: used default value")
 
     for unused in config.unused:
         print(f"WARNING: {name}: {unused}: unused parameter")
@@ -133,7 +133,7 @@ def _load_components(dag: model.DAG,
         config = options.process(req_config, raw_config)
 
         for default in config.defaults:
-            print(f"WARNING: {component.name}: {default}: used default parameter")
+            print(f"WARNING: {component.name}: {default}: used default value")
 
         for unused in config.unused:
             print(f"WARNING: {component.name}: {unused}: unused parameter")
@@ -157,7 +157,7 @@ def _load_links(dag: model.DAG,
         config = options.process(req_config, raw_config)
 
         for default in config.defaults:
-            print(f"WARNING: {link.name}: {default}: used default parameter")
+            print(f"WARNING: {link.name}: {default}: used default value")
 
         for unused in config.unused:
             print(f"WARNING: {link.name}: {unused}: unused parameter")

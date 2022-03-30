@@ -454,7 +454,7 @@ class Workspace:
         params = options.process(component_type.parameters(), raw_params)
 
         for default in params.defaults:
-            print(f"WARNING: {default}: default parameter used")
+            print(f"WARNING: {default}: used default value")
 
         for unused in params.unused:
             print(f"WARNING: {unused}: unused parameter")
@@ -497,7 +497,7 @@ class Workspace:
         params = options.process(link_type.parameters(), raw_params)
 
         for default in params.defaults:
-            print(f"WARNING: {default}: default parameter used")
+            print(f"WARNING: {default}: used default value")
 
         for unused in params.unused:
             print(f"WARNING: {unused}: unused parameter")
