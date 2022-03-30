@@ -5,17 +5,13 @@
 """TODO"""
 
 import argparse
-import os
 import sys
-import traceback
 
 from torque import commands
 
 
 def main() -> int:
     """TODO"""
-
-    verbose = os.getenv("VERBOSE") is not None
 
     # pylint: disable=W0703
     try:
@@ -46,12 +42,8 @@ def main() -> int:
 
         return 0
 
-    except Exception as exc:
-        if verbose:
-            traceback.print_exc()
-
-        else:
-            print(exc)
+    except RuntimeError as exc:
+        print(exc)
 
     return 1
 
