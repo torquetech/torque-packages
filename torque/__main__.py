@@ -8,7 +8,6 @@ import argparse
 import os
 import subprocess
 import sys
-import traceback
 
 from torque import init
 from torque import workspace
@@ -33,7 +32,7 @@ def find_workspace_root():
         os.chdir("..")
 
 
-def pass_through_command(argv, cwd: str, verbose: bool):
+def pass_through_command(argv, cwd: str):
     """TODO"""
 
     cmd = [
@@ -54,8 +53,6 @@ def pass_through_command(argv, cwd: str, verbose: bool):
 
 def main() -> int:
     """TODO"""
-
-    verbose = os.getenv("VERBOSE") is not None
 
     # pylint: disable=W0703
     try:
@@ -83,19 +80,15 @@ def main() -> int:
         if os.path.isfile(".torque/local/install_deps"):
             workspace.install_deps()
 
-        pass_through_command(sys.argv[1:], cwd, verbose)
+        pass_through_command(sys.argv[1:], cwd)
 
         return 0
 
     except subprocess.CalledProcessError:
         pass
 
-    except Exception as exc:
-        if verbose:
-            traceback.print_exc()
-
-        else:
-            print(exc)
+    except RuntimeError as exc:
+        print(exc)
 
     return 1
 
