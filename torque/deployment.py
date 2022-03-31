@@ -5,6 +5,7 @@
 """TODO"""
 
 import multiprocessing
+import multiprocessing.pool
 import threading
 
 from collections import namedtuple
@@ -17,7 +18,9 @@ from torque import options
 from torque import profile
 
 from torque.v1 import component as component_v1
+from torque.v1 import dsl as dsl_v1
 from torque.v1 import link as link_v1
+from torque.v1 import provider as provider_v1
 
 
 Configuration = namedtuple("Configuration", ["provider", "components", "links"])
@@ -34,6 +37,7 @@ class Deployment:
         self.config = config
         self.exts = exts
         self.artifacts = {}
+        self.program = {}
 
     def _component(self, name: str) -> component_v1.Component:
         """TODO"""
@@ -61,6 +65,12 @@ class Deployment:
                                          source,
                                          destination)
 
+    def _provider(self) -> provider_v1.Provider:
+        """TODO"""
+
+        name, config = self.config.provider
+        return self.exts.provider(name)(config)
+
     def _on_build(self, type: str, name: str) -> list[str]:
         """TODO"""
 
@@ -81,6 +91,43 @@ class Deployment:
 
         return artifacts
 
+    def _on_generate(self, type: str, name: str) -> list[object]:
+        """TODO"""
+
+        program = None
+
+        if type == "component":
+            instance = self._component(name)
+            program = instance.on_generate()
+
+        elif type == "link":
+            instance = self._link(name)
+            program = instance.on_generate()
+
+        else:
+            assert False
+
+        return program
+
+    def _generate(self):
+        """TODO"""
+
+        lock = threading.Lock()
+
+        with multiprocessing.pool.ThreadPool(1) as pool:
+            def _on_generate(type: str, name: str):
+                program = pool.apply(self._on_generate, (type, name))
+
+                if program is None:
+                    return False
+
+                with lock:
+                    self.program[f"{type}/{name}"] = program
+
+                return True
+
+            execute.from_roots(1, self.dag, _on_generate)
+
     def build(self, workers: int):
         """TODO"""
 
@@ -99,6 +146,31 @@ class Deployment:
                 return True
 
             execute.from_roots(workers, self.dag, _on_build)
+
+    def push(self):
+        """TODO"""
+
+        self._provider().push(self.artifacts)
+
+    def apply(self, dry_run: bool, show_program: bool):
+        """TODO"""
+
+        self._generate()
+
+        if show_program:
+            for name, program in self.program.items():
+                print(f"{name}:")
+
+                for instr in program:
+                    print(f"  {dsl_v1.fqcn(instr)}")
+
+        self._provider().apply(self.program, dry_run)
+
+    def delete(self, dry_run: bool):
+        """TODO"""
+
+        self._generate()
+        self._provider().delete(self.program, dry_run)
 
 
 def _load_provider(profile: profile.Profile,

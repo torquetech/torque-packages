@@ -7,6 +7,7 @@
 from abc import ABC
 from abc import abstractmethod
 
+from torque.v1 import dsl
 from torque.v1 import options
 
 
@@ -54,4 +55,8 @@ class Component(ABC):
 
     @abstractmethod
     def on_build(self) -> list[str]:
+        """TODO"""
+
+    @abstractmethod
+    def on_generate(self) -> list[dsl.Instruction]:
         """TODO"""

@@ -11,9 +11,6 @@ from torque.v1 import dsl
 from torque.v1 import options
 
 
-Target = dict[str, object]
-Targets = dict[str, Target]
-
 Instructions = list[dsl.Instruction]
 Program = dict[str, Instructions]
 
@@ -30,9 +27,13 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def compile(self, program: Program) -> Targets:
+    def push(self, artifacts: list[str]):
         """TODO"""
 
     @abstractmethod
-    def apply(self, targets: Targets):
+    def apply(self, program: Program, dry_run: bool):
+        """TODO"""
+
+    @abstractmethod
+    def delete(self, program: Program, dry_run: bool):
         """TODO"""

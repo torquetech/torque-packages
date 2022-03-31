@@ -4,6 +4,7 @@
 
 """TODO"""
 
+from torque.v1 import dsl as dsl_v1
 from torque.v1 import link as link_v1
 from torque.v1 import options as options_v1
 
@@ -30,6 +31,11 @@ class DependencyLink(link_v1.Link):
         """TODO"""
 
     def on_build(self, source_artifacts: list[str]) -> list[str]:
+        """TODO"""
+
+        return []
+
+    def on_generate(self) -> list[dsl_v1.Instruction]:
         """TODO"""
 
         return []

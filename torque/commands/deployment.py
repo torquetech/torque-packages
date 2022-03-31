@@ -90,8 +90,8 @@ def _build(arguments: argparse.Namespace):
         deployment = ws.load_deployment(arguments.name)
         deployment.build(arguments.workers)
 
-        # if arugments.push:
-        #     provider.push(deployment.artifacts)
+        if arguments.push:
+            deployment.push()
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
@@ -108,6 +108,46 @@ def _build(arguments: argparse.Namespace):
 
 def _apply(arguments: argparse.Namespace):
     """TODO"""
+
+    ws = workspace.load(arguments.workspace)
+
+    try:
+        deployment = ws.load_deployment(arguments.name)
+        deployment.apply(arguments.dry_run, arguments.show_program)
+
+    except exceptions.DeploymentNotFound as exc:
+        raise RuntimeError(f"{exc}: deployment not found") from exc
+
+    except exceptions.ProfileNotFound as exc:
+        raise RuntimeError(f"{exc}: profile not found") from exc
+
+    except exceptions.ProviderNotFound as exc:
+        raise RuntimeError(f"{exc}: provider not found") from exc
+
+    except exceptions.NoComponentsSelected as exc:
+        raise RuntimeError("no components selected") from exc
+
+
+def _delete(arguments: argparse.Namespace):
+    """TODO"""
+
+    ws = workspace.load(arguments.workspace)
+
+    try:
+        deployment = ws.load_deployment(arguments.name)
+        deployment.delete(arguments.dry_run)
+
+    except exceptions.DeploymentNotFound as exc:
+        raise RuntimeError(f"{exc}: deployment not found") from exc
+
+    except exceptions.ProfileNotFound as exc:
+        raise RuntimeError(f"{exc}: profile not found") from exc
+
+    except exceptions.ProviderNotFound as exc:
+        raise RuntimeError(f"{exc}: provider not found") from exc
+
+    except exceptions.NoComponentsSelected as exc:
+        raise RuntimeError("no components selected") from exc
 
 
 def add_arguments(subparsers):
@@ -131,7 +171,9 @@ def add_arguments(subparsers):
     subparsers.add_parser("list", help="list deployments")
 
     build_parser = subparsers.add_parser("build", help="build deployment")
-    build_parser.add_argument("--push", help="push build artifacts")
+    build_parser.add_argument("--push",
+                              action="store_true",
+                              help="push build artifacts")
     build_parser.add_argument("--workers",
                               type=int,
                               default=1,
@@ -139,7 +181,19 @@ def add_arguments(subparsers):
     build_parser.add_argument("name", help="deployment name")
 
     apply_parser = subparsers.add_parser("apply", help="apply deployment")
+    apply_parser.add_argument("--show-program",
+                              action="store_true",
+                              help="show program")
+    apply_parser.add_argument("--dry-run",
+                              action="store_true",
+                              help="dry run")
     apply_parser.add_argument("name", help="deployment name")
+
+    delete_parser = subparsers.add_parser("delete", help="delete deployment")
+    delete_parser.add_argument("--dry-run",
+                               action="store_true",
+                               help="dry run")
+    delete_parser.add_argument("name", help="deployment name")
 
 
 def run(arguments: argparse.Namespace):
@@ -151,7 +205,8 @@ def run(arguments: argparse.Namespace):
         "show": _show,
         "list": _list,
         "build": _build,
-        "apply": _apply
+        "apply": _apply,
+        "delete": _delete
     }
 
     cmds[arguments.deployment_cmd](arguments)
