@@ -12,7 +12,7 @@ from torque.v1 import tao
 
 
 Statements = list[tao.Statement]
-Program = dict[str, Statements]
+Manifest = dict[str, Statements]
 
 
 class Provider(ABC):
@@ -31,9 +31,9 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def apply(self, program: Program, dry_run: bool):
+    def apply(self, manifest: Manifest, dry_run: bool):
         """TODO"""
 
     @abstractmethod
-    def delete(self, program: Program, dry_run: bool):
+    def delete(self, manifest: Manifest, dry_run: bool):
         """TODO"""

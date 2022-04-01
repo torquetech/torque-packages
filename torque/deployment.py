@@ -37,7 +37,7 @@ class Deployment:
         self.config = config
         self.exts = exts
         self.artifacts = {}
-        self.program = {}
+        self.manifest = {}
 
     def _component(self, name: str) -> component_v1.Component:
         """TODO"""
@@ -94,20 +94,20 @@ class Deployment:
     def _on_generate(self, type: str, name: str) -> list[object]:
         """TODO"""
 
-        program = None
+        manifest = None
 
         if type == "component":
             instance = self._component(name)
-            program = instance.on_generate()
+            manifest = instance.on_generate()
 
         elif type == "link":
             instance = self._link(name)
-            program = instance.on_generate()
+            manifest = instance.on_generate()
 
         else:
             assert False
 
-        return program
+        return manifest
 
     def _generate(self):
         """TODO"""
@@ -116,13 +116,13 @@ class Deployment:
 
         with multiprocessing.pool.ThreadPool(1) as pool:
             def _on_generate(type: str, name: str):
-                program = pool.apply(self._on_generate, (type, name))
+                manifest = pool.apply(self._on_generate, (type, name))
 
-                if program is None:
+                if manifest is None:
                     return False
 
                 with lock:
-                    self.program[f"{type}/{name}"] = program
+                    self.manifest[f"{type}/{name}"] = manifest
 
                 return True
 
@@ -152,25 +152,25 @@ class Deployment:
 
         self._provider().push(self.artifacts)
 
-    def apply(self, dry_run: bool, show_program: bool):
+    def apply(self, dry_run: bool, show_manifest: bool):
         """TODO"""
 
         self._generate()
 
-        if show_program:
-            for name, statements in self.program.items():
+        if show_manifest:
+            for name, statements in self.manifest.items():
                 print(f"{name}:")
 
                 for statement in statements:
                     print(f"  {tao_v1.fqcn(statement)}")
 
-        self._provider().apply(self.program, dry_run)
+        self._provider().apply(self.manifest, dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""
 
         self._generate()
-        self._provider().delete(self.program, dry_run)
+        self._provider().delete(self.manifest, dry_run)
 
 
 def _load_provider(profile: profile.Profile,
