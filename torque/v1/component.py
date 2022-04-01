@@ -21,11 +21,15 @@ class Component(ABC):
                  name: str,
                  group: str,
                  params: options.Options,
-                 config: options.Options):
+                 config: options.Options,
+                 artifacts: list[str]):
+        # pylint: disable=R0913
+
         self.name = name
         self.group = group
         self.params = params
         self.config = config
+        self.artifacts = artifacts
 
     @staticmethod
     @abstractmethod

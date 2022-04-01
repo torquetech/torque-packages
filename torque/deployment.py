@@ -44,11 +44,16 @@ class Deployment:
 
         component = self.dag.components[name]
         config = self.config.components[name]
+        artifacts = None
+
+        if f"component/{name}" in self.artifacts:
+            artifacts = self.artifacts[f"component/{name}"]
 
         return self.exts.component(component.type)(component.name,
                                                    component.group,
                                                    component.params,
-                                                   config)
+                                                   config,
+                                                   artifacts)
 
     def _link(self, name: str) -> link_v1.Link:
         """TODO"""
@@ -74,40 +79,30 @@ class Deployment:
     def _on_build(self, type: str, name: str) -> list[str]:
         """TODO"""
 
-        artifacts = None
-
         if type == "component":
             instance = self._component(name)
-            artifacts = instance.on_build()
 
         elif type == "link":
             instance = self._link(name)
-            source_artifacts = self.artifacts[f"component/{instance.source.name}"]
-
-            artifacts = instance.on_build(source_artifacts)
 
         else:
             assert False
 
-        return artifacts
+        return instance.on_build()
 
     def _on_generate(self, type: str, name: str) -> list[object]:
         """TODO"""
 
-        manifest = None
-
         if type == "component":
             instance = self._component(name)
-            manifest = instance.on_generate()
 
         elif type == "link":
             instance = self._link(name)
-            manifest = instance.on_generate()
 
         else:
             assert False
 
-        return manifest
+        return instance.on_generate()
 
     def _generate(self):
         """TODO"""
