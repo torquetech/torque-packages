@@ -5,11 +5,11 @@
 """TODO"""
 
 
-class Instruction:
+class Statement:
     """TODO"""
 
 
-class Service(Instruction):
+class Service(Statement):
     """TODO"""
 
     def __init__(self, name: str, image: str):
@@ -19,7 +19,7 @@ class Service(Instruction):
         self.image = image
 
 
-class Task(Instruction):
+class Task(Statement):
     """TODO"""
 
     def __init__(self, name: str, image: str):

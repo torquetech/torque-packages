@@ -158,11 +158,11 @@ class Deployment:
         self._generate()
 
         if show_program:
-            for name, program in self.program.items():
+            for name, statements in self.program.items():
                 print(f"{name}:")
 
-                for instr in program:
-                    print(f"  {tao_v1.fqcn(instr)}")
+                for statement in statements:
+                    print(f"  {tao_v1.fqcn(statement)}")
 
         self._provider().apply(self.program, dry_run)
 

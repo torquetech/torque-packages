@@ -11,8 +11,8 @@ from torque.v1 import options
 from torque.v1 import tao
 
 
-Instructions = list[tao.Instruction]
-Program = dict[str, Instructions]
+Statements = list[tao.Statement]
+Program = dict[str, Statements]
 
 
 class Provider(ABC):

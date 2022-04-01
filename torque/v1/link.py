@@ -52,5 +52,5 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_generate(self) -> list[tao.Instruction]:
+    def on_generate(self) -> list[tao.Statement]:
         """TODO"""
