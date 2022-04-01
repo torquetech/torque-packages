@@ -4,9 +4,9 @@
 
 """TODO"""
 
-from torque.v1 import dsl as dsl_v1
 from torque.v1 import link as link_v1
 from torque.v1 import options as options_v1
+from torque.v1 import tao as tao_v1
 
 
 class DependencyLink(link_v1.Link):
@@ -35,7 +35,7 @@ class DependencyLink(link_v1.Link):
 
         return []
 
-    def on_generate(self) -> list[dsl_v1.Instruction]:
+    def on_generate(self) -> list[tao_v1.Statement]:
         """TODO"""
 
         return []

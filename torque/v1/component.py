@@ -7,7 +7,7 @@
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import dsl
+from torque.v1 import tao
 from torque.v1 import options
 
 
@@ -58,5 +58,5 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_generate(self) -> list[dsl.Instruction]:
+    def on_generate(self) -> list[tao.Instruction]:
         """TODO"""

@@ -7,11 +7,11 @@
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import dsl
 from torque.v1 import options
+from torque.v1 import tao
 
 
-Instructions = list[dsl.Instruction]
+Instructions = list[tao.Instruction]
 Program = dict[str, Instructions]
 
 

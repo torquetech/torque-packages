@@ -18,9 +18,9 @@ from torque import options
 from torque import profile
 
 from torque.v1 import component as component_v1
-from torque.v1 import dsl as dsl_v1
 from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
+from torque.v1 import tao as tao_v1
 
 
 Configuration = namedtuple("Configuration", ["provider", "components", "links"])
@@ -162,7 +162,7 @@ class Deployment:
                 print(f"{name}:")
 
                 for instr in program:
-                    print(f"  {dsl_v1.fqcn(instr)}")
+                    print(f"  {tao_v1.fqcn(instr)}")
 
         self._provider().apply(self.program, dry_run)
 
