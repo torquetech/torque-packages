@@ -30,9 +30,11 @@ class Deployment:
     """TODO"""
 
     def __init__(self,
+                 name: str,
                  dag: model.DAG,
                  config: dict[str, options.Options],
                  exts: extensions.Extensions):
+        self.name = name
         self.dag = dag
         self.config = config
         self.exts = exts
@@ -159,13 +161,13 @@ class Deployment:
                 for statement in statements:
                     print(f"  {tao_v1.fqcn(statement)}")
 
-        self._provider().apply(self.manifest, dry_run)
+        self._provider().apply(self.name, self.manifest, dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""
 
         self._generate()
-        self._provider().delete(self.manifest, dry_run)
+        self._provider().delete(self.name, dry_run)
 
 
 def _load_provider(profile: profile.Profile,
@@ -249,7 +251,8 @@ def _load_config(dag: model.DAG,
     return Configuration(provider, components, links)
 
 
-def load(components: list[str],
+def load(name: str,
+         components: list[str],
          profile: profile.Profile,
          dag: model.DAG,
          exts: extensions.Extensions) -> Deployment:
@@ -261,4 +264,4 @@ def load(components: list[str],
     dag = dag.subset(components)
     config = _load_config(dag, profile, exts)
 
-    return Deployment(dag, config, exts)
+    return Deployment(name, dag, config, exts)

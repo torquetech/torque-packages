@@ -31,9 +31,9 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def apply(self, manifest: Manifest, dry_run: bool):
+    def apply(self, name: str, manifest: Manifest, dry_run: bool):
         """TODO"""
 
     @abstractmethod
-    def delete(self, manifest: Manifest, dry_run: bool):
+    def delete(self, name: str, dry_run: bool):
         """TODO"""

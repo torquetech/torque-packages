@@ -322,10 +322,13 @@ class Workspace:
 
         return list(collected_components)
 
-    def _load_deployment(self, components: list[str], profile: profile.Profile) -> deployment.Deployment:
+    def _load_deployment(self,
+                         name: str,
+                         components: list[str],
+                         profile: profile.Profile) -> deployment.Deployment:
         """TODO"""
 
-        return deployment.load(components, profile, self.dag, self.exts)
+        return deployment.load(name, components, profile, self.dag, self.exts)
 
     def create_profile(self, name: str, uri: str, secret: str) -> Profile:
         """TODO"""
@@ -410,7 +413,7 @@ class Workspace:
         components = self._collect_components(deployment.groups, deployment.components)
         profile = self.load_profile(deployment.profile)
 
-        return self._load_deployment(components, profile)
+        return self._load_deployment(name, components, profile)
 
     def create_group(self, name: str, set_default: bool):
         """TODO"""
