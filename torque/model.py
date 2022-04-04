@@ -166,7 +166,7 @@ class DAG:
             raise exceptions.LinkExists(name)
 
         if source == destination:
-            raise exceptions.CycleDetected(name)
+            raise exceptions.CycleDetected()
 
         if source not in self.components:
             raise exceptions.ComponentNotFound(source)
@@ -203,20 +203,17 @@ class DAG:
         """TODO"""
 
         if component in seen_components:
-            return True
+            raise exceptions.CycleDetected()
 
         seen_components.add(component)
         visited_components.add(component)
 
         for child_component in self.components[component].outbound_links:
-            if self._dfs_check(visited_components, seen_components, child_component):
-                return True
+            self._dfs_check(visited_components, seen_components, child_component)
 
         seen_components.remove(component)
 
-        return False
-
-    def _has_cycles(self) -> bool:
+    def verify(self) -> bool:
         """TODO"""
 
         seen_components: set[str] = set()
@@ -226,16 +223,7 @@ class DAG:
             if root in visited_components:
                 continue
 
-            if self._dfs_check(visited_components, seen_components, root):
-                return True
-
-        return False
-
-    def verify(self):
-        """TODO"""
-
-        if self._has_cycles():
-            raise exceptions.CycleDetected()
+            self._dfs_check(visited_components, seen_components, root)
 
     def used_component_types(self) -> set[str]:
         """TODO"""

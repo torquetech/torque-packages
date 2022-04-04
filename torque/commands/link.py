@@ -56,7 +56,7 @@ def _create(arguments: argparse.Namespace):
         raise RuntimeError(f"{exc}: link type not found") from exc
 
     except exceptions.CycleDetected as exc:
-        raise RuntimeError(f"{exc}: cycle detected") from exc
+        raise RuntimeError("cycle detected") from exc
 
     except exceptions.OptionRequired as exc:
         raise RuntimeError(f"{exc}: parameter required") from exc
