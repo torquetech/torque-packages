@@ -42,6 +42,9 @@ class ComponentsAlreadyConnected(TorqueException):
         self.source = source
         self.destination = destination
 
+    def __str__(self) -> str:
+        return f"{self.source},{self.destination}"
+
 
 class ComponentsNotConnected(TorqueException):
     """TODO"""
@@ -51,6 +54,9 @@ class ComponentsNotConnected(TorqueException):
 
         self.source = source
         self.destination = destination
+
+    def __str__(self) -> str:
+        return f"{self.source},{self.destination}"
 
 
 class ComponentTypeNotFound(TorqueException):
