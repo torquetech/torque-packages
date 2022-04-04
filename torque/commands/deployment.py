@@ -35,6 +35,9 @@ def _create(arguments: argparse.Namespace):
                              components)
         ws.store()
 
+    except exceptions.ConfigurationRequired as exc:
+        raise RuntimeError(f"{exc}: configuration required") from exc
+
     except exceptions.DeploymentExists as exc:
         raise RuntimeError(f"{exc}: deployment exists") from exc
 
@@ -90,6 +93,9 @@ def _build(arguments: argparse.Namespace):
         if arguments.push:
             deployment.push()
 
+    except exceptions.ConfigurationRequired as exc:
+        raise RuntimeError(f"{exc}: configuration required") from exc
+
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -111,6 +117,9 @@ def _apply(arguments: argparse.Namespace):
     try:
         deployment = ws.load_deployment(arguments.name)
         deployment.apply(arguments.dry_run, arguments.show_manifests)
+
+    except exceptions.ConfigurationRequired as exc:
+        raise RuntimeError(f"{exc}: configuration required") from exc
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc

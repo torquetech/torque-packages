@@ -76,6 +76,19 @@ class ExecuteFailed(TorqueException):
 class OptionRequired(TorqueException):
     """TODO"""
 
+class ConfigurationRequired(TorqueException):
+    """TODO"""
+
+    def __init__(self, type: str, name: str, config: str):
+        super().__init__("")
+
+        self.type = type
+        self.name = name
+        self.config = config
+
+    def __str__(self) -> str:
+        return f"{self.type}/{self.name}: {self.config}"
+
 
 class ProtocolNotFound(TorqueException):
     """TODO"""

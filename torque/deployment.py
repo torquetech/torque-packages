@@ -221,7 +221,7 @@ def _load_components(dag: model.DAG,
             config = options.process(req_config, raw_config)
 
         except exceptions.OptionRequired as exc:
-            raise RuntimeError(f"{component.name}: {exc}: component option required") from exc
+            raise exceptions.ConfigurationRequired("component", component.name, str(exc)) from exc
 
         for default in config.defaults:
             print(f"WARNING: {component.name}: {default}: used default value")
@@ -249,7 +249,7 @@ def _load_links(dag: model.DAG,
             config = options.process(req_config, raw_config)
 
         except exceptions.OptionRequired as exc:
-            raise RuntimeError(f"{link.name}: {exc}: link option required") from exc
+            raise exceptions.ConfigurationRequired("link", link.name, str(exc)) from exc
 
         for default in config.defaults:
             print(f"WARNING: {link.name}: {default}: used default value")
