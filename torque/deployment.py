@@ -200,7 +200,11 @@ def _load_components(dag: model.DAG,
         req_config = exts.component(component.type).configuration()
         _, raw_config = profile.component(component.name)
 
-        config = options.process(req_config, raw_config)
+        try:
+            config = options.process(req_config, raw_config)
+
+        except exceptions.OptionRequired as exc:
+            raise RuntimeError(f"{component.name}: {exc}: component option required") from exc
 
         for default in config.defaults:
             print(f"WARNING: {component.name}: {default}: used default value")
@@ -224,7 +228,11 @@ def _load_links(dag: model.DAG,
         req_config = exts.link(link.type).configuration()
         _, raw_config = profile.link(link.name)
 
-        config = options.process(req_config, raw_config)
+        try:
+            config = options.process(req_config, raw_config)
+
+        except exceptions.OptionRequired as exc:
+            raise RuntimeError(f"{link.name}: {exc}: link option required") from exc
 
         for default in config.defaults:
             print(f"WARNING: {link.name}: {default}: used default value")
