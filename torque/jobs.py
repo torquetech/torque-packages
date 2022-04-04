@@ -143,3 +143,10 @@ class Runner:
             self.queue = []
             self.jobs = {}
             self.workers = []
+
+
+def execute(worker_count: int, jobs: list[Job]):
+    """TODO"""
+
+    runner = Runner(worker_count)
+    runner.execute(jobs)
