@@ -21,6 +21,7 @@ from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
 from torque.v1 import tao as tao_v1
+from torque.v1 import utils as utils_v1
 
 
 Configuration = namedtuple("Configuration", ["provider", "components", "links"])
@@ -159,7 +160,7 @@ class Deployment:
                 print(f"{name}:")
 
                 for statement in statements:
-                    print(f"  {tao_v1.fqcn(statement)}")
+                    print(f"  {utils_v1.fqcn(statement)}")
 
         self._provider().apply(self.name, self.manifest, dry_run)
 

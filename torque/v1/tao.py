@@ -25,9 +25,3 @@ class Task(Statement):
     def __init__(self, name: str, image: str):
         self.name = name
         self.image = image
-
-
-def fqcn(instance: type) -> str:
-    """TODO"""
-
-    return f"{instance.__class__.__module__}.{instance.__class__.__name__}"
