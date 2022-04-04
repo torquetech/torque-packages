@@ -25,8 +25,8 @@ class Component:
         self.labels = labels
         self.params = params
 
-        self.inbound_links: dict[str, str] = {}
-        self.outbound_links: dict[str, str] = {}
+        self.inbound_links: dict[str, set()] = {}
+        self.outbound_links: dict[str, set()] = {}
 
     def __repr__(self) -> str:
         inbound_links = ",".join(self.inbound_links)
@@ -41,34 +41,50 @@ class Component:
     def add_inbound_link(self, component: str, link: str):
         """TODO"""
 
-        if component in self.inbound_links:
-            raise exceptions.ComponentsAlreadyConnected(component, self.name)
+        if component not in self.inbound_links:
+            self.inbound_links[component] = set()
 
-        self.inbound_links[component] = link
+        self.inbound_links[component].add(link)
 
-    def remove_inbound_link(self, component: str):
+    def remove_inbound_link(self, component: str, link: str):
         """TODO"""
 
         if component not in self.inbound_links:
             raise exceptions.ComponentsNotConnected(component, self.name)
 
-        self.inbound_links.pop(component)
+        inbound_links = self.inbound_links[component]
+
+        if link not in inbound_links:
+            raise exceptions.ComponentsNotConnected(component, self.name)
+
+        inbound_links.remove(link)
+
+        if not inbound_links:
+            self.inbound_links.pop(component)
 
     def add_outbound_link(self, component: str, link: str):
         """TODO"""
 
-        if component in self.outbound_links:
-            raise exceptions.ComponentsAlreadyConnected(self.name, component)
+        if component not in self.outbound_links:
+            self.outbound_links[component] = set()
 
-        self.outbound_links[component] = link
+        self.outbound_links[component].add(link)
 
-    def remove_outbound_link(self, component: str):
+    def remove_outbound_link(self, component: str, link: str):
         """TODO"""
 
         if component not in self.outbound_links:
             raise exceptions.ComponentsNotConnected(self.name, component)
 
-        self.outbound_links.pop(component)
+        outbound_links = self.outbound_links[component]
+
+        if link not in outbound_links:
+            raise exceptions.ComponentsNotConnected(self.name, component)
+
+        outbound_links.remove(link)
+
+        if not outbound_links:
+            self.outbound_links.pop(component)
 
 
 class Link:
@@ -128,10 +144,10 @@ class DAG:
 
         component = self.components[name]
 
-        if len(component.inbound_links) != 0:
+        if component.inbound_links:
             raise exceptions.ComponentStillConnected(name)
 
-        if len(component.outbound_links) != 0:
+        if component.outbound_links:
             raise exceptions.ComponentStillConnected(name)
 
         return self.components.pop(name)
@@ -164,6 +180,7 @@ class DAG:
         self.components[source].add_outbound_link(destination, name)
 
         self.links[name] = link
+
         return link
 
     def remove_link(self, name: str) -> Link:
@@ -174,8 +191,8 @@ class DAG:
 
         link = self.links[name]
 
-        self.components[link.destination].remove_inbound_link(link.source)
-        self.components[link.source].remove_outbound_link(link.destination)
+        self.components[link.destination].remove_inbound_link(link.source, name)
+        self.components[link.source].remove_outbound_link(link.destination, name)
 
         return self.links.pop(name)
 
@@ -247,9 +264,11 @@ class DAG:
             if component.name not in components_to_keep:
                 components_to_keep.add(component.name)
 
-                for component_name, link_name in component.inbound_links.items():
-                    links_to_keep.add(link_name)
+                for component_name, inbound_links in component.inbound_links.items():
                     components.append(component_name)
+
+                    for link in inbound_links:
+                        links_to_keep.add(link)
 
         components_to_remove = set(subset.components.keys()) - components_to_keep
         links_to_remove = set(subset.links.keys()) - links_to_keep

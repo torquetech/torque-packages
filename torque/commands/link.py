@@ -55,9 +55,6 @@ def _create(arguments: argparse.Namespace):
     except exceptions.LinkTypeNotFound as exc:
         raise RuntimeError(f"{exc}: link type not found") from exc
 
-    except exceptions.ComponentsAlreadyConnected as exc:
-        raise RuntimeError(f"{exc}: components already connected") from exc
-
     except exceptions.CycleDetected as exc:
         raise RuntimeError(f"{exc}: cycle detected") from exc
 

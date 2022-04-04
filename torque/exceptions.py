@@ -33,19 +33,6 @@ class CycleDetected(TorqueException):
     """TODO"""
 
 
-class ComponentsAlreadyConnected(TorqueException):
-    """TODO"""
-
-    def __init__(self, source: str, destination: str):
-        super().__init__("")
-
-        self.source = source
-        self.destination = destination
-
-    def __str__(self) -> str:
-        return f"{self.source},{self.destination}"
-
-
 class ComponentsNotConnected(TorqueException):
     """TODO"""
 

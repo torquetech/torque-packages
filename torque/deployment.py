@@ -94,19 +94,23 @@ class Deployment:
 
         _jobs = []
 
-        for component in self.dag.components:
-            depends = [f"link/{link}" for link in self.dag.components[component].inbound_links.values()]
-            data = (callback, "component", component)
+        for component in self.dag.components.values():
+            data = (callback, "component", component.name)
+            depends = []
 
-            job = jobs.Job(f"component/{component}", depends, _callback_helper, data)
+            for inbound_links in component.inbound_links.values():
+                depends += [f"link/{link}" for link in inbound_links]
+
+            job = jobs.Job(f"component/{component.name}", depends, _callback_helper, data)
             _jobs.append(job)
 
-            for _, link in self.dag.components[component].outbound_links.items():
-                depends = [f"component/{component}"]
-                data = (callback, "link", link)
+            for outbound_links in component.outbound_links.values():
+                for link in outbound_links:
+                    data = (callback, "link", link)
+                    depends = [f"component/{component.name}"]
 
-                job = jobs.Job(f"link/{link}", depends, _callback_helper, data)
-                _jobs.append(job)
+                    job = jobs.Job(f"link/{link}", depends, _callback_helper, data)
+                    _jobs.append(job)
 
         jobs.execute(workers, _jobs)
 

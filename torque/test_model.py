@@ -133,28 +133,10 @@ def test_test7():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
-    dag.create_component("component2", ["label1"], "component_type", None)
-
-    try:
-        dag.create_link("link1", "component1", "component2", "link_type", None)
-        dag.create_link("link2", "component1", "component2", "link_type", None)
-
-        assert False
-
-    except exceptions.ComponentsAlreadyConnected:
-        pass
-
-
-def test_test8():
-    """TODO"""
-
-    dag = model.DAG(0)
-
     assert not _has_cycles(dag)
 
 
-def test_test9():
+def test_test8():
     """TODO"""
 
     dag = model.DAG(0)
