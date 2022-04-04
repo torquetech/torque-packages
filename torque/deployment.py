@@ -4,15 +4,14 @@
 
 """TODO"""
 
-import multiprocessing
-import multiprocessing.pool
 import threading
 
 from collections import namedtuple
+from collections.abc import Callable
 
 from torque import exceptions
-from torque import execute
 from torque import extensions
+from torque import jobs
 from torque import model
 from torque import options
 from torque import profile
@@ -39,27 +38,32 @@ class Deployment:
         self.dag = dag
         self.config = config
         self.exts = exts
-        self.artifacts = {}
-        self.manifest = {}
+        self.components: dict[str, component_v1.Component] = {}
+        self.links: dict[str, link_v1.Link] = {}
+
+        self._lock = threading.Lock()
 
     def _component(self, name: str) -> component_v1.Component:
         """TODO"""
 
+        if name in self.components:
+            return self.components[name]
+
         component = self.dag.components[name]
         config = self.config.components[name]
-        artifacts = None
 
-        if f"component/{name}" in self.artifacts:
-            artifacts = self.artifacts[f"component/{name}"]
+        self.components[name] = self.exts.component(component.type)(component.name,
+                                                                    component.group,
+                                                                    component.params,
+                                                                    config)
 
-        return self.exts.component(component.type)(component.name,
-                                                   component.group,
-                                                   component.params,
-                                                   config,
-                                                   artifacts)
+        return self.components[name]
 
     def _link(self, name: str) -> link_v1.Link:
         """TODO"""
+
+        if name in self.links:
+            return self.links[name]
 
         link = self.dag.links[name]
         config = self.config.links[name]
@@ -67,11 +71,13 @@ class Deployment:
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        return self.exts.link(link.type)(link.name,
-                                         link.params,
-                                         config,
-                                         source,
-                                         destination)
+        self.links[name] = self.exts.link(link.type)(link.name,
+                                                     link.params,
+                                                     config,
+                                                     source,
+                                                     destination)
+
+        return self.links[name]
 
     def _provider(self) -> provider_v1.Provider:
         """TODO"""
@@ -79,90 +85,101 @@ class Deployment:
         name, config = self.config.provider
         return self.exts.provider(name)(config)
 
-    def _on_build(self, type: str, name: str) -> list[str]:
+    def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
 
-        if type == "component":
-            instance = self._component(name)
+        def _callback_helper(_, data: tuple) -> bool:
+            callback, type, args = data
+            return callback(type, args)
 
-        elif type == "link":
-            instance = self._link(name)
+        _jobs = []
 
-        else:
-            assert False
+        for component in self.dag.components:
+            depends = [f"link/{link}" for link in self.dag.components[component].inbound_links.values()]
+            data = (callback, "component", component)
 
-        return instance.on_build()
+            job = jobs.Job(f"component/{component}", depends, _callback_helper, data)
+            _jobs.append(job)
 
-    def _on_generate(self, type: str, name: str) -> list[object]:
-        """TODO"""
+            for _, link in self.dag.components[component].outbound_links.items():
+                depends = [f"component/{component}"]
+                data = (callback, "link", link)
 
-        if type == "component":
-            instance = self._component(name)
+                job = jobs.Job(f"link/{link}", depends, _callback_helper, data)
+                _jobs.append(job)
 
-        elif type == "link":
-            instance = self._link(name)
-
-        else:
-            assert False
-
-        return instance.on_generate()
+        jobs.execute(workers, _jobs)
 
     def _generate(self):
         """TODO"""
 
-        lock = threading.Lock()
+        def _on_generate(type: str, name: str) -> bool:
+            """TODO"""
 
-        with multiprocessing.pool.ThreadPool(1) as pool:
-            def _on_generate(type: str, name: str):
-                manifest = pool.apply(self._on_generate, (type, name))
+            with self._lock:
+                if type == "component":
+                    instance = self._component(name)
 
-                if manifest is None:
-                    return False
+                elif type == "link":
+                    instance = self._link(name)
 
-                with lock:
-                    self.manifest[f"{type}/{name}"] = manifest
+                else:
+                    assert False
 
-                return True
+            return instance.on_generate()
 
-            execute.from_roots(1, self.dag, _on_generate)
+        self._execute(1, _on_generate)
 
     def build(self, workers: int):
         """TODO"""
 
-        lock = threading.Lock()
+        def _on_build(type: str, name: str) -> bool:
+            """TODO"""
 
-        with multiprocessing.Pool(workers) as pool:
-            def _on_build(type: str, name: str):
-                artifacts = pool.apply(self._on_build, (type, name))
+            with self._lock:
+                if type == "component":
+                    instance = self._component(name)
 
-                if artifacts is None:
-                    return False
+                elif type == "link":
+                    instance = self._link(name)
 
-                with lock:
-                    self.artifacts[f"{type}/{name}"] = artifacts
+                else:
+                    assert False
 
-                return True
+            return instance.on_build()
 
-            execute.from_roots(workers, self.dag, _on_build)
+        self._execute(workers, _on_build)
 
     def push(self):
         """TODO"""
 
-        self._provider().push(self.artifacts)
+        artifacts: component_v1.Artifacts = []
+        artifacts += [component.artifacts for component in self.components.values()]
+        artifacts += [link.artifacts for link in self.links.values()]
 
-    def apply(self, dry_run: bool, show_manifest: bool):
+        self._provider().push(artifacts)
+
+    def apply(self, dry_run: bool, show_manifests: bool):
         """TODO"""
 
         self._generate()
 
-        if show_manifest:
-            for name, statements in self.manifest.items():
+        manifests: tao_v1.Manifests = {}
+
+        for name, component in self.components.items():
+            manifests[f"component/{name}"] = component.manifest
+
+        for name, link in self.links.items():
+            manifests[f"link/{name}"] = link.manifest
+
+        if show_manifests:
+            for name, manifest in manifests.items():
                 print(f"{name}:")
 
-                for statement in statements:
+                for statement in manifest:
                     print(f"  {utils_v1.fqcn(statement)}")
 
-        self._provider().apply(self.name, self.manifest, dry_run)
+        self._provider().apply(self.name, manifests, dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""

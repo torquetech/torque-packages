@@ -6,7 +6,6 @@
 
 from torque.v1 import link as link_v1
 from torque.v1 import options as options_v1
-from torque.v1 import tao as tao_v1
 
 
 class DependencyLink(link_v1.Link):
@@ -30,12 +29,12 @@ class DependencyLink(link_v1.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self) -> list[str]:
+    def on_build(self) -> bool:
         """TODO"""
 
-        return []
+        return True
 
-    def on_generate(self) -> list[tao_v1.Statement]:
+    def on_generate(self) -> bool:
         """TODO"""
 
-        return []
+        return True

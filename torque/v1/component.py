@@ -11,6 +11,7 @@ from torque.v1 import tao
 from torque.v1 import options
 
 
+Artifacts = list[str]
 Tags = list[str]
 
 
@@ -21,15 +22,16 @@ class Component(ABC):
                  name: str,
                  group: str,
                  params: options.Options,
-                 config: options.Options,
-                 artifacts: list[str]):
+                 config: options.Options):
         # pylint: disable=R0913
 
         self.name = name
         self.group = group
         self.params = params
         self.config = config
-        self.artifacts = artifacts
+
+        self.artifacts: Artifacts = []
+        self.manifest: tao.Manifest = []
 
     @staticmethod
     @abstractmethod
@@ -58,9 +60,9 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self) -> list[str]:
+    def on_build(self) -> bool:
         """TODO"""
 
     @abstractmethod
-    def on_generate(self) -> list[tao.Statement]:
+    def on_generate(self) -> bool:
         """TODO"""

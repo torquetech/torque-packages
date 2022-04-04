@@ -113,7 +113,7 @@ def _apply(arguments: argparse.Namespace):
 
     try:
         deployment = ws.load_deployment(arguments.name)
-        deployment.apply(arguments.dry_run, arguments.show_manifest)
+        deployment.apply(arguments.dry_run, arguments.show_manifests)
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
@@ -181,9 +181,9 @@ def add_arguments(subparsers):
     build_parser.add_argument("name", help="deployment name")
 
     apply_parser = subparsers.add_parser("apply", help="apply deployment")
-    apply_parser.add_argument("--show-manifest",
+    apply_parser.add_argument("--show-manifests",
                               action="store_true",
-                              help="show manifest")
+                              help="show manifests")
     apply_parser.add_argument("--dry-run",
                               action="store_true",
                               help="dry run")

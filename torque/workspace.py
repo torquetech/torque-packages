@@ -280,8 +280,7 @@ class Workspace:
         return component_type(component.name,
                               component.group,
                               component.params,
-                              config,
-                              None)
+                              config)
 
     def _create_link(self,
                      link: model.Link,

@@ -29,6 +29,9 @@ class Link(ABC):
         self.source = source
         self.destination = destination
 
+        self.artifacts: component.Artifacts = []
+        self.manifest: tao.Manifest = []
+
     @staticmethod
     @abstractmethod
     def parameters() -> options.OptionsSpec:
@@ -48,9 +51,9 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self) -> list[str]:
+    def on_build(self) -> bool:
         """TODO"""
 
     @abstractmethod
-    def on_generate(self) -> list[tao.Statement]:
+    def on_generate(self) -> bool:
         """TODO"""
