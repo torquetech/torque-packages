@@ -53,7 +53,7 @@ class Deployment:
         config = self.config.components[name]
 
         self.components[name] = self.exts.component(component.type)(component.name,
-                                                                    component.group,
+                                                                    component.labels,
                                                                     component.params,
                                                                     config)
 
@@ -278,7 +278,7 @@ def _load_config(dag: model.DAG,
 
 
 def load(name: str,
-         components: list[str],
+         components: [str],
          profile: profile.Profile,
          dag: model.DAG,
          exts: extensions.Extensions) -> Deployment:

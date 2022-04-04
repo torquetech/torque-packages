@@ -10,28 +10,18 @@ from torque import exceptions
 from torque import options
 
 
-class Group:
-    """TODO"""
-
-    def __init__(self, name: str):
-        self.name = name
-
-    def __repr__(self) -> str:
-        return f"Group({self.name})"
-
-
 class Component:
     """TODO"""
 
     def __init__(self,
                  name: str,
-                 group: str,
+                 labels: [str],
                  type: str,
                  params: options.Options):
         # pylint: disable=W0622
 
         self.name = name
-        self.group = group
+        self.labels = labels
         self.type = type
         self.params = params
 
@@ -43,7 +33,7 @@ class Component:
         outbound_links = ",".join(self.outbound_links)
 
         return f"Component({self.name}" \
-               f", group={self.group}" \
+               f", labels={self.labels}" \
                f", inbound_links=[{inbound_links}]" \
                f", outbound_links=[{outbound_links}]" \
                f", type={self.type})"
@@ -110,37 +100,12 @@ class DAG:
 
     def __init__(self, revision: int):
         self.revision = revision
-        self.groups = {}
         self.components = {}
         self.links = {}
 
-    def create_group(self, name: str) -> Group:
-        """TODO"""
-
-        if name in self.groups:
-            raise exceptions.GroupExists(name)
-
-        group = Group(name)
-
-        self.groups[name] = group
-        return group
-
-    def remove_group(self, name: str) -> Group:
-        """TODO"""
-
-        if name not in self.groups:
-            raise exceptions.GroupNotFound(name)
-
-        groups_in_use = {i.group for i in self.components.values()}
-
-        if name in groups_in_use:
-            raise exceptions.GroupNotEmpty(name)
-
-        return self.groups.pop(name)
-
     def create_component(self,
                          name: str,
-                         group: str,
+                         labels: [str],
                          type: str,
                          params: options.Options) -> Component:
         # pylint: disable=W0622
@@ -150,10 +115,7 @@ class DAG:
         if name in self.components:
             raise exceptions.ComponentExists(name)
 
-        if group not in self.groups:
-            raise exceptions.GroupNotFound(group)
-
-        component = Component(name, group, type, params)
+        component = Component(name, labels, type, params)
 
         self.components[name] = component
         return component
@@ -268,12 +230,7 @@ class DAG:
 
         return {i.type for i in self.links.values()}
 
-    def has_group(self, name: str) -> bool:
-        """TODO"""
-
-        return name in self.groups
-
-    def subset(self, components: list[str]) -> "DAG":
+    def subset(self, components: [str]) -> "DAG":
         """TODO"""
 
         subset = deepcopy(self)

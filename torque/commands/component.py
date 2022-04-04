@@ -23,24 +23,18 @@ def _create(arguments: argparse.Namespace):
     else:
         raw_params = {}
 
-    if arguments.group:
-        group = arguments.group
+    if arguments.labels:
+        labels = arguments.labels.split(",")
 
     else:
-        group = ws.config.default_group
-
-    if not group:
-        raise RuntimeError("group not specified")
+        labels = []
 
     try:
-        ws.create_component(arguments.name, group, arguments.type, raw_params)
+        ws.create_component(arguments.name, labels, arguments.type, raw_params)
         ws.store()
 
     except exceptions.ComponentExists as exc:
         raise RuntimeError(f"{exc}: component exists") from exc
-
-    except exceptions.GroupNotFound as exc:
-        raise RuntimeError(f"{exc}: group not found") from exc
 
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{exc}: component type not found") from exc
@@ -124,7 +118,7 @@ def add_arguments(subparsers):
 
     create_parser = subparsers.add_parser("create", help="create component")
     create_parser.add_argument("--params", "-p", help="component params")
-    create_parser.add_argument("--group", help="component group membership")
+    create_parser.add_argument("--labels", help="component labels")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 

@@ -11,8 +11,8 @@ from torque.v1 import tao
 from torque.v1 import options
 
 
-Artifacts = list[str]
-Tags = list[str]
+Artifacts = [str]
+Tags = [str]
 
 
 class Component(ABC):
@@ -20,13 +20,13 @@ class Component(ABC):
 
     def __init__(self,
                  name: str,
-                 group: str,
+                 labels: [str],
                  params: options.Options,
                  config: options.Options):
         # pylint: disable=R0913
 
         self.name = name
-        self.group = group
+        self.labels = labels
         self.params = params
         self.config = config
 

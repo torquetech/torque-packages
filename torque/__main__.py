@@ -27,7 +27,6 @@ def main() -> int:
             "init": commands.init,
             "package": commands.package,
             "profile": commands.profile,
-            "group": commands.group,
             "component": commands.component,
             "link": commands.link,
             "deployment": commands.deployment

@@ -17,7 +17,7 @@ class Job:
 
     def __init__(self,
                  name: str,
-                 depends: list[str],
+                 depends: [str],
                  handler: Callable[[str, object], bool],
                  data: object):
         self.name = name
@@ -108,7 +108,7 @@ class Runner:
                 self._abort()
                 raise
 
-    def execute(self, jobs: list[Job]):
+    def execute(self, jobs: [Job]):
         """TODO"""
 
         jobs = dict((job.name, Job(job.name, deepcopy(job.depends), job.handler, job.data))
@@ -145,7 +145,7 @@ class Runner:
             self.workers = []
 
 
-def execute(worker_count: int, jobs: list[Job]):
+def execute(worker_count: int, jobs: [Job]):
     """TODO"""
 
     runner = Runner(worker_count)

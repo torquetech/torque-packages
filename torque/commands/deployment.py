@@ -41,9 +41,6 @@ def _create(arguments: argparse.Namespace):
     except exceptions.ProfileNotFound as exc:
         raise RuntimeError(f"{exc}: profile not found") from exc
 
-    except exceptions.GroupNotFound as exc:
-        raise RuntimeError(f"{exc}: group not found") from exc
-
     except exceptions.ComponentNotFound as exc:
         raise RuntimeError(f"{exc}: component not found") from exc
 

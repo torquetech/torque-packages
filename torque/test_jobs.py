@@ -13,7 +13,7 @@ from torque.jobs import Runner
 class Checker:
     """TODO"""
 
-    def __init__(self, jobs: list[Job], fail_on: list[str]):
+    def __init__(self, jobs: [Job], fail_on: [str]):
         self.jobs = jobs
         self.fail_on = fail_on
 

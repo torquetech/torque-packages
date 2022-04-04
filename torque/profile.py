@@ -24,13 +24,6 @@ _CONFIG_SCHEMA = schema.Schema({
     },
     "dag": {
         "revision": int,
-        "groups": [{
-            "name": str,
-            "configuration": [{
-                "name": str,
-                "value": str
-            }]
-        }],
         "components": [{
             "name": str,
             "configuration": [{
@@ -64,17 +57,6 @@ class Profile:
         """TODO"""
 
         return list(self.config["provider"].items())[0]
-
-    def group(self, name: str) -> (str, options.RawOptions):
-        """TODO"""
-
-        dag_config = self.config["dag"]
-        groups = dag_config["groups"]
-
-        if name not in groups:
-            return (name, options.RawOptions())
-
-        return (name, groups[name])
 
     def component(self, name: str) -> (str, options.RawOptions):
         """TODO"""
@@ -144,9 +126,6 @@ def load(uri: str, secret: str, exts: extensions.Extensions) -> Profile:
         },
         "dag": {
             "revision": dag["revision"],
-            "groups": {
-                i["name"]: _to_raw(i["configuration"]) for i in dag["groups"]
-            },
             "components": {
                 i["name"]: _to_raw(i["configuration"]) for i in dag["components"]
             },
@@ -175,18 +154,13 @@ def defaults(provider: str,
         },
         "dag": {
             "revision": dag.revision,
-            "groups": [],
             "components": [],
             "links": []
         }
     }
 
-    groups = defaults["dag"]["groups"]
     components = defaults["dag"]["components"]
     links = defaults["dag"]["links"]
-
-    for group in dag.groups.values():
-        groups.append({"name": group.name, "configuration": []})
 
     for component in dag.components.values():
         component_conf = exts.component(component.type).configuration()

@@ -9,18 +9,6 @@ class TorqueException(Exception):
     """TODO"""
 
 
-class GroupNotEmpty(TorqueException):
-    """TODO"""
-
-
-class GroupNotFound(TorqueException):
-    """TODO"""
-
-
-class GroupExists(TorqueException):
-    """TODO"""
-
-
 class ComponentNotFound(TorqueException):
     """TODO"""
 

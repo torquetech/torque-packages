@@ -31,17 +31,13 @@ _WORKSPACE_SCHEMA = schema.Schema({
         "secret": schema.Or(str, None)
     }],
     "config": {
-        "default_group": schema.Or(str, None),
         "deployment_config": schema.Or(str, None)
     },
     "dag": {
         "revision": int,
-        "groups": [{
-            "name": str
-        }],
         "components": [{
             "name": str,
-            "group": str,
+            "labels": [str],
             "type": str,
             "params": [{
                 "name": str,
@@ -65,7 +61,7 @@ _DEPLOYMENTS_SCHEMA = schema.Schema({
     "deployments": [{
         "name": str,
         "profile": str,
-        "groups": schema.Or([str], None),
+        "lables": schema.Or([str], None),
         "components": schema.Or([str], None)
     }]
 })
@@ -86,25 +82,22 @@ class Profile:
 class Deployment:
     """TODO"""
 
-    def __init__(self, name: str, profile: str, groups: list[str], components: list[str]):
+    def __init__(self, name: str, profile: str, labels: [str], components: [str]):
         self.name = name
         self.profile = profile
-        self.groups = groups
+        self.labels = labels
         self.components = components
 
     def __repr__(self) -> str:
         return \
             f"Deployment({self.name}, profile={self.profile}" \
-            f", groups={self.groups}, components={self.components})"
+            f", labels={self.labels}, components={self.components})"
 
 
 class Configuration:
     """TODO"""
 
-    def __init__(self,
-                 default_group: str,
-                 deployment_config: str):
-        self.default_group = default_group
+    def __init__(self, deployment_config: str):
         self.deployment_config = deployment_config
 
 
@@ -119,8 +112,7 @@ def _to_profile(profile_workspace: dict[str, object]) -> Profile:
 def _to_config(config_workspace: dict[str, str]) -> Configuration:
     """TODO"""
 
-    return Configuration(config_workspace["default_group"],
-                         config_workspace["deployment_config"])
+    return Configuration(config_workspace["deployment_config"])
 
 
 def _to_deployment(deployment: dict[str, object]) -> Deployment:
@@ -128,7 +120,7 @@ def _to_deployment(deployment: dict[str, object]) -> Deployment:
 
     return Deployment(deployment["name"],
                       deployment["profile"],
-                      deployment["groups"],
+                      deployment["labels"],
                       deployment["components"])
 
 
@@ -160,16 +152,7 @@ def _from_config(config: Configuration) -> dict[str, str]:
     """TODO"""
 
     return {
-        "default_group": config.default_group,
         "deployment_config": config.deployment_config
-    }
-
-
-def _from_group(group: model.Group) -> dict[str: str]:
-    """TODO"""
-
-    return {
-        "name": group.name
     }
 
 
@@ -186,7 +169,7 @@ def _from_component(component: model.Component) -> dict[str: object]:
 
     return {
         "name": component.name,
-        "group": component.group,
+        "labels": component.labels,
         "type": component.type,
         "params": _from_params(component.params)
     }
@@ -210,7 +193,7 @@ def _from_deployment(deployment: Deployment) -> dict[str, object]:
     return {
         "name": deployment.name,
         "profile": deployment.profile,
-        "groups": deployment.groups,
+        "labels": deployment.labels,
         "components": deployment.components
     }
 
@@ -220,9 +203,6 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
 
     dag = model.DAG(dag_workspace["revision"])
 
-    for group in dag_workspace["groups"]:
-        dag.create_group(group["name"])
-
     for component in dag_workspace["components"]:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
 
@@ -230,7 +210,7 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
         params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
-                             component["group"],
+                             component["labels"],
                              component["type"],
                              params)
 
@@ -278,7 +258,7 @@ class Workspace:
         component_type = self.exts.component(component.type)
 
         return component_type(component.name,
-                              component.group,
+                              component.labels,
                               component.params,
                               config)
 
@@ -293,37 +273,29 @@ class Workspace:
 
         return link_type(link.name, link.params, config, source, destination)
 
-    def _collect_components(self, groups: list[str], components: list[str]) -> list[str]:
+    def _collect_components(self, labels: [str], components: [str]) -> [str]:
         """TODO"""
 
-        if groups is None and components is None:
+        if labels is None and components is None:
             return None
+
+        labels = set(labels or [])
+        components = set(components or [])
 
         collected_components = set()
 
-        for group in groups or []:
-            if group not in self.dag.groups:
-                print(f"WARNING: {group}: group not found")
+        for component in self.dag.components.values():
+            if labels.intersection(component.labels):
+                collected_components.add(component.name)
 
-            else:
-                for component in self.dag.components.values():
-                    if component.group != group:
-                        continue
-
-                    collected_components.add(component.name)
-
-        for component in components or []:
-            if component in self.dag.components:
-                collected_components.add(component)
-
-            else:
-                print(f"WARNING: {component}: component not found")
+            if component.name in components:
+                collected_components.add(component.name)
 
         return list(collected_components)
 
     def _load_deployment(self,
                          name: str,
-                         components: list[str],
+                         components: [str],
                          profile: profile.Profile) -> deployment.Deployment:
         """TODO"""
 
@@ -371,8 +343,8 @@ class Workspace:
     def create_deployment(self,
                           name: str,
                           profile: str,
-                          groups: list[str],
-                          components: list[str]) -> Deployment:
+                          labels: [str],
+                          components: [str]) -> Deployment:
         """TODO"""
 
         if name in self.deployments:
@@ -381,15 +353,11 @@ class Workspace:
         if profile not in self.profiles:
             raise exceptions.ProfileNotFound(profile)
 
-        for group in groups or []:
-            if group not in self.dag.groups:
-                raise exceptions.GroupNotFound(group)
-
         for component in components or []:
             if component not in self.dag.components:
                 raise exceptions.ComponentNotFound(component)
 
-        deployment = Deployment(name, profile, groups, components)
+        deployment = Deployment(name, profile, labels, components)
 
         self.deployments[name] = deployment
         return deployment
@@ -409,41 +377,14 @@ class Workspace:
             raise exceptions.DeploymentNotFound(name)
 
         deployment = self.deployments[name]
-        components = self._collect_components(deployment.groups, deployment.components)
+        components = self._collect_components(deployment.labels, deployment.components)
         profile = self.load_profile(deployment.profile)
 
         return self._load_deployment(name, components, profile)
 
-    def create_group(self, name: str, set_default: bool):
-        """TODO"""
-
-        if not re.match(_NAME, name):
-            raise exceptions.InvalidName(name)
-
-        self.dag.create_group(name)
-
-        if set_default:
-            self.config.default_group = name
-
-        self.dag.revision += 1
-
-    def remove_group(self, name: str):
-        """TODO"""
-
-        self.dag.remove_group(name)
-        self.dag.revision += 1
-
-    def set_default_group(self, name: str):
-        """TODO"""
-
-        if not self.dag.has_group(name):
-            raise exceptions.GroupNotFound(name)
-
-        self.config.default_group = name
-
     def create_component(self,
                          name: str,
-                         group: str,
+                         labels: [str],
                          type: str,
                          raw_params: options.RawOptions) -> model.Component:
         # pylint: disable=W0622
@@ -462,7 +403,7 @@ class Workspace:
         for unused in params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
-        component = self.dag.create_component(name, group, type, params)
+        component = self.dag.create_component(name, labels, type, params)
 
         instance = self._create_component(component, None)
         instance.on_create()
@@ -542,9 +483,6 @@ class Workspace:
             "config": _from_config(self.config),
             "dag": {
                 "revision": self.dag.revision,
-                "groups": [
-                    _from_group(i) for i in self.dag.groups.values()
-                ],
                 "components": [
                     _from_component(i) for i in self.dag.components.values()
                 ],
@@ -592,12 +530,10 @@ def load(path: str) -> Workspace:
     workspace = {
         "profiles": [],
         "config": {
-            "default_group": None,
             "deployment_config": ".torque/local/deployments.yaml"
         },
         "dag": {
             "revision": 0,
-            "groups": [],
             "components": [],
             "links": []
         }
