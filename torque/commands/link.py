@@ -31,14 +31,6 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    if arguments.params:
-        raw_params = arguments.params.split(",")
-        raw_params = [i.split("=") for i in raw_params]
-        raw_params = {i[0]: "".join(i[1:]) for i in raw_params}
-
-    else:
-        raw_params = {}
-
     if not arguments.name:
         name = f"{arguments.source}_{arguments.destination}"
         name = _generate_unique_name(set(ws.dag.links.keys()), name)
@@ -51,7 +43,7 @@ def _create(arguments: argparse.Namespace):
                        arguments.source,
                        arguments.destination,
                        arguments.type,
-                       raw_params)
+                       arguments.params or [])
         ws.store()
 
     except exceptions.LinkExists as exc:
@@ -143,7 +135,7 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create link")
-    create_parser.add_argument("--params", "-p", help="link params")
+    create_parser.add_argument("--param", "-p", action="append", dest="params", help="link param")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",
                                default="torquetech.dev/dependency",

@@ -210,8 +210,8 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
         params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
-                             component["labels"],
                              component["type"],
+                             component["labels"],
                              params)
 
     for link in dag_workspace["links"]:
@@ -229,6 +229,18 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
     dag.verify()
 
     return dag
+
+
+def _process_params(params: [str]) -> options.RawOptions:
+    """TODO"""
+
+    if not params:
+        return {}
+
+    params = [i.split("=") for i in params]
+    params = {i[0]: "".join(i[1:]) for i in params}
+
+    return params
 
 
 class Workspace:
@@ -384,9 +396,9 @@ class Workspace:
 
     def create_component(self,
                          name: str,
-                         labels: [str],
                          type: str,
-                         raw_params: options.RawOptions) -> model.Component:
+                         labels: [str],
+                         params: [str]) -> model.Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -395,7 +407,9 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         component_type = self.exts.component(type)
-        params = options.process(component_type.parameters(), raw_params)
+
+        params = _process_params(params)
+        params = options.process(component_type.parameters(), params)
 
         for default in params.defaults:
             print(f"WARNING: {default}: used default value")
@@ -403,7 +417,7 @@ class Workspace:
         for unused in params.unused:
             print(f"WARNING: {unused}: unused parameter")
 
-        component = self.dag.create_component(name, labels, type, params)
+        component = self.dag.create_component(name, type, labels, params)
 
         instance = self._create_component(component, None)
         instance.on_create()
@@ -429,7 +443,7 @@ class Workspace:
                     source: str,
                     destination: str,
                     type: str,
-                    raw_params: options.RawOptions) -> model.Link:
+                    params: [str]) -> model.Link:
         # pylint: disable=W0622,R0913
 
         """TODO"""
@@ -438,7 +452,9 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         link_type = self.exts.link(type)
-        params = options.process(link_type.parameters(), raw_params)
+
+        params = _process_params(params)
+        params = options.process(link_type.parameters(), params)
 
         for default in params.defaults:
             print(f"WARNING: {default}: used default value")

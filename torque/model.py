@@ -15,14 +15,14 @@ class Component:
 
     def __init__(self,
                  name: str,
-                 labels: [str],
                  type: str,
+                 labels: [str],
                  params: options.Options):
         # pylint: disable=W0622
 
         self.name = name
-        self.labels = labels
         self.type = type
+        self.labels = labels
         self.params = params
 
         self.inbound_links: dict[str, str] = {}
@@ -33,10 +33,10 @@ class Component:
         outbound_links = ",".join(self.outbound_links)
 
         return f"Component({self.name}" \
+               f", type={self.type}" \
                f", labels={self.labels}" \
                f", inbound_links=[{inbound_links}]" \
-               f", outbound_links=[{outbound_links}]" \
-               f", type={self.type})"
+               f", outbound_links=[{outbound_links}])"
 
     def add_inbound_link(self, component: str, link: str):
         """TODO"""
@@ -105,8 +105,8 @@ class DAG:
 
     def create_component(self,
                          name: str,
-                         labels: [str],
                          type: str,
+                         labels: [str],
                          params: options.Options) -> Component:
         # pylint: disable=W0622
 
@@ -115,7 +115,7 @@ class DAG:
         if name in self.components:
             raise exceptions.ComponentExists(name)
 
-        component = Component(name, labels, type, params)
+        component = Component(name, type, labels, params)
 
         self.components[name] = component
         return component
