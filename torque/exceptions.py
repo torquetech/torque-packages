@@ -36,14 +36,8 @@ class CycleDetected(TorqueException):
 class ComponentsNotConnected(TorqueException):
     """TODO"""
 
-    def __init__(self, source: str, destination: str):
-        super().__init__("")
-
-        self.source = source
-        self.destination = destination
-
     def __str__(self) -> str:
-        return f"{self.source},{self.destination}"
+        return f"{self.args[0]},{self.args[1]}"
 
 
 class ComponentTypeNotFound(TorqueException):
@@ -69,18 +63,12 @@ class ExecuteFailed(TorqueException):
 class OptionRequired(TorqueException):
     """TODO"""
 
+
 class ConfigurationRequired(TorqueException):
     """TODO"""
 
-    def __init__(self, type: str, name: str, config: str):
-        super().__init__("")
-
-        self.type = type
-        self.name = name
-        self.config = config
-
     def __str__(self) -> str:
-        return f"{self.type}/{self.name}: {self.config}"
+        return f"{self.args[0]}/{self.args[1]}: {self.args[2]}"
 
 
 class ProtocolNotFound(TorqueException):
