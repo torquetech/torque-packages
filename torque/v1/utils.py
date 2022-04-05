@@ -4,8 +4,13 @@
 
 """TODO"""
 
+import inspect
 
-def fqcn(instance: type) -> str:
+
+def fqcn(instance: object) -> str:
     """TODO"""
 
-    return f"{instance.__class__.__module__}.{instance.__class__.__name__}"
+    if not inspect.isclass(instance):
+        return f"{instance.__class__.__module__}.{instance.__class__.__name__}"
+
+    return f"{instance.__module__}.{instance.__name__}"
