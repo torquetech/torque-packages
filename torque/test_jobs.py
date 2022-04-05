@@ -24,9 +24,9 @@ class Checker:
         """TODO"""
 
         for name, depends in self.jobs.items():
-            yield Job(name, depends, self._handler, None)
+            yield Job(name, depends, self._handler)
 
-    def _handler(self, job_name: str, _):
+    def _handler(self, job_name: str):
         """TODO"""
 
         with self.lock:

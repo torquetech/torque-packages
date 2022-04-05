@@ -18,13 +18,11 @@ class Job:
     def __init__(self,
                  name: str,
                  depends: [str],
-                 handler: Callable[[str, object], bool],
-                 data: object):
+                 handler: Callable[[str, object], bool]):
         self.name = name
         self.blocks = []
         self.depends = depends
         self.handler = handler
-        self.data = data
 
     def __repr__(self) -> str:
         depends = ','.join(self.depends)
@@ -88,7 +86,7 @@ class Runner:
                 break
 
             try:
-                if not job.handler(job.name, job.data):
+                if not job.handler(job.name):
                     self._abort()
                     break
 
@@ -111,7 +109,7 @@ class Runner:
     def execute(self, jobs: [Job]):
         """TODO"""
 
-        jobs = dict((job.name, Job(job.name, deepcopy(job.depends), job.handler, job.data))
+        jobs = dict((job.name, Job(job.name, deepcopy(job.depends), job.handler))
                     for job in jobs)
 
         try:

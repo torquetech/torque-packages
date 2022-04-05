@@ -88,28 +88,27 @@ class Deployment:
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
 
-        def _callback_helper(_, data: tuple) -> bool:
-            callback, type, args = data
-            return callback(type, args)
+        def _callback_helper(name: str) -> bool:
+            type = name[:name.index("/")]
+            name = name[len(type) + 1:]
+
+            return callback(type, name)
 
         _jobs = []
 
         for component in self.dag.components.values():
-            data = (callback, "component", component.name)
             depends = []
 
             for inbound_links in component.inbound_links.values():
                 depends += [f"link/{link}" for link in inbound_links]
 
-            job = jobs.Job(f"component/{component.name}", depends, _callback_helper, data)
+            job = jobs.Job(f"component/{component.name}", depends, _callback_helper)
             _jobs.append(job)
 
             for outbound_links in component.outbound_links.values():
                 for link in outbound_links:
-                    data = (callback, "link", link)
                     depends = [f"component/{component.name}"]
-
-                    job = jobs.Job(f"link/{link}", depends, _callback_helper, data)
+                    job = jobs.Job(f"link/{link}", depends, _callback_helper)
                     _jobs.append(job)
 
         jobs.execute(workers, _jobs)
