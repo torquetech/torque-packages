@@ -55,8 +55,8 @@ class Deployment:
 
         self.components[name] = self.exts.component(component.type)(component.name,
                                                                     component.labels,
-                                                                    component.params,
-                                                                    config)
+                                                                    component.params.processed,
+                                                                    config.processed)
 
         return self.components[name]
 
@@ -73,8 +73,8 @@ class Deployment:
         destination = self._component(link.destination)
 
         self.links[name] = self.exts.link(link.type)(link.name,
-                                                     link.params,
-                                                     config,
+                                                     link.params.processed,
+                                                     config.processed,
                                                      source,
                                                      destination)
 

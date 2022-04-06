@@ -269,11 +269,14 @@ class Workspace:
                           config: options.Options) -> component_v1.Component:
         """TODO"""
 
+        if config:
+            config = config.processed
+
         component_type = self.exts.component(component.type)
 
         return component_type(component.name,
                               component.labels,
-                              component.params,
+                              component.params.processed,
                               config)
 
     def _create_link(self,
@@ -283,9 +286,16 @@ class Workspace:
                      destination: component_v1.Component) -> link_v1.Link:
         """TODO"""
 
+        if config:
+            config = config.processed
+
         link_type = self.exts.link(link.type)
 
-        return link_type(link.name, link.params, config, source, destination)
+        return link_type(link.name,
+                         link.params.processed,
+                         config,
+                         source,
+                         destination)
 
     def _collect_components(self, labels: [str], components: [str]) -> [str]:
         """TODO"""
