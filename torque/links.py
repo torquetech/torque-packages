@@ -29,12 +29,12 @@ class DependencyLink(link_v1.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self) -> bool:
+    def on_build(self, _: str) -> bool:
         """TODO"""
 
         return True
 
-    def on_generate(self) -> bool:
+    def on_generate(self, _: str) -> bool:
         """TODO"""
 
         return True

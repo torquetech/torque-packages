@@ -120,9 +120,9 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self) -> bool:
+    def on_build(self, deployment: str) -> bool:
         """TODO"""
 
     @abstractmethod
-    def on_generate(self) -> bool:
+    def on_generate(self, deployment: str) -> bool:
         """TODO"""

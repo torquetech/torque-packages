@@ -130,7 +130,7 @@ class Deployment:
                 else:
                     assert False
 
-            return instance.on_generate()
+            return instance.on_generate(self.name)
 
         self._execute(1, _on_generate)
 
@@ -150,7 +150,7 @@ class Deployment:
                 else:
                     assert False
 
-            return instance.on_build()
+            return instance.on_build(self.name)
 
         self._execute(workers, _on_build)
 
