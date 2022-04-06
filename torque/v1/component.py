@@ -67,7 +67,8 @@ class Component(ABC):
         for interface in self.outbound_interfaces():
             self._outbound_interfaces[utils.fqcn(interface)] = interface
 
-        self.initialize()
+        if self.config:
+            self.initialize()
 
     def inbound_interface(self, cls: type) -> Interface:
         """TODO"""
