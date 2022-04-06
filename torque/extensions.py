@@ -5,6 +5,7 @@
 """TODO"""
 
 import importlib
+import traceback
 import sys
 
 import schema
@@ -166,6 +167,8 @@ def load() -> Extensions:
                 print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
 
             except Exception as exc:
+                traceback.print_exc()
+
                 print(f"WARNING: {entry_point.name}: unable to load extension: {exc}", file=sys.stderr)
 
     return Extensions(extensions)
