@@ -8,6 +8,4 @@ from collections import namedtuple
 
 
 Options = dict[str, str]
-
 OptionSpec = namedtuple("OptionSpec", ["name", "description", "default_value", "process_fn"])
-OptionsSpec = list[OptionSpec]

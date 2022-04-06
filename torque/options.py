@@ -15,7 +15,7 @@ RawOptions = dict[str, str]
 Options = namedtuple("Options", ["processed", "defaults", "unused", "raw"])
 
 
-def process(options_spec: options.OptionsSpec, raw_options: RawOptions) -> Options:
+def process(options_spec: [options.OptionSpec], raw_options: RawOptions) -> Options:
     """TODO"""
 
     spec_keys = {i.name for i in options_spec}

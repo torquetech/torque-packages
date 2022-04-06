@@ -20,7 +20,7 @@ class Provider(ABC):
 
     @staticmethod
     @abstractmethod
-    def configuration() -> options.OptionsSpec:
+    def configuration() -> [options.OptionSpec]:
         """TODO"""
 
     @abstractmethod

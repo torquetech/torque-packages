@@ -12,16 +12,16 @@ class DependencyLink(link_v1.Link):
     """TODO"""
 
     @staticmethod
-    def parameters() -> options_v1.OptionsSpec:
+    def parameters() -> [options_v1.OptionSpec]:
         """TODO"""
 
-        return options_v1.OptionsSpec()
+        return []
 
     @staticmethod
-    def configuration() -> options_v1.OptionsSpec:
+    def configuration() -> [options_v1.OptionSpec]:
         """TODO"""
 
-        return options_v1.OptionsSpec()
+        return []
 
     def on_create(self):
         """TODO"""

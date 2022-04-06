@@ -91,12 +91,12 @@ class Component(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> options.OptionsSpec:
+    def parameters() -> [options.OptionSpec]:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> options.OptionsSpec:
+    def configuration() -> [options.OptionSpec]:
         """TODO"""
 
     @abstractmethod
