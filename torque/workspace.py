@@ -72,7 +72,7 @@ def install_torque(package: str):
 def install_deps():
     """TODO"""
 
-    requires = []
+    requirements = []
 
     for entry in os.listdir(".torque/system"):
         if not entry.endswith(".dist-info"):
@@ -82,16 +82,16 @@ def install_deps():
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
-            requires += dist_requires
+            requirements += dist_requires
 
-    if os.path.isfile(".torque/requires.txt"):
-        with open(".torque/requires.txt", encoding="utf8") as file:
-            requires += [i.strip() for i in file]
+    if os.path.isfile(".torque/requirements.txt"):
+        with open(".torque/requirements.txt", encoding="utf8") as file:
+            requirements += [i.strip() for i in file]
 
-    with open(".torque/local/requires.txt", "w", encoding="utf8") as req:
-        req.write("\n".join(requires))
+    requirements += [""]
 
-    requires += [""]
+    with open(".torque/local/requirements.txt", "w", encoding="utf8") as req:
+        req.write("\n".join(requirements))
 
     env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv"
@@ -100,7 +100,7 @@ def install_deps():
     cmd = [
         ".torque/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/local/requires.txt",
+        "install", "-r", ".torque/local/requirements.txt",
         "--force-reinstall", "--upgrade"
     ]
 
