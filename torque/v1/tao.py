@@ -11,21 +11,3 @@ class Statement:
 
 Manifest = list[Statement]
 Manifests = dict[str, Manifest]
-
-
-class Service(Statement):
-    """TODO"""
-
-    def __init__(self, name: str, image: str):
-        # pylint: disable=W0613
-
-        self.name = name
-        self.image = image
-
-
-class Task(Statement):
-    """TODO"""
-
-    def __init__(self, name: str, image: str):
-        self.name = name
-        self.image = image
