@@ -47,7 +47,7 @@ def _show(arguments: argparse.Namespace):
     if arguments.name not in ws.profiles:
         raise RuntimeError(f"{arguments.name}: profile not found")
 
-    print(f"{ws.profiles[arguments.name]}")
+    print(f"{ws.profiles[arguments.name]}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):
@@ -56,7 +56,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     for profile in ws.profiles.values():
-        print(f"{profile}")
+        print(f"{profile}", file=sys.stdout)
 
 
 def _defaults(arguments: argparse.Namespace):

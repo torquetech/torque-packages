@@ -42,7 +42,7 @@ def main() -> int:
         return 0
 
     except RuntimeError as exc:
-        print(exc)
+        print(exc, file=sys.stderr)
 
     return 1
 

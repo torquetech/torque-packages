@@ -5,6 +5,7 @@
 """TODO"""
 
 import argparse
+import sys
 
 from torque import exceptions
 from torque import workspace
@@ -60,7 +61,7 @@ def _show(arguments: argparse.Namespace):
     if arguments.name not in ws.dag.components:
         raise RuntimeError(f"{arguments.name}: component not found")
 
-    print(f"{ws.dag.components[arguments.name]}")
+    print(f"{ws.dag.components[arguments.name]}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):
@@ -71,7 +72,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     for component in ws.dag.components.values():
-        print(f"{component}")
+        print(f"{component}", file=sys.stdout)
 
 
 def _show_type(arguments: argparse.Namespace):
@@ -81,7 +82,7 @@ def _show_type(arguments: argparse.Namespace):
 
     try:
         component_type = ws.exts.component(arguments.name)
-        print(f"{arguments.name}: {component_type}")
+        print(f"{arguments.name}: {component_type}", file=sys.stdout)
 
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{exc}: component type not found") from exc
@@ -96,7 +97,7 @@ def _list_types(arguments: argparse.Namespace):
     component_types = ws.exts.components()
 
     for component in component_types:
-        print(f"{component}: {component_types[component]}")
+        print(f"{component}: {component_types[component]}", file=sys.stdout)
 
 
 def add_arguments(subparsers):

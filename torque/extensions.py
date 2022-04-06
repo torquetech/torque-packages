@@ -5,6 +5,8 @@
 """TODO"""
 
 import importlib
+import sys
+
 import schema
 
 from torque import exceptions
@@ -161,9 +163,9 @@ def load() -> Extensions:
                 extensions = utils.merge_dicts(extensions, extension, False)
 
             except exceptions.DuplicateDictEntry as exc:
-                print(f"WARNING: {entry_point.name}({exc}): duplicate entry")
+                print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
 
             except Exception as exc:
-                print(f"WARNING: {entry_point.name}: unable to load extension: {exc}")
+                print(f"WARNING: {entry_point.name}: unable to load extension: {exc}", file=sys.stderr)
 
     return Extensions(extensions)

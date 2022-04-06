@@ -6,6 +6,7 @@
 
 
 import argparse
+import sys
 
 from torque import exceptions
 from torque import workspace
@@ -69,7 +70,7 @@ def _show(arguments: argparse.Namespace):
     if arguments.name not in ws.deployments:
         raise RuntimeError(f"{arguments.name}: deployment not found")
 
-    print(f"{ws.deployments[arguments.name]}")
+    print(f"{ws.deployments[arguments.name]}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):
@@ -78,7 +79,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     for deployment in ws.deployments.values():
-        print(f"{deployment}")
+        print(f"{deployment}", file=sys.stdout)
 
 
 def _build(arguments: argparse.Namespace):

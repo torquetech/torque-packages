@@ -5,6 +5,7 @@
 """TODO"""
 
 import threading
+import sys
 
 from collections import namedtuple
 from collections.abc import Callable
@@ -177,10 +178,10 @@ class Deployment:
 
         if show_manifests:
             for name, manifest in manifests.items():
-                print(f"{name}:")
+                print(f"{name}:", file=sys.stdout)
 
                 for statement in manifest:
-                    print(f"  {utils_v1.fqcn(statement)}")
+                    print(f"  {utils_v1.fqcn(statement)}", file=sys.stdout)
 
         self._provider().apply(self.name, manifests, dry_run)
 
@@ -201,10 +202,10 @@ def _load_provider(profile: profile.Profile,
     config = options.process(provider.configuration(), config)
 
     for default in config.defaults:
-        print(f"WARNING: {name}: {default}: used default value")
+        print(f"WARNING: {name}: {default}: used default value", file=sys.stderr)
 
     for unused in config.unused:
-        print(f"WARNING: {name}: {unused}: unused parameter")
+        print(f"WARNING: {name}: {unused}: unused parameter", file=sys.stderr)
 
     return name, config
 
@@ -227,10 +228,10 @@ def _load_components(dag: model.DAG,
             raise exceptions.ConfigurationRequired("component", component.name, str(exc)) from exc
 
         for default in config.defaults:
-            print(f"WARNING: {component.name}: {default}: used default value")
+            print(f"WARNING: {component.name}: {default}: used default value", file=sys.stderr)
 
         for unused in config.unused:
-            print(f"WARNING: {component.name}: {unused}: unused parameter")
+            print(f"WARNING: {component.name}: {unused}: unused parameter", file=sys.stderr)
 
         components[component.name] = config
 
@@ -255,10 +256,10 @@ def _load_links(dag: model.DAG,
             raise exceptions.ConfigurationRequired("link", link.name, str(exc)) from exc
 
         for default in config.defaults:
-            print(f"WARNING: {link.name}: {default}: used default value")
+            print(f"WARNING: {link.name}: {default}: used default value", file=sys.stderr)
 
         for unused in config.unused:
-            print(f"WARNING: {link.name}: {unused}: unused parameter")
+            print(f"WARNING: {link.name}: {unused}: unused parameter", file=sys.stderr)
 
         links[link.name] = config
 
@@ -271,7 +272,7 @@ def _load_config(dag: model.DAG,
     """TODO"""
 
     if dag.revision != profile.revision():
-        print("WARNING: profile out of date")
+        print("WARNING: profile out of date", file=sys.stderr)
 
     provider = _load_provider(profile, exts)
     components = _load_components(dag, profile, exts)

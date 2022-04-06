@@ -7,6 +7,7 @@
 import os
 import re
 import subprocess
+import sys
 
 from importlib import metadata
 
@@ -156,4 +157,4 @@ def list_packages():
             continue
 
         package = entry.removesuffix(".dist-info")
-        print(f"{package}")
+        print(f"{package}", file=sys.stdout)

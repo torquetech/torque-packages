@@ -5,6 +5,7 @@
 """TODO"""
 
 import argparse
+import sys
 
 from torque import exceptions
 from torque import workspace
@@ -86,7 +87,7 @@ def _show(arguments: argparse.Namespace):
     if arguments.name not in ws.dag.links:
         raise RuntimeError(f"{arguments.name}: link not found")
 
-    print(f"{ws.dag.links[arguments.name]}")
+    print(f"{ws.dag.links[arguments.name]}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):
@@ -97,7 +98,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     for link in ws.dag.links.values():
-        print(f"{link}")
+        print(f"{link}", file=sys.stdout)
 
 
 def _show_type(arguments: argparse.Namespace):
@@ -107,7 +108,7 @@ def _show_type(arguments: argparse.Namespace):
 
     try:
         link_type = ws.exts.link(arguments.name)
-        print(f"{arguments.name}: {link_type}")
+        print(f"{arguments.name}: {link_type}", file=sys.stdout)
 
     except exceptions.LinkTypeNotFound as exc:
         raise RuntimeError(f"{exc}: link type not found") from exc
@@ -122,7 +123,7 @@ def _list_types(arguments: argparse.Namespace):
     link_types = ws.exts.links()
 
     for link in link_types:
-        print(f"{link}: {link_types[link]}")
+        print(f"{link}: {link_types[link]}", file=sys.stdout)
 
 
 def add_arguments(subparsers):
