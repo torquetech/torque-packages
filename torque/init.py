@@ -9,7 +9,7 @@ import re
 
 from argparse import Namespace
 
-from torque.workspace import install_torque
+from torque import workspace
 
 
 _URI = r"^[^:]+://"
@@ -26,6 +26,9 @@ def add_arguments(subparsers):
                              metavar="package",
                              default="git+https://github.com/torquetech/torque-workspace@stable",
                              help="torque-workspace package to install, default: %(default)s")
+    init_parser.add_argument("--no-package",
+                             action="store_true",
+                             help="skip installing of torque-workspace package")
 
     init_parser.add_argument("path", help="path to initialize torque in")
 
@@ -44,7 +47,8 @@ def run(arguments: Namespace):
     os.makedirs(f"{arguments.path}/.torque/system")
     os.chdir(f"{arguments.path}")
 
-    install_torque(package)
+    if not arguments.no_package:
+        workspace.install_torque(package)
 
     with open(".torque/.gitignore", "w", encoding="utf8") as file:
         print("local", file=file)
