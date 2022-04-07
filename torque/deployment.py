@@ -130,6 +130,8 @@ class Deployment:
                 else:
                     assert False
 
+            print(f"generating {name}...", file=sys.stderr)
+
             return instance.on_generate(self.name)
 
         self._execute(1, _on_generate)
@@ -149,6 +151,8 @@ class Deployment:
 
                 else:
                     assert False
+
+            print(f"building {name}...", file=sys.stderr)
 
             return instance.on_build(self.name)
 
