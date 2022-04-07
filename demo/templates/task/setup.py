@@ -12,7 +12,7 @@ def load_file(name: str) -> str:
 
 
 setup(
-    name=load_file("NAME"),
+    name="task",
     version=load_file("VERSION"),
     packages=find_packages(),
     install_requires=[],

@@ -4,11 +4,16 @@
 
 """TODO"""
 
+import inspect
+import os
+import shutil
+
 from torque.v1 import component as component_v1
 from torque.v1 import options as options_v1
 
 from demo import interfaces
 from demo import tao
+from demo import utils
 
 
 class PythonTask(component_v1.Component):
@@ -30,6 +35,11 @@ class PythonTask(component_v1.Component):
             options_v1.OptionSpec("replicas", "number of replicas", 1, int)
         ]
 
+    def _path(self) -> str:
+        """TODO"""
+
+        return self.params["path"]
+
     def _add_network_link(self, component: str, address: int):
         """TODO"""
 
@@ -43,7 +53,7 @@ class PythonTask(component_v1.Component):
     def _get_modules_path(self) -> str:
         """TODO"""
 
-        return self.params["path"]
+        return f"{self._path()}/mods"
 
     def _add_requirements(self, requirements: [str]):
         """TODO"""
@@ -54,8 +64,8 @@ class PythonTask(component_v1.Component):
         self.network_links = []
         self.volume_links = []
 
-        self.version = '0.1'
         self.replicas = self.config['replicas']
+        self.version = utils.load_file(f"{self._path()}/VERSION")
 
     def inbound_interfaces(self) -> [component_v1.Interface]:
         """TODO"""
@@ -75,7 +85,13 @@ class PythonTask(component_v1.Component):
     def on_create(self):
         """TODO"""
 
-        # copy templates
+        source_path = f"{utils.module_path()}/templates/task"
+        target_path = self._path()
+
+        if os.path.exists(target_path):
+            raise RuntimeError(f"{target_path}: path already exists")
+
+        shutil.copytree(source_path, target_path)
 
     def on_remove(self):
         """TODO"""
