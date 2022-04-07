@@ -40,6 +40,11 @@ class PythonTask(component_v1.Component):
 
         return self.params["path"]
 
+    def _image(self, deployment: str) -> str:
+        """TODO"""
+
+        return f"{deployment}/component/{self.name}-{self.version}"
+
     def _add_network_link(self, component: str, address: int):
         """TODO"""
 
@@ -100,7 +105,7 @@ class PythonTask(component_v1.Component):
         """TODO"""
 
         self.artifacts = [
-            f"{deployment}/component/{self.name}-{self.version}"
+            self._image(deployment)
         ]
 
         return True
@@ -110,7 +115,7 @@ class PythonTask(component_v1.Component):
 
         self.manifest = [
             tao.Task(self.name,
-                     f"{deployment}/component/{self.name}-{self.version}",
+                     self._image(deployment),
                      self.network_links,
                      self.volume_links,
                      replicas=self.replicas)
