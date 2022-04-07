@@ -53,6 +53,7 @@ def initialize_venv():
 
     with open(f"{site_packages}/torque.pth", "a", encoding="utf8") as file:
         print(f"{os.getcwd()}/.torque/system", file=file)
+        print(f"{os.getcwd()}/.torque/site", file=file)
 
     with open(".torque/local/install_deps", "w", encoding="utf8"):
         pass
