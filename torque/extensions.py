@@ -145,30 +145,56 @@ class Extensions:
         return providers[provider]
 
 
-def load() -> Extensions:
+def _system_entry_points():
     """TODO"""
 
     entry_points = importlib.metadata.entry_points()
-    extensions = _DEFAULT_EXTENSIONS
 
     if "torque" in entry_points:
-        entry_points = entry_points["torque"]
+        return list(entry_points["torque"])
 
-        for entry_point in entry_points:
-            # pylint: disable=W0703
+    return []
 
-            try:
-                extension = entry_point.load()
 
-                extension = _EXTENSION_SCHEMA.validate(extension)
-                extensions = utils.merge_dicts(extensions, extension, False)
+def _local_entry_points():
+    """TODO"""
 
-            except exceptions.DuplicateDictEntry as exc:
-                print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
+    try:
+        importlib.import_module("local")
 
-            except Exception as exc:
-                traceback.print_exc()
+        return [
+            importlib.metadata.EntryPoint(name="local",
+                                          value="local:entry_points",
+                                          group="torque")
+        ]
 
-                print(f"WARNING: {entry_point.name}: unable to load extension: {exc}", file=sys.stderr)
+    except ModuleNotFoundError:
+        return []
+
+
+def load() -> Extensions:
+    """TODO"""
+
+    extensions = _DEFAULT_EXTENSIONS
+
+    entry_points = _system_entry_points()
+    entry_points += _local_entry_points()
+
+    for entry_point in entry_points:
+        # pylint: disable=W0703
+
+        try:
+            extension = entry_point.load()
+
+            extension = _EXTENSION_SCHEMA.validate(extension)
+            extensions = utils.merge_dicts(extensions, extension, False)
+
+        except exceptions.DuplicateDictEntry as exc:
+            print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
+
+        except Exception as exc:
+            traceback.print_exc()
+
+            print(f"WARNING: {entry_point.name}: unable to load extension: {exc}", file=sys.stderr)
 
     return Extensions(extensions)
