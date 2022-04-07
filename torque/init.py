@@ -53,3 +53,5 @@ def run(arguments: Namespace):
     with open(".torque/.gitignore", "w", encoding="utf8") as file:
         print("local", file=file)
         print("**/__pycache__", file=file)
+
+    workspace.initialize_venv()
