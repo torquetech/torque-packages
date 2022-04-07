@@ -10,10 +10,11 @@ from setuptools import setup, find_packages
 
 
 CURDIR = os.path.abspath(os.path.dirname(__file__))
-README = None
 
-with open(os.path.join(CURDIR, "README.md"), "r", encoding="utf-8") as f:
-    README = f.read()
+
+def load_file(name: str) -> str:
+    with open(f"{CURDIR}/{name}", encoding="utf8") as file:
+        return file.read().strip()
 
 setup(
     name="demo-package",
@@ -21,7 +22,7 @@ setup(
     author="Torque Team",
     author_email="team@torquetech.dev",
     description="",
-    long_description=README,
+    long_description=load_file("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/torquetech/demo-package",
     license="MPL v2.0",
