@@ -10,11 +10,18 @@ from torque.v1 import tao as tao_v1
 class Task(tao_v1.Statement):
     """TODO"""
 
-    def __init__(self, name: str, image: str, links: [(str, int)], **kwargs):
+    def __init__(self,
+                 name: str,
+                 image: str,
+                 network_links: [(str, int)],
+                 volume_links: [(str, str)],
+                 **kwargs):
         print(image)
         self.name = name
         self.image = image
-        self.links = links
+
+        self.network_links = network_links
+        self.volume_links = volume_links
 
         if 'replicas' in kwargs:
             self.replicas = kwargs['replicas']
