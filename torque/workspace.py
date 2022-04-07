@@ -11,17 +11,17 @@ import sys
 from importlib import metadata
 
 
-def initialize_venv(target: str):
+def initialize_venv():
     """TODO"""
 
     subprocess.run([sys.executable,
                     "-m", "venv",
                     "--prompt", "torque",
-                    f"{target}/.torque/local/venv"],
+                    "--clear",
+                    "--upgrade-deps",
+                    f".torque/local/venv"],
                    env=os.environ,
                    check=True)
-
-    os.chdir(target)
 
     env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv",
@@ -31,12 +31,28 @@ def initialize_venv(target: str):
         subprocess.run([".torque/local/venv/bin/python",
                         "-m", "pip",
                         "install", "-U",
-                        "pip", "wheel", "setuptools"],
+                        "wheel"],
                        env=env,
                        check=True)
 
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("failed to install venv") from exc
+
+    try:
+        p = subprocess.run([".torque/local/venv/bin/python",
+                            "-c", "import site; print(site.getsitepackages()[0])"],
+                           env=env,
+                           check=True,
+                           capture_output=True)
+
+        site_packages = p.stdout.decode('utf8')
+        site_packages = site_packages.strip()
+
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("failed to get site-packages directory") from exc
+
+    with open(f"{site_packages}/torque.pth", "a", encoding="utf8") as file:
+        print(f"{os.getcwd()}/.torque/system", file=file)
 
     with open(".torque/local/install_deps", "w", encoding="utf8"):
         pass
@@ -44,10 +60,6 @@ def initialize_venv(target: str):
 
 def install_torque(package: str):
     """TODO"""
-
-    env = os.environ | {
-        "PYTHONPATH": ".torque/system"
-    }
 
     cmd = [
         sys.executable,
@@ -63,7 +75,7 @@ def install_torque(package: str):
     cmd += [package]
 
     try:
-        subprocess.run(cmd, env=env, check=True)
+        subprocess.run(cmd, env=os.environ, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("failed to install torque-workspace package") from exc

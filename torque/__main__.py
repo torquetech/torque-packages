@@ -44,7 +44,6 @@ def pass_through_command(argv, cwd: str):
 
     env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv",
-        "PYTHONPATH": ".torque/system",
         "TORQUE_CWD": cwd
     }
 
@@ -75,7 +74,7 @@ def main() -> int:
             raise RuntimeError("workspace root not found!")
 
         if not os.path.isfile(".torque/local/venv/bin/python"):
-            workspace.initialize_venv(".")
+            workspace.initialize_venv()
 
         if os.path.isfile(".torque/local/install_deps"):
             workspace.install_deps()
