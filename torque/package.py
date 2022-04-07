@@ -71,8 +71,7 @@ def install_package(package: str, force: bool, upgrade: bool):
         package = os.path.abspath(package)
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv",
-        "PYTHONPATH": ".torque/system"
+        "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
