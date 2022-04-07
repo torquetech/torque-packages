@@ -32,7 +32,7 @@ setup(
     python_requires=">=3.9",
     entry_points={
         "torque": [
-            "demo=demo.entry_points:entry_points"
+            "demo=demo.demo:entry_points"
         ]
     },
 )
