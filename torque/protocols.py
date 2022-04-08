@@ -7,6 +7,7 @@
 import io
 
 from torque.v1 import protocol
+from torque.v1 import utils
 
 
 class FileProtocol(protocol.Protocol):
@@ -18,5 +19,8 @@ class FileProtocol(protocol.Protocol):
 
         if uri.startswith("file://"):
             uri = uri[7:]
+
+        else:
+            uri = utils.resolve_path(uri)
 
         return open(uri, encoding="utf8")

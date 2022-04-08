@@ -35,7 +35,7 @@ def main() -> int:
         subparsers = parser.add_subparsers(required=True, dest="main_cmd", metavar="command")
 
         parser.add_argument("--workspace",
-                            default=".torque/workspace.yaml",
+                            default=f"{utils.torque_root()}/.torque/workspace.yaml",
                             metavar="PATH",
                             help="workspace file to use")
 

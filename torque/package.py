@@ -12,6 +12,7 @@ import sys
 from importlib import metadata
 
 from torque import exceptions
+from torque import utils
 
 
 _URI = r"^[^:]+://"
@@ -20,35 +21,36 @@ _URI = r"^[^:]+://"
 def install_deps(force: bool, upgrade: bool):
     """TODO"""
 
+    torque_dir = f"{utils.torque_root()}/.torque"
     requirements = []
 
-    for entry in os.listdir(".torque/system"):
+    for entry in os.listdir(f"{torque_dir}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        dist = metadata.Distribution.at(f".torque/system/{entry}")
+        dist = metadata.Distribution.at(f"{torque_dir}/system/{entry}")
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(".torque/requirements.txt"):
-        with open(".torque/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{torque_dir}/requirements.txt"):
+        with open(f"{torque_dir}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(".torque/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{torque_dir}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv"
+        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
     }
 
     cmd = [
-        ".torque/local/venv/bin/python",
+        f"{torque_dir}/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/local/requirements.txt"
+        "install", "-r", f"{torque_dir}/local/requirements.txt"
     ]
 
     if force:
@@ -67,15 +69,19 @@ def install_deps(force: bool, upgrade: bool):
 def install_package(package: str, force: bool, upgrade: bool):
     """TODO"""
 
+    torque_dir = f"{utils.torque_root()}/.torque"
+
     if re.match(_URI, package) is None and os.path.exists(package):
-        package = os.path.abspath(package)
+        if not os.path.isabs(package):
+            package = os.path.join(utils.torque_cwd(), package)
+            package = os.path.normpath(package)
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv"
+        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
     }
 
     cmd = [
-        ".torque/local/venv/bin/python",
+        f"{torque_dir}/local/venv/bin/python",
         "-m", "pip",
         "install"
     ]
@@ -87,7 +93,7 @@ def install_package(package: str, force: bool, upgrade: bool):
         cmd += ["--upgrade"]
 
     cmd += [
-        "-t", ".torque/system",
+        "-t", f"{torque_dir}/system",
         "--platform", "torque",
         "--implementation", "py3",
         "--no-deps",
@@ -107,7 +113,8 @@ def install_package(package: str, force: bool, upgrade: bool):
 def remove_package(package: str, used_component_types: set[str], used_link_types: set[str]):
     """TODO"""
 
-    dist = metadata.Distribution.at(f".torque/system/{package}.dist-info")
+    torque_dir = f"{utils.torque_root()}/.torque"
+    dist = metadata.Distribution.at(f"{torque_dir}/system/{package}.dist-info")
 
     if not dist.files:
         raise exceptions.PackageNotFound(package)
@@ -131,7 +138,7 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
             files.add(os.path.join(*file.parts[:i+1]))
 
     for file in sorted(files, reverse=True):
-        path = f".torque/system/{file}"
+        path = f"{torque_dir}/system/{file}"
 
         try:
             if os.path.isdir(path):
@@ -151,7 +158,9 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
 def list_packages():
     """TODO"""
 
-    for entry in os.listdir(".torque/system"):
+    torque_dir = f"{utils.torque_root()}/.torque"
+
+    for entry in os.listdir(f"{torque_dir}/system"):
         if not entry.endswith(".dist-info"):
             continue
 

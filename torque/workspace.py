@@ -331,10 +331,8 @@ class Workspace:
         if name in self.profiles:
             raise exceptions.ProfileExists(name)
 
-        if not re.match(_PROTO, uri) and not os.path.isabs(uri):
-            uri = os.path.join(os.getenv("TORQUE_CWD"), uri)
-            uri = os.path.abspath(uri)
-            uri = os.path.relpath(uri)
+        if not re.match(_PROTO, uri):
+            uri = utils.torque_path(uri)
 
         profile = Profile(name, uri, secret)
 
@@ -537,13 +535,15 @@ class Workspace:
             ]
         }
 
-        with open(f"{self.config.deployment_config}.tmp", "w", encoding="utf8") as file:
+        deployment_config = utils.resolve_path(self.config.deployment_config)
+
+        with open(f"{deployment_config}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(deployments,
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{self.config.deployment_config}.tmp", self.config.deployment_config)
+        os.replace(f"{deployment_config}.tmp", deployment_config)
 
     def store(self):
         """TODO"""
@@ -554,6 +554,9 @@ class Workspace:
 
 def load(path: str) -> Workspace:
     """TODO"""
+
+    path = utils.torque_path(path)
+    path = utils.resolve_path(path)
 
     workspace = {
         "profiles": [],
@@ -585,8 +588,10 @@ def load(path: str) -> Workspace:
         "deployments": []
     }
 
-    if os.path.exists(config.deployment_config):
-        with open(config.deployment_config, encoding="utf8") as file:
+    deployment_config = utils.resolve_path(config.deployment_config)
+
+    if os.path.exists(deployment_config):
+        with open(deployment_config, encoding="utf8") as file:
             deployments = utils.merge_dicts(deployments, yaml.safe_load(file))
 
     deployments = _to_deployments(deployments["deployments"])

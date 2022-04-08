@@ -6,6 +6,13 @@
 
 
 from torque import exceptions
+from torque.v1 import utils
+
+
+torque_cwd = utils.torque_cwd
+torque_root = utils.torque_root
+torque_path = utils.torque_path
+resolve_path = utils.resolve_path
 
 
 def merge_dicts(dict1: dict[str, object],
