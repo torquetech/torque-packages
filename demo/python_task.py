@@ -7,6 +7,7 @@
 import inspect
 import os
 import shutil
+import subprocess
 
 from torque.v1 import component as component_v1
 from torque.v1 import options as options_v1
@@ -44,7 +45,7 @@ class PythonTask(component_v1.Component):
     def _image(self, deployment: str) -> str:
         """TODO"""
 
-        return f"{deployment}/component/{self.name}-{self.version}"
+        return f"{deployment}/component/{self.name}:{self.version}"
 
     def _add_network_link(self, component: str, address: int):
         """TODO"""
@@ -104,6 +105,13 @@ class PythonTask(component_v1.Component):
 
     def on_build(self, deployment: str) -> bool:
         """TODO"""
+
+        cmd = [
+            "docker", "build", ".",
+            "-t", self._image(deployment)
+        ]
+
+        subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
         self.artifacts = [
             self._image(deployment)
