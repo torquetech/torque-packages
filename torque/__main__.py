@@ -5,13 +5,29 @@
 """TODO"""
 
 import argparse
+import os
 import sys
 
 from torque import commands
+from torque import utils
+
+
+def fix_paths():
+    """TODO"""
+
+    if sys.path[0] == os.getcwd():
+        sys.path = sys.path[1:]
 
 
 def main() -> int:
     """TODO"""
+
+    # For 'python -m module' python always puts in current directory
+    # as the first path element and that can mess up the whole environment
+    # if the current directory has a file or a directory with the same
+    # name as some torque and/or system module. Fix it here util it's
+    # fixed upstream.
+    fix_paths()
 
     # pylint: disable=W0703
     try:
