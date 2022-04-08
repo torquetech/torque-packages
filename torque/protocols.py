@@ -15,4 +15,8 @@ class FileProtocol(protocol.Protocol):
     @staticmethod
     def fetch(uri: str, secret: str) -> io.TextIOWrapper:
         """TODO"""
+
+        if uri.startswith("file://"):
+            uri = uri[7:]
+
         return open(uri, encoding="utf8")

@@ -92,8 +92,9 @@ def _load_config(uri: str,
         proto = match[0]
 
     else:
-        proto = "file"
+        proto = "file://"
 
+    proto = proto.rstrip("://")
     proto = exts.protocol(proto)
     proto = proto()
 
