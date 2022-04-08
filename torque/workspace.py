@@ -11,24 +11,26 @@ import sys
 from importlib import metadata
 
 
-def initialize_venv():
+def initialize_venv(root: str):
     """TODO"""
+
+    torque_dir = f"{root}/.torque"
 
     subprocess.run([sys.executable,
                     "-m", "venv",
                     "--prompt", "torque",
                     "--clear",
                     "--upgrade-deps",
-                    f".torque/local/venv"],
+                    f"{torque_dir}/local/venv"],
                    env=os.environ,
                    check=True)
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv",
+        "VIRTUAL_ENV": f"{torque_dir}/local/venv",
     }
 
     try:
-        subprocess.run([".torque/local/venv/bin/python",
+        subprocess.run([f"{torque_dir}/local/venv/bin/python",
                         "-m", "pip",
                         "install", "-U",
                         "wheel"],
@@ -39,7 +41,7 @@ def initialize_venv():
         raise RuntimeError("failed to install venv") from exc
 
     try:
-        p = subprocess.run([".torque/local/venv/bin/python",
+        p = subprocess.run([f"{torque_dir}/local/venv/bin/python",
                             "-c", "import site; print(site.getsitepackages()[0])"],
                            env=env,
                            check=True,
@@ -52,21 +54,23 @@ def initialize_venv():
         raise RuntimeError("failed to get site-packages directory") from exc
 
     with open(f"{site_packages}/torque.pth", "a", encoding="utf8") as file:
-        print(f"{os.getcwd()}/.torque/system", file=file)
-        print(f"{os.getcwd()}/.torque/site", file=file)
+        print(f"{torque_dir}/system", file=file)
+        print(f"{torque_dir}/site", file=file)
 
-    with open(".torque/local/install_deps", "w", encoding="utf8"):
+    with open(f"{torque_dir}/local/install_deps", "w", encoding="utf8"):
         pass
 
 
-def install_torque(package: str):
+def install_torque(root: str, package: str):
     """TODO"""
+
+    torque_dir = f"{root}/.torque"
 
     cmd = [
         sys.executable,
         "-m", "pip",
         "install",
-        "-t", ".torque/system",
+        "-t", f"{torque_dir}/system",
         "--platform", "torque",
         "--implementation", "py3",
         "--no-deps",
@@ -82,40 +86,41 @@ def install_torque(package: str):
         raise RuntimeError("failed to install torque-workspace package") from exc
 
 
-def install_deps():
+def install_deps(root: str):
     """TODO"""
 
+    torque_dir = f"{root}/.torque"
     requirements = []
 
-    for entry in os.listdir(".torque/system"):
+    for entry in os.listdir(f"{torque_dir}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        dist = metadata.Distribution.at(f".torque/system/{entry}")
+        dist = metadata.Distribution.at(f"{torque_dir}/system/{entry}")
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(".torque/requirements.txt"):
-        with open(".torque/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{torque_dir}/requirements.txt"):
+        with open(f"{torque_dir}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(".torque/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{torque_dir}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv"
+        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
     }
 
     cmd = [
-        ".torque/local/venv/bin/python",
+        f"{torque_dir}/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/local/requirements.txt",
+        "install", "-r", f"{torque_dir}/local/requirements.txt",
         "--force-reinstall", "--upgrade"
     ]
 
     subprocess.run(cmd, env=env, check=True)
-    os.unlink(".torque/local/install_deps")
+    os.unlink(f"{torque_dir}/local/install_deps")

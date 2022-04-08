@@ -33,25 +33,33 @@ def add_arguments(subparsers):
     init_parser.add_argument("path", help="path to initialize torque in")
 
 
-def run(arguments: Namespace):
+def run(cwd: str, arguments: Namespace):
     """TODO"""
 
     package = arguments.package
 
     if re.match(_URI, package) is None and os.path.exists(package):
-        package = os.path.abspath(arguments.package)
+        if not os.path.isabs(package):
+            package = os.path.join(cwd, package)
+            package = os.path.normpath(package)
 
-    if os.path.exists(f"{arguments.path}/.torque"):
-        raise RuntimeError(f"{arguments.path}: already has .torque directory")
+    root = arguments.path
 
-    os.makedirs(f"{arguments.path}/.torque/system")
-    os.chdir(f"{arguments.path}")
+    if not os.path.isabs(root):
+        root = os.path.join(cwd, root)
+        root = os.path.normpath(root)
+
+    if os.path.exists(f"{root}/.torque"):
+        raise RuntimeError(f"{root}: already has .torque directory")
+
+    os.makedirs(f"{root}/.torque/system")
 
     if not arguments.no_package:
-        workspace.install_torque(package)
+        workspace.install_torque(root, package)
 
-    with open(".torque/.gitignore", "w", encoding="utf8") as file:
+    with open(f"{root}/.torque/.gitignore", "w", encoding="utf8") as file:
         print("local", file=file)
         print("**/__pycache__", file=file)
 
-    workspace.initialize_venv()
+    workspace.initialize_venv(root)
+    workspace.install_deps(root)

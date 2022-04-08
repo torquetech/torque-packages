@@ -5,6 +5,7 @@
 """TODO"""
 
 import argparse
+import pathlib
 import os
 import subprocess
 import sys
@@ -17,34 +18,41 @@ class InvalidWorkspace(Exception):
     """TODO"""
 
 
-def find_workspace_root():
+def torque_cwd() -> str:
     """TODO"""
 
+    return os.getenv("PWD", os.getcwd())
+
+
+def torque_root() -> str:
+    """TODO"""
+
+    cwd = pathlib.Path(torque_cwd())
+
     while True:
-        cwd = os.getcwd()
+        if os.path.isdir(f"{cwd}/.torque"):
+            break
 
-        if os.path.isdir(".torque"):
-            return True
+        if cwd.parent == cwd:
+            raise RuntimeError("workspace root not found!")
 
-        if cwd == "/":
-            return False
+        cwd = cwd.parent
 
-        os.chdir("..")
+    return str(cwd)
 
 
-def pass_through_command(argv, cwd: str):
+def pass_through_command(root: str, argv):
     """TODO"""
 
     cmd = [
-        ".torque/local/venv/bin/python",
+        f"{root}/.torque/local/venv/bin/python",
         "-m", "torque"
     ]
 
     cmd += argv
 
     env = os.environ | {
-        "VIRTUAL_ENV": ".torque/local/venv",
-        "TORQUE_CWD": cwd
+        "VIRTUAL_ENV": f"{root}/.torque/local/venv"
     }
 
     subprocess.run(cmd, env=env, check=True)
@@ -64,22 +72,19 @@ def main() -> int:
             init.add_arguments(subparsers)
 
             if sys.argv[1] == "init":
-                init.run(parser.parse_args())
+                init.run(torque_cwd(), parser.parse_args())
 
                 return 0
 
-        cwd = os.getcwd()
+        root = torque_root()
 
-        if not find_workspace_root():
-            raise RuntimeError("workspace root not found!")
+        if not os.path.isfile(f"{root}/.torque/local/venv/bin/python"):
+            workspace.initialize_venv(root)
 
-        if not os.path.isfile(".torque/local/venv/bin/python"):
-            workspace.initialize_venv()
+        if os.path.isfile(f"{root}/.torque/local/install_deps"):
+            workspace.install_deps(root)
 
-        if os.path.isfile(".torque/local/install_deps"):
-            workspace.install_deps()
-
-        pass_through_command(sys.argv[1:], cwd)
+        pass_through_command(root, sys.argv[1:])
 
         return 0
 
