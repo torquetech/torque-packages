@@ -10,6 +10,7 @@ import shutil
 
 from torque.v1 import component as component_v1
 from torque.v1 import options as options_v1
+from torque.v1 import utils as utils_v1
 
 from demo import interfaces
 from demo import tao
@@ -38,7 +39,7 @@ class PythonTask(component_v1.Component):
     def _path(self) -> str:
         """TODO"""
 
-        return self.params["path"]
+        return utils_v1.resolve_path(self.params["path"])
 
     def _image(self, deployment: str) -> str:
         """TODO"""
