@@ -9,6 +9,8 @@ import os
 import shutil
 import subprocess
 
+import schema
+
 from torque.v1 import component as component_v1
 from torque.v1 import options as options_v1
 from torque.v1 import utils as utils_v1
@@ -16,6 +18,12 @@ from torque.v1 import utils as utils_v1
 from demo import interfaces
 from demo import tau
 from demo import utils
+
+
+_ENV_SCHEMA = schema.Schema([{
+    "name": str,
+    "value": str
+}])
 
 
 class PythonTask(component_v1.Component):
@@ -34,7 +42,11 @@ class PythonTask(component_v1.Component):
         """TODO"""
 
         return [
-            options_v1.OptionSpec("replicas", "number of replicas", 1, int)
+            options_v1.OptionSpec("replicas", "number of replicas", 1, int),
+            options_v1.OptionSpec("environment",
+                                  "environment variables",
+                                  [],
+                                  _ENV_SCHEMA.validate)
         ]
 
     def _path(self) -> str:

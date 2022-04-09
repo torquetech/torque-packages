@@ -46,6 +46,9 @@ setup(
     },
     include_package_data=True,
     python_requires=">=3.9",
+    install_requires=[
+        "schema"
+    ],
     entry_points={
         "torque": [
             "demo=demo.demo:entry_points"
