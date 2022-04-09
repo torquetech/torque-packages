@@ -103,7 +103,7 @@ class PythonTask(component_v1.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: str) -> bool:
+    def on_build(self, deployment: str, profile: str) -> bool:
         """TODO"""
 
         cmd = [
@@ -119,7 +119,7 @@ class PythonTask(component_v1.Component):
 
         return True
 
-    def on_generate(self, deployment: str) -> bool:
+    def on_generate(self, deployment: str, profile: str) -> bool:
         """TODO"""
 
         self.manifest = [
