@@ -214,15 +214,19 @@ def _load_provider(profile: profile.Profile,
     name, config = profile.provider()
     provider = exts.provider(name)
 
-    config = options.process(provider.configuration(), config)
+    try:
+        config = options.process(provider.configuration(), config)
 
-    for default in config.defaults:
-        print(f"WARNING: {name}: {default}: used default value", file=sys.stderr)
+        for default in config.defaults:
+            print(f"WARNING: {name}: {default}: used default value", file=sys.stderr)
 
-    for unused in config.unused:
-        print(f"WARNING: {name}: {unused}: unused parameter", file=sys.stderr)
+        for unused in config.unused:
+            print(f"WARNING: {name}: {unused}: unused parameter", file=sys.stderr)
 
-    return name, config
+        return name, config
+
+    except exceptions.OptionRequired as exc:
+        raise exceptions.ConfigurationRequired("provider", name, str(exc)) from exc
 
 
 def _load_components(dag: model.DAG,
