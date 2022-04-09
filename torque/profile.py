@@ -111,6 +111,14 @@ def _to_raw(config: list[dict[str, str]]) -> options.RawOptions:
 
     return options.RawOptions({i["name"]: i["value"] for i in config})
 
+def _to_string(instance: object) -> str:
+    """TODO"""
+
+    if instance:
+        return str(instance)
+
+    return None
+
 
 def load(uri: str, secret: str, exts: extensions.Extensions) -> Profile:
     """TODO"""
@@ -150,7 +158,7 @@ def defaults(provider: str,
         "provider": {
             "name": provider,
             "configuration": [
-                {"name": i.name, "value": i.default_value} for i in provider_conf
+                {"name": i.name, "value": _to_string(i.default_value)} for i in provider_conf
             ]
         },
         "dag": {
@@ -168,7 +176,7 @@ def defaults(provider: str,
         components.append({
             "name": component.name,
             "configuration": [
-                {"name": i.name, "value": i.default_value} for i in component_conf
+                {"name": i.name, "value": _to_string(i.default_value)} for i in component_conf
             ]
         })
 
@@ -177,7 +185,7 @@ def defaults(provider: str,
         links.append({
             "name": link.name,
             "configuration": [
-                {"name": i.name, "value": i.default_value} for i in link_conf
+                {"name": i.name, "value": _to_string(i.default_value)} for i in link_conf
             ]
         })
 
