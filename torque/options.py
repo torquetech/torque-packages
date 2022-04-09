@@ -34,13 +34,9 @@ def process(options_spec: [options.OptionSpec], raw_options: RawOptions) -> Opti
         if name in raw_options:
             value = raw_options[name]
 
-        else:
-            if not value:
-                raise exceptions.OptionRequired(name)
+        if value is None:
+            raise exceptions.OptionRequired(name)
 
-        if option_spec.process_fn:
-            value = option_spec.process_fn(value)
-
-        processed[name] = value
+        processed[name] = option_spec.validate_fn(value)
 
     return Options(processed, defaults, unused, raw)

@@ -43,7 +43,7 @@ _WORKSPACE_SCHEMA = schema.Schema({
             "type": str,
             "params": [{
                 "name": str,
-                "value": str
+                "value": object
             }]
         }],
         "links": [{
@@ -53,7 +53,7 @@ _WORKSPACE_SCHEMA = schema.Schema({
             "type": str,
             "params": [{
                 "name": str,
-                "value": str
+                "value": object
             }]
         }]
     }
