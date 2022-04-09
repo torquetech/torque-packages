@@ -6,6 +6,8 @@
 
 from copy import deepcopy
 
+import pydot
+
 from torque import exceptions
 from torque import options
 
@@ -273,3 +275,18 @@ class DAG:
                 component.outbound_links.pop(component_name, None)
 
         return subset
+
+    def dot(self, name: str) -> str:
+        """TODO"""
+
+        graph = pydot.Dot(name, graph_type="digraph")
+
+        for component in self.components.values():
+            node = pydot.Node(component.name)
+            graph.add_node(node)
+
+        for link in self.links.values():
+            edge = pydot.Edge(link.source, link.destination, label=link.type)
+            graph.add_edge(edge)
+
+        return graph.to_string()

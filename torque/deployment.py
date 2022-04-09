@@ -201,6 +201,11 @@ class Deployment:
         self._generate()
         self._provider().delete(self.name, dry_run)
 
+    def dot(self) -> str:
+        """TODO"""
+
+        return self.dag.dot(self.name)
+
 
 def _load_provider(profile: profile.Profile,
                    exts: extensions.Extensions) -> (str, options.Options):

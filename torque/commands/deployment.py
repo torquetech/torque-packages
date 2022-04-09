@@ -157,6 +157,28 @@ def _delete(arguments: argparse.Namespace):
         raise RuntimeError("no components selected") from exc
 
 
+def _dot(arguments: argparse.Namespace):
+    """TODO"""
+
+    ws = workspace.load(arguments.workspace)
+
+    try:
+        deployment = ws.load_deployment(arguments.name)
+        print(deployment.dot(), file=sys.stdout)
+
+    except exceptions.DeploymentNotFound as exc:
+        raise RuntimeError(f"{exc}: deployment not found") from exc
+
+    except exceptions.ProfileNotFound as exc:
+        raise RuntimeError(f"{exc}: profile not found") from exc
+
+    except exceptions.ProviderNotFound as exc:
+        raise RuntimeError(f"{exc}: provider not found") from exc
+
+    except exceptions.NoComponentsSelected as exc:
+        raise RuntimeError("no components selected") from exc
+
+
 def add_arguments(subparsers):
     """TODO"""
 
@@ -202,6 +224,9 @@ def add_arguments(subparsers):
                                help="dry run")
     delete_parser.add_argument("name", help="deployment name")
 
+    dot_parser = subparsers.add_parser("dot", help="generate dot file")
+    dot_parser.add_argument("name", help="deployment name")
+
 
 def run(arguments: argparse.Namespace):
     """TODO"""
@@ -213,7 +238,8 @@ def run(arguments: argparse.Namespace):
         "list": _list,
         "build": _build,
         "apply": _apply,
-        "delete": _delete
+        "delete": _delete,
+        "dot": _dot
     }
 
     cmds[arguments.deployment_cmd](arguments)
