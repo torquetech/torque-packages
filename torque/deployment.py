@@ -28,14 +28,20 @@ Configuration = namedtuple("Configuration", ["provider", "components", "links"])
 
 
 class Deployment:
+    # pylint: disable=R0902
+
     """TODO"""
 
     def __init__(self,
                  name: str,
+                 profile: str,
                  dag: model.DAG,
                  config: dict[str, options.Options],
                  exts: extensions.Extensions):
+        # pylint: disable=R0913
+
         self.name = name
+        self.profile = profile
         self.dag = dag
         self.config = config
         self.exts = exts
@@ -132,7 +138,7 @@ class Deployment:
 
             print(f"generating {name}...", file=sys.stderr)
 
-            return instance.on_generate(self.name)
+            return instance.on_generate(self.name, self.profile)
 
         self._execute(1, _on_generate)
 
@@ -154,7 +160,7 @@ class Deployment:
 
             print(f"building {name}...", file=sys.stderr)
 
-            return instance.on_build(self.name)
+            return instance.on_build(self.name, self.profile)
 
         self._execute(workers, _on_build)
 
@@ -287,9 +293,12 @@ def _load_config(dag: model.DAG,
 
 def load(name: str,
          components: [str],
+         profile_name: str,
          profile: profile.Profile,
          dag: model.DAG,
          exts: extensions.Extensions) -> Deployment:
+    # pylint: disable=R0913
+
     """TODO"""
 
     if components is not None and len(components) == 0:
@@ -298,4 +307,4 @@ def load(name: str,
     dag = dag.subset(components)
     config = _load_config(dag, profile, exts)
 
-    return Deployment(name, dag, config, exts)
+    return Deployment(name, profile_name, dag, config, exts)
