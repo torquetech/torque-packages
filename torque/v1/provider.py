@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 from torque.v1 import component
 from torque.v1 import options
-from torque.v1 import tao
+from torque.v1 import tau
 
 
 class Provider(ABC):
@@ -28,7 +28,7 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def apply(self, name: str, manifests: tao.Manifests, dry_run: bool):
+    def apply(self, name: str, manifests: tau.Manifests, dry_run: bool):
         """TODO"""
 
     @abstractmethod

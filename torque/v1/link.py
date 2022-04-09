@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 from torque.v1 import component
 from torque.v1 import options
-from torque.v1 import tao
+from torque.v1 import tau
 
 
 class Link(ABC):
@@ -30,7 +30,7 @@ class Link(ABC):
         self.destination = destination
 
         self.artifacts: component.Artifacts = []
-        self.manifest: tao.Manifest = []
+        self.manifest: tau.Manifest = []
 
     @staticmethod
     @abstractmethod

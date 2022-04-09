@@ -20,7 +20,7 @@ from torque import profile
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
-from torque.v1 import tao as tao_v1
+from torque.v1 import tau as tau_v1
 from torque.v1 import utils as utils_v1
 
 
@@ -178,7 +178,7 @@ class Deployment:
 
         self._generate()
 
-        manifests: tao_v1.Manifests = {}
+        manifests: tau_v1.Manifests = {}
 
         for name, component in self.components.items():
             manifests[f"component/{name}"] = component.manifest
