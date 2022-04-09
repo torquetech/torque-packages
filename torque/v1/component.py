@@ -5,6 +5,7 @@
 """TODO"""
 
 import inspect
+import threading
 import warnings
 
 from abc import ABC
@@ -38,6 +39,21 @@ class Interface:
             setattr(self, name, func)
 
 
+class InterfaceContext:
+    """TODO"""
+
+    def __init__(self, lock: threading.Lock, interface: Interface):
+        self.lock = lock
+        self.interface = interface
+
+    def __enter__(self):
+        self.lock.acquire()
+        return self.interface
+
+    def __exit__(self, type, value, traceback):
+        self.lock.release()
+
+
 class Component(ABC):
     # pylint: disable=R0902
 
@@ -68,27 +84,28 @@ class Component(ABC):
             self._outbound_interfaces[utils.fqcn(interface)] = interface
 
         if self.config:
+            self._lock = threading.Lock()
             self.initialize()
 
-    def inbound_interface(self, cls: type) -> Interface:
+    def inbound_interface(self, cls: type) -> InterfaceContext:
         """TODO"""
 
         name = utils.fqcn(cls)
 
         if name not in self._inbound_interfaces:
-            return None
+            return InterfaceContext(self._lock, None)
 
-        return self._inbound_interfaces[name]
+        return InterfaceContext(self._lock, self._inbound_interfaces[name])
 
-    def outbound_interface(self, cls: type) -> Interface:
+    def outbound_interface(self, cls: type) -> InterfaceContext:
         """TODO"""
 
         name = utils.fqcn(cls)
 
         if name not in self._outbound_interfaces:
-            return None
+            return InterfaceContext(self._lock, None)
 
-        return self._outbound_interfaces[name]
+        return InterfaceContext(self._lock, self._outbound_interfaces[name])
 
     @staticmethod
     @abstractmethod
