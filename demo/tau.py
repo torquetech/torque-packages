@@ -4,10 +4,10 @@
 
 """TODO"""
 
-from torque.v1 import tao as tao_v1
+from torque.v1 import tau as tau_v1
 
 
-class Task(tao_v1.Statement):
+class Task(tau_v1.Statement):
     """TODO"""
 
     def __init__(self,

@@ -14,7 +14,7 @@ from torque.v1 import options as options_v1
 from torque.v1 import utils as utils_v1
 
 from demo import interfaces
-from demo import tao
+from demo import tau
 from demo import utils
 
 
@@ -123,7 +123,7 @@ class PythonTask(component_v1.Component):
         """TODO"""
 
         self.manifest = [
-            tao.Task(self.name,
+            tau.Task(self.name,
                      self._image(deployment),
                      self.network_links,
                      self.volume_links,
