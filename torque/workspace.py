@@ -55,9 +55,6 @@ def initialize_venv(root: str):
         print(f"{torque_dir}/system", file=file)
         print(f"{torque_dir}/site", file=file)
 
-    with open(f"{torque_dir}/local/install_deps", "w", encoding="utf8"):
-        pass
-
 
 def install_torque(root: str, package: str):
     """TODO"""

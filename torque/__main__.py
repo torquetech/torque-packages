@@ -80,8 +80,6 @@ def main() -> int:
 
         if not os.path.isfile(f"{root}/.torque/local/venv/bin/python"):
             workspace.initialize_venv(root)
-
-        if os.path.isfile(f"{root}/.torque/local/install_deps"):
             workspace.install_deps(root)
 
         pass_through_command(root, sys.argv[1:])

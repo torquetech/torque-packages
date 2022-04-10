@@ -62,4 +62,6 @@ def run(cwd: str, arguments: Namespace):
         print("**/__pycache__", file=file)
 
     workspace.initialize_venv(root)
-    workspace.install_deps(root)
+
+    if not arguments.no_package:
+        workspace.install_deps(root)
