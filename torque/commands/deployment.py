@@ -144,6 +144,9 @@ def _delete(arguments: argparse.Namespace):
         deployment = ws.load_deployment(arguments.name)
         deployment.delete(arguments.dry_run)
 
+    except exceptions.ConfigurationRequired as exc:
+        raise RuntimeError(f"{exc}: configuration required") from exc
+
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -165,6 +168,9 @@ def _dot(arguments: argparse.Namespace):
     try:
         deployment = ws.load_deployment(arguments.name)
         print(deployment.dot(), file=sys.stdout)
+
+    except exceptions.ConfigurationRequired as exc:
+        raise RuntimeError(f"{exc}: configuration required") from exc
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc

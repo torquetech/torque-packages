@@ -221,7 +221,7 @@ def _load_provider(profile: profile.Profile,
             print(f"WARNING: {name}: {default}: used default value", file=sys.stderr)
 
         for unused in config.unused:
-            print(f"WARNING: {name}: {unused}: unused parameter", file=sys.stderr)
+            print(f"WARNING: {name}: {unused}: unused configuration", file=sys.stderr)
 
         return name, config
 
@@ -250,7 +250,7 @@ def _load_components(dag: model.DAG,
             print(f"WARNING: {component.name}: {default}: used default value", file=sys.stderr)
 
         for unused in config.unused:
-            print(f"WARNING: {component.name}: {unused}: unused parameter", file=sys.stderr)
+            print(f"WARNING: {component.name}: {unused}: unused configuration", file=sys.stderr)
 
         components[component.name] = config
 
@@ -278,7 +278,7 @@ def _load_links(dag: model.DAG,
             print(f"WARNING: {link.name}: {default}: used default value", file=sys.stderr)
 
         for unused in config.unused:
-            print(f"WARNING: {link.name}: {unused}: unused parameter", file=sys.stderr)
+            print(f"WARNING: {link.name}: {unused}: unused configuration", file=sys.stderr)
 
         links[link.name] = config
 

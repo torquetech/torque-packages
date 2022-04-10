@@ -431,7 +431,7 @@ class Workspace:
             print(f"WARNING: {default}: used default value", file=sys.stderr)
 
         for unused in params.unused:
-            print(f"WARNING: {unused}: unused parameter", file=sys.stderr)
+            print(f"WARNING: {unused}: unused configuration", file=sys.stderr)
 
         component = self.dag.create_component(name, type, labels, params)
 
@@ -476,7 +476,7 @@ class Workspace:
             print(f"WARNING: {default}: used default value", file=sys.stderr)
 
         for unused in params.unused:
-            print(f"WARNING: {unused}: unused parameter", file=sys.stderr)
+            print(f"WARNING: {unused}: unused configuration", file=sys.stderr)
 
         link = self.dag.create_link(name, source, destination, type, params)
 
