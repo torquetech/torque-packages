@@ -12,26 +12,26 @@ import sys
 def initialize_venv(root: str):
     """TODO"""
 
-    torque_dir = f"{root}/.torque"
-
     subprocess.run([sys.executable,
                     "-m", "venv",
                     "--prompt", "torque",
                     "--clear",
                     "--upgrade-deps",
-                    f"{torque_dir}/local/venv"],
+                    ".torque/local/venv"],
+                   cwd=root,
                    env=os.environ,
                    check=True)
 
     env = os.environ | {
-        "VIRTUAL_ENV": f"{torque_dir}/local/venv",
+        "VIRTUAL_ENV": ".torque/local/venv",
     }
 
     try:
-        subprocess.run([f"{torque_dir}/local/venv/bin/python",
+        subprocess.run([".torque/local/venv/bin/python",
                         "-m", "pip",
                         "install", "-U",
                         "wheel"],
+                       cwd=root,
                        env=env,
                        check=True)
 
@@ -39,8 +39,9 @@ def initialize_venv(root: str):
         raise RuntimeError("failed to install venv") from exc
 
     try:
-        p = subprocess.run([f"{torque_dir}/local/venv/bin/python",
+        p = subprocess.run([".torque/local/venv/bin/python",
                             "-c", "import site; print(site.getsitepackages()[0])"],
+                           cwd=root,
                            env=env,
                            check=True,
                            capture_output=True)
@@ -52,20 +53,18 @@ def initialize_venv(root: str):
         raise RuntimeError("failed to get site-packages directory") from exc
 
     with open(f"{site_packages}/torque.pth", "a", encoding="utf8") as file:
-        print(f"{torque_dir}/system", file=file)
-        print(f"{torque_dir}/site", file=file)
+        print(f"{root}/.torque/system", file=file)
+        print(f"{root}/.torque/site", file=file)
 
 
 def install_torque(root: str, package: str):
     """TODO"""
 
-    torque_dir = f"{root}/.torque"
-
     cmd = [
         sys.executable,
         "-m", "pip",
         "install",
-        "-t", f"{torque_dir}/system",
+        "-t", ".torque/system",
         "--platform", "torque",
         "--implementation", "py3",
         "--no-deps",
@@ -75,7 +74,7 @@ def install_torque(root: str, package: str):
     cmd += [package]
 
     try:
-        subprocess.run(cmd, env=os.environ, check=True)
+        subprocess.run(cmd, cwd=root, env=os.environ, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("failed to install torque-workspace package") from exc
@@ -84,15 +83,13 @@ def install_torque(root: str, package: str):
 def install_deps(root: str):
     """TODO"""
 
-    torque_dir = f"{root}/.torque"
-
     cmd = [
-        f"{torque_dir}/local/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "torque.install_deps"
     ]
 
     env = os.environ | {
-        "VIRTUAL_ENV": f"{torque_dir}/local/venv",
+        "VIRTUAL_ENV": ".torque/local/venv",
         "PWD": root
     }
 
