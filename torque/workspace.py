@@ -53,8 +53,8 @@ def initialize_venv(root: str):
         raise RuntimeError("failed to get site-packages directory") from exc
 
     with open(f"{site_packages}/torque.pth", "a", encoding="utf8") as file:
-        print(f"{root}/.torque/system", file=file)
-        print(f"{root}/.torque/site", file=file)
+        print(os.path.relpath(f"{root}/.torque/system", site_packages), file=file)
+        print(os.path.relpath(f"{root}/.torque/site", site_packages), file=file)
 
 
 def install_torque(root: str, package: str):
