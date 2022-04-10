@@ -21,26 +21,25 @@ _URI = r"^[^:]+://"
 def install_deps(force: bool, upgrade: bool):
     """TODO"""
 
-    torque_dir = f"{utils.torque_root()}/.torque"
     requirements = []
 
-    for entry in os.listdir(f"{torque_dir}/system"):
+    for entry in os.listdir(f"{utils.torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        dist = metadata.Distribution.at(f"{torque_dir}/system/{entry}")
+        dist = metadata.Distribution.at(f"{utils.torque_dir()}/system/{entry}")
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(f"{torque_dir}/requirements.txt"):
-        with open(f"{torque_dir}/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{utils.torque_dir()}/requirements.txt"):
+        with open(f"{utils.torque_dir()}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(f"{torque_dir}/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{utils.torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
@@ -111,8 +110,7 @@ def install_package(package: str, force: bool, upgrade: bool):
 def remove_package(package: str, used_component_types: set[str], used_link_types: set[str]):
     """TODO"""
 
-    torque_dir = f"{utils.torque_root()}/.torque"
-    dist = metadata.Distribution.at(f"{torque_dir}/system/{package}.dist-info")
+    dist = metadata.Distribution.at(f"{utils.torque_dir()}/system/{package}.dist-info")
 
     if not dist.files:
         raise exceptions.PackageNotFound(package)
@@ -136,7 +134,7 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
             files.add(os.path.join(*file.parts[:i+1]))
 
     for file in sorted(files, reverse=True):
-        path = f"{torque_dir}/system/{file}"
+        path = f"{utils.torque_dir()}/system/{file}"
 
         try:
             if os.path.isdir(path):
@@ -156,9 +154,7 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
 def list_packages():
     """TODO"""
 
-    torque_dir = f"{utils.torque_root()}/.torque"
-
-    for entry in os.listdir(f"{torque_dir}/system"):
+    for entry in os.listdir(f"{utils.torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
