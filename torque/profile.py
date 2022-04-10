@@ -11,6 +11,7 @@ import yaml
 from torque import model
 from torque import extensions
 from torque import options
+from torque import utils
 
 
 _PROTO = r"^([^:]+)://"
@@ -81,9 +82,7 @@ class Profile:
         return (name, links[name])
 
 
-def _load_config(uri: str,
-                 secret: str,
-                 exts: extensions.Extensions) -> dict[str, object]:
+def _load_config(uri: str, exts: extensions.Extensions) -> dict[str, object]:
     """TODO"""
 
     match = re.match(_PROTO, uri)
@@ -98,12 +97,8 @@ def _load_config(uri: str,
     proto = exts.protocol(proto)
     proto = proto()
 
-    config = None
-
-    with proto.fetch(uri, secret) as file:
-        config = yaml.safe_load(file)
-
-    return config
+    with proto.fetch(uri) as file:
+        return yaml.safe_load(file)
 
 
 def _to_raw(config: list[dict[str, str]]) -> options.RawOptions:
@@ -112,10 +107,14 @@ def _to_raw(config: list[dict[str, str]]) -> options.RawOptions:
     return options.RawOptions({i["name"]: i["value"] for i in config})
 
 
-def load(uri: str, secret: str, exts: extensions.Extensions) -> Profile:
+def load(uris: [str], exts: extensions.Extensions) -> Profile:
     """TODO"""
 
-    config = _load_config(uri, secret, exts)
+    config = {}
+
+    for uri in uris:
+        config = utils.merge_dicts(config, _load_config(uri, exts), False)
+
     config = _CONFIG_SCHEMA.validate(config)
 
     provider = config["provider"]

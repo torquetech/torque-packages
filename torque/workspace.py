@@ -29,8 +29,7 @@ _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 _WORKSPACE_SCHEMA = schema.Schema({
     "profiles": [{
         "name": str,
-        "uri": str,
-        "secret": schema.Or(str, None)
+        "uris": [str],
     }],
     "config": {
         "deployment": schema.Or(str, None)
@@ -72,13 +71,13 @@ _DEPLOYMENTS_SCHEMA = schema.Schema({
 class Profile:
     """TODO"""
 
-    def __init__(self, name: str, uri: str, secret: str):
+    def __init__(self, name: str, uris: [str]):
         self.name = name
-        self.uri = uri
-        self.secret = secret
+        self.uris = uris
 
     def __repr__(self) -> str:
-        return f"Profile({self.name}, uri={self.uri}, secret={self.secret})"
+        uris = ", ".join(self.uris)
+        return f"Profile({self.name}, uris=[{uris}])"
 
 
 class Deployment:
@@ -107,8 +106,7 @@ def _to_profile(profile_workspace: dict[str, object]) -> Profile:
     """TODO"""
 
     return Profile(profile_workspace["name"],
-                   profile_workspace["uri"],
-                   profile_workspace["secret"])
+                   profile_workspace["uris"])
 
 
 def _to_config(config_workspace: dict[str, str]) -> Configuration:
@@ -139,8 +137,7 @@ def _from_profile(profile: Profile) -> dict[str, object]:
 
     return {
         "name": profile.name,
-        "uri": profile.uri,
-        "secret": profile.secret
+        "uris": profile.uris
     }
 
 
@@ -331,16 +328,21 @@ class Workspace:
                                self.dag,
                                self.exts)
 
-    def create_profile(self, name: str, uri: str, secret: str) -> Profile:
+    def create_profile(self, name: str, uris: [str]) -> Profile:
         """TODO"""
 
         if name in self.profiles:
             raise exceptions.ProfileExists(name)
 
-        if not re.match(_PROTO, uri):
-            uri = utils.torque_path(uri)
+        _uris = []
 
-        profile = Profile(name, uri, secret)
+        for uri in uris:
+            if not re.match(_PROTO, uri):
+                uri = utils.torque_path(uri)
+
+            _uris.append(uri)
+
+        profile = Profile(name, _uris)
 
         self.profiles[name] = profile
         return profile
@@ -361,7 +363,7 @@ class Workspace:
 
         p = self.profiles[name]
 
-        return profile.load(p.uri, p.secret, self.exts)
+        return profile.load(p.uris, self.exts)
 
     def profile_defaults(self, provider: str) -> dict[str, object]:
         """TODO"""

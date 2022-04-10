@@ -19,7 +19,7 @@ def _create(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
-        ws.create_profile(arguments.name, arguments.uri, arguments.secret)
+        ws.create_profile(arguments.name, arguments.uris)
         ws.store()
 
     except exceptions.ProfileExists as exc:
@@ -86,10 +86,11 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="profile_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create profile")
-
-    create_parser.add_argument("--secret", help="configuration uri secret")
     create_parser.add_argument("name", help="profile name")
-    create_parser.add_argument("uri", help="configuration uri")
+    create_parser.add_argument("uris",
+                               metavar="uri",
+                               nargs="+",
+                               help="configuration uri")
 
     remove_parser = subparsers.add_parser("remove", help="remove profile")
     remove_parser.add_argument("name", help="profile name")

@@ -15,5 +15,5 @@ class Protocol(ABC):
 
     @staticmethod
     @abstractmethod
-    def fetch(uri: str, secret: str) -> io.TextIOWrapper:
+    def fetch(uri: str) -> io.TextIOWrapper:
         """TODO"""
