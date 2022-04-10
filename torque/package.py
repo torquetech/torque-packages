@@ -44,13 +44,13 @@ def install_deps(force: bool, upgrade: bool):
         req.write("\n".join(requirements))
 
     env = os.environ | {
-        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
+        "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
-        f"{torque_dir}/local/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", f"{torque_dir}/local/requirements.txt"
+        "install", "-r", ".torque/local/requirements.txt"
     ]
 
     if force:
@@ -60,7 +60,7 @@ def install_deps(force: bool, upgrade: bool):
         cmd += ["--upgrade"]
 
     try:
-        subprocess.run(cmd, env=env, check=True)
+        subprocess.run(cmd, cwd=utils.torque_root(), env=env, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
@@ -69,19 +69,17 @@ def install_deps(force: bool, upgrade: bool):
 def install_package(package: str, force: bool, upgrade: bool):
     """TODO"""
 
-    torque_dir = f"{utils.torque_root()}/.torque"
-
     if re.match(_URI, package) is None and os.path.exists(package):
         if not os.path.isabs(package):
             package = os.path.join(utils.torque_cwd(), package)
             package = os.path.normpath(package)
 
     env = os.environ | {
-        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
+        "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
-        f"{torque_dir}/local/venv/bin/python",
+        ".torque/local/venv/bin/python",
         "-m", "pip",
         "install"
     ]
@@ -93,7 +91,7 @@ def install_package(package: str, force: bool, upgrade: bool):
         cmd += ["--upgrade"]
 
     cmd += [
-        "-t", f"{torque_dir}/system",
+        "-t", ".torque/system",
         "--platform", "torque",
         "--implementation", "py3",
         "--no-deps",
@@ -102,7 +100,7 @@ def install_package(package: str, force: bool, upgrade: bool):
     ]
 
     try:
-        subprocess.run(cmd, env=env, check=True)
+        subprocess.run(cmd, cwd=utils.torque_root(), env=env, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
