@@ -8,8 +8,6 @@ import os
 import subprocess
 import sys
 
-from importlib import metadata
-
 
 def initialize_venv(root: str):
     """TODO"""
@@ -90,37 +88,15 @@ def install_deps(root: str):
     """TODO"""
 
     torque_dir = f"{root}/.torque"
-    requirements = []
-
-    for entry in os.listdir(f"{torque_dir}/system"):
-        if not entry.endswith(".dist-info"):
-            continue
-
-        dist = metadata.Distribution.at(f"{torque_dir}/system/{entry}")
-        dist_requires = dist.metadata.get_all("Requires-Dist")
-
-        if dist_requires:
-            requirements += dist_requires
-
-    if os.path.isfile(f"{torque_dir}/requirements.txt"):
-        with open(f"{torque_dir}/requirements.txt", encoding="utf8") as file:
-            requirements += [i.strip() for i in file]
-
-    requirements += [""]
-
-    with open(f"{torque_dir}/local/requirements.txt", "w", encoding="utf8") as req:
-        req.write("\n".join(requirements))
-
-    env = os.environ | {
-        "VIRTUAL_ENV": f"{torque_dir}/local/venv"
-    }
 
     cmd = [
         f"{torque_dir}/local/venv/bin/python",
-        "-m", "pip",
-        "install", "-r", f"{torque_dir}/local/requirements.txt",
-        "--force-reinstall", "--upgrade"
+        "-m", "torque.install_deps"
     ]
 
-    subprocess.run(cmd, env=env, check=True)
-    os.unlink(f"{torque_dir}/local/install_deps")
+    env = os.environ | {
+        "VIRTUAL_ENV": f"{torque_dir}/local/venv",
+        "PWD": root
+    }
+
+    subprocess.run(cmd, cwd=root, env=env, check=True)
