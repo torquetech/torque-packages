@@ -40,11 +40,13 @@ def _create(arguments: argparse.Namespace):
         name = arguments.name
 
     try:
+        params = workspace.process_params(arguments.params_file, arguments.params)
+
         ws.create_link(name,
                        arguments.source,
                        arguments.destination,
                        arguments.type,
-                       arguments.params or [])
+                       params)
         ws.store()
 
     except exceptions.LinkExists as exc:
@@ -133,6 +135,7 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create link")
+    create_parser.add_argument("--params-file", help="parameters file")
     create_parser.add_argument("--param", "-p", action="append", dest="params", help="link param")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",

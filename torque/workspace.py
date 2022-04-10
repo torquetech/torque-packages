@@ -67,6 +67,13 @@ _DEPLOYMENTS_SCHEMA = schema.Schema({
     }]
 })
 
+_PARAMS_SCHEMA = schema.Schema({
+    "parameters": [{
+        "name": str,
+        "value": object
+    }]
+})
+
 
 class Profile:
     """TODO"""
@@ -228,18 +235,6 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
     dag.verify()
 
     return dag
-
-
-def _process_params(params: [str]) -> options.RawOptions:
-    """TODO"""
-
-    if not params:
-        return {}
-
-    params = [i.split("=") for i in params]
-    params = {i[0]: "".join(i[1:]) for i in params}
-
-    return params
 
 
 class Workspace:
@@ -416,7 +411,7 @@ class Workspace:
                          name: str,
                          type: str,
                          labels: [str],
-                         params: [str]) -> model.Component:
+                         params: options.RawOptions) -> model.Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -425,8 +420,6 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         component_type = self.exts.component(type)
-
-        params = _process_params(params)
         params = options.process(component_type.parameters(), params)
 
         for default in params.defaults:
@@ -461,7 +454,7 @@ class Workspace:
                     source: str,
                     destination: str,
                     type: str,
-                    params: [str]) -> model.Link:
+                    params: options.RawOptions) -> model.Link:
         # pylint: disable=W0622,R0913
 
         """TODO"""
@@ -470,8 +463,6 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         link_type = self.exts.link(type)
-
-        params = _process_params(params)
         params = options.process(link_type.parameters(), params)
 
         for default in params.defaults:
@@ -605,3 +596,41 @@ def load(path: str) -> Workspace:
     deployments = _to_deployments(deployments["deployments"])
 
     return Workspace(path, profiles, config, dag, exts, deployments)
+
+
+def _load_params(path: str) -> options.RawOptions:
+    """TODO"""
+
+    if not path:
+        return {}
+
+    if path == "-":
+        config = sys.stdin.read()
+
+    else:
+        with open(path, encoding="utf8") as file:
+            config = file.read()
+
+    config = yaml.safe_load(config)
+    config = _PARAMS_SCHEMA.validate(config)
+
+    return {param["name"]: param["value"] for param in config["parameters"]}
+
+
+def process_params(params_file: str, params: [str]) -> options.RawOptions:
+    """TODO"""
+
+    _params = _load_params(params_file)
+
+    if not params:
+        return _params
+
+    for p in params:
+        ndx = p.index("=")
+
+        name = p[:ndx]
+        value = p[ndx+1:]
+
+        _params[name] = value
+
+    return _params

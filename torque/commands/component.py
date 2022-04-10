@@ -17,10 +17,12 @@ def _create(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
+        params = workspace.process_params(arguments.params_file, arguments.params)
+
         ws.create_component(arguments.name,
                             arguments.type,
                             arguments.labels or [],
-                            arguments.params or [])
+                            params)
         ws.store()
 
     except exceptions.ComponentExists as exc:
@@ -107,6 +109,7 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="component_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create component")
+    create_parser.add_argument("--params-file", help="parameters file")
     create_parser.add_argument("--param", "-p", action="append", dest="params", help="component param")
     create_parser.add_argument("--label", action="append", dest="labels", help="component label")
     create_parser.add_argument("name", help="component name")
