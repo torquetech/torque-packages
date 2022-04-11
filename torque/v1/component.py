@@ -69,7 +69,7 @@ class Component(ABC):
         self.config = config
 
         self.artifacts: [str] = []
-        self.manifest: tau.Manifest = []
+        self.statements: [tau.Statement] = []
 
         self._inbound_interfaces: dict[str, Interface] = {}
         self._outbound_interfaces: dict[str, Interface] = {}

@@ -6,10 +6,17 @@
 
 from abc import ABC
 from abc import abstractmethod
+from collections import namedtuple
 
-from torque.v1 import component
 from torque.v1 import options
-from torque.v1 import tau
+
+
+Manifest = namedtuple("Manifest", [
+    "type",
+    "name",
+    "labels",
+    "statements"
+])
 
 
 class Provider(ABC):
@@ -28,7 +35,7 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def apply(self, name: str, manifests: tau.Manifests, dry_run: bool):
+    def apply(self, name: str, manifests: [Manifest], dry_run: bool):
         """TODO"""
 
     @abstractmethod

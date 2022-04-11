@@ -20,8 +20,6 @@ from torque import profile
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
-from torque.v1 import tau as tau_v1
-from torque.v1 import utils as utils_v1
 
 
 Configuration = namedtuple("Configuration", ["provider", "components", "links"])
@@ -178,20 +176,17 @@ class Deployment:
 
         self._generate()
 
-        manifests: tau_v1.Manifests = {}
+        manifests: [provider_v1.Manifest] = []
 
         for name, component in self.components.items():
-            manifests[f"component/{name}"] = component.manifest
+            manifests.append(provider_v1.Manifest("component", name, component.labels, component.statements))
 
         for name, link in self.links.items():
-            manifests[f"link/{name}"] = link.manifest
+            manifests.append(provider_v1.Manifest("link", name, [], link.statements))
 
         if show_manifests:
-            for name, manifest in manifests.items():
-                print(f"{name}:", file=sys.stdout)
-
-                for statement in manifest:
-                    print(f"  {utils_v1.fqcn(statement)}", file=sys.stdout)
+            for manifest in manifests:
+                print(f"{manifest}:", file=sys.stdout)
 
         self._provider().apply(self.name, manifests, dry_run)
 

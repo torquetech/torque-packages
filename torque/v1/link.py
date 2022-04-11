@@ -30,7 +30,7 @@ class Link(ABC):
         self.destination = destination
 
         self.artifacts: [str] = []
-        self.manifest: tau.Manifest = []
+        self.statements: [tau.Statement] = []
 
     @staticmethod
     @abstractmethod

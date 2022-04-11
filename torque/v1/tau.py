@@ -7,7 +7,3 @@
 
 class Statement:
     """TODO"""
-
-
-Manifest = list[Statement]
-Manifests = dict[str, Manifest]
