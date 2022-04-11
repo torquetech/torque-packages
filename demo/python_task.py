@@ -134,7 +134,7 @@ class PythonTask(component_v1.Component):
     def on_generate(self, deployment: str, profile: str) -> bool:
         """TODO"""
 
-        self.manifest = [
+        self.statements = [
             tau.Task(self.name,
                      self._image(deployment),
                      self.network_links,
