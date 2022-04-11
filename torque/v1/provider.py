@@ -24,7 +24,7 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def push(self, artifacts: component.Artifacts):
+    def push(self, artifacts: [str]):
         """TODO"""
 
     @abstractmethod

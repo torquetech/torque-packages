@@ -16,9 +16,6 @@ from torque.v1 import options
 from torque.v1 import utils
 
 
-Artifacts = [str]
-
-
 class Interface:
     """TODO"""
 
@@ -71,7 +68,7 @@ class Component(ABC):
         self.params = params
         self.config = config
 
-        self.artifacts: Artifacts = []
+        self.artifacts: [str] = []
         self.manifest: tau.Manifest = []
 
         self._inbound_interfaces: dict[str, Interface] = {}

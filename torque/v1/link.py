@@ -29,7 +29,7 @@ class Link(ABC):
         self.source = source
         self.destination = destination
 
-        self.artifacts: component.Artifacts = []
+        self.artifacts: [str] = []
         self.manifest: tau.Manifest = []
 
     @staticmethod

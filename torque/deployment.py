@@ -167,7 +167,7 @@ class Deployment:
     def push(self):
         """TODO"""
 
-        artifacts: component_v1.Artifacts = []
+        artifacts: [str] = []
         artifacts += [component.artifacts for component in self.components.values()]
         artifacts += [link.artifacts for link in self.links.values()]
 
