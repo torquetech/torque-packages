@@ -193,7 +193,6 @@ class Deployment:
     def delete(self, dry_run: bool):
         """TODO"""
 
-        self._generate()
         self._provider().delete(self.name, dry_run)
 
     def dot(self) -> str:
