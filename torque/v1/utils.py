@@ -69,6 +69,12 @@ def torque_path(path: str) -> str:
     return path
 
 
+def torque_dir() -> str:
+    """TODO"""
+
+    return f"{torque_root()}/.torque"
+
+
 def resolve_path(path: str) -> str:
     """TODO"""
 

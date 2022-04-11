@@ -12,13 +12,8 @@ from torque.v1 import utils
 torque_cwd = utils.torque_cwd
 torque_root = utils.torque_root
 torque_path = utils.torque_path
+torque_dir = utils.torque_dir
 resolve_path = utils.resolve_path
-
-
-def torque_dir() -> str:
-    """TODO"""
-
-    return f"{torque_root()}/.torque"
 
 
 def merge_dicts(dict1: dict[str, object],
