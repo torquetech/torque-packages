@@ -32,7 +32,7 @@ _WORKSPACE_SCHEMA = schema.Schema({
         "uris": [str],
     }],
     "config": {
-        "deployment": schema.Or(str, None)
+        "deployments": schema.Or(str, None)
     },
     "dag": {
         "revision": int,
@@ -105,8 +105,8 @@ class Deployment:
 class Configuration:
     """TODO"""
 
-    def __init__(self, deployment: str):
-        self.deployment = deployment
+    def __init__(self, deployments: str):
+        self.deployments = deployments
 
 
 def _to_profile(profile_workspace: dict[str, object]) -> Profile:
@@ -119,7 +119,7 @@ def _to_profile(profile_workspace: dict[str, object]) -> Profile:
 def _to_config(config_workspace: dict[str, str]) -> Configuration:
     """TODO"""
 
-    return Configuration(config_workspace["deployment"])
+    return Configuration(config_workspace["deployments"])
 
 
 def _to_deployment(deployment: dict[str, object]) -> Deployment:
@@ -158,7 +158,7 @@ def _from_config(config: Configuration) -> dict[str, str]:
     """TODO"""
 
     return {
-        "deployment": config.deployment
+        "deployments": config.deployments
     }
 
 
@@ -534,15 +534,15 @@ class Workspace:
             ]
         }
 
-        deployment = utils.resolve_path(self.config.deployment)
+        deployments_path = utils.resolve_path(self.config.deployments)
 
-        with open(f"{deployment}.tmp", "w", encoding="utf8") as file:
+        with open(f"{deployments_path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(deployments,
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{deployment}.tmp", deployment)
+        os.replace(f"{deployments_path}.tmp", deployments)
 
     def store(self):
         """TODO"""
@@ -560,7 +560,7 @@ def load(path: str) -> Workspace:
     workspace = {
         "profiles": [],
         "config": {
-            "deployment": ".torque/local/deployments.yaml"
+            "deployments": ".torque/local/deployments.yaml"
         },
         "dag": {
             "revision": 0,
@@ -587,10 +587,10 @@ def load(path: str) -> Workspace:
         "deployments": []
     }
 
-    deployment = utils.resolve_path(config.deployment)
+    deployments_path = utils.resolve_path(config.deployments)
 
-    if os.path.exists(deployment):
-        with open(deployment, encoding="utf8") as file:
+    if os.path.exists(deployments_path):
+        with open(deployments_path, encoding="utf8") as file:
             deployments = utils.merge_dicts(deployments, yaml.safe_load(file))
 
     deployments = _to_deployments(deployments["deployments"])
