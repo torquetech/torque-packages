@@ -13,12 +13,12 @@ import schema
 from torque import exceptions
 from torque import links
 from torque import protocols
-from torque import utils
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
 from torque.v1 import protocol as protocol_v1
 from torque.v1 import provider as provider_v1
+from torque.v1 import utils as utils_v1
 
 
 def _is_component(obj: object) -> bool:
@@ -187,10 +187,10 @@ def load() -> Repository:
             _repository = entry_point.load()
             _repository = _REPOSITORY_SCHEMA.validate(_repository)
 
-            repository = utils.merge_dicts(repository, _repository, False)
+            repository = utils_v1.merge_dicts(repository, _repository, False)
 
-        except exceptions.DuplicateDictEntry as exc:
-            print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
+        except RuntimeError as exc:
+            print(f"WARNING: {entry_point.name}: {exc}", file=sys.stderr)
 
         except Exception as exc:
             traceback.print_exc()

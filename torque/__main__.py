@@ -9,7 +9,8 @@ import os
 import sys
 
 from torque import commands
-from torque import utils
+
+from torque.v1 import utils as utils_v1
 
 
 def fix_paths():
@@ -35,7 +36,7 @@ def main() -> int:
         subparsers = parser.add_subparsers(required=True, dest="main_cmd", metavar="command")
 
         parser.add_argument("--workspace",
-                            default=f"{utils.torque_root()}/.torque/workspace.yaml",
+                            default=f"{utils_v1.torque_root()}/.torque/workspace.yaml",
                             metavar="PATH",
                             help="workspace file to use")
 

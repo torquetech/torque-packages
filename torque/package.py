@@ -12,7 +12,8 @@ import sys
 from importlib import metadata
 
 from torque import exceptions
-from torque import utils
+
+from torque.v1 import utils as utils_v1
 
 
 _URI = r"^[^:]+://"
@@ -23,23 +24,23 @@ def install_deps(force: bool, upgrade: bool):
 
     requirements = []
 
-    for entry in os.listdir(f"{utils.torque_dir()}/system"):
+    for entry in os.listdir(f"{utils_v1.torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        dist = metadata.Distribution.at(f"{utils.torque_dir()}/system/{entry}")
+        dist = metadata.Distribution.at(f"{utils_v1.torque_dir()}/system/{entry}")
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(f"{utils.torque_dir()}/requirements.txt"):
-        with open(f"{utils.torque_dir()}/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{utils_v1.torque_dir()}/requirements.txt"):
+        with open(f"{utils_v1.torque_dir()}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(f"{utils.torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{utils_v1.torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
@@ -59,7 +60,7 @@ def install_deps(force: bool, upgrade: bool):
         cmd += ["--upgrade"]
 
     try:
-        subprocess.run(cmd, cwd=utils.torque_root(), env=env, check=True)
+        subprocess.run(cmd, cwd=utils_v1.torque_root(), env=env, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
@@ -70,7 +71,7 @@ def install_package(package: str, force: bool, upgrade: bool):
 
     if re.match(_URI, package) is None and os.path.exists(package):
         if not os.path.isabs(package):
-            package = os.path.join(utils.torque_cwd(), package)
+            package = os.path.join(utils_v1.torque_cwd(), package)
             package = os.path.normpath(package)
 
     env = os.environ | {
@@ -99,7 +100,7 @@ def install_package(package: str, force: bool, upgrade: bool):
     ]
 
     try:
-        subprocess.run(cmd, cwd=utils.torque_root(), env=env, check=True)
+        subprocess.run(cmd, cwd=utils_v1.torque_root(), env=env, check=True)
 
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
@@ -110,7 +111,7 @@ def install_package(package: str, force: bool, upgrade: bool):
 def remove_package(package: str, used_component_types: set[str], used_link_types: set[str]):
     """TODO"""
 
-    dist = metadata.Distribution.at(f"{utils.torque_dir()}/system/{package}.dist-info")
+    dist = metadata.Distribution.at(f"{utils_v1.torque_dir()}/system/{package}.dist-info")
 
     if not dist.files:
         raise exceptions.PackageNotFound(package)
@@ -134,7 +135,7 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
             files.add(os.path.join(*file.parts[:i+1]))
 
     for file in sorted(files, reverse=True):
-        path = f"{utils.torque_dir()}/system/{file}"
+        path = f"{utils_v1.torque_dir()}/system/{file}"
 
         try:
             if os.path.isdir(path):
@@ -154,7 +155,7 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
 def list_packages():
     """TODO"""
 
-    for entry in os.listdir(f"{utils.torque_dir()}/system"):
+    for entry in os.listdir(f"{utils_v1.torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 

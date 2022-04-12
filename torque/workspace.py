@@ -17,10 +17,10 @@ from torque import model
 from torque import options
 from torque import profile
 from torque import repository
-from torque import utils
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
+from torque.v1 import utils as utils_v1
 
 
 _PROTO = r"^([^:]+)://"
@@ -334,7 +334,7 @@ class Workspace:
 
         for uri in uris:
             if not re.match(_PROTO, uri):
-                uri = utils.torque_path(uri)
+                uri = utils_v1.torque_path(uri)
 
             _uris.append(uri)
 
@@ -535,7 +535,7 @@ class Workspace:
             ]
         }
 
-        deployments_path = utils.resolve_path(self.config.deployments)
+        deployments_path = utils_v1.resolve_path(self.config.deployments)
 
         with open(f"{deployments_path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(deployments,
@@ -555,8 +555,8 @@ class Workspace:
 def load(path: str) -> Workspace:
     """TODO"""
 
-    path = utils.torque_path(path)
-    path = utils.resolve_path(path)
+    path = utils_v1.torque_path(path)
+    path = utils_v1.resolve_path(path)
 
     workspace = {
         "profiles": [],
@@ -572,7 +572,7 @@ def load(path: str) -> Workspace:
 
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
-            workspace = utils.merge_dicts(workspace, yaml.safe_load(file))
+            workspace = utils_v1.merge_dicts(workspace, yaml.safe_load(file))
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
     repo = repository.load()
@@ -588,11 +588,11 @@ def load(path: str) -> Workspace:
         "deployments": []
     }
 
-    deployments_path = utils.resolve_path(config.deployments)
+    deployments_path = utils_v1.resolve_path(config.deployments)
 
     if os.path.exists(deployments_path):
         with open(deployments_path, encoding="utf8") as file:
-            deployments = utils.merge_dicts(deployments, yaml.safe_load(file))
+            deployments = utils_v1.merge_dicts(deployments, yaml.safe_load(file))
 
     deployments = _to_deployments(deployments["deployments"])
 

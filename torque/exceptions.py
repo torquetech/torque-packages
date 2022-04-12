@@ -83,10 +83,6 @@ class ProfileNotFound(TorqueException):
     """TODO"""
 
 
-class DuplicateDictEntry(TorqueException):
-    """TODO"""
-
-
 class ProviderNotFound(TorqueException):
     """TODO"""
 

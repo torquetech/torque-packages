@@ -11,7 +11,8 @@ import yaml
 from torque import model
 from torque import options
 from torque import repository
-from torque import utils
+
+from torque.v1 import utils as utils_v1
 
 
 _PROTO = r"^([^:]+)://"
@@ -113,7 +114,7 @@ def load(uris: [str], repo: repository.Repository) -> Profile:
     config = {}
 
     for uri in uris:
-        config = utils.merge_dicts(config, _load_config(uri, repo), False)
+        config = utils_v1.merge_dicts(config, _load_config(uri, repo), False)
 
     config = _CONFIG_SCHEMA.validate(config)
 
