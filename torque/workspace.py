@@ -150,7 +150,7 @@ def _from_components(components: dict[str, model.Component]) -> dict[str: object
     """TODO"""
 
     return {
-        component.name : {
+        component.name: {
             "labels": component.labels,
             "type": component.type,
             "parameters": component.parameters
@@ -162,7 +162,7 @@ def _from_links(links: dict[str, model.Link]) -> dict[str: object]:
     """TODO"""
 
     return {
-        link.name : {
+        link.name: {
             "source": link.source,
             "destination": link.destination,
             "type": link.type,

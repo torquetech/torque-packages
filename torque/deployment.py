@@ -21,7 +21,11 @@ from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
 
 
-Configuration = namedtuple("Configuration", ["provider", "components", "links"])
+Configuration = namedtuple("Configuration", [
+    "provider",
+    "components",
+    "links"
+])
 
 
 class Deployment:
@@ -203,6 +207,7 @@ class Deployment:
 
         return self.dag.dot(self.name)
 
+
 def _provider_config(profile: profile.Profile,
                      repo: repository.Repository) -> object:
     """TODO"""
@@ -214,6 +219,7 @@ def _provider_config(profile: profile.Profile,
 
     except RuntimeError as exc:
         raise RuntimeError(f"provider: {name}: {exc}") from exc
+
 
 def _component_config(component: model.Component,
                       profile: profile.Profile,
@@ -260,11 +266,13 @@ def load(name: str,
     provider = _provider_config(profile, repo)
 
     components = {
-        i.name: _component_config(i, profile, repo) for i in dag.components.values()
+        component.name: _component_config(component, profile, repo)
+        for component in dag.components.values()
     }
 
     links = {
-        i.name: _link_config(i, profile, repo) for i in dag.links.values()
+        link.name: _link_config(link, profile, repo)
+        for link in dag.links.values()
     }
 
     config = Configuration(provider, components, links)
