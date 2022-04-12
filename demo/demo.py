@@ -8,7 +8,7 @@ from demo.python_task import PythonTask
 from demo.python_service import PythonService
 
 
-entry_points = {
+repository = {
     "v1": {
         "components": {
             "demo/python-task": PythonTask,

@@ -51,7 +51,7 @@ setup(
     ],
     entry_points={
         "torque": [
-            "demo=demo.demo:entry_points"
+            "demo=demo.demo:repository"
         ]
     },
 )
