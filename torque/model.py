@@ -9,7 +9,6 @@ from copy import deepcopy
 import pydot
 
 from torque import exceptions
-from torque import options
 
 
 class Component:
@@ -19,13 +18,13 @@ class Component:
                  name: str,
                  type: str,
                  labels: [str],
-                 params: options.Options):
+                 parameters: object):
         # pylint: disable=W0622
 
         self.name = name
         self.type = type
         self.labels = labels
-        self.params = params
+        self.parameters = parameters
 
         self.inbound_links: dict[str, set()] = {}
         self.outbound_links: dict[str, set()] = {}
@@ -94,23 +93,23 @@ class Link:
 
     def __init__(self,
                  name: str,
+                 type: str,
                  source: str,
                  destination: str,
-                 type: str,
-                 params: options.Options):
+                 parameters: object):
         # pylint: disable=R0913,W0622
 
         self.name = name
+        self.type = type
         self.source = source
         self.destination = destination
-        self.type = type
-        self.params = params
+        self.parameters = parameters
 
     def __repr__(self) -> str:
         return f"Link({self.name}" \
+               f", type={self.type}" \
                f", source={self.source}" \
-               f", destination={self.destination}" \
-               f", type={self.type})"
+               f", destination={self.destination})"
 
 
 class DAG:
@@ -125,7 +124,7 @@ class DAG:
                          name: str,
                          type: str,
                          labels: [str],
-                         params: options.Options) -> Component:
+                         parameters: object) -> Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -133,7 +132,7 @@ class DAG:
         if name in self.components:
             raise exceptions.ComponentExists(name)
 
-        component = Component(name, type, labels, params)
+        component = Component(name, type, labels, parameters)
 
         self.components[name] = component
         return component
@@ -156,10 +155,10 @@ class DAG:
 
     def create_link(self,
                     name: str,
+                    type: str,
                     source: str,
                     destination: str,
-                    type: str,
-                    params: options.Options) -> Link:
+                    parameters: object) -> Link:
         # pylint: disable=R0913,W0622
 
         """TODO"""
@@ -176,13 +175,12 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        link = Link(name, source, destination, type, params)
+        link = Link(name, type, source, destination, parameters)
 
         self.components[destination].add_inbound_link(source, name)
         self.components[source].add_outbound_link(destination, name)
 
         self.links[name] = link
-
         return link
 
     def remove_link(self, name: str) -> Link:

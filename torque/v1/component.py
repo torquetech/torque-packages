@@ -12,7 +12,6 @@ from abc import ABC
 from abc import abstractmethod
 
 from torque.v1 import tau
-from torque.v1 import options
 from torque.v1 import utils
 
 
@@ -56,17 +55,13 @@ class Component(ABC):
 
     """TODO"""
 
-    def __init__(self,
-                 name: str,
-                 labels: [str],
-                 params: options.Options,
-                 config: options.Options):
+    def __init__(self, name: str, labels: [str], parameters: object):
         # pylint: disable=R0913
 
         self.name = name
         self.labels = labels
-        self.params = params
-        self.config = config
+        self.parameters = parameters
+        self.configuration = None
 
         self.artifacts: [str] = []
         self.statements: [tau.Statement] = []
@@ -81,9 +76,6 @@ class Component(ABC):
             self._outbound_interfaces[utils.fqcn(interface)] = interface
 
         self._lock = threading.Lock()
-
-        if self.config:
-            self.initialize()
 
     def inbound_interface(self, cls: type) -> InterfaceContext:
         """TODO"""
@@ -107,16 +99,12 @@ class Component(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> [options.OptionSpec]:
+    def validate_parameters(parameters: object) -> object:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> [options.OptionSpec]:
-        """TODO"""
-
-    @abstractmethod
-    def initialize(self):
+    def validate_configuration(configuration: object) -> object:
         """TODO"""
 
     @abstractmethod
@@ -133,6 +121,10 @@ class Component(ABC):
 
     @abstractmethod
     def on_remove(self):
+        """TODO"""
+
+    @abstractmethod
+    def on_initialize(self, configuration: object):
         """TODO"""
 
     @abstractmethod

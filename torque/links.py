@@ -5,28 +5,30 @@
 """TODO"""
 
 from torque.v1 import link as link_v1
-from torque.v1 import options as options_v1
 
 
 class DependencyLink(link_v1.Link):
     """TODO"""
 
     @staticmethod
-    def parameters() -> [options_v1.OptionSpec]:
+    def validate_parameters(parameters: object) -> object:
         """TODO"""
 
-        return []
+        return {}
 
     @staticmethod
-    def configuration() -> [options_v1.OptionSpec]:
+    def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        return []
+        return {}
 
     def on_create(self):
         """TODO"""
 
     def on_remove(self):
+        """TODO"""
+
+    def on_initialize(self, configuration: object):
         """TODO"""
 
     def on_build(self, deployment: str, profile: str) -> bool:

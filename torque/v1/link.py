@@ -8,7 +8,6 @@ from abc import ABC
 from abc import abstractmethod
 
 from torque.v1 import component
-from torque.v1 import options
 from torque.v1 import tau
 
 
@@ -17,29 +16,28 @@ class Link(ABC):
 
     def __init__(self,
                  name: str,
-                 params: options.Options,
-                 config: options.Options,
+                 parameters: object,
                  source: component.Component,
                  destination: component.Component):
         # pylint: disable=R0913
 
         self.name = name
-        self.params = params
-        self.config = config
+        self.parameters = parameters
         self.source = source
         self.destination = destination
+        self.configuration = None
 
         self.artifacts: [str] = []
         self.statements: [tau.Statement] = []
 
     @staticmethod
     @abstractmethod
-    def parameters() -> [options.OptionSpec]:
+    def validate_parameters(parameters: object) -> object:
         """TODO"""
 
     @staticmethod
     @abstractmethod
-    def configuration() -> [options.OptionSpec]:
+    def validate_configuration(configuration: object) -> object:
         """TODO"""
 
     @abstractmethod
@@ -48,6 +46,10 @@ class Link(ABC):
 
     @abstractmethod
     def on_remove(self):
+        """TODO"""
+
+    @abstractmethod
+    def on_initialize(self, configuration: object):
         """TODO"""
 
     @abstractmethod

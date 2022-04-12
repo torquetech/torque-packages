@@ -13,7 +13,6 @@ from collections.abc import Callable
 from torque import exceptions
 from torque import jobs
 from torque import model
-from torque import options
 from torque import profile
 from torque import repository
 
@@ -34,7 +33,7 @@ class Deployment:
                  name: str,
                  profile: str,
                  dag: model.DAG,
-                 config: dict[str, options.Options],
+                 config: Configuration,
                  repo: repository.Repository):
         # pylint: disable=R0913
 
@@ -43,6 +42,7 @@ class Deployment:
         self.dag = dag
         self.config = config
         self.repo = repo
+
         self.components: dict[str, component_v1.Component] = {}
         self.links: dict[str, link_v1.Link] = {}
 
@@ -55,14 +55,15 @@ class Deployment:
             return self.components[name]
 
         component = self.dag.components[name]
-        config = self.config.components[name]
+        component = self.repo.component(component.type)(component.name,
+                                                        component.labels,
+                                                        component.parameters)
 
-        self.components[name] = self.repo.component(component.type)(component.name,
-                                                                    component.labels,
-                                                                    component.params.processed,
-                                                                    config.processed)
+        config = self.config.components[component.name]
+        component.on_initialize(config)
 
-        return self.components[name]
+        self.components[component.name] = component
+        return component
 
     def _link(self, name: str) -> link_v1.Link:
         """TODO"""
@@ -71,18 +72,20 @@ class Deployment:
             return self.links[name]
 
         link = self.dag.links[name]
-        config = self.config.links[name]
 
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        self.links[name] = self.repo.link(link.type)(link.name,
-                                                     link.params.processed,
-                                                     config.processed,
-                                                     source,
-                                                     destination)
+        link = self.repo.link(link.type)(link.name,
+                                         link.parameters,
+                                         source,
+                                         destination)
 
-        return self.links[name]
+        config = self.config.links[link.name]
+        link.on_initialize(config)
+
+        self.links[link.name] = link
+        return link
 
     def _provider(self) -> provider_v1.Provider:
         """TODO"""
@@ -200,98 +203,42 @@ class Deployment:
 
         return self.dag.dot(self.name)
 
-
-def _load_provider(profile: profile.Profile,
-                   repo: repository.Repository) -> (str, options.Options):
+def _provider_config(profile: profile.Profile,
+                     repo: repository.Repository) -> object:
     """TODO"""
 
     name, config = profile.provider()
-    provider = repo.provider(name)
 
     try:
-        config = options.process(provider.configuration(), config)
+        return name, repo.provider(name).validate_configuration(config or {})
 
-        for default in config.defaults:
-            print(f"WARNING: {name}: {default}: used default value", file=sys.stderr)
+    except RuntimeError as exc:
+        raise RuntimeError(f"provider: {name}: {exc}") from exc
 
-        for unused in config.unused:
-            print(f"WARNING: {name}: {unused}: unused configuration", file=sys.stderr)
-
-        return name, config
-
-    except exceptions.OptionRequired as exc:
-        raise exceptions.ConfigurationRequired("provider", name, str(exc)) from exc
-
-
-def _load_components(dag: model.DAG,
-                     profile: profile.Profile,
-                     repo: repository.Repository) -> dict[str, options.Options]:
+def _component_config(component: model.Component,
+                      profile: profile.Profile,
+                      repo: repository.Repository) -> object:
     """TODO"""
+    config = profile.component(component.name)
 
-    components = {}
+    try:
+        return repo.component(component.type).validate_configuration(config or {})
 
-    for component in dag.components.values():
-        req_config = repo.component(component.type).configuration()
-        _, raw_config = profile.component(component.name)
-
-        try:
-            config = options.process(req_config, raw_config)
-
-        except exceptions.OptionRequired as exc:
-            raise exceptions.ConfigurationRequired("component", component.name, str(exc)) from exc
-
-        for default in config.defaults:
-            print(f"WARNING: {component.name}: {default}: used default value", file=sys.stderr)
-
-        for unused in config.unused:
-            print(f"WARNING: {component.name}: {unused}: unused configuration", file=sys.stderr)
-
-        components[component.name] = config
-
-    return components
+    except RuntimeError as exc:
+        raise RuntimeError(f"component: {component.name}: {exc}") from exc
 
 
-def _load_links(dag: model.DAG,
-                profile: profile.Profile,
-                repo: repository.Repository) -> dict[str, options.Options]:
-    """TODO"""
-
-    links = {}
-
-    for link in dag.links.values():
-        req_config = repo.link(link.type).configuration()
-        _, raw_config = profile.link(link.name)
-
-        try:
-            config = options.process(req_config, raw_config)
-
-        except exceptions.OptionRequired as exc:
-            raise exceptions.ConfigurationRequired("link", link.name, str(exc)) from exc
-
-        for default in config.defaults:
-            print(f"WARNING: {link.name}: {default}: used default value", file=sys.stderr)
-
-        for unused in config.unused:
-            print(f"WARNING: {link.name}: {unused}: unused configuration", file=sys.stderr)
-
-        links[link.name] = config
-
-    return links
-
-
-def _load_config(dag: model.DAG,
+def _link_config(link: model.Link,
                  profile: profile.Profile,
-                 repo: repository.Repository) -> Configuration:
+                 repo: repository.Repository) -> object:
     """TODO"""
+    config = profile.link(link.name)
 
-    if dag.revision != profile.revision():
-        print("WARNING: profile out of date", file=sys.stderr)
+    try:
+        return repo.link(link.type).validate_configuration(config or {})
 
-    provider = _load_provider(profile, repo)
-    components = _load_components(dag, profile, repo)
-    links = _load_links(dag, profile, repo)
-
-    return Configuration(provider, components, links)
+    except RuntimeError as exc:
+        raise RuntimeError(f"link: {link.name}: {exc}") from exc
 
 
 def load(name: str,
@@ -304,10 +251,23 @@ def load(name: str,
 
     """TODO"""
 
+    if dag.revision != profile.revision():
+        print("WARNING: profile out of date", file=sys.stderr)
+
     if components is not None and len(components) == 0:
         raise exceptions.NoComponentsSelected()
 
     dag = dag.subset(components)
-    config = _load_config(dag, profile, repo)
+    provider = _provider_config(profile, repo)
+
+    components = {
+        i.name: _component_config(i, profile, repo) for i in dag.components.values()
+    }
+
+    links = {
+        i.name: _link_config(i, profile, repo) for i in dag.links.values()
+    }
+
+    config = Configuration(provider, components, links)
 
     return Deployment(name, profile_name, dag, config, repo)

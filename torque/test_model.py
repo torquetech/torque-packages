@@ -26,23 +26,23 @@ def test_test1():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
-    dag.create_component("component2", ["label1"], "component_type", None)
-    dag.create_component("component3", ["label1"], "component_type", None)
-    dag.create_component("component4", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
+    dag.create_component("component2", "component_type", ["label1"], None)
+    dag.create_component("component3", "component_type", ["label1"], None)
+    dag.create_component("component4", "component_type", ["label1"], None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", None)
-    dag.create_link("link2", "component1", "component3", "link_type", None)
-    dag.create_link("link3", "component2", "component3", "link_type", None)
-    dag.create_link("link4", "component3", "component4", "link_type", None)
+    dag.create_link("link1", "link_type", "component1", "component2", None)
+    dag.create_link("link2", "link_type", "component1", "component3", None)
+    dag.create_link("link3", "link_type", "component2", "component3", None)
+    dag.create_link("link4", "link_type", "component3", "component4", None)
 
     assert _has_cycles(dag) is False
 
-    dag.create_link("link5", "component4", "component2", "link_type", None)
+    dag.create_link("link5", "link_type", "component4", "component2", None)
 
     assert _has_cycles(dag) is True
 
-    dag.create_link("link6", "component4", "component1", "link_type", None)
+    dag.create_link("link6", "link_type", "component4", "component1", None)
 
     assert _has_cycles(dag) is True
 
@@ -53,8 +53,8 @@ def test_test2():
     dag = model.DAG(0)
 
     try:
-        dag.create_component("component1", ["label1"], "component_type", None)
-        dag.create_component("component1", ["label1"], "component_type", None)
+        dag.create_component("component1", "component_type", ["label1"], None)
+        dag.create_component("component1", "component_type", ["label1"], None)
 
         assert False
 
@@ -67,12 +67,12 @@ def test_test3():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
-    dag.create_component("component2", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
+    dag.create_component("component2", "component_type", ["label1"], None)
 
     try:
-        dag.create_link("link1", "component1", "component2", "link_type", None)
-        dag.create_link("link1", "component1", "component2", "link_type", None)
+        dag.create_link("link1", "link_type", "component1", "component2", None)
+        dag.create_link("link1", "link_type", "component1", "component2", None)
 
         assert False
 
@@ -85,10 +85,10 @@ def test_test4():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
 
     try:
-        dag.create_link("link1", "_component", "component1", "link_type", None)
+        dag.create_link("link1", "link_type", "_component", "component1", None)
 
         assert False
 
@@ -101,10 +101,10 @@ def test_test5():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
 
     try:
-        dag.create_link("link1", "component1", "_component", "link_type", None)
+        dag.create_link("link1", "link_type", "component1", "_component", None)
 
         assert False
 
@@ -117,10 +117,10 @@ def test_test6():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
 
     try:
-        dag.create_link("link1", "component1", "component1", "link_type", None)
+        dag.create_link("link1", "link_type", "component1", "component1", None)
 
         assert False
 
@@ -141,11 +141,11 @@ def test_test8():
 
     dag = model.DAG(0)
 
-    dag.create_component("component1", ["label1"], "component_type", None)
-    dag.create_component("component2", ["label1"], "component_type", None)
-    dag.create_component("component3", ["label1"], "component_type", None)
+    dag.create_component("component1", "component_type", ["label1"], None)
+    dag.create_component("component2", "component_type", ["label1"], None)
+    dag.create_component("component3", "component_type", ["label1"], None)
 
-    dag.create_link("link1", "component1", "component2", "link_type", None)
-    dag.create_link("link2", "component2", "component1", "link_type", None)
+    dag.create_link("link1", "link_type", "component1", "component2", None)
+    dag.create_link("link2", "link_type", "component2", "component1", None)
 
     assert _has_cycles(dag)

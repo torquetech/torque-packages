@@ -60,17 +60,6 @@ class ExecuteFailed(TorqueException):
     """TODO"""
 
 
-class OptionRequired(TorqueException):
-    """TODO"""
-
-
-class ConfigurationRequired(TorqueException):
-    """TODO"""
-
-    def __str__(self) -> str:
-        return f"{self.args[0]}: {self.args[1]}: {self.args[2]}"
-
-
 class ProtocolNotFound(TorqueException):
     """TODO"""
 

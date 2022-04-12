@@ -9,37 +9,24 @@ import schema
 import yaml
 
 from torque import model
-from torque import options
 from torque import repository
 
 from torque.v1 import utils as utils_v1
 
 
 _PROTO = r"^([^:]+)://"
-_CONFIG_SCHEMA = schema.Schema({
+_CONFIGURATION_SCHEMA = schema.Schema({
     "provider": {
-        "name": str,
-        "configuration": [{
-            "name": str,
-            "value": object
-        }]
+        schema.Optional(str): object,
     },
     "dag": {
         "revision": int,
-        "components": [{
-            "name": str,
-            "configuration": [{
-                "name": str,
-                "value": object
-            }]
-        }],
-        "links": [{
-            "name": str,
-            "configuration": [{
-                "name": str,
-                "value": object
-            }]
-        }]
+        "components": {
+            schema.Optional(str): object
+        },
+        "links": {
+            schema.Optional(str): object
+        }
     }
 })
 
@@ -55,35 +42,35 @@ class Profile:
 
         return self.config["dag"]["revision"]
 
-    def provider(self) -> options.RawOptions:
+    def provider(self) -> (str, object):
         """TODO"""
 
         return list(self.config["provider"].items())[0]
 
-    def component(self, name: str) -> (str, options.RawOptions):
+    def component(self, name: str) -> object:
         """TODO"""
 
         dag_config = self.config["dag"]
         components = dag_config["components"]
 
         if name not in components:
-            return (name, options.RawOptions())
+            return {}
 
-        return (name, components[name])
+        return components[name]
 
-    def link(self, name: str) -> (str, options.RawOptions):
+    def link(self, name: str) -> object:
         """TODO"""
 
         dag_config = self.config["dag"]
         links = dag_config["links"]
 
         if name not in links:
-            return (name, options.RawOptions())
+            return {}
 
-        return (name, links[name])
+        return links[name]
 
 
-def _load_config(uri: str, repo: repository.Repository) -> dict[str, object]:
+def _load_configuration(uri: str, repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
     match = re.match(_PROTO, uri)
@@ -102,41 +89,15 @@ def _load_config(uri: str, repo: repository.Repository) -> dict[str, object]:
         return yaml.safe_load(file)
 
 
-def _to_raw(config: [dict[str, str]]) -> options.RawOptions:
-    """TODO"""
-
-    return options.RawOptions({i["name"]: i["value"] for i in config})
-
-
 def load(uris: [str], repo: repository.Repository) -> Profile:
     """TODO"""
 
-    config = {}
+    configuration = {}
 
     for uri in uris:
-        config = utils_v1.merge_dicts(config, _load_config(uri, repo), False)
+        configuration = utils_v1.merge_dicts(configuration, _load_configuration(uri, repo), False)
 
-    config = _CONFIG_SCHEMA.validate(config)
-
-    provider = config["provider"]
-    dag = config["dag"]
-
-    _config = {
-        "provider": {
-            provider["name"]: _to_raw(provider["configuration"])
-        },
-        "dag": {
-            "revision": dag["revision"],
-            "components": {
-                i["name"]: _to_raw(i["configuration"]) for i in dag["components"]
-            },
-            "links": {
-                i["name"]: _to_raw(i["configuration"]) for i in dag["links"]
-            }
-        }
-    }
-
-    return Profile(_config)
+    return Profile(_CONFIGURATION_SCHEMA.validate(configuration))
 
 
 def defaults(provider: str,
@@ -144,41 +105,19 @@ def defaults(provider: str,
              repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
-    provider_conf = repo.provider(provider).configuration()
-
-    defaults = {
+    return {
         "provider": {
-            "name": provider,
-            "configuration": [
-                {"name": i.name, "value": i.default_value} for i in provider_conf
-            ]
+            provider: repo.provider(provider).validate_configuration({})
         },
         "dag": {
             "revision": dag.revision,
-            "components": [],
-            "links": []
+            "components": {
+                component.name: repo.component(component.type).validate_configuration({}) or {}
+                for component in dag.components.values()
+            },
+            "links": {
+                link.name: repo.link(link.type).validate_configuration({}) or {}
+                for link in dag.links.values()
+            }
         }
     }
-
-    components = defaults["dag"]["components"]
-    links = defaults["dag"]["links"]
-
-    for component in dag.components.values():
-        component_conf = repo.component(component.type).configuration()
-        components.append({
-            "name": component.name,
-            "configuration": [
-                {"name": i.name, "value": i.default_value} for i in component_conf
-            ]
-        })
-
-    for link in dag.links.values():
-        link_conf = repo.link(link.type).configuration()
-        links.append({
-            "name": link.name,
-            "configuration": [
-                {"name": i.name, "value": i.default_value} for i in link_conf
-            ]
-        })
-
-    return defaults

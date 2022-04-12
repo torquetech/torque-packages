@@ -8,8 +8,6 @@ from abc import ABC
 from abc import abstractmethod
 from collections import namedtuple
 
-from torque.v1 import options
-
 
 Manifest = namedtuple("Manifest", [
     "type",
@@ -22,12 +20,12 @@ Manifest = namedtuple("Manifest", [
 class Provider(ABC):
     """TODO"""
 
-    def __init__(self, config: options.Options):
-        self.config = config
+    def __init__(self, configuration: object):
+        self.configuration = configuration
 
     @staticmethod
     @abstractmethod
-    def configuration() -> [options.OptionSpec]:
+    def validate_configuration(configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

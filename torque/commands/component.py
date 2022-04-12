@@ -17,7 +17,7 @@ def _create(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
-        params = workspace.process_params(arguments.params_file, arguments.params)
+        params = workspace.process_parameters(arguments.params_file, arguments.params)
 
         ws.create_component(arguments.name,
                             arguments.type,
@@ -30,9 +30,6 @@ def _create(arguments: argparse.Namespace):
 
     except exceptions.ComponentTypeNotFound as exc:
         raise RuntimeError(f"{exc}: component type not found") from exc
-
-    except exceptions.OptionRequired as exc:
-        raise RuntimeError(f"{exc}: parameter required") from exc
 
     except exceptions.InvalidName as exc:
         raise RuntimeError(f"{exc}: invalid name") from exc

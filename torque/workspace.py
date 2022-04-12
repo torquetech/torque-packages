@@ -14,7 +14,6 @@ import yaml
 from torque import deployment
 from torque import exceptions
 from torque import model
-from torque import options
 from torque import profile
 from torque import repository
 
@@ -27,51 +26,38 @@ _PROTO = r"^([^:]+)://"
 _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
 _WORKSPACE_SCHEMA = schema.Schema({
-    "profiles": [{
-        "name": str,
-        "uris": [str],
-    }],
-    "config": {
+    "profiles": {
+        schema.Optional(str): [str]
+    },
+    "configuration": {
         "deployments": schema.Or(str, None)
     },
     "dag": {
         "revision": int,
-        "components": [{
-            "name": str,
-            "labels": [str],
-            "type": str,
-            "params": [{
-                "name": str,
-                "value": object
-            }]
-        }],
-        "links": [{
-            "name": str,
-            "source": str,
-            "destination": str,
-            "type": str,
-            "params": [{
-                "name": str,
-                "value": object
-            }]
-        }]
+        "components": {
+            schema.Optional(str): {
+                "labels": [str],
+                "type": str,
+                "parameters": object
+            }
+        },
+        "links": {
+            schema.Optional(str): {
+                "source": str,
+                "destination": str,
+                "type": str,
+                "parameters": object
+            }
+        }
     }
 })
 
 _DEPLOYMENTS_SCHEMA = schema.Schema({
-    "deployments": [{
-        "name": str,
+    schema.Optional(str): {
         "profile": str,
         "lables": schema.Or([str], None),
         "components": schema.Or([str], None)
-    }]
-})
-
-_PARAMS_SCHEMA = schema.Schema({
-    "parameters": [{
-        "name": str,
-        "value": object
-    }]
+    }
 })
 
 
@@ -109,52 +95,50 @@ class Configuration:
         self.deployments = deployments
 
 
-def _to_profile(profile_workspace: dict[str, object]) -> Profile:
-    """TODO"""
-
-    return Profile(profile_workspace["name"],
-                   profile_workspace["uris"])
-
-
-def _to_config(config_workspace: dict[str, str]) -> Configuration:
-    """TODO"""
-
-    return Configuration(config_workspace["deployments"])
-
-
-def _to_deployment(deployment: dict[str, object]) -> Deployment:
-    """TODO"""
-
-    return Deployment(deployment["name"],
-                      deployment["profile"],
-                      deployment["labels"],
-                      deployment["components"])
-
-
-def _to_deployments(deployments: list[dict[str, object]]) -> dict[str, Deployment]:
+def _to_profiles(workspace: dict[str, object]) -> Profile:
     """TODO"""
 
     return {
-        i["name"]: _to_deployment(i) for i in deployments
+        name: Profile(name, uris) for name, uris in workspace["profiles"].items()
     }
 
 
-def _from_profile(profile: Profile) -> dict[str, object]:
+def _to_configuration(workspace: dict[str, object]) -> Configuration:
+    """TODO"""
+
+    config = workspace["configuration"]
+
+    return Configuration(config["deployments"])
+
+
+def _to_deployments(config: Configuration) -> dict[str, Deployment]:
+    """TODO"""
+
+    path = utils_v1.resolve_path(config.deployments)
+
+    if not os.path.exists(path):
+        return {}
+
+    with open(path, encoding="utf8") as file:
+        deployments = yaml.safe_load(file)
+
+    return {
+        name: Deployment(name,
+                         deployment["profile"],
+                         deployment["labels"],
+                         deployment["components"]) for name, deployment in deployments.items()
+    }
+
+
+def _from_profiles(profiles: dict[str, Profile]) -> dict[str, object]:
     """TODO"""
 
     return {
-        "name": profile.name,
-        "uris": profile.uris
+        profile.name: profile.uris for profile in profiles.values()
     }
 
 
-def _from_profiles(profiles: dict[str, Profile]) -> list[dict[str, object]]:
-    """TODO"""
-
-    return [_from_profile(i) for i in profiles.values()]
-
-
-def _from_config(config: Configuration) -> dict[str, str]:
+def _from_configuration(config: Configuration) -> dict[str, str]:
     """TODO"""
 
     return {
@@ -162,76 +146,61 @@ def _from_config(config: Configuration) -> dict[str, str]:
     }
 
 
-def _from_params(params: dict[str, str]) -> list[dict[str, str]]:
-    """TODO"""
-
-    return [
-        {"name": name, "value": value} for name, value in params.raw.items()
-    ]
-
-
-def _from_component(component: model.Component) -> dict[str: object]:
+def _from_components(components: dict[str, model.Component]) -> dict[str: object]:
     """TODO"""
 
     return {
-        "name": component.name,
-        "labels": component.labels,
-        "type": component.type,
-        "params": _from_params(component.params)
+        component.name : {
+            "labels": component.labels,
+            "type": component.type,
+            "parameters": component.parameters
+        } for component in components.values()
     }
 
 
-def _from_link(link: model.Link) -> dict[str: object]:
+def _from_links(links: dict[str, model.Link]) -> dict[str: object]:
     """TODO"""
 
     return {
-        "name": link.name,
-        "source": link.source,
-        "destination": link.destination,
-        "type": link.type,
-        "params": _from_params(link.params)
+        link.name : {
+            "source": link.source,
+            "destination": link.destination,
+            "type": link.type,
+            "parameters": link.parameters
+        } for link in links.values()
     }
 
 
-def _from_deployment(deployment: Deployment) -> dict[str, object]:
+def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
     """TODO"""
 
     return {
-        "name": deployment.name,
-        "profile": deployment.profile,
-        "labels": deployment.labels,
-        "components": deployment.components
+        deployment.name: {
+            "profile": deployment.profile,
+            "labels": deployment.labels,
+            "components": deployment.components
+        } for deployment in deployments.values()
     }
 
 
-def _generate_dag(dag_workspace: dict[str, object],
-                  repo: repository.Repository) -> model.DAG:
+def _generate_dag(workspace: dict[str, object]):
     """TODO"""
 
-    dag = model.DAG(dag_workspace["revision"])
+    workspace_dag = workspace["dag"]
+    dag = model.DAG(workspace_dag["revision"])
 
-    for component in dag_workspace["components"]:
-        raw_params = {i["name"]: i["value"] for i in component["params"]}
-
-        component_type = repo.component(component["type"])
-        params = options.process(component_type.parameters(), raw_params)
-
-        dag.create_component(component["name"],
+    for name, component in workspace_dag["components"].items():
+        dag.create_component(name,
                              component["type"],
                              component["labels"],
-                             params)
+                             component["parameters"])
 
-    for link in dag_workspace["links"]:
-        raw_params = {i["name"]: i["value"] for i in link["params"]}
-
-        link_type = repo.link(link["type"])
-        params = options.process(link_type.parameters(), raw_params)
-
-        dag.create_link(link["name"],
+    for name, link in workspace_dag["links"].items():
+        dag.create_link(name,
+                        link["type"],
                         link["source"],
                         link["destination"],
-                        link["type"],
-                        params)
+                        link["parameters"])
 
     dag.verify()
 
@@ -245,9 +214,9 @@ class Workspace:
                  path: str,
                  profiles: dict[str, Profile],
                  config: Configuration,
+                 deployments: dict[str, Deployment],
                  dag: model.DAG,
-                 repo: repository.Repository,
-                 deployments: dict[str, Deployment]):
+                 repo: repository.Repository):
         # pylint: disable=R0913
 
         self.path = path
@@ -257,36 +226,25 @@ class Workspace:
         self.repo = repo
         self.deployments = deployments
 
-    def _create_component(self,
-                          component: model.Component,
-                          config: options.Options) -> component_v1.Component:
+    def _component(self, component: model.Component):
         """TODO"""
-
-        if config:
-            config = config.processed
 
         component_type = self.repo.component(component.type)
 
         return component_type(component.name,
                               component.labels,
-                              component.params.processed,
-                              config)
+                              component.parameters)
 
-    def _create_link(self,
-                     link: model.Link,
-                     config: options.Options,
-                     source: component_v1.Component,
-                     destination: component_v1.Component) -> link_v1.Link:
+    def _link(self,
+              link: model.Link,
+              source: component_v1.Component,
+              destination: component_v1.Component) -> link_v1.Link:
         """TODO"""
-
-        if config:
-            config = config.processed
 
         link_type = self.repo.link(link.type)
 
         return link_type(link.name,
-                         link.params.processed,
-                         config,
+                         link.parameters,
                          source,
                          destination)
 
@@ -357,9 +315,7 @@ class Workspace:
         if name not in self.profiles:
             raise exceptions.ProfileNotFound(name)
 
-        p = self.profiles[name]
-
-        return profile.load(p.uris, self.repo)
+        return profile.load(self.profiles[name].uris, self.repo)
 
     def profile_defaults(self, provider: str) -> dict[str, object]:
         """TODO"""
@@ -412,7 +368,7 @@ class Workspace:
                          name: str,
                          type: str,
                          labels: [str],
-                         params: options.RawOptions) -> model.Component:
+                         params: object) -> model.Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -421,17 +377,16 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         component_type = self.repo.component(type)
-        params = options.process(component_type.parameters(), params)
 
-        for default in params.defaults:
-            print(f"WARNING: {default}: used default value", file=sys.stderr)
+        try:
+            params = component_type.validate_parameters(params)
 
-        for unused in params.unused:
-            print(f"WARNING: {unused}: unused configuration", file=sys.stderr)
+        except RuntimeError as exc:
+            raise RuntimeError(f"component: {name}: {exc}") from exc
 
         component = self.dag.create_component(name, type, labels, params)
 
-        instance = self._create_component(component, None)
+        instance = self._component(component)
         instance.on_create()
 
         self.dag.revision += 1
@@ -443,7 +398,7 @@ class Workspace:
 
         component = self.dag.remove_component(name)
 
-        instance = self._create_component(component, None)
+        instance = self._component(component)
         instance.on_remove()
 
         self.dag.revision += 1
@@ -452,10 +407,10 @@ class Workspace:
 
     def create_link(self,
                     name: str,
-                    source: str,
-                    destination: str,
                     type: str,
-                    params: options.RawOptions) -> model.Link:
+                    params: object,
+                    source: str,
+                    destination: str) -> model.Link:
         # pylint: disable=W0622,R0913
 
         """TODO"""
@@ -464,22 +419,21 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         link_type = self.repo.link(type)
-        params = options.process(link_type.parameters(), params)
 
-        for default in params.defaults:
-            print(f"WARNING: {default}: used default value", file=sys.stderr)
+        try:
+            params = link_type.validate_parameters(params)
 
-        for unused in params.unused:
-            print(f"WARNING: {unused}: unused configuration", file=sys.stderr)
+        except RuntimeError as exc:
+            raise RuntimeError(f"link: {name}: {exc}") from exc
 
-        link = self.dag.create_link(name, source, destination, type, params)
+        link = self.dag.create_link(name, type, source, destination, params)
 
         self.dag.verify()
 
-        source = self._create_component(self.dag.components[link.source], None)
-        destination = self._create_component(self.dag.components[link.destination], None)
+        source = self._component(self.dag.components[link.source])
+        destination = self._component(self.dag.components[link.destination])
 
-        instance = self._create_link(link, None, source, destination)
+        instance = self._link(link, source, destination)
         instance.on_create()
 
         self.dag.revision += 1
@@ -491,10 +445,10 @@ class Workspace:
 
         link = self.dag.remove_link(name)
 
-        source = self._create_component(self.dag.components[link.source], None)
-        destination = self._create_component(self.dag.components[link.destination], None)
+        source = self._component(self.dag.components[link.source])
+        destination = self._component(self.dag.components[link.destination])
 
-        instance = self._create_link(link, None, source, destination)
+        instance = self._link(link, source, destination)
         instance.on_remove()
 
         self.dag.revision += 1
@@ -506,15 +460,11 @@ class Workspace:
 
         workspace = {
             "profiles": _from_profiles(self.profiles),
-            "config": _from_config(self.config),
+            "configuration": _from_configuration(self.config),
             "dag": {
                 "revision": self.dag.revision,
-                "components": [
-                    _from_component(i) for i in self.dag.components.values()
-                ],
-                "links": [
-                    _from_link(i) for i in self.dag.links.values()
-                ]
+                "components": _from_components(self.dag.components),
+                "links": _from_links(self.dag.links)
             }
         }
 
@@ -529,21 +479,15 @@ class Workspace:
     def _store_deployments(self):
         """TODO"""
 
-        deployments = {
-            "deployments": [
-                _from_deployment(i) for i in self.deployments.values()
-            ]
-        }
+        path = utils_v1.resolve_path(self.config.deployments)
 
-        deployments_path = utils_v1.resolve_path(self.config.deployments)
-
-        with open(f"{deployments_path}.tmp", "w", encoding="utf8") as file:
-            yaml.safe_dump(deployments,
+        with open(f"{path}.tmp", "w", encoding="utf8") as file:
+            yaml.safe_dump(_from_deployments(self.deployments),
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{deployments_path}.tmp", deployments)
+        os.replace(f"{path}.tmp", path)
 
     def store(self):
         """TODO"""
@@ -559,14 +503,14 @@ def load(path: str) -> Workspace:
     path = utils_v1.resolve_path(path)
 
     workspace = {
-        "profiles": [],
-        "config": {
+        "profiles": {},
+        "configuration": {
             "deployments": ".torque/local/deployments.yaml"
         },
         "dag": {
             "revision": 0,
-            "components": [],
-            "links": []
+            "components": {},
+            "links": {}
         }
     }
 
@@ -577,51 +521,35 @@ def load(path: str) -> Workspace:
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
     repo = repository.load()
 
-    profiles = {
-        i["name"]: _to_profile(i) for i in workspace["profiles"]
-    }
+    profiles = _to_profiles(workspace)
+    configuration = _to_configuration(workspace)
+    deployments = _to_deployments(configuration)
 
-    config = _to_config(workspace["config"])
-    dag = _generate_dag(workspace["dag"], repo)
+    dag = _generate_dag(workspace)
 
-    deployments = {
-        "deployments": []
-    }
-
-    deployments_path = utils_v1.resolve_path(config.deployments)
-
-    if os.path.exists(deployments_path):
-        with open(deployments_path, encoding="utf8") as file:
-            deployments = utils_v1.merge_dicts(deployments, yaml.safe_load(file))
-
-    deployments = _to_deployments(deployments["deployments"])
-
-    return Workspace(path, profiles, config, dag, repo, deployments)
+    return Workspace(path, profiles, configuration, deployments, dag, repo)
 
 
-def _load_params(path: str) -> options.RawOptions:
+def _load_params(path: str) -> object:
     """TODO"""
 
     if not path:
         return {}
 
     if path == "-":
-        config = sys.stdin.read()
+        params = sys.stdin.read()
 
     else:
         with open(path, encoding="utf8") as file:
-            config = file.read()
+            params = file.read()
 
-    config = yaml.safe_load(config)
-    config = _PARAMS_SCHEMA.validate(config)
-
-    return {param["name"]: param["value"] for param in config["parameters"]}
+    return yaml.safe_load(params)
 
 
-def process_params(params_file: str, params: [str]) -> options.RawOptions:
+def process_parameters(path: str, params: [str]) -> object:
     """TODO"""
 
-    _params = _load_params(params_file)
+    _params = _load_params(path)
 
     if not params:
         return _params

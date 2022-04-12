@@ -17,27 +17,12 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    if arguments.groups:
-        groups = arguments.groups.split(",")
-
-    else:
-        groups = None
-
-    if arguments.components:
-        components = arguments.components.split(",")
-
-    else:
-        components = None
-
     try:
         ws.create_deployment(arguments.name,
                              arguments.profile,
-                             groups,
-                             components)
+                             arguments.labels,
+                             arguments.components)
         ws.store()
-
-    except exceptions.ConfigurationRequired as exc:
-        raise RuntimeError(f"{exc}: configuration required") from exc
 
     except exceptions.DeploymentExists as exc:
         raise RuntimeError(f"{exc}: deployment exists") from exc
@@ -94,9 +79,6 @@ def _build(arguments: argparse.Namespace):
         if arguments.push:
             deployment.push()
 
-    except exceptions.ConfigurationRequired as exc:
-        raise RuntimeError(f"{exc}: configuration required") from exc
-
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -118,9 +100,6 @@ def _apply(arguments: argparse.Namespace):
     try:
         deployment = ws.load_deployment(arguments.name)
         deployment.apply(arguments.dry_run, arguments.show_manifests)
-
-    except exceptions.ConfigurationRequired as exc:
-        raise RuntimeError(f"{exc}: configuration required") from exc
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
@@ -144,9 +123,6 @@ def _delete(arguments: argparse.Namespace):
         deployment = ws.load_deployment(arguments.name)
         deployment.delete(arguments.dry_run)
 
-    except exceptions.ConfigurationRequired as exc:
-        raise RuntimeError(f"{exc}: configuration required") from exc
-
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -169,9 +145,6 @@ def _dot(arguments: argparse.Namespace):
         deployment = ws.load_deployment(arguments.name)
         print(deployment.dot(), file=sys.stdout)
 
-    except exceptions.ConfigurationRequired as exc:
-        raise RuntimeError(f"{exc}: configuration required") from exc
-
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -192,8 +165,8 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="deployment_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create deployment")
-    create_parser.add_argument("--groups", help="groups to use")
-    create_parser.add_argument("--components", help="components to use")
+    create_parser.add_argument("--label", action="append", dest="labels", help="label")
+    create_parser.add_argument("--component", action="append", dest="components", help="component")
     create_parser.add_argument("name", help="deployment name")
     create_parser.add_argument("profile", help="profile to use")
 

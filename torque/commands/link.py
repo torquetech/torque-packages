@@ -40,13 +40,14 @@ def _create(arguments: argparse.Namespace):
         name = arguments.name
 
     try:
-        params = workspace.process_params(arguments.params_file, arguments.params)
+        params = workspace.process_parameters(arguments.params_file, arguments.params)
 
         ws.create_link(name,
-                       arguments.source,
-                       arguments.destination,
                        arguments.type,
-                       params)
+                       params,
+                       arguments.source,
+                       arguments.destination)
+
         ws.store()
 
     except exceptions.LinkExists as exc:
@@ -60,9 +61,6 @@ def _create(arguments: argparse.Namespace):
 
     except exceptions.CycleDetected as exc:
         raise RuntimeError("cycle detected") from exc
-
-    except exceptions.OptionRequired as exc:
-        raise RuntimeError(f"{exc}: parameter required") from exc
 
     except exceptions.InvalidName as exc:
         raise RuntimeError(f"{exc}: invalid name") from exc
