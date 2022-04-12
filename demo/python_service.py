@@ -27,7 +27,7 @@ class PythonService(python_task.PythonTask):
             interfaces.Service(get_address=self._get_network_address)
         ]
 
-    def on_generate(self, deployment: str) -> bool:
+    def on_generate(self, deployment: str, profile: str) -> bool:
         """TODO"""
 
         return True

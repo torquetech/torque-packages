@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import inspect
 import os
 import shutil
 import subprocess
@@ -12,7 +11,6 @@ import subprocess
 import schema
 
 from torque.v1 import component as component_v1
-from torque.v1 import options as options_v1
 from torque.v1 import utils as utils_v1
 
 from demo import interfaces
@@ -20,39 +18,56 @@ from demo import tau
 from demo import utils
 
 
-_ENV_SCHEMA = schema.Schema([{
-    "name": str,
-    "value": str
-}])
-
-
 class PythonTask(component_v1.Component):
     """TODO"""
 
+    _DEFAULT_PARAMETERS = {
+    }
+
+    _PARAMETERS_SCHEMA = schema.Schema({
+        "path": str
+    })
+
+    _DEFAULT_CONFIGURATION = {
+        "replicas": 1,
+        "environment": {}
+    }
+
+    _CONFIGURATION_SCHEMA = schema.Schema({
+        "replicas": int,
+        "environment": {
+            schema.Optional(str): str
+        }
+    })
+
     @staticmethod
-    def parameters() -> [options_v1.OptionSpec]:
+    def validate_parameters(parameters: object) -> object:
         """TODO"""
 
-        return [
-            options_v1.OptionSpec("path", "component's path", None, str)
-        ]
+        parameters = utils_v1.merge_dicts(PythonTask._DEFAULT_PARAMETERS, parameters)
+
+        try:
+            return PythonTask._PARAMETERS_SCHEMA.validate(parameters)
+
+        except schema.SchemaError as exc:
+            raise RuntimeError("invalid parameters") from exc
 
     @staticmethod
-    def configuration() -> [options_v1.OptionSpec]:
+    def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        return [
-            options_v1.OptionSpec("replicas", "number of replicas", 1, int),
-            options_v1.OptionSpec("environment",
-                                  "environment variables",
-                                  [],
-                                  _ENV_SCHEMA.validate)
-        ]
+        configuration = utils_v1.merge_dicts(PythonTask._DEFAULT_CONFIGURATION, configuration)
+
+        try:
+            return PythonTask._CONFIGURATION_SCHEMA.validate(configuration)
+
+        except schema.SchemaError as exc:
+            raise RuntimeError("invalid configuration") from exc
 
     def _path(self) -> str:
         """TODO"""
 
-        return utils_v1.resolve_path(self.params["path"])
+        return utils_v1.resolve_path(self.parameters["path"])
 
     def _image(self, deployment: str) -> str:
         """TODO"""
@@ -76,15 +91,6 @@ class PythonTask(component_v1.Component):
 
     def _add_requirements(self, requirements: [str]):
         """TODO"""
-
-    def initialize(self):
-        """TODO"""
-
-        self.network_links = []
-        self.volume_links = []
-
-        self.replicas = self.config['replicas']
-        self.version = utils.load_file(f"{self._path()}/VERSION")
 
     def inbound_interfaces(self) -> [component_v1.Interface]:
         """TODO"""
@@ -115,6 +121,15 @@ class PythonTask(component_v1.Component):
     def on_remove(self):
         """TODO"""
 
+    def on_initialize(self, configuration: object):
+        """TODO"""
+
+        self.configuration = configuration
+        self.network_links = []
+        self.volume_links = []
+
+        self.version = utils.load_file(f"{self._path()}/VERSION")
+
     def on_build(self, deployment: str, profile: str) -> bool:
         """TODO"""
 
@@ -139,7 +154,7 @@ class PythonTask(component_v1.Component):
                      self._image(deployment),
                      self.network_links,
                      self.volume_links,
-                     replicas=self.replicas)
+                     replicas=self.configuration["replicas"])
         ]
 
         return True
