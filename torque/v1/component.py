@@ -80,8 +80,9 @@ class Component(ABC):
         for interface in self.outbound_interfaces():
             self._outbound_interfaces[utils.fqcn(interface)] = interface
 
+        self._lock = threading.Lock()
+
         if self.config:
-            self._lock = threading.Lock()
             self.initialize()
 
     def inbound_interface(self, cls: type) -> InterfaceContext:
