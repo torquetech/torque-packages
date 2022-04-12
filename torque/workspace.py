@@ -271,13 +271,11 @@ class Workspace:
     def _load_deployment(self,
                          name: str,
                          components: [str],
-                         profile_name: str,
                          profile: profile.Profile) -> deployment.Deployment:
         """TODO"""
 
         return deployment.load(name,
                                components,
-                               profile_name,
                                profile,
                                self.dag,
                                self.repo)
@@ -315,7 +313,7 @@ class Workspace:
         if name not in self.profiles:
             raise exceptions.ProfileNotFound(name)
 
-        return profile.load(self.profiles[name].uris, self.repo)
+        return profile.load(name, self.profiles[name].uris, self.repo)
 
     def profile_defaults(self, provider: str) -> dict[str, object]:
         """TODO"""
@@ -362,7 +360,7 @@ class Workspace:
         components = self._collect_components(deployment.labels, deployment.components)
         profile = self.load_profile(deployment.profile)
 
-        return self._load_deployment(name, components, deployment.profile, profile)
+        return self._load_deployment(name, components, profile)
 
     def create_component(self,
                          name: str,

@@ -34,7 +34,8 @@ _CONFIGURATION_SCHEMA = schema.Schema({
 class Profile:
     """TODO"""
 
-    def __init__(self, config: dict[str, object]):
+    def __init__(self, name: str, config: dict[str, object]):
+        self.name = name
         self.config = config
 
     def revision(self) -> int:
@@ -89,7 +90,7 @@ def _load_configuration(uri: str, repo: repository.Repository) -> dict[str, obje
         return yaml.safe_load(file)
 
 
-def load(uris: [str], repo: repository.Repository) -> Profile:
+def load(name: str, uris: [str], repo: repository.Repository) -> Profile:
     """TODO"""
 
     configuration = {}
@@ -97,7 +98,7 @@ def load(uris: [str], repo: repository.Repository) -> Profile:
     for uri in uris:
         configuration = utils_v1.merge_dicts(configuration, _load_configuration(uri, repo), False)
 
-    return Profile(_CONFIGURATION_SCHEMA.validate(configuration))
+    return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
 
 
 def defaults(provider: str,

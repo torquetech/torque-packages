@@ -243,7 +243,6 @@ def _link_config(link: model.Link,
 
 def load(name: str,
          components: [str],
-         profile_name: str,
          profile: profile.Profile,
          dag: model.DAG,
          repo: repository.Repository) -> Deployment:
@@ -270,4 +269,4 @@ def load(name: str,
 
     config = Configuration(provider, components, links)
 
-    return Deployment(name, profile_name, dag, config, repo)
+    return Deployment(name, profile.name, dag, config, repo)
