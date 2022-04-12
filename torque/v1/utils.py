@@ -87,10 +87,10 @@ def resolve_path(path: str) -> str:
     return path
 
 
-def fqcn(instance: object) -> str:
+def fqcn(obj: object) -> str:
     """TODO"""
 
-    if not inspect.isclass(instance):
-        return f"{instance.__class__.__module__}.{instance.__class__.__name__}"
+    if not inspect.isclass(obj):
+        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
 
-    return f"{instance.__module__}.{instance.__name__}"
+    return f"{obj.__module__}.{obj.__name__}"

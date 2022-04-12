@@ -6,11 +6,11 @@
 
 import io
 
-from torque.v1 import protocol
-from torque.v1 import utils
+from torque.v1 import protocol as protocol_v1
+from torque.v1 import utils as utils_v1
 
 
-class FileProtocol(protocol.Protocol):
+class FileProtocol(protocol_v1.Protocol):
     """TODO"""
 
     @staticmethod
@@ -21,6 +21,6 @@ class FileProtocol(protocol.Protocol):
             uri = uri[7:]
 
         else:
-            uri = utils.resolve_path(uri)
+            uri = utils_v1.resolve_path(uri)
 
         return open(uri, encoding="utf8")

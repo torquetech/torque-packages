@@ -101,7 +101,7 @@ def _load_config(uri: str, exts: extensions.Extensions) -> dict[str, object]:
         return yaml.safe_load(file)
 
 
-def _to_raw(config: list[dict[str, str]]) -> options.RawOptions:
+def _to_raw(config: [dict[str, str]]) -> options.RawOptions:
     """TODO"""
 
     return options.RawOptions({i["name"]: i["value"] for i in config})
