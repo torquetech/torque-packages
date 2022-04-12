@@ -45,7 +45,7 @@ def _is_provider(obj: object) -> bool:
     return issubclass(obj, provider_v1.Provider)
 
 
-_EXTENSION_SCHEMA = schema.Schema({
+_REPOSITORY_SCHEMA = schema.Schema({
     schema.Optional("v1"): schema.Schema({
         schema.Optional("components"): {
             schema.Optional(str): _is_component
@@ -62,7 +62,7 @@ _EXTENSION_SCHEMA = schema.Schema({
     })
 }, ignore_extra_keys=True)
 
-_DEFAULT_EXTENSIONS = {
+_DEFAULT_REPOSITORY = {
     "v1": {
         "components": {
         },
@@ -78,7 +78,7 @@ _DEFAULT_EXTENSIONS = {
 }
 
 
-class Extensions:
+class Repository:
     """TODO"""
 
     def __init__(self, exts: dict[str, object]):
@@ -145,7 +145,7 @@ class Extensions:
         return providers[provider]
 
 
-def _system_entry_points():
+def _system_repository():
     """TODO"""
 
     entry_points = importlib.metadata.entry_points()
@@ -156,7 +156,7 @@ def _system_entry_points():
     return []
 
 
-def _local_entry_points():
+def _local_repository():
     """TODO"""
 
     try:
@@ -164,7 +164,7 @@ def _local_entry_points():
 
         return [
             importlib.metadata.EntryPoint(name="local",
-                                          value="local:entry_points",
+                                          value="local:repository",
                                           group="torque")
         ]
 
@@ -172,22 +172,22 @@ def _local_entry_points():
         return []
 
 
-def load() -> Extensions:
+def load() -> Repository:
     """TODO"""
 
-    extensions = _DEFAULT_EXTENSIONS
+    repository = _DEFAULT_REPOSITORY
 
-    entry_points = _system_entry_points()
-    entry_points += _local_entry_points()
+    entry_points = _system_repository()
+    entry_points += _local_repository()
 
     for entry_point in entry_points:
         # pylint: disable=W0703
 
         try:
-            extension = entry_point.load()
+            _repository = entry_point.load()
+            _repository = _REPOSITORY_SCHEMA.validate(_repository)
 
-            extension = _EXTENSION_SCHEMA.validate(extension)
-            extensions = utils.merge_dicts(extensions, extension, False)
+            repository = utils.merge_dicts(repository, _repository, False)
 
         except exceptions.DuplicateDictEntry as exc:
             print(f"WARNING: {entry_point.name}({exc}): duplicate entry", file=sys.stderr)
@@ -195,6 +195,6 @@ def load() -> Extensions:
         except Exception as exc:
             traceback.print_exc()
 
-            print(f"WARNING: {entry_point.name}: unable to load extension: {exc}", file=sys.stderr)
+            print(f"WARNING: {entry_point.name}: unable to load repository: {exc}", file=sys.stderr)
 
-    return Extensions(extensions)
+    return Repository(repository)

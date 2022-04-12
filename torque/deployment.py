@@ -11,11 +11,11 @@ from collections import namedtuple
 from collections.abc import Callable
 
 from torque import exceptions
-from torque import extensions
 from torque import jobs
 from torque import model
 from torque import options
 from torque import profile
+from torque import repository
 
 from torque.v1 import component as component_v1
 from torque.v1 import link as link_v1
@@ -35,14 +35,14 @@ class Deployment:
                  profile: str,
                  dag: model.DAG,
                  config: dict[str, options.Options],
-                 exts: extensions.Extensions):
+                 repo: repository.Repository):
         # pylint: disable=R0913
 
         self.name = name
         self.profile = profile
         self.dag = dag
         self.config = config
-        self.exts = exts
+        self.repo = repo
         self.components: dict[str, component_v1.Component] = {}
         self.links: dict[str, link_v1.Link] = {}
 
@@ -57,7 +57,7 @@ class Deployment:
         component = self.dag.components[name]
         config = self.config.components[name]
 
-        self.components[name] = self.exts.component(component.type)(component.name,
+        self.components[name] = self.repo.component(component.type)(component.name,
                                                                     component.labels,
                                                                     component.params.processed,
                                                                     config.processed)
@@ -76,7 +76,7 @@ class Deployment:
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        self.links[name] = self.exts.link(link.type)(link.name,
+        self.links[name] = self.repo.link(link.type)(link.name,
                                                      link.params.processed,
                                                      config.processed,
                                                      source,
@@ -88,7 +88,7 @@ class Deployment:
         """TODO"""
 
         name, config = self.config.provider
-        return self.exts.provider(name)(config)
+        return self.repo.provider(name)(config)
 
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
@@ -202,11 +202,11 @@ class Deployment:
 
 
 def _load_provider(profile: profile.Profile,
-                   exts: extensions.Extensions) -> (str, options.Options):
+                   repo: repository.Repository) -> (str, options.Options):
     """TODO"""
 
     name, config = profile.provider()
-    provider = exts.provider(name)
+    provider = repo.provider(name)
 
     try:
         config = options.process(provider.configuration(), config)
@@ -225,13 +225,13 @@ def _load_provider(profile: profile.Profile,
 
 def _load_components(dag: model.DAG,
                      profile: profile.Profile,
-                     exts: extensions.Extensions) -> dict[str, options.Options]:
+                     repo: repository.Repository) -> dict[str, options.Options]:
     """TODO"""
 
     components = {}
 
     for component in dag.components.values():
-        req_config = exts.component(component.type).configuration()
+        req_config = repo.component(component.type).configuration()
         _, raw_config = profile.component(component.name)
 
         try:
@@ -253,13 +253,13 @@ def _load_components(dag: model.DAG,
 
 def _load_links(dag: model.DAG,
                 profile: profile.Profile,
-                exts: extensions.Extensions) -> dict[str, options.Options]:
+                repo: repository.Repository) -> dict[str, options.Options]:
     """TODO"""
 
     links = {}
 
     for link in dag.links.values():
-        req_config = exts.link(link.type).configuration()
+        req_config = repo.link(link.type).configuration()
         _, raw_config = profile.link(link.name)
 
         try:
@@ -281,15 +281,15 @@ def _load_links(dag: model.DAG,
 
 def _load_config(dag: model.DAG,
                  profile: profile.Profile,
-                 exts: extensions.Extensions) -> Configuration:
+                 repo: repository.Repository) -> Configuration:
     """TODO"""
 
     if dag.revision != profile.revision():
         print("WARNING: profile out of date", file=sys.stderr)
 
-    provider = _load_provider(profile, exts)
-    components = _load_components(dag, profile, exts)
-    links = _load_links(dag, profile, exts)
+    provider = _load_provider(profile, repo)
+    components = _load_components(dag, profile, repo)
+    links = _load_links(dag, profile, repo)
 
     return Configuration(provider, components, links)
 
@@ -299,7 +299,7 @@ def load(name: str,
          profile_name: str,
          profile: profile.Profile,
          dag: model.DAG,
-         exts: extensions.Extensions) -> Deployment:
+         repo: repository.Repository) -> Deployment:
     # pylint: disable=R0913
 
     """TODO"""
@@ -308,6 +308,6 @@ def load(name: str,
         raise exceptions.NoComponentsSelected()
 
     dag = dag.subset(components)
-    config = _load_config(dag, profile, exts)
+    config = _load_config(dag, profile, repo)
 
-    return Deployment(name, profile_name, dag, config, exts)
+    return Deployment(name, profile_name, dag, config, repo)

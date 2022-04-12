@@ -83,7 +83,7 @@ def _show_type(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
-        component_type = ws.exts.component(arguments.name)
+        component_type = ws.repo.component(arguments.name)
         print(f"{arguments.name}: {component_type}", file=sys.stdout)
 
     except exceptions.ComponentTypeNotFound as exc:
@@ -96,7 +96,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     ws = workspace.load(arguments.workspace)
-    component_types = ws.exts.components()
+    component_types = ws.repo.components()
 
     for component in component_types:
         print(f"{component}: {component_types[component]}", file=sys.stdout)

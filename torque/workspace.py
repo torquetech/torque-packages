@@ -13,10 +13,10 @@ import yaml
 
 from torque import deployment
 from torque import exceptions
-from torque import extensions
 from torque import model
 from torque import options
 from torque import profile
+from torque import repository
 from torque import utils
 
 from torque.v1 import component as component_v1
@@ -204,7 +204,8 @@ def _from_deployment(deployment: Deployment) -> dict[str, object]:
     }
 
 
-def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions) -> model.DAG:
+def _generate_dag(dag_workspace: dict[str, object],
+                  repo: repository.Repository) -> model.DAG:
     """TODO"""
 
     dag = model.DAG(dag_workspace["revision"])
@@ -212,7 +213,7 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
     for component in dag_workspace["components"]:
         raw_params = {i["name"]: i["value"] for i in component["params"]}
 
-        component_type = exts.component(component["type"])
+        component_type = repo.component(component["type"])
         params = options.process(component_type.parameters(), raw_params)
 
         dag.create_component(component["name"],
@@ -223,7 +224,7 @@ def _generate_dag(dag_workspace: dict[str, object], exts: extensions.Extensions)
     for link in dag_workspace["links"]:
         raw_params = {i["name"]: i["value"] for i in link["params"]}
 
-        link_type = exts.link(link["type"])
+        link_type = repo.link(link["type"])
         params = options.process(link_type.parameters(), raw_params)
 
         dag.create_link(link["name"],
@@ -245,7 +246,7 @@ class Workspace:
                  profiles: dict[str, Profile],
                  config: Configuration,
                  dag: model.DAG,
-                 exts: extensions.Extensions,
+                 repo: repository.Repository,
                  deployments: dict[str, Deployment]):
         # pylint: disable=R0913
 
@@ -253,7 +254,7 @@ class Workspace:
         self.profiles = profiles
         self.config = config
         self.dag = dag
-        self.exts = exts
+        self.repo = repo
         self.deployments = deployments
 
     def _create_component(self,
@@ -264,7 +265,7 @@ class Workspace:
         if config:
             config = config.processed
 
-        component_type = self.exts.component(component.type)
+        component_type = self.repo.component(component.type)
 
         return component_type(component.name,
                               component.labels,
@@ -281,7 +282,7 @@ class Workspace:
         if config:
             config = config.processed
 
-        link_type = self.exts.link(link.type)
+        link_type = self.repo.link(link.type)
 
         return link_type(link.name,
                          link.params.processed,
@@ -321,7 +322,7 @@ class Workspace:
                                profile_name,
                                profile,
                                self.dag,
-                               self.exts)
+                               self.repo)
 
     def create_profile(self, name: str, uris: [str]) -> Profile:
         """TODO"""
@@ -358,12 +359,12 @@ class Workspace:
 
         p = self.profiles[name]
 
-        return profile.load(p.uris, self.exts)
+        return profile.load(p.uris, self.repo)
 
     def profile_defaults(self, provider: str) -> dict[str, object]:
         """TODO"""
 
-        return profile.defaults(provider, self.dag, self.exts)
+        return profile.defaults(provider, self.dag, self.repo)
 
     def create_deployment(self,
                           name: str,
@@ -419,7 +420,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        component_type = self.exts.component(type)
+        component_type = self.repo.component(type)
         params = options.process(component_type.parameters(), params)
 
         for default in params.defaults:
@@ -462,7 +463,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        link_type = self.exts.link(type)
+        link_type = self.repo.link(type)
         params = options.process(link_type.parameters(), params)
 
         for default in params.defaults:
@@ -574,14 +575,14 @@ def load(path: str) -> Workspace:
             workspace = utils.merge_dicts(workspace, yaml.safe_load(file))
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
-    exts = extensions.load()
+    repo = repository.load()
 
     profiles = {
         i["name"]: _to_profile(i) for i in workspace["profiles"]
     }
 
     config = _to_config(workspace["config"])
-    dag = _generate_dag(workspace["dag"], exts)
+    dag = _generate_dag(workspace["dag"], repo)
 
     deployments = {
         "deployments": []
@@ -595,7 +596,7 @@ def load(path: str) -> Workspace:
 
     deployments = _to_deployments(deployments["deployments"])
 
-    return Workspace(path, profiles, config, dag, exts, deployments)
+    return Workspace(path, profiles, config, dag, repo, deployments)
 
 
 def _load_params(path: str) -> options.RawOptions:

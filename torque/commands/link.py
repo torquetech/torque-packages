@@ -109,7 +109,7 @@ def _show_type(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     try:
-        link_type = ws.exts.link(arguments.name)
+        link_type = ws.repo.link(arguments.name)
         print(f"{arguments.name}: {link_type}", file=sys.stdout)
 
     except exceptions.LinkTypeNotFound as exc:
@@ -122,7 +122,7 @@ def _list_types(arguments: argparse.Namespace):
     """TODO"""
 
     ws = workspace.load(arguments.workspace)
-    link_types = ws.exts.links()
+    link_types = ws.repo.links()
 
     for link in link_types:
         print(f"{link}: {link_types[link]}", file=sys.stdout)

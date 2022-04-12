@@ -9,8 +9,8 @@ import schema
 import yaml
 
 from torque import model
-from torque import extensions
 from torque import options
+from torque import repository
 from torque import utils
 
 
@@ -82,7 +82,7 @@ class Profile:
         return (name, links[name])
 
 
-def _load_config(uri: str, exts: extensions.Extensions) -> dict[str, object]:
+def _load_config(uri: str, repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
     match = re.match(_PROTO, uri)
@@ -94,7 +94,7 @@ def _load_config(uri: str, exts: extensions.Extensions) -> dict[str, object]:
         proto = "file://"
 
     proto = proto.rstrip("://")
-    proto = exts.protocol(proto)
+    proto = repo.protocol(proto)
     proto = proto()
 
     with proto.fetch(uri) as file:
@@ -107,13 +107,13 @@ def _to_raw(config: [dict[str, str]]) -> options.RawOptions:
     return options.RawOptions({i["name"]: i["value"] for i in config})
 
 
-def load(uris: [str], exts: extensions.Extensions) -> Profile:
+def load(uris: [str], repo: repository.Repository) -> Profile:
     """TODO"""
 
     config = {}
 
     for uri in uris:
-        config = utils.merge_dicts(config, _load_config(uri, exts), False)
+        config = utils.merge_dicts(config, _load_config(uri, repo), False)
 
     config = _CONFIG_SCHEMA.validate(config)
 
@@ -140,10 +140,10 @@ def load(uris: [str], exts: extensions.Extensions) -> Profile:
 
 def defaults(provider: str,
              dag: model.DAG,
-             exts: extensions.Extensions) -> dict[str, object]:
+             repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
-    provider_conf = exts.provider(provider).configuration()
+    provider_conf = repo.provider(provider).configuration()
 
     defaults = {
         "provider": {
@@ -163,7 +163,7 @@ def defaults(provider: str,
     links = defaults["dag"]["links"]
 
     for component in dag.components.values():
-        component_conf = exts.component(component.type).configuration()
+        component_conf = repo.component(component.type).configuration()
         components.append({
             "name": component.name,
             "configuration": [
@@ -172,7 +172,7 @@ def defaults(provider: str,
         })
 
     for link in dag.links.values():
-        link_conf = exts.link(link.type).configuration()
+        link_conf = repo.link(link.type).configuration()
         links.append({
             "name": link.name,
             "configuration": [
