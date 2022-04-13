@@ -11,10 +11,11 @@ import subprocess
 import schema
 
 from torque.v1 import component as component_v1
+from torque.v1 import build as build_v1
+from torque.v1 import deployment as deployment_v1
 from torque.v1 import utils as utils_v1
 
 from demo import interfaces
-from demo import tau
 from demo import utils
 
 
@@ -64,15 +65,29 @@ class PythonTask(component_v1.Component):
         except schema.SchemaError as exc:
             raise RuntimeError("invalid configuration") from exc
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.network_links = []
+        self.volume_links = []
+        self.version = None
+
     def _path(self) -> str:
         """TODO"""
 
         return utils_v1.resolve_path(self.parameters["path"])
 
+    def _get_version(self):
+        if self.version:
+            return self.version
+
+        self.version = utils.load_file(f"{self._path()}/VERSION")
+        return self.version
+
     def _image(self, deployment: str) -> str:
         """TODO"""
 
-        return f"{deployment}/component/{self.name}:{self.version}"
+        return f"{deployment}-component-{self.name}:{self._get_version()}"
 
     def _add_network_link(self, component: str, address: int):
         """TODO"""
@@ -121,40 +136,23 @@ class PythonTask(component_v1.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_initialize(self, configuration: object):
-        """TODO"""
-
-        self.configuration = configuration
-        self.network_links = []
-        self.volume_links = []
-
-        self.version = utils.load_file(f"{self._path()}/VERSION")
-
-    def on_build(self, deployment: str, profile: str) -> bool:
+    def on_build(self, build: build_v1.Build) -> bool:
         """TODO"""
 
         cmd = [
             "docker", "build", ".",
-            "-t", self._image(deployment)
+            "-t", self._image(build.deployment)
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
         self.artifacts = [
-            self._image(deployment)
+            self._image(build.deployment)
         ]
 
         return True
 
-    def on_generate(self, deployment: str, profile: str) -> bool:
+    def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
         """TODO"""
-
-        self.statements = [
-            tau.Task(self.name,
-                     self._image(deployment),
-                     self.network_links,
-                     self.volume_links,
-                     replicas=self.configuration["replicas"])
-        ]
 
         return True

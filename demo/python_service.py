@@ -5,6 +5,8 @@
 """TODO"""
 
 from torque.v1 import component as component_v1
+from torque.v1 import build as build_v1
+from torque.v1 import deployment as deployment_v1
 
 from demo import interfaces
 from demo import python_task
@@ -27,7 +29,7 @@ class PythonService(python_task.PythonTask):
             interfaces.Service(get_address=self._get_network_address)
         ]
 
-    def on_generate(self, deployment: str, profile: str) -> bool:
+    def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
         """TODO"""
 
         return True
