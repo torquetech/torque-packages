@@ -22,7 +22,8 @@ class Interface:
         provided_funcs = set(kwargs.keys())
 
         if required_funcs - provided_funcs:
-            raise NotImplementedError(utils.fqcn(self))
+            funcs = ", ".join(list(required_funcs - provided_funcs))
+            raise NotImplementedError(f"{utils.fqcn(self)}: {funcs}: not implemented")
 
         if provided_funcs - required_funcs:
             warnings.warn("extra methods provided", stacklevel=2)
