@@ -76,9 +76,6 @@ def _build(arguments: argparse.Namespace):
         deployment = ws.load_deployment(arguments.name)
         deployment.build(arguments.workers)
 
-        if arguments.push:
-            deployment.push()
-
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
 
@@ -99,7 +96,7 @@ def _apply(arguments: argparse.Namespace):
 
     try:
         deployment = ws.load_deployment(arguments.name)
-        deployment.apply(arguments.dry_run, arguments.show_manifests)
+        deployment.apply(arguments.workers, arguments.dry_run)
 
     except exceptions.DeploymentNotFound as exc:
         raise RuntimeError(f"{exc}: deployment not found") from exc
@@ -179,9 +176,6 @@ def add_arguments(subparsers):
     subparsers.add_parser("list", help="list deployments")
 
     build_parser = subparsers.add_parser("build", help="build deployment")
-    build_parser.add_argument("--push",
-                              action="store_true",
-                              help="push build artifacts")
     build_parser.add_argument("--workers",
                               type=int,
                               default=1,
@@ -189,9 +183,10 @@ def add_arguments(subparsers):
     build_parser.add_argument("name", help="deployment name")
 
     apply_parser = subparsers.add_parser("apply", help="apply deployment")
-    apply_parser.add_argument("--show-manifests",
-                              action="store_true",
-                              help="show manifests")
+    apply_parser.add_argument("--workers",
+                              type=int,
+                              default=1,
+                              help="number of build workers to use, default: %(default)s")
     apply_parser.add_argument("--dry-run",
                               action="store_true",
                               help="dry run")

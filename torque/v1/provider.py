@@ -6,15 +6,6 @@
 
 from abc import ABC
 from abc import abstractmethod
-from collections import namedtuple
-
-
-Manifest = namedtuple("Manifest", [
-    "type",
-    "name",
-    "labels",
-    "statements"
-])
 
 
 class Provider(ABC):
@@ -26,16 +17,4 @@ class Provider(ABC):
     @staticmethod
     @abstractmethod
     def validate_configuration(configuration: object) -> object:
-        """TODO"""
-
-    @abstractmethod
-    def push(self, artifacts: [str]):
-        """TODO"""
-
-    @abstractmethod
-    def apply(self, name: str, manifests: [Manifest], dry_run: bool):
-        """TODO"""
-
-    @abstractmethod
-    def delete(self, name: str, dry_run: bool):
         """TODO"""

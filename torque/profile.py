@@ -16,7 +16,7 @@ from torque.v1 import utils as utils_v1
 
 _PROTO = r"^([^:]+)://"
 _CONFIGURATION_SCHEMA = schema.Schema({
-    "provider": {
+    "providers": {
         schema.Optional(str): object,
     },
     "dag": {
@@ -43,10 +43,20 @@ class Profile:
 
         return self._config["dag"]["revision"]
 
-    def provider(self) -> (str, object):
+    def providers(self) -> [str]:
         """TODO"""
 
-        return list(self._config["provider"].items())[0]
+        return self._config["providers"].keys()
+
+    def provider(self, name: str) -> object:
+        """TODO"""
+
+        providers = self._config["providers"]
+
+        if name not in providers:
+            return {}
+
+        return providers[name]
 
     def component(self, name: str) -> object:
         """TODO"""
@@ -101,14 +111,15 @@ def load(name: str, uris: [str], repo: repository.Repository) -> Profile:
     return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
 
 
-def defaults(provider: str,
+def defaults(providers: [str],
              dag: model.DAG,
              repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
     return {
-        "provider": {
+        "providers": {
             provider: repo.provider(provider).validate_configuration({})
+            for provider in providers
         },
         "dag": {
             "revision": dag.revision,

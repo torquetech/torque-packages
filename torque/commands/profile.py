@@ -101,7 +101,7 @@ def add_arguments(subparsers):
     subparsers.add_parser("list", help="list profiles")
 
     defaults_parser = subparsers.add_parser("defaults", help="show defaults")
-    defaults_parser.add_argument("provider", help="provider name")
+    defaults_parser.add_argument("provider", nargs="+", help="provider name")
 
 
 def run(arguments: argparse.Namespace):

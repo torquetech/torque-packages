@@ -8,6 +8,8 @@ from abc import ABC
 from abc import abstractmethod
 
 from torque.v1 import component
+from torque.v1 import build
+from torque.v1 import deployment
 
 
 class Link(ABC):
@@ -48,9 +50,9 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self, deployment: str, profile: str) -> bool:
+    def on_build(self, build: build.Build) -> bool:
         """TODO"""
 
     @abstractmethod
-    def on_generate(self, deployment: str, profile: str) -> bool:
+    def on_apply(self, deployment: deployment.Deployment) -> bool:
         """TODO"""

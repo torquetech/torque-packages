@@ -17,12 +17,14 @@ from torque import profile
 from torque import repository
 
 from torque.v1 import component as component_v1
+from torque.v1 import build as build_v1
+from torque.v1 import deployment as deployment_v1
 from torque.v1 import link as link_v1
 from torque.v1 import provider as provider_v1
 
 
 Configuration = namedtuple("Configuration", [
-    "provider",
+    "providers",
     "components",
     "links"
 ])
@@ -49,6 +51,7 @@ class Deployment:
 
         self._components: dict[str, component_v1.Component] = {}
         self._links: dict[str, link_v1.Link] = {}
+        self._providers: dict[str, provider_v1.Provider] = {}
 
         self._lock = threading.Lock()
 
@@ -90,11 +93,17 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _provider(self) -> provider_v1.Provider:
+    def _provider(self, name: str) -> provider_v1.Provider:
         """TODO"""
 
-        name, config = self._config.provider
-        return self._repo.provider(name)(config)
+        if name in self._providers:
+            return self._providers[name]
+
+        config = self._config.providers[name]
+        provider = self._repo.provider(name)(config)
+
+        self._providers[name] = provider
+        return provider
 
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
@@ -124,30 +133,10 @@ class Deployment:
 
         jobs.execute(workers, _jobs)
 
-    def _generate(self):
-        """TODO"""
-
-        def _on_generate(type: str, name: str) -> bool:
-            """TODO"""
-
-            with self._lock:
-                if type == "component":
-                    instance = self._component(name)
-
-                elif type == "link":
-                    instance = self._link(name)
-
-                else:
-                    assert False
-
-            print(f"generating {name}...", file=sys.stderr)
-
-            return instance.on_generate(self._name, self._profile)
-
-        self._execute(1, _on_generate)
-
     def build(self, workers: int):
         """TODO"""
+
+        build = build_v1.create(self._name, self._profile)
 
         def _on_build(type: str, name: str) -> bool:
             """TODO"""
@@ -164,29 +153,37 @@ class Deployment:
 
             print(f"building {name}...", file=sys.stderr)
 
-            return instance.on_build(self._name, self._profile)
+            return instance.on_build(build)
 
         self._execute(workers, _on_build)
 
-    def push(self):
+    def apply(self, workers: int, dry_run: bool):
         """TODO"""
 
-        artifacts: [str] = []
-        artifacts += [component.artifacts for component in self._components.values()]
-        artifacts += [link.artifacts for link in self._links.values()]
+        providers = [self._provider(provider) for provider in self._config.providers.keys()]
+        deployment = deployment_v1.create(self._name, self._profile, dry_run, providers)
 
-        self._provider().push(artifacts)
+        def _on_apply(type: str, name: str) -> bool:
+            """TODO"""
 
-    def apply(self, dry_run: bool, show_manifests: bool):
-        """TODO"""
+            with self._lock:
+                if type == "component":
+                    instance = self._component(name)
 
-        self._generate()
+                elif type == "link":
+                    instance = self._link(name)
 
+                else:
+                    assert False
+
+            print(f"applying {name}...", file=sys.stderr)
+
+            return instance.on_apply(deployment)
+
+        self._execute(workers, _on_apply)
 
     def delete(self, dry_run: bool):
         """TODO"""
-
-        self._provider().delete(self._name, dry_run)
 
     def dot(self) -> str:
         """TODO"""
@@ -194,17 +191,18 @@ class Deployment:
         return self._dag.dot(self._name)
 
 
-def _provider_config(profile: profile.Profile,
+def _provider_config(provider: str,
+                     profile: profile.Profile,
                      repo: repository.Repository) -> object:
     """TODO"""
 
-    name, config = profile.provider()
+    config = profile.provider(provider)
 
     try:
-        return name, repo.provider(name).validate_configuration(config or {})
+        return repo.provider(provider).validate_configuration(config or {})
 
     except RuntimeError as exc:
-        raise RuntimeError(f"provider: {name}: {exc}") from exc
+        raise RuntimeError(f"provider: {provider}: {exc}") from exc
 
 
 def _component_config(component: model.Component,
@@ -249,7 +247,11 @@ def load(name: str,
         raise exceptions.NoComponentsSelected()
 
     dag = dag.subset(components)
-    provider = _provider_config(profile, repo)
+
+    providers = {
+        provider: _provider_config(provider, profile, repo)
+        for provider in profile.providers()
+    }
 
     components = {
         component.name: _component_config(component, profile, repo)
@@ -261,6 +263,6 @@ def load(name: str,
         for link in dag.links.values()
     }
 
-    config = Configuration(provider, components, links)
+    config = Configuration(providers, components, links)
 
     return Deployment(name, profile.name, dag, config, repo)
