@@ -55,13 +55,13 @@ class Component(ABC):
 
     """TODO"""
 
-    def __init__(self, name: str, labels: [str], parameters: object):
+    def __init__(self, name: str, labels: [str], parameters: object, configuration: object):
         # pylint: disable=R0913
 
         self.name = name
         self.labels = labels
         self.parameters = parameters
-        self.configuration = None
+        self.configuration = configuration
 
         self.artifacts: [str] = []
         self.statements: [tau.Statement] = []
@@ -121,10 +121,6 @@ class Component(ABC):
 
     @abstractmethod
     def on_remove(self):
-        """TODO"""
-
-    @abstractmethod
-    def on_initialize(self, configuration: object):
         """TODO"""
 
     @abstractmethod

@@ -58,13 +58,13 @@ class Deployment:
         if name in self._components:
             return self._components[name]
 
+        config = self._config.components[name]
         component = self._dag.components[name]
+
         component = self._repo.component(component.type)(component.name,
                                                          component.labels,
-                                                         component.parameters)
-
-        config = self._config.components[component.name]
-        component.on_initialize(config)
+                                                         component.parameters,
+                                                         config)
 
         self._components[component.name] = component
         return component
@@ -75,6 +75,7 @@ class Deployment:
         if name in self._links:
             return self._links[name]
 
+        config = self._config.links[name]
         link = self._dag.links[name]
 
         source = self._component(link.source)
@@ -82,11 +83,9 @@ class Deployment:
 
         link = self._repo.link(link.type)(link.name,
                                           link.parameters,
+                                          config,
                                           source,
                                           destination)
-
-        config = self._config.links[link.name]
-        link.on_initialize(config)
 
         self._links[link.name] = link
         return link

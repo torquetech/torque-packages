@@ -17,15 +17,16 @@ class Link(ABC):
     def __init__(self,
                  name: str,
                  parameters: object,
+                 configuration: object,
                  source: component.Component,
                  destination: component.Component):
         # pylint: disable=R0913
 
         self.name = name
         self.parameters = parameters
+        self.configuration = configuration
         self.source = source
         self.destination = destination
-        self.configuration = None
 
         self.artifacts: [str] = []
         self.statements: [tau.Statement] = []
@@ -46,10 +47,6 @@ class Link(ABC):
 
     @abstractmethod
     def on_remove(self):
-        """TODO"""
-
-    @abstractmethod
-    def on_initialize(self, configuration: object):
         """TODO"""
 
     @abstractmethod

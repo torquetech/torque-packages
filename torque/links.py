@@ -28,9 +28,6 @@ class DependencyLink(link_v1.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_initialize(self, configuration: object):
-        """TODO"""
-
     def on_build(self, deployment: str, profile: str) -> bool:
         """TODO"""
 

@@ -233,7 +233,8 @@ class Workspace:
 
         return component_type(component.name,
                               component.labels,
-                              component.parameters)
+                              component.parameters,
+                              None)
 
     def _link(self,
               link: model.Link,
@@ -245,6 +246,7 @@ class Workspace:
 
         return link_type(link.name,
                          link.parameters,
+                         None,
                          source,
                          destination)
 
