@@ -156,4 +156,14 @@ class PythonTask(component_v1.Component):
     def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
         """TODO"""
 
+        with deployment.interface(interfaces.SimpleDeployment, self.labels) as iface:
+            assert iface is not None
+
+            iface.push_image(self._image(deployment.name))
+            iface.create_task(self.name,
+                              self._image(deployment.name),
+                              self.network_links,
+                              self.volume_links,
+                              replicas=self.configuration["replicas"])
+
         return True

@@ -50,3 +50,19 @@ class PythonRequirements(interface_v1.Interface):
 
     def add(requirements: [str]):
         """TODO"""
+
+
+class SimpleDeployment(interface_v1.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def push_image(image: str):
+        """TODO"""
+
+    def create_task(name: str,
+                    image: str,
+                    network_links: [object],
+                    volume_links: [object],
+                    replicas: int):
+        """TODO"""

@@ -4,15 +4,16 @@
 
 """TODO"""
 
-from demo.python_task import PythonTask
-from demo.python_service import PythonService
+from demo import python_task
+from demo import python_service
+from demo import providers
 
 
 repository = {
     "v1": {
         "components": {
-            "demo/python-task": PythonTask,
-            "demo/python-service": PythonService
+            "demo/python-task": python_task.PythonTask,
+            "demo/python-service": python_service.PythonService
         },
         # "links": {
         #     "torquetech.dev/dummy1": DummyLink,
@@ -22,9 +23,8 @@ repository = {
         #     "proto1": CustomProtocol,
         #     "proto2": CustomProtocol
         # },
-        # "providers": {
-        #     "aws-k8s": AWSK8S,
-        #     "aws-k8s-ext": AWSK8SExt
-        # }
+        "providers": {
+            "demo/aws-k8s": providers.AWSK8S,
+        }
     }
 }
