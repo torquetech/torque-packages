@@ -10,17 +10,13 @@ import subprocess
 
 import schema
 
-from torque.v1 import build as build_v1
-from torque.v1 import component as component_v1
-from torque.v1 import deployment as deployment_v1
-from torque.v1 import interface as interface_v1
-from torque.v1 import utils as utils_v1
+from torque import v1
 
 from demo import interfaces
 from demo import utils
 
 
-class PythonTask(component_v1.Component):
+class PythonTask(v1.component.Component):
     """TODO"""
 
     _DEFAULT_PARAMETERS = {
@@ -46,7 +42,7 @@ class PythonTask(component_v1.Component):
     def validate_parameters(parameters: object) -> object:
         """TODO"""
 
-        parameters = utils_v1.merge_dicts(PythonTask._DEFAULT_PARAMETERS, parameters)
+        parameters = v1.utils.merge_dicts(PythonTask._DEFAULT_PARAMETERS, parameters)
 
         try:
             return PythonTask._PARAMETERS_SCHEMA.validate(parameters)
@@ -58,7 +54,7 @@ class PythonTask(component_v1.Component):
     def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        configuration = utils_v1.merge_dicts(PythonTask._DEFAULT_CONFIGURATION, configuration)
+        configuration = v1.utils.merge_dicts(PythonTask._DEFAULT_CONFIGURATION, configuration)
 
         try:
             return PythonTask._CONFIGURATION_SCHEMA.validate(configuration)
@@ -76,7 +72,7 @@ class PythonTask(component_v1.Component):
     def _path(self) -> str:
         """TODO"""
 
-        return utils_v1.resolve_path(self.parameters["path"])
+        return v1.utils.resolve_path(self.parameters["path"])
 
     def _get_version(self):
         if self.version:
@@ -108,7 +104,7 @@ class PythonTask(component_v1.Component):
     def _add_requirements(self, requirements: [str]):
         """TODO"""
 
-    def inbound_interfaces(self) -> [interface_v1.Interface]:
+    def inbound_interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return [
@@ -118,7 +114,7 @@ class PythonTask(component_v1.Component):
             interfaces.PythonRequirements(add=self._add_requirements)
         ]
 
-    def outbound_interfaces(self) -> [interface_v1.Interface]:
+    def outbound_interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return []
@@ -137,7 +133,7 @@ class PythonTask(component_v1.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, build: build_v1.Build) -> bool:
+    def on_build(self, build: v1.build.Build) -> bool:
         """TODO"""
 
         cmd = [
@@ -153,7 +149,7 @@ class PythonTask(component_v1.Component):
 
         return True
 
-    def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         with deployment.interface(interfaces.SimpleDeployment, self.labels) as iface:

@@ -6,14 +6,12 @@
 
 import schema
 
-from torque.v1 import interface as interface_v1
-from torque.v1 import provider as provider_v1
-from torque.v1 import utils as utils_v1
+from torque import v1
 
 from demo import interfaces
 
 
-class AWSK8S(provider_v1.Provider):
+class AWSK8S(v1.provider.Provider):
     """TODO"""
 
     _DEFAULT_CONFIGURATION = {}
@@ -23,7 +21,7 @@ class AWSK8S(provider_v1.Provider):
     def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        configuration = utils_v1.merge_dicts(AWSK8S._DEFAULT_CONFIGURATION, configuration)
+        configuration = v1.utils.merge_dicts(AWSK8S._DEFAULT_CONFIGURATION, configuration)
 
         try:
             return AWSK8S._CONFIGURATION_SCHEMA.validate(configuration)
@@ -46,7 +44,7 @@ class AWSK8S(provider_v1.Provider):
 
         print(f"_create_task({name}, {image}) called")
 
-    def interfaces(self) -> [interface_v1.Interface]:
+    def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return [

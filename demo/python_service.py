@@ -4,9 +4,7 @@
 
 """TODO"""
 
-from torque.v1 import build as build_v1
-from torque.v1 import deployment as deployment_v1
-from torque.v1 import interface as interface_v1
+from torque import v1
 
 from demo import interfaces
 from demo import python_task
@@ -22,14 +20,14 @@ class PythonService(python_task.PythonTask):
 
         return ("", 0)
 
-    def outbound_interfaces(self) -> [interface_v1.Interface]:
+    def outbound_interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return super().outbound_interfaces() + [
             interfaces.Service(get_address=self._get_network_address)
         ]
 
-    def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         return True
