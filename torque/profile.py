@@ -36,22 +36,22 @@ class Profile:
 
     def __init__(self, name: str, config: dict[str, object]):
         self.name = name
-        self.config = config
+        self._config = config
 
     def revision(self) -> int:
         """TODO"""
 
-        return self.config["dag"]["revision"]
+        return self._config["dag"]["revision"]
 
     def provider(self) -> (str, object):
         """TODO"""
 
-        return list(self.config["provider"].items())[0]
+        return list(self._config["provider"].items())[0]
 
     def component(self, name: str) -> object:
         """TODO"""
 
-        dag_config = self.config["dag"]
+        dag_config = self._config["dag"]
         components = dag_config["components"]
 
         if name not in components:
@@ -62,7 +62,7 @@ class Profile:
     def link(self, name: str) -> object:
         """TODO"""
 
-        dag_config = self.config["dag"]
+        dag_config = self._config["dag"]
         links = dag_config["links"]
 
         if name not in links:

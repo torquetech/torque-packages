@@ -14,34 +14,34 @@ class Checker:
     """TODO"""
 
     def __init__(self, jobs: [Job], fail_on: [str]):
-        self.jobs = jobs
-        self.fail_on = fail_on
+        self._jobs = jobs
+        self._fail_on = fail_on
 
-        self.lock = Lock()
-        self.finished = []
+        self._lock = Lock()
+        self._finished = []
 
     def __iter__(self):
         """TODO"""
 
-        for name, depends in self.jobs.items():
+        for name, depends in self._jobs.items():
             yield Job(name, depends, self._handler)
 
     def _handler(self, job_name: str):
         """TODO"""
 
-        with self.lock:
-            assert job_name not in self.finished
+        with self._lock:
+            assert job_name not in self._finished
 
-            for depends in self.jobs[job_name]:
-                assert depends in self.finished
+            for depends in self._jobs[job_name]:
+                assert depends in self._finished
 
-            self.finished.append(job_name)
-            return job_name not in self.fail_on
+            self._finished.append(job_name)
+            return job_name not in self._fail_on
 
     def verify(self) -> bool:
         """TODO"""
 
-        assert sorted(self.finished) == sorted(self.jobs.keys())
+        assert sorted(self._finished) == sorted(self._jobs.keys())
 
 
 def test_test1():

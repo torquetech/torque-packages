@@ -82,27 +82,27 @@ class Repository:
     """TODO"""
 
     def __init__(self, exts: dict[str, object]):
-        self.exts = exts
+        self._exts = exts
 
     def components(self) -> dict[str, object]:
         """TODO"""
 
-        return self.exts["v1"]["components"]
+        return self._exts["v1"]["components"]
 
     def links(self) -> dict[str, object]:
         """TODO"""
 
-        return self.exts["v1"]["links"]
+        return self._exts["v1"]["links"]
 
     def protocols(self) -> dict[str, object]:
         """TODO"""
 
-        return self.exts["v1"]["protocols"]
+        return self._exts["v1"]["protocols"]
 
     def providers(self) -> dict[str, object]:
         """TODO"""
 
-        return self.exts["v1"]["providers"]
+        return self._exts["v1"]["providers"]
 
     def component(self, component_type: str) -> component_v1.Component:
         """TODO"""

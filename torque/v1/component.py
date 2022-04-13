@@ -39,15 +39,15 @@ class InterfaceContext:
     """TODO"""
 
     def __init__(self, lock: threading.Lock, interface: Interface):
-        self.lock = lock
-        self.interface = interface
+        self._lock = lock
+        self._interface = interface
 
     def __enter__(self):
-        self.lock.acquire()
-        return self.interface
+        self._lock.acquire()
+        return self._interface
 
     def __exit__(self, type, value, traceback):
-        self.lock.release()
+        self._lock.release()
 
 
 class Component(ABC):

@@ -33,48 +33,48 @@ class Runner:
     """TODO"""
 
     def __init__(self, worker_count: int):
-        self.worker_count = worker_count
-        self.workers = []
+        self._worker_count = worker_count
+        self._workers = []
 
-        self.queue_cond = Condition()
-        self.queue = []
+        self._queue_cond = Condition()
+        self._queue = []
 
-        self.jobs_lock = Lock()
-        self.jobs = {}
+        self._jobs_lock = Lock()
+        self._jobs = {}
 
     def _pop(self):
         """TODO"""
 
-        with self.queue_cond:
+        with self._queue_cond:
             while True:
-                if len(self.queue) != 0:
-                    if self.queue[0] is None:
+                if len(self._queue) != 0:
+                    if self._queue[0] is None:
                         return None
 
-                    return self.queue.pop(0)
+                    return self._queue.pop(0)
 
-                self.queue_cond.wait()
+                self._queue_cond.wait()
 
     def _push(self, job):
         """TODO"""
 
-        with self.queue_cond:
-            self.queue.append(job)
-            self.queue_cond.notify()
+        with self._queue_cond:
+            self._queue.append(job)
+            self._queue_cond.notify()
 
     def _quit(self):
         """TODO"""
 
-        with self.queue_cond:
-            self.queue.append(None)
-            self.queue_cond.notify_all()
+        with self._queue_cond:
+            self._queue.append(None)
+            self._queue_cond.notify_all()
 
     def _abort(self):
         """TODO"""
 
-        with self.queue_cond:
-            self.queue.insert(0, None)
-            self.queue_cond.notify_all()
+        with self._queue_cond:
+            self._queue.insert(0, None)
+            self._queue_cond.notify_all()
 
     def _worker(self):
         """TODO"""
@@ -90,16 +90,16 @@ class Runner:
                     self._abort()
                     break
 
-                with self.jobs_lock:
+                with self._jobs_lock:
                     for blocked_job in job.blocks:
-                        blocked_job = self.jobs[blocked_job]
+                        blocked_job = self._jobs[blocked_job]
                         blocked_job.depends.remove(job.name)
 
                         if len(blocked_job.depends) == 0:
-                            self.jobs.pop(blocked_job.name)
+                            self._jobs.pop(blocked_job.name)
                             self._push(blocked_job)
 
-                    if len(self.jobs) == 0:
+                    if len(self._jobs) == 0:
                         self._quit()
 
             except Exception:
@@ -122,25 +122,25 @@ class Runner:
                     self._push(job)
 
                 else:
-                    self.jobs[job.name] = job
+                    self._jobs[job.name] = job
 
-            for _ in range(self.worker_count):
+            for _ in range(self._worker_count):
                 thr = Thread(target=self._worker)
                 thr.start()
 
-                self.workers.append(thr)
+                self._workers.append(thr)
 
         except Exception:
             self._abort()
             raise
 
         finally:
-            for worker in self.workers:
+            for worker in self._workers:
                 worker.join()
 
-            self.queue = []
-            self.jobs = {}
-            self.workers = []
+            self._queue = []
+            self._jobs = {}
+            self._workers = []
 
 
 def execute(worker_count: int, jobs: [Job]):

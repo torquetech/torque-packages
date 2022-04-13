@@ -219,12 +219,12 @@ class Workspace:
                  repo: repository.Repository):
         # pylint: disable=R0913
 
-        self.path = path
-        self.profiles = profiles
-        self.config = config
         self.dag = dag
         self.repo = repo
         self.deployments = deployments
+        self.profiles = profiles
+        self._path = path
+        self._config = config
 
     def _component(self, component: model.Component):
         """TODO"""
@@ -458,7 +458,7 @@ class Workspace:
 
         workspace = {
             "profiles": _from_profiles(self.profiles),
-            "configuration": _from_configuration(self.config),
+            "configuration": _from_configuration(self._config),
             "dag": {
                 "revision": self.dag.revision,
                 "components": _from_components(self.dag.components),
@@ -466,18 +466,18 @@ class Workspace:
             }
         }
 
-        with open(f"{self.path}.tmp", "w", encoding="utf8") as file:
+        with open(f"{self._path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(workspace,
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{self.path}.tmp", self.path)
+        os.replace(f"{self._path}.tmp", self._path)
 
     def _store_deployments(self):
         """TODO"""
 
-        path = utils_v1.resolve_path(self.config.deployments)
+        path = utils_v1.resolve_path(self._config.deployments)
 
         with open(f"{path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(_from_deployments(self.deployments),
