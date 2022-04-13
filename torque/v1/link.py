@@ -8,7 +8,6 @@ from abc import ABC
 from abc import abstractmethod
 
 from torque.v1 import component
-from torque.v1 import tau
 
 
 class Link(ABC):
@@ -29,7 +28,6 @@ class Link(ABC):
         self.destination = destination
 
         self.artifacts: [str] = []
-        self.statements: [tau.Statement] = []
 
     @staticmethod
     @abstractmethod

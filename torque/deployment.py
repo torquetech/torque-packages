@@ -182,19 +182,6 @@ class Deployment:
 
         self._generate()
 
-        manifests: [provider_v1.Manifest] = []
-
-        for name, component in self._components.items():
-            manifests.append(provider_v1.Manifest("component", name, component.labels, component.statements))
-
-        for name, link in self._links.items():
-            manifests.append(provider_v1.Manifest("link", name, [], link.statements))
-
-        if show_manifests:
-            for manifest in manifests:
-                print(f"{manifest}:", file=sys.stdout)
-
-        self._provider().apply(self._name, manifests, dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""

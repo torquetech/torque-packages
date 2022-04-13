@@ -11,7 +11,6 @@ import warnings
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import tau
 from torque.v1 import utils
 
 
@@ -64,7 +63,6 @@ class Component(ABC):
         self.configuration = configuration
 
         self.artifacts: [str] = []
-        self.statements: [tau.Statement] = []
 
         self._inbound_interfaces: dict[str, Interface] = {}
         self._outbound_interfaces: dict[str, Interface] = {}
