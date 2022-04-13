@@ -10,9 +10,10 @@ import subprocess
 
 import schema
 
-from torque.v1 import component as component_v1
 from torque.v1 import build as build_v1
+from torque.v1 import component as component_v1
 from torque.v1 import deployment as deployment_v1
+from torque.v1 import interface as interface_v1
 from torque.v1 import utils as utils_v1
 
 from demo import interfaces
@@ -107,7 +108,7 @@ class PythonTask(component_v1.Component):
     def _add_requirements(self, requirements: [str]):
         """TODO"""
 
-    def inbound_interfaces(self) -> [component_v1.Interface]:
+    def inbound_interfaces(self) -> [interface_v1.Interface]:
         """TODO"""
 
         return [
@@ -117,7 +118,7 @@ class PythonTask(component_v1.Component):
             interfaces.PythonRequirements(add=self._add_requirements)
         ]
 
-    def outbound_interfaces(self) -> [component_v1.Interface]:
+    def outbound_interfaces(self) -> [interface_v1.Interface]:
         """TODO"""
 
         return []

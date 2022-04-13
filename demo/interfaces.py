@@ -4,10 +4,10 @@
 
 """TODO"""
 
-from torque.v1 import component as component_v1
+from torque.v1 import interface as interface_v1
 
 
-class NetworkLink(component_v1.Interface):
+class NetworkLink(interface_v1.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -16,7 +16,7 @@ class NetworkLink(component_v1.Interface):
         """TODO"""
 
 
-class VolumeLink(component_v1.Interface):
+class VolumeLink(interface_v1.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -25,7 +25,7 @@ class VolumeLink(component_v1.Interface):
         """TODO"""
 
 
-class Service(component_v1.Interface):
+class Service(interface_v1.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -34,7 +34,7 @@ class Service(component_v1.Interface):
         """TODO"""
 
 
-class PythonModulesPath(component_v1.Interface):
+class PythonModulesPath(interface_v1.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -43,7 +43,7 @@ class PythonModulesPath(component_v1.Interface):
         """TODO"""
 
 
-class PythonRequirements(component_v1.Interface):
+class PythonRequirements(interface_v1.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
