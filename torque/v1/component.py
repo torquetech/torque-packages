@@ -38,6 +38,11 @@ class Component(ABC):
 
         self._lock = threading.Lock()
 
+    def has_inbound_interface(self, cls: type) -> bool:
+        """TODO"""
+
+        return v1.utils.fqcn(cls) in self._inbound_interfaces
+
     def inbound_interface(self, cls: type) -> v1.interface.Context:
         """TODO"""
 
@@ -47,6 +52,11 @@ class Component(ABC):
             return v1.interface.Context(self._lock, None)
 
         return v1.interface.Context(self._lock, self._inbound_interfaces[name])
+
+    def has_outbound_interface(self, cls: type) -> bool:
+        """TODO"""
+
+        return v1.utils.fqcn(cls) in self._outbound_interfaces
 
     def outbound_interface(self, cls: type) -> v1.interface.Context:
         """TODO"""
