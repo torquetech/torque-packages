@@ -4,12 +4,10 @@
 
 """TODO"""
 
-from torque.v1 import build as build_v1
-from torque.v1 import deployment as deployment_v1
-from torque.v1 import link as link_v1
+from torque import v1
 
 
-class DependencyLink(link_v1.Link):
+class DependencyLink(v1.link.Link):
     """TODO"""
 
     @staticmethod
@@ -30,12 +28,12 @@ class DependencyLink(link_v1.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, build: build_v1.Build) -> bool:
+    def on_build(self, build: v1.build.Build) -> bool:
         """TODO"""
 
         return True
 
-    def on_apply(self, deployment: deployment_v1.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         return True

@@ -15,12 +15,7 @@ from torque import jobs
 from torque import model
 from torque import profile
 from torque import repository
-
-from torque.v1 import component as component_v1
-from torque.v1 import build as build_v1
-from torque.v1 import deployment as deployment_v1
-from torque.v1 import link as link_v1
-from torque.v1 import provider as provider_v1
+from torque import v1
 
 
 Configuration = namedtuple("Configuration", [
@@ -49,13 +44,13 @@ class Deployment:
         self._config = config
         self._repo = repo
 
-        self._components: dict[str, component_v1.Component] = {}
-        self._links: dict[str, link_v1.Link] = {}
-        self._providers: dict[str, provider_v1.Provider] = {}
+        self._components: dict[str, v1.component.Component] = {}
+        self._links: dict[str, v1.link.Link] = {}
+        self._providers: dict[str, v1.provider.Provider] = {}
 
         self._lock = threading.Lock()
 
-    def _component(self, name: str) -> component_v1.Component:
+    def _component(self, name: str) -> v1.component.Component:
         """TODO"""
 
         if name in self._components:
@@ -72,7 +67,7 @@ class Deployment:
         self._components[component.name] = component
         return component
 
-    def _link(self, name: str) -> link_v1.Link:
+    def _link(self, name: str) -> v1.link.Link:
         """TODO"""
 
         if name in self._links:
@@ -93,7 +88,7 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _provider(self, name: str) -> provider_v1.Provider:
+    def _provider(self, name: str) -> v1.provider.Provider:
         """TODO"""
 
         if name in self._providers:
@@ -136,7 +131,7 @@ class Deployment:
     def build(self, workers: int):
         """TODO"""
 
-        build = build_v1.create(self._name, self._profile)
+        build = v1.build.create(self._name, self._profile)
 
         def _on_build(type: str, name: str) -> bool:
             """TODO"""
@@ -161,7 +156,7 @@ class Deployment:
         """TODO"""
 
         providers = [self._provider(provider) for provider in self._config.providers.keys()]
-        deployment = deployment_v1.create(self._name, self._profile, dry_run, providers)
+        deployment = v1.deployment.create(self._name, self._profile, dry_run, providers)
 
         def _on_apply(type: str, name: str) -> bool:
             """TODO"""

@@ -16,10 +16,7 @@ from torque import exceptions
 from torque import model
 from torque import profile
 from torque import repository
-
-from torque.v1 import component as component_v1
-from torque.v1 import link as link_v1
-from torque.v1 import utils as utils_v1
+from torque import v1
 
 
 _PROTO = r"^([^:]+)://"
@@ -114,7 +111,7 @@ def _to_configuration(workspace: dict[str, object]) -> Configuration:
 def _to_deployments(config: Configuration) -> dict[str, Deployment]:
     """TODO"""
 
-    path = utils_v1.resolve_path(config.deployments)
+    path = v1.utils.resolve_path(config.deployments)
 
     if not os.path.exists(path):
         return {}
@@ -238,8 +235,8 @@ class Workspace:
 
     def _link(self,
               link: model.Link,
-              source: component_v1.Component,
-              destination: component_v1.Component) -> link_v1.Link:
+              source: v1.component.Component,
+              destination: v1.component.Component) -> v1.link.Link:
         """TODO"""
 
         link_type = self.repo.link(link.type)
@@ -292,7 +289,7 @@ class Workspace:
 
         for uri in uris:
             if not re.match(_PROTO, uri):
-                uri = utils_v1.torque_path(uri)
+                uri = v1.utils.torque_path(uri)
 
             _uris.append(uri)
 
@@ -479,7 +476,7 @@ class Workspace:
     def _store_deployments(self):
         """TODO"""
 
-        path = utils_v1.resolve_path(self._config.deployments)
+        path = v1.utils.resolve_path(self._config.deployments)
 
         with open(f"{path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(_from_deployments(self.deployments),
@@ -499,8 +496,8 @@ class Workspace:
 def load(path: str) -> Workspace:
     """TODO"""
 
-    path = utils_v1.torque_path(path)
-    path = utils_v1.resolve_path(path)
+    path = v1.utils.torque_path(path)
+    path = v1.utils.resolve_path(path)
 
     workspace = {
         "profiles": {},
@@ -516,7 +513,7 @@ def load(path: str) -> Workspace:
 
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
-            workspace = utils_v1.merge_dicts(workspace, yaml.safe_load(file))
+            workspace = v1.utils.merge_dicts(workspace, yaml.safe_load(file))
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
     repo = repository.load()

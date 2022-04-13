@@ -9,8 +9,7 @@ import threading
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import interface as interface_v1
-from torque.v1 import utils as utils_v1
+from torque import v1
 
 
 class Provider(ABC):
@@ -20,25 +19,25 @@ class Provider(ABC):
         self.configuration = configuration
 
         self._lock = threading.Lock()
-        self._interfaces: dict[str, v1_interface.Interface] = {}
+        self._interfaces: dict[str, v1.interface.Interface] = {}
 
         for iface in self.interfaces():
-            self._interfaces[utils_v1.fqcn(iface)] = iface
+            self._interfaces[v1.utils.fqcn(iface)] = iface
 
     def has_interface(self, cls: type) -> bool:
         """TODO"""
 
-        return utils_v1.fqcn(cls) in self._interfaces
+        return v1.utils.fqcn(cls) in self._interfaces
 
-    def interface(self, cls: type) -> interface_v1.Context:
+    def interface(self, cls: type) -> v1.interface.Context:
         """TODO"""
 
-        name = utils_v1.fqcn(cls)
+        name = v1.utils.fqcn(cls)
 
         if name not in self._interfaces:
-            return interface_v1.Context(self._lock, None)
+            return v1.interface.Context(self._lock, None)
 
-        return interface_v1.Context(self._lock, self._interfaces[name])
+        return v1.interface.Context(self._lock, self._interfaces[name])
 
     @staticmethod
     @abstractmethod
@@ -46,6 +45,5 @@ class Provider(ABC):
         """TODO"""
 
     @abstractmethod
-    def interfaces(self) -> [interface_v1.Interface]:
+    def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
-

@@ -9,10 +9,7 @@ import threading
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import build
-from torque.v1 import deployment
-from torque.v1 import interface
-from torque.v1 import utils
+from torque import v1
 
 
 class Component(ABC):
@@ -30,36 +27,36 @@ class Component(ABC):
 
         self.artifacts: [str] = []
 
-        self._inbound_interfaces: dict[str, interface.Interface] = {}
-        self._outbound_interfaces: dict[str, interface.Interface] = {}
+        self._inbound_interfaces: dict[str, v1.interface.Interface] = {}
+        self._outbound_interfaces: dict[str, v1.interface.Interface] = {}
 
         for iface in self.inbound_interfaces():
-            self._inbound_interfaces[utils.fqcn(iface)] = iface
+            self._inbound_interfaces[v1.utils.fqcn(iface)] = iface
 
         for iface in self.outbound_interfaces():
-            self._outbound_interfaces[utils.fqcn(iface)] = iface
+            self._outbound_interfaces[v1.utils.fqcn(iface)] = iface
 
         self._lock = threading.Lock()
 
-    def inbound_interface(self, cls: type) -> interface.Context:
+    def inbound_interface(self, cls: type) -> v1.interface.Context:
         """TODO"""
 
-        name = utils.fqcn(cls)
+        name = v1.utils.fqcn(cls)
 
         if name not in self._inbound_interfaces:
-            return interface.Context(self._lock, None)
+            return v1.interface.Context(self._lock, None)
 
-        return interface.Context(self._lock, self._inbound_interfaces[name])
+        return v1.interface.Context(self._lock, self._inbound_interfaces[name])
 
-    def outbound_interface(self, cls: type) -> interface.Context:
+    def outbound_interface(self, cls: type) -> v1.interface.Context:
         """TODO"""
 
-        name = utils.fqcn(cls)
+        name = v1.utils.fqcn(cls)
 
         if name not in self._outbound_interfaces:
-            return interface.Context(self._lock, None)
+            return v1.interface.Context(self._lock, None)
 
-        return interface.Context(self._lock, self._outbound_interfaces[name])
+        return v1.interface.Context(self._lock, self._outbound_interfaces[name])
 
     @staticmethod
     @abstractmethod
@@ -72,11 +69,11 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def inbound_interfaces(self) -> [interface.Interface]:
+    def inbound_interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
     @abstractmethod
-    def outbound_interfaces(self) -> [interface.Interface]:
+    def outbound_interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
     @abstractmethod
@@ -88,9 +85,9 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self, build: build.Build) -> bool:
+    def on_build(self, build: v1.build.Build) -> bool:
         """TODO"""
 
     @abstractmethod
-    def on_apply(self, deployment: deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""

@@ -13,36 +13,31 @@ import schema
 from torque import exceptions
 from torque import links
 from torque import protocols
-
-from torque.v1 import component as component_v1
-from torque.v1 import link as link_v1
-from torque.v1 import protocol as protocol_v1
-from torque.v1 import provider as provider_v1
-from torque.v1 import utils as utils_v1
+from torque import v1
 
 
 def _is_component(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, component_v1.Component)
+    return issubclass(obj, v1.component.Component)
 
 
 def _is_link(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, link_v1.Link)
+    return issubclass(obj, v1.link.Link)
 
 
 def _is_protocol(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, protocol_v1.Protocol)
+    return issubclass(obj, v1.protocol.Protocol)
 
 
 def _is_provider(obj: object) -> bool:
     """TODO"""
 
-    return issubclass(obj, provider_v1.Provider)
+    return issubclass(obj, v1.provider.Provider)
 
 
 _REPOSITORY_SCHEMA = schema.Schema({
@@ -104,7 +99,7 @@ class Repository:
 
         return self._exts["v1"]["providers"]
 
-    def component(self, component_type: str) -> component_v1.Component:
+    def component(self, component_type: str) -> v1.component.Component:
         """TODO"""
 
         components = self.components()
@@ -114,7 +109,7 @@ class Repository:
 
         return components[component_type]
 
-    def link(self, link_type: str) -> link_v1.Link:
+    def link(self, link_type: str) -> v1.link.Link:
         """TODO"""
 
         links = self.links()
@@ -124,7 +119,7 @@ class Repository:
 
         return links[link_type]
 
-    def protocol(self, protocol: str) -> protocol_v1.Protocol:
+    def protocol(self, protocol: str) -> v1.protocol.Protocol:
         """TODO"""
 
         protocols = self.protocols()
@@ -134,7 +129,7 @@ class Repository:
 
         return protocols[protocol]
 
-    def provider(self, provider: str) -> provider_v1.Provider:
+    def provider(self, provider: str) -> v1.provider.Provider:
         """TODO"""
 
         providers = self.providers()
@@ -187,7 +182,7 @@ def load() -> Repository:
             _repository = entry_point.load()
             _repository = _REPOSITORY_SCHEMA.validate(_repository)
 
-            repository = utils_v1.merge_dicts(repository, _repository, False)
+            repository = v1.utils.merge_dicts(repository, _repository, False)
 
         except RuntimeError as exc:
             print(f"WARNING: {entry_point.name}: {exc}", file=sys.stderr)
