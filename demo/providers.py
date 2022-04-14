@@ -37,6 +37,8 @@ class AWSK8S(v1.provider.Provider):
     def _create_task(self,
                      name: str,
                      image: str,
+                     cmd: [str],
+                     cwd: str,
                      network_links: [object],
                      volume_links: [object],
                      replicas: int):

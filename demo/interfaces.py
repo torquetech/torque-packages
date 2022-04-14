@@ -62,6 +62,8 @@ class SimpleDeployment(v1.interface.Interface):
 
     def create_task(name: str,
                     image: str,
+                    cmd: [str],
+                    cwd: str,
                     network_links: [object],
                     volume_links: [object],
                     replicas: int):

@@ -158,8 +158,10 @@ class PythonTask(v1.component.Component):
             iface.push_image(self._image(deployment.name))
             iface.create_task(self.name,
                               self._image(deployment.name),
+                              None,
+                              None,
                               self.network_links,
                               self.volume_links,
-                              replicas=self.configuration["replicas"])
+                              self.configuration["replicas"])
 
         return True
