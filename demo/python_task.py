@@ -167,6 +167,7 @@ class PythonTask(v1.component.Component):
                               self._image(deployment.name),
                               None,
                               None,
+                              self.configuration["environment"],
                               self.network_links,
                               self.volume_links,
                               self.configuration["replicas"])

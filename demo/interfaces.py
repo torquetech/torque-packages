@@ -66,6 +66,7 @@ class SimpleDeployment(v1.interface.Interface):
                     image: str,
                     cmd: [str],
                     cwd: str,
+                    env: dict[str, str],
                     network_links: [object],
                     volume_links: [object],
                     replicas: int):

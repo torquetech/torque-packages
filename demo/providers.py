@@ -39,6 +39,7 @@ class AWSK8S(v1.provider.Provider):
                      image: str,
                      cmd: [str],
                      cwd: str,
+                     env: dict[str, str],
                      network_links: [object],
                      volume_links: [object],
                      replicas: int):
