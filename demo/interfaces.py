@@ -7,48 +7,50 @@
 from torque import v1
 
 
+class Service(v1.interface.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def get() -> v1.interface.Future:
+        """TODO"""
+
+
 class NetworkLink(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
-    def add(component: str, address: int):
+    def add(link: v1.interface.Future):
         """TODO"""
 
+
+class Volume(v1.interface.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def get(size: int) -> v1.interface.Future:
+        """TODO"""
 
 class VolumeLink(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
-    def add(volume: str, mount_point: str):
+    def add(mount_point: str, link: v1.interface.Future):
         """TODO"""
 
 
-class Service(v1.interface.Interface):
+class PythonModules(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
-    def get_address() -> (str, int):
+    def path() -> str:
         """TODO"""
 
-
-class PythonModulesPath(v1.interface.Interface):
-    # pylint: disable=E0211,E0213
-
-    """TODO"""
-
-    def get() -> str:
-        """TODO"""
-
-
-class PythonRequirements(v1.interface.Interface):
-    # pylint: disable=E0211,E0213
-
-    """TODO"""
-
-    def add(requirements: [str]):
+    def add_requirements(requirements: [str]):
         """TODO"""
 
 

@@ -93,15 +93,15 @@ class PythonTask(v1.component.Component):
 
         return f"{deployment}-component-{self.name}:{self._get_version()}"
 
-    def _add_network_link(self, component: str, address: int):
+    def _add_network_link(self, link: v1.interface.Future):
         """TODO"""
 
-        self.network_links.append((component, address))
+        self.network_links.append(link)
 
-    def _add_volume_link(self, volume: str, mount_point: str):
+    def _add_volume_link(self, mount_point: str, link: v1.interface.Future):
         """TODO"""
 
-        self.volume_links.append((volume, mount_point))
+        self.volume_links.append((mount_point, link))
 
     def _get_modules_path(self) -> str:
         """TODO"""
@@ -117,8 +117,8 @@ class PythonTask(v1.component.Component):
         return [
             interfaces.NetworkLink(add=self._add_network_link),
             interfaces.VolumeLink(add=self._add_volume_link),
-            interfaces.PythonModulesPath(get=self._get_modules_path),
-            interfaces.PythonRequirements(add=self._add_requirements)
+            interfaces.PythonModules(path=self._get_modules_path,
+                                     add_requirements=self._add_requirements)
         ]
 
     def outbound_interfaces(self) -> [v1.interface.Interface]:
