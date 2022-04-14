@@ -4,6 +4,8 @@
 
 """TODO"""
 
+import os
+import shutil
 import threading
 
 from . import interface
@@ -18,10 +20,24 @@ class Deployment:
         self.name = name
         self.profile = profile
         self.dry_run = dry_run
+        self.path = f"{utils.torque_dir()}/local/deployments/{name}"
 
         self._providers = providers
         self._lock = threading.Lock()
         self._interfaces: dict[str, provider.Provider] = {}
+
+        if os.path.exists(self.path):
+            for path in os.listdir(self.path):
+                path = f"{self.path}/{path}"
+
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+
+                else:
+                    os.unlink(path)
+
+        else:
+            os.makedirs(self.path)
 
     def _interface(self, cls: type, labels: [str]) -> interface.Context:
         """TODO"""
