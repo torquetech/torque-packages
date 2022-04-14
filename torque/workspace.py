@@ -282,6 +282,9 @@ class Workspace:
     def create_profile(self, name: str, uris: [str]) -> Profile:
         """TODO"""
 
+        if not re.match(_NAME, name):
+            raise exceptions.InvalidName(name)
+
         if name in self.profiles:
             raise exceptions.ProfileExists(name)
 
@@ -325,6 +328,9 @@ class Workspace:
                           labels: [str],
                           components: [str]) -> Deployment:
         """TODO"""
+
+        if not re.match(_NAME, name):
+            raise exceptions.InvalidName(name)
 
         if name in self.deployments:
             raise exceptions.DeploymentExists(name)
