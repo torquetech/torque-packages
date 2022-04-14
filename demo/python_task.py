@@ -150,18 +150,12 @@ class PythonTask(v1.component.Component):
 
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
-        self.artifacts = [
-            self._image(build.deployment)
-        ]
-
         return True
 
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         with deployment.interface(interfaces.SimpleDeployment, self.labels) as iface:
-            assert iface is not None
-
             iface.push_image(self._image(deployment.name))
             iface.create_task(self.name,
                               self._image(deployment.name),
