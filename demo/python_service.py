@@ -10,7 +10,7 @@ from demo import interfaces
 from demo import python_task
 
 
-class PythonService(python_task.PythonTask):
+class Service(python_task.Task):
     """TODO"""
 
     def _get_network_address(self) -> (str, int):

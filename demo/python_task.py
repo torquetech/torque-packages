@@ -36,7 +36,7 @@ _CONFIGURATION_SCHEMA = schema.Schema({
 })
 
 
-class PythonTask(v1.component.Component):
+class Task(v1.component.Component):
     """TODO"""
 
     @staticmethod
