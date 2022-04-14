@@ -35,7 +35,7 @@ class Provider(ABC):
         name = v1.utils.fqcn(cls)
 
         if name not in self._interfaces:
-            return v1.interface.Context(self._lock, None)
+            raise RuntimeError(f"{name}: provider interface not found")
 
         return v1.interface.Context(self._lock, self._interfaces[name])
 

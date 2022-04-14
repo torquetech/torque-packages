@@ -49,7 +49,7 @@ class Component(ABC):
         name = v1.utils.fqcn(cls)
 
         if name not in self._inbound_interfaces:
-            return v1.interface.Context(self._lock, None)
+            raise RuntimeError(f"{name}: inbound interface not found")
 
         return v1.interface.Context(self._lock, self._inbound_interfaces[name])
 
@@ -64,7 +64,7 @@ class Component(ABC):
         name = v1.utils.fqcn(cls)
 
         if name not in self._outbound_interfaces:
-            return v1.interface.Context(self._lock, None)
+            raise RuntimeError(f"{name}: outbound interface not found")
 
         return v1.interface.Context(self._lock, self._outbound_interfaces[name])
 
