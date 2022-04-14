@@ -140,12 +140,12 @@ class PythonTask(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, build: v1.build.Build) -> bool:
+    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         cmd = [
             "docker", "build", ".",
-            "-t", self._image(build.deployment)
+            "-t", self._image(deployment.name)
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
