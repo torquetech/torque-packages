@@ -16,51 +16,46 @@ from demo import interfaces
 from demo import utils
 
 
+_DEFAULT_PARAMETERS = {
+}
+
+_PARAMETERS_SCHEMA = schema.Schema({
+    "path": str
+})
+
+_DEFAULT_CONFIGURATION = {
+    "replicas": 1,
+    "environment": {}
+}
+
+_CONFIGURATION_SCHEMA = schema.Schema({
+    "replicas": int,
+    "environment": {
+        schema.Optional(str): str
+    }
+})
+
+
 class PythonTask(v1.component.Component):
     """TODO"""
-
-    _DEFAULT_PARAMETERS = {
-    }
-
-    _PARAMETERS_SCHEMA = schema.Schema({
-        "path": str
-    })
-
-    _DEFAULT_CONFIGURATION = {
-        "replicas": 1,
-        "environment": {}
-    }
-
-    _CONFIGURATION_SCHEMA = schema.Schema({
-        "replicas": int,
-        "environment": {
-            schema.Optional(str): str
-        }
-    })
 
     @staticmethod
     def validate_parameters(parameters: object) -> object:
         """TODO"""
 
-        parameters = v1.utils.merge_dicts(PythonTask._DEFAULT_PARAMETERS, parameters)
-
-        try:
-            return PythonTask._PARAMETERS_SCHEMA.validate(parameters)
-
-        except schema.SchemaError as exc:
-            raise RuntimeError("invalid parameters") from exc
+        return utils.validate_schema("parameters",
+                                     parameters,
+                                     _DEFAULT_PARAMETERS,
+                                     _PARAMETERS_SCHEMA)
 
     @staticmethod
     def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        configuration = v1.utils.merge_dicts(PythonTask._DEFAULT_CONFIGURATION, configuration)
-
-        try:
-            return PythonTask._CONFIGURATION_SCHEMA.validate(configuration)
-
-        except schema.SchemaError as exc:
-            raise RuntimeError("invalid configuration") from exc
+        return utils.validate_schema("configuration",
+                                     configuration,
+                                     _DEFAULT_CONFIGURATION,
+                                     _CONFIGURATION_SCHEMA)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

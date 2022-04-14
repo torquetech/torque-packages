@@ -9,25 +9,24 @@ import schema
 from torque import v1
 
 from demo import interfaces
+from demo import utils
+
+
+_DEFAULT_CONFIGURATION = {}
+_CONFIGURATION_SCHEMA = schema.Schema({})
 
 
 class AWSK8S(v1.provider.Provider):
     """TODO"""
 
-    _DEFAULT_CONFIGURATION = {}
-    _CONFIGURATION_SCHEMA = schema.Schema({})
-
     @staticmethod
     def validate_configuration(configuration: object) -> object:
         """TODO"""
 
-        configuration = v1.utils.merge_dicts(AWSK8S._DEFAULT_CONFIGURATION, configuration)
-
-        try:
-            return AWSK8S._CONFIGURATION_SCHEMA.validate(configuration)
-
-        except schema.SchemaError as exc:
-            raise RuntimeError(f"invalid configuration") from exc
+        return utils.validate_schema("configuration",
+                                     configuration,
+                                     _DEFAULT_CONFIGURATION,
+                                     _CONFIGURATION_SCHEMA)
 
     def _push_image(self, image: str):
         """TODO"""
