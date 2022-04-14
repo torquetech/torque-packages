@@ -131,7 +131,7 @@ class Deployment:
     def build(self, workers: int):
         """TODO"""
 
-        build = v1.build.create(self._name, self._profile)
+        deployment = v1.deployment.create(self._name, self._profile, False, [])
 
         def _on_build(type: str, name: str) -> bool:
             """TODO"""
@@ -148,7 +148,7 @@ class Deployment:
 
             print(f"building {name}...", file=sys.stderr)
 
-            return instance.on_build(build)
+            return instance.on_build(deployment)
 
         self._execute(workers, _on_build)
 

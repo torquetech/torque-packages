@@ -28,7 +28,7 @@ class DependencyLink(v1.link.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, build: v1.build.Build) -> bool:
+    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
         return True

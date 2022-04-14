@@ -9,7 +9,6 @@ import threading
 from abc import ABC
 from abc import abstractmethod
 
-from . import build
 from . import deployment
 from . import interface
 from . import utils
@@ -98,7 +97,7 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self, build: build.Build) -> bool:
+    def on_build(self, deployment: deployment.Deployment) -> bool:
         """TODO"""
 
     @abstractmethod

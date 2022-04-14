@@ -8,7 +8,6 @@ from abc import ABC
 from abc import abstractmethod
 
 from . import component
-from . import build
 from . import deployment
 
 
@@ -50,7 +49,7 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self, build: build.Build) -> bool:
+    def on_build(self, deployment: deployment.Deployment) -> bool:
         """TODO"""
 
     @abstractmethod
