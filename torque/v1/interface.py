@@ -9,7 +9,7 @@ import threading
 import typing
 import warnings
 
-from torque.v1 import utils
+from . import utils
 
 
 T = typing.TypeVar("T")

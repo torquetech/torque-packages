@@ -4,11 +4,11 @@
 
 """TODO"""
 
-from . import utils
-from . import interface
-from . import deployment
 from . import build
 from . import component
+from . import deployment
+from . import interface
 from . import link
 from . import protocol
 from . import provider
+from . import utils

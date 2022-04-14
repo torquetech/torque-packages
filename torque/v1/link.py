@@ -7,9 +7,9 @@
 from abc import ABC
 from abc import abstractmethod
 
-from torque.v1 import component
-from torque.v1 import build
-from torque.v1 import deployment
+from . import component
+from . import build
+from . import deployment
 
 
 class Link(ABC):

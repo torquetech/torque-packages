@@ -6,9 +6,9 @@
 
 import threading
 
-from torque.v1 import interface
-from torque.v1 import provider
-from torque.v1 import utils
+from . import interface
+from . import provider
+from . import utils
 
 
 class Deployment:
