@@ -60,9 +60,9 @@ class PythonTask(v1.component.Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.network_links = []
-        self.volume_links = []
-        self.version = None
+        self._network_links = []
+        self._volume_links = []
+        self._version = None
 
     def _path(self) -> str:
         """TODO"""
@@ -70,8 +70,8 @@ class PythonTask(v1.component.Component):
         return v1.utils.resolve_path(self.parameters["path"])
 
     def _get_version(self):
-        if self.version:
-            return self.version
+        if self._version:
+            return self._version
 
         p = subprocess.run(["./version.sh"],
                            cwd=self._path(),
@@ -80,8 +80,8 @@ class PythonTask(v1.component.Component):
                            check=True,
                            capture_output=True)
 
-        self.version = p.stdout.decode("utf8").strip()
-        return self.version
+        self._version = p.stdout.decode("utf8").strip()
+        return self._version
 
     def _image(self, deployment: str) -> str:
         """TODO"""
@@ -91,12 +91,12 @@ class PythonTask(v1.component.Component):
     def _add_network_link(self, link: v1.interface.Future):
         """TODO"""
 
-        self.network_links.append(link)
+        self._network_links.append(link)
 
     def _add_volume_link(self, mount_point: str, link: v1.interface.Future):
         """TODO"""
 
-        self.volume_links.append((mount_point, link))
+        self._volume_links.append((mount_point, link))
 
     def _get_modules_path(self) -> str:
         """TODO"""
@@ -162,8 +162,8 @@ class PythonTask(v1.component.Component):
                               None,
                               None,
                               self.configuration["environment"],
-                              self.network_links,
-                              self.volume_links,
+                              self._network_links,
+                              self._volume_links,
                               self.configuration["replicas"])
 
         return True
