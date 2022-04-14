@@ -78,7 +78,14 @@ class PythonTask(v1.component.Component):
         if self.version:
             return self.version
 
-        self.version = utils.load_file(f"{self._path()}/VERSION")
+        p = subprocess.run(["./version.sh"],
+                           cwd=self._path(),
+                           env=os.environ,
+                           shell=True,
+                           check=True,
+                           capture_output=True)
+
+        self.version = p.stdout.decode("utf8").strip()
         return self.version
 
     def _image(self, deployment: str) -> str:
