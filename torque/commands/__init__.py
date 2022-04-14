@@ -4,11 +4,9 @@
 
 """TODO"""
 
-import importlib
-import pkgutil
-
-__all__ = []
-
-for _, name, _ in pkgutil.walk_packages(__path__):
-    m = importlib.import_module(f"{__name__}.{name}")
-    __all__.append(name)
+from . import init
+from . import package
+from . import profile
+from . import component
+from . import link
+from . import deployment
