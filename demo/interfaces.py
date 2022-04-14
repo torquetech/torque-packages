@@ -71,3 +71,15 @@ class SimpleDeployment(v1.interface.Interface):
                     volume_links: [object],
                     replicas: int):
         """TODO"""
+
+    def create_service(name: str,
+                       image: str,
+                       cmd: [str],
+                       cwd: str,
+                       env: dict[str, str],
+                       network_links: [object],
+                       volume_links: [object],
+                       tcp_ports: [int],
+                       udp_ports: [int],
+                       replicas: int) -> v1.interface.Future:
+        """TODO"""

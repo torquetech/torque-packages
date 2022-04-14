@@ -47,10 +47,26 @@ class AWSK8S(v1.provider.Provider):
 
         print(f"_create_task({name}, {image}) called")
 
+    def _create_service(self,
+                        name: str,
+                        image: str,
+                        cmd: [str],
+                        cwd: str,
+                        env: dict[str, str],
+                        network_links: [object],
+                        volume_links: [object],
+                        tcp_ports: [int],
+                        udp_ports: [int],
+                        replicas: int) -> v1.interface.Future:
+        """TODO"""
+
+        print(f"_create_service({name}, {image}) called")
+
     def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return [
             interfaces.SimpleDeployment(push_image=self._push_image,
-                                        create_task=self._create_task)
+                                        create_task=self._create_task,
+                                        create_service=self._create_service)
         ]
