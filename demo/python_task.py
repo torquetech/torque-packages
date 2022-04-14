@@ -106,7 +106,7 @@ class PythonTask(v1.component.Component):
     def _get_modules_path(self) -> str:
         """TODO"""
 
-        return f"{self._path()}/mods"
+        return f"{self._path()}/modules"
 
     def _add_requirements(self, requirements: [str]):
         """TODO"""
