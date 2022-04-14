@@ -4,12 +4,9 @@
 
 """TODO"""
 
-from copy import deepcopy
-from collections.abc import Callable
+import threading
 
-from threading import Condition
-from threading import Lock
-from threading import Thread
+from collections.abc import Callable
 
 
 class Job:
@@ -20,13 +17,26 @@ class Job:
                  depends: [str],
                  handler: Callable[[str, object], bool]):
         self.name = name
-        self.blocks = []
         self.depends = depends
         self.handler = handler
 
     def __repr__(self) -> str:
         depends = ','.join(self.depends)
         return f"Job({self.name}, depends=[{depends}])"
+
+
+class _Job:
+    """TODO"""
+
+    def __init__(self,
+                 name: str,
+                 blocks: [str],
+                 depends: int,
+                 handler: Callable[[str, object], bool]):
+        self.name = name
+        self.blocks = blocks
+        self.depends = depends
+        self.handler = handler
 
 
 class Runner:
@@ -36,10 +46,10 @@ class Runner:
         self._worker_count = worker_count
         self._workers = []
 
-        self._queue_cond = Condition()
+        self._queue_cond = threading.Condition()
         self._queue = []
 
-        self._jobs_lock = Lock()
+        self._jobs_lock = threading.Lock()
         self._jobs = {}
 
     def _pop(self):
@@ -93,9 +103,11 @@ class Runner:
                 with self._jobs_lock:
                     for blocked_job in job.blocks:
                         blocked_job = self._jobs[blocked_job]
-                        blocked_job.depends.remove(job.name)
 
-                        if len(blocked_job.depends) == 0:
+                        assert blocked_job.depends > 0
+                        blocked_job.depends -= 1
+
+                        if blocked_job.depends == 0:
                             self._jobs.pop(blocked_job.name)
                             self._push(blocked_job)
 
@@ -109,23 +121,28 @@ class Runner:
     def execute(self, jobs: [Job]):
         """TODO"""
 
-        jobs = dict((job.name, Job(job.name, deepcopy(job.depends), job.handler))
-                    for job in jobs)
+        self._jobs = {
+            job.name: _Job(job.name, [], len(job.depends), job.handler) for job in jobs
+        }
 
         try:
-            for job in jobs.values():
+            for job in jobs:
                 for dependant in job.depends:
-                    dependant = jobs[dependant]
+                    dependant = self._jobs[dependant]
                     dependant.blocks.append(job.name)
 
-                if len(job.depends) == 0:
+            for job in list(jobs):
+                job = self._jobs[job.name]
+
+                if job.depends == 0:
+                    self._jobs.pop(job.name)
                     self._push(job)
 
-                else:
-                    self._jobs[job.name] = job
+            if len(self._jobs) == len(jobs):
+                raise RuntimeError("internal error: no roots found")
 
             for _ in range(self._worker_count):
-                thr = Thread(target=self._worker)
+                thr = threading.Thread(target=self._worker)
                 thr.start()
 
                 self._workers.append(thr)

@@ -26,6 +26,9 @@ class Checker:
         for name, depends in self._jobs.items():
             yield Job(name, depends, self._handler)
 
+    def __len__(self):
+        return len(self._jobs)
+
     def _handler(self, job_name: str):
         """TODO"""
 
