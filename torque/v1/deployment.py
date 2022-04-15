@@ -9,14 +9,13 @@ import shutil
 import threading
 
 from . import interface
-from . import provider
 from . import utils
 
 
 class Deployment:
     """TODO"""
 
-    def __init__(self, name: str, profile: str, dry_run: bool, providers: [provider.Provider]):
+    def __init__(self, name: str, profile: str, dry_run: bool, providers: "[provider.Provider]"):
         self.name = name
         self.profile = profile
         self.dry_run = dry_run
@@ -24,7 +23,7 @@ class Deployment:
 
         self._providers = providers
         self._lock = threading.Lock()
-        self._interfaces: dict[str, provider.Provider] = {}
+        self._interfaces = {}
 
         if os.path.exists(self.path):
             for path in os.listdir(self.path):
@@ -62,7 +61,7 @@ class Deployment:
             return self._interface(cls, labels)
 
 
-def create(name: str, profile: str, dry_run: bool, providers: [provider.Provider]) -> Deployment:
+def create(name: str, profile: str, dry_run: bool, providers: "[provider.Provider]") -> Deployment:
     """TODO"""
 
     return Deployment(name, profile, dry_run, providers)

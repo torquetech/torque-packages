@@ -9,6 +9,7 @@ import threading
 from abc import ABC
 from abc import abstractmethod
 
+from . import deployment
 from . import interface as interface_v1
 from . import utils
 
@@ -47,4 +48,8 @@ class Provider(ABC):
 
     @abstractmethod
     def interfaces(self) -> [interface_v1.Interface]:
+        """TODO"""
+
+    @abstractmethod
+    def on_apply(self, deployment: deployment.Deployment):
         """TODO"""

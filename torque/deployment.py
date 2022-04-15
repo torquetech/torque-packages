@@ -177,6 +177,9 @@ class Deployment:
 
         self._execute(workers, _on_apply)
 
+        for provider in providers:
+            provider.on_apply(deployment)
+
     def delete(self, dry_run: bool):
         """TODO"""
 
