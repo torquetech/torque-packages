@@ -39,7 +39,7 @@ class Component(ABC):
 
         return utils.fqcn(cls) in self._interfaces
 
-    def interface(self, cls: type) -> interface_v1.Context:
+    def interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
         """TODO"""
 
         name = utils.fqcn(cls)
@@ -47,7 +47,7 @@ class Component(ABC):
         if name not in self._interfaces:
             raise RuntimeError(f"{name}: interface not found")
 
-        return interface_v1.Context(self._lock, self._interfaces[name])
+        return self._lock, self._interfaces[name]
 
     @staticmethod
     @abstractmethod

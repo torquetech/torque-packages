@@ -18,7 +18,29 @@ T = typing.TypeVar("T")
 class Interface:
     """TODO"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+
+        if args:
+            self._get_interface(*args)
+
+        else:
+            self._init_interface(**kwargs)
+
+    def __enter__(self):
+        self.__lock.acquire()
+        return self.__interface
+
+    def __exit__(self, type, value, traceback):
+        self.__lock.release()
+
+    def _get_interface(self, *args):
+        """TODO"""
+
+        self.__lock, self.__interface = args[0].interface(self.__class__)
+
+    def _init_interface(self, **kwargs):
+        """TODO"""
+
         required_funcs = inspect.getmembers(self, predicate=inspect.ismethod)
         required_funcs = filter(lambda x: not x[0].startswith("_"), required_funcs)
         required_funcs = set(map(lambda x: x[0], required_funcs))
@@ -34,21 +56,6 @@ class Interface:
 
         for name, func in kwargs.items():
             setattr(self, name, func)
-
-
-class Context:
-    """TODO"""
-
-    def __init__(self, lock: threading.Lock, interface: Interface):
-        self._lock = lock
-        self._interface = interface
-
-    def __enter__(self):
-        self._lock.acquire()
-        return self._interface
-
-    def __exit__(self, type, value, traceback):
-        self._lock.release()
 
 
 class Future(typing.Generic[T]):

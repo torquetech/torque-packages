@@ -8,7 +8,7 @@ import os
 import shutil
 import threading
 
-from . import interface
+from . import interface as interface_v1
 from . import utils
 
 
@@ -38,7 +38,7 @@ class Deployment:
         else:
             os.makedirs(self.path)
 
-    def _interface(self, cls: type, labels: [str]) -> interface.Context:
+    def _interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
         """TODO"""
 
         name = utils.fqcn(cls)
@@ -52,13 +52,13 @@ class Deployment:
 
             return provider.interface(cls)
 
-        return interface.Context(self._lock, None)
+        raise RuntimeError(f"{name}: provider interface not implemented")
 
-    def interface(self, cls: type, labels: [str]) -> interface.Context:
+    def interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
         """TODO"""
 
         with self._lock:
-            return self._interface(cls, labels)
+            return self._interface(cls)
 
 
 def create(name: str, profile: str, dry_run: bool, providers: "[provider.Provider]") -> Deployment:
