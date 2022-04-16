@@ -15,13 +15,6 @@ from demo import utils
 class Service(v1.component.Component):
     """TODO"""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._service_link = None
-        self._secret = None
-        self._volume_links = []
-
     @staticmethod
     def validate_parameters(parameters: object) -> object:
         """TODO"""
@@ -52,6 +45,13 @@ class Service(v1.component.Component):
                                      configuration,
                                      _DEFAULT_CONFIGURATION,
                                      _CONFIGURATION_SCHEMA)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._service_link = None
+        self._secret = None
+        self._volume_links = []
 
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"
