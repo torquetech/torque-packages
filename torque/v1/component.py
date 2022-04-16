@@ -27,27 +27,27 @@ class Component(ABC):
         self.parameters = parameters
         self.configuration = configuration
 
-        self._interfaces: dict[str, interface_v1.Interface] = {}
+        self._torque_interfaces: dict[str, interface_v1.Interface] = {}
 
         for iface in self.interfaces():
-            self._interfaces[utils.fqcn(iface)] = iface
+            self._torque_interfaces[utils.fqcn(iface)] = iface
 
-        self._lock = threading.Lock()
+        self._torque_lock = threading.Lock()
 
     def has_interface(self, cls: type) -> bool:
         """TODO"""
 
-        return utils.fqcn(cls) in self._interfaces
+        return utils.fqcn(cls) in self._torque_interfaces
 
     def interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
         """TODO"""
 
         name = utils.fqcn(cls)
 
-        if name not in self._interfaces:
+        if name not in self._torque_interfaces:
             raise RuntimeError(f"{name}: interface not found")
 
-        return self._lock, self._interfaces[name]
+        return self._torque_lock, self._torque_interfaces[name]
 
     @staticmethod
     @abstractmethod

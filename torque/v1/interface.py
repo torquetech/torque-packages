@@ -21,24 +21,24 @@ class Interface:
     def __init__(self, *args, **kwargs):
 
         if args:
-            self._get_interface(*args)
+            self._torque_get_interface(*args)
 
         else:
-            self._init_interface(**kwargs)
+            self._torque_init_interface(**kwargs)
 
     def __enter__(self):
-        self.__lock.acquire()
-        return self.__interface
+        self._torque_lock.acquire()
+        return self._torque_interface
 
     def __exit__(self, type, value, traceback):
-        self.__lock.release()
+        self._torque_lock.release()
 
-    def _get_interface(self, *args):
+    def _torque_get_interface(self, *args):
         """TODO"""
 
-        self.__lock, self.__interface = args[0].interface(self.__class__)
+        self._torque_lock, self._torque_interface = args[0].interface(self.__class__)
 
-    def _init_interface(self, **kwargs):
+    def _torque_init_interface(self, **kwargs):
         """TODO"""
 
         required_funcs = inspect.getmembers(self, predicate=inspect.ismethod)
