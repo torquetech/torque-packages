@@ -27,8 +27,6 @@ class Component(ABC):
         self.parameters = parameters
         self.configuration = configuration
 
-        self.artifacts: [str] = []
-
         self._inbound_interfaces: dict[str, interface.Interface] = {}
         self._outbound_interfaces: dict[str, interface.Interface] = {}
 

@@ -28,8 +28,6 @@ class Link(ABC):
         self.source = source
         self.destination = destination
 
-        self.artifacts: [str] = []
-
     @staticmethod
     @abstractmethod
     def validate_parameters(parameters: object) -> object:
