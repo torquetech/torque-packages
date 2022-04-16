@@ -120,7 +120,7 @@ class Task(v1.component.Component):
     def _add_requirements(self, requirements: [str]):
         """TODO"""
 
-        requirements += []
+        requirements += [""]
 
         with open(f"{self._path()}/requirements.txt", "a", encoding="utf8") as file:
             file.write("\n".join(requirements))
