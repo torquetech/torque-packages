@@ -7,27 +7,51 @@
 from torque import v1
 
 from demo import interfaces
-from demo import python_task
+from demo import utils
 
+from demo.python_task import Task
 
-class Service(python_task.Task):
+class Service(Task):
     """TODO"""
 
-    def _get_network_address(self) -> (str, int):
+    _CONFIGURATION = v1.utils.merge_dicts(Task._CONFIGURATION, {
+        "defaults": {
+            "tcp_ports": [],
+            "udp_ports": []
+        },
+        "schema": {
+            "tcp_ports": [int],
+            "udp_ports": [int]
+        }
+    }, allow_overwrites=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._service_link = None
+
+    def _link(self) -> (str, int):
         # pylint: disable=R0201
 
         """TODO"""
 
-        return ("", 0)
+        return self._service_link
 
     def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return super().interfaces() + [
-            interfaces.Service(get_address=self._get_network_address)
+            interfaces.Service(link=self._link)
         ]
 
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
+
+        with interfaces.Provider(deployment) as provider:
+            self._service_link = provider.create_service(self.name,
+                                                         self.configuration["tcp_ports"],
+                                                         self.configuration["udp_ports"])
+
+        Task.on_apply(self, deployment)
 
         return True
