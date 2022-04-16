@@ -10,7 +10,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from . import deployment
-from . import interface
+from . import interface as interface_v1
 from . import utils
 
 
@@ -27,46 +27,27 @@ class Component(ABC):
         self.parameters = parameters
         self.configuration = configuration
 
-        self._inbound_interfaces: dict[str, interface.Interface] = {}
-        self._outbound_interfaces: dict[str, interface.Interface] = {}
+        self._interfaces: dict[str, interface_v1.Interface] = {}
 
-        for iface in self.inbound_interfaces():
-            self._inbound_interfaces[utils.fqcn(iface)] = iface
-
-        for iface in self.outbound_interfaces():
-            self._outbound_interfaces[utils.fqcn(iface)] = iface
+        for iface in self.interfaces():
+            self._interfaces[utils.fqcn(iface)] = iface
 
         self._lock = threading.Lock()
 
-    def has_inbound_interface(self, cls: type) -> bool:
+    def has_interface(self, cls: type) -> bool:
         """TODO"""
 
-        return utils.fqcn(cls) in self._inbound_interfaces
+        return utils.fqcn(cls) in self._interfaces
 
-    def inbound_interface(self, cls: type) -> interface.Context:
-        """TODO"""
-
-        name = utils.fqcn(cls)
-
-        if name not in self._inbound_interfaces:
-            raise RuntimeError(f"{name}: inbound interface not found")
-
-        return interface.Context(self._lock, self._inbound_interfaces[name])
-
-    def has_outbound_interface(self, cls: type) -> bool:
-        """TODO"""
-
-        return utils.fqcn(cls) in self._outbound_interfaces
-
-    def outbound_interface(self, cls: type) -> interface.Context:
+    def interface(self, cls: type) -> interface_v1.Context:
         """TODO"""
 
         name = utils.fqcn(cls)
 
-        if name not in self._outbound_interfaces:
-            raise RuntimeError(f"{name}: outbound interface not found")
+        if name not in self._interfaces:
+            raise RuntimeError(f"{name}: interface not found")
 
-        return interface.Context(self._lock, self._outbound_interfaces[name])
+        return interface_v1.Context(self._lock, self._interfaces[name])
 
     @staticmethod
     @abstractmethod
@@ -79,11 +60,7 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def inbound_interfaces(self) -> [interface.Interface]:
-        """TODO"""
-
-    @abstractmethod
-    def outbound_interfaces(self) -> [interface.Interface]:
+    def interfaces(self) -> [interface_v1.Interface]:
         """TODO"""
 
     @abstractmethod
