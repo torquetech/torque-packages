@@ -6,6 +6,7 @@
 
 from demo import python_task
 from demo import python_service
+from demo import psycopg2
 from demo import postgres
 from demo import providers
 
@@ -17,14 +18,9 @@ repository = {
             "demo/python-service": python_service.Service,
             "demo/postgres": postgres.Service
         },
-        # "links": {
-        #     "torquetech.dev/dummy1": DummyLink,
-        #     "torquetech.dev/dummy2": DummyLink
-        # },
-        # "protocols": {
-        #     "proto1": CustomProtocol,
-        #     "proto2": CustomProtocol
-        # },
+        "links": {
+            "demo/psycopg2": psycopg2.Link
+        },
         "providers": {
             "demo/aws-k8s": providers.AWSK8S,
         }

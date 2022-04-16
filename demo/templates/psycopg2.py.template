@@ -1,0 +1,13 @@
+import os
+import psycopg2
+
+
+def connect():
+    type, port, host = os.getenv("LINK_{{COMPONENT}}_0").split(":")
+    assert type == "tcp"
+
+    return psycopg2.connect(dbname=os.getenv("PSYCOPG2_{{COMPONENT}}_DB"),
+                            user=os.getenv("PSYCOPG2_{{COMPONENT}}_USER"),
+                            password=os.getenv("PSYCOPG2_{{COMPONENT}}_PASSWORD"),
+                            host=host,
+                            port=port)
