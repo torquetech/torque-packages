@@ -16,32 +16,19 @@ from demo import interfaces
 from demo import utils
 
 
-_DEFAULT_PARAMETERS = {
-}
-
-_PARAMETERS_SCHEMA = schema.Schema({
-    "path": str
-})
-
-_DEFAULT_CONFIGURATION = {
-    "replicas": 1,
-    "environment": {}
-}
-
-_CONFIGURATION_SCHEMA = schema.Schema({
-    "replicas": int,
-    "environment": {
-        schema.Optional(str): str
-    }
-})
-
-
 class Task(v1.component.Component):
     """TODO"""
 
     @staticmethod
     def validate_parameters(parameters: object) -> object:
         """TODO"""
+
+        _DEFAULT_PARAMETERS = {
+        }
+
+        _PARAMETERS_SCHEMA = schema.Schema({
+            "path": str
+        })
 
         return utils.validate_schema("parameters",
                                      parameters,
@@ -51,6 +38,18 @@ class Task(v1.component.Component):
     @staticmethod
     def validate_configuration(configuration: object) -> object:
         """TODO"""
+
+        _DEFAULT_CONFIGURATION = {
+            "replicas": 1,
+            "environment": {}
+        }
+
+        _CONFIGURATION_SCHEMA = schema.Schema({
+            "replicas": int,
+            "environment": {
+                schema.Optional(str): str
+            }
+        })
 
         return utils.validate_schema("configuration",
                                      configuration,
