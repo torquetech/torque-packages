@@ -49,14 +49,14 @@ class Component(ABC):
 
         return self._torque_lock, self._torque_interfaces[name]
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_parameters(parameters: object) -> object:
+    def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_configuration(configuration: object) -> object:
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

@@ -10,14 +10,14 @@ from torque import v1
 class DependencyLink(v1.link.Link):
     """TODO"""
 
-    @staticmethod
-    def validate_parameters(parameters: object) -> object:
+    @classmethod
+    def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return {}
 
-    @staticmethod
-    def validate_configuration(configuration: object) -> object:
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return {}

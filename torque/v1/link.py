@@ -28,14 +28,14 @@ class Link(ABC):
         self.source = source
         self.destination = destination
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_parameters(parameters: object) -> object:
+    def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_configuration(configuration: object) -> object:
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

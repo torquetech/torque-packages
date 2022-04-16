@@ -41,9 +41,9 @@ class Provider(ABC):
 
         return self._torque_lock, self._torque_interfaces[name]
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_configuration(configuration: object) -> object:
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod
