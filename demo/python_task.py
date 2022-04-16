@@ -155,15 +155,22 @@ class Task(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with deployment.interface(interfaces.SimpleDeployment, self.labels) as iface:
-            iface.push_image(self._image(deployment.name))
-            iface.create_task(self.name,
-                              self._image(deployment.name),
-                              None,
-                              None,
-                              self.configuration["environment"],
-                              self._network_links,
-                              self._volume_links,
-                              self.configuration["replicas"])
+        env = [
+            interfaces.Provider.KeyValue(name, value)
+            for name, value in self.configuration["environment"].items()
+        ]
+
+        with deployment.interface(interfaces.Provider, self.labels) as provider:
+            provider.push_image(self._image(deployment.name))
+            provider.create_deployment(self.name,
+                                       self._image(deployment.name),
+                                       None,
+                                       None,
+                                       None,
+                                       env,
+                                       self._network_links,
+                                       self._volume_links,
+                                       None,
+                                       self.configuration["replicas"])
 
         return True

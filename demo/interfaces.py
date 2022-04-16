@@ -4,7 +4,57 @@
 
 """TODO"""
 
+from collections import namedtuple
+
 from torque import v1
+
+
+class Provider(v1.interface.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    KeyValue = namedtuple("KeyValue", [
+        "key",
+        "value"
+    ])
+
+    Secret = namedtuple("Secret", [
+        "env",
+        "obj",
+        "key"
+    ])
+
+    NetworkLink = namedtuple("NetworkLink", [
+        "name",
+        "host",
+        "tcp_ports",
+        "udp_ports"
+    ])
+
+    def push_image(image: str):
+        """TODO"""
+
+    def create_secret(name: str,
+                      entries: [KeyValue]) -> v1.interface.Future[str]:
+        """TODO"""
+
+    def create_deployment(name: str,
+                          image: str,
+                          cmd: [str],
+                          args: [str],
+                          cwd: str,
+                          env: [KeyValue],
+                          network_links: [NetworkLink],
+                          volume_links: [object],
+                          secrets: [Secret],
+                          replicas: int):
+        """TODO"""
+
+    def create_service(name: str,
+                       tcp_ports: [int],
+                       udp_ports: [int]) -> v1.interface.Future[NetworkLink]:
+        """TODO"""
 
 
 class Service(v1.interface.Interface):
@@ -12,7 +62,7 @@ class Service(v1.interface.Interface):
 
     """TODO"""
 
-    def get() -> v1.interface.Future:
+    def link() -> v1.interface.Future[Provider.NetworkLink]:
         """TODO"""
 
 
@@ -21,7 +71,7 @@ class NetworkLink(v1.interface.Interface):
 
     """TODO"""
 
-    def add(link: v1.interface.Future):
+    def add(link: v1.interface.Future[Provider.NetworkLink]):
         """TODO"""
 
 
@@ -33,12 +83,31 @@ class Volume(v1.interface.Interface):
     def get(size: int) -> v1.interface.Future:
         """TODO"""
 
+
 class VolumeLink(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
     def add(mount_point: str, link: v1.interface.Future):
+        """TODO"""
+
+
+class Secret(v1.interface.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def add(name: str, obj: object, key: str):
+        """TODO"""
+
+
+class Environment(v1.interface.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def add(name: str, value: str):
         """TODO"""
 
 
@@ -51,35 +120,4 @@ class PythonModules(v1.interface.Interface):
         """TODO"""
 
     def add_requirements(requirements: [str]):
-        """TODO"""
-
-
-class SimpleDeployment(v1.interface.Interface):
-    # pylint: disable=E0211,E0213
-
-    """TODO"""
-
-    def push_image(image: str):
-        """TODO"""
-
-    def create_task(name: str,
-                    image: str,
-                    cmd: [str],
-                    cwd: str,
-                    env: dict[str, str],
-                    network_links: [object],
-                    volume_links: [object],
-                    replicas: int):
-        """TODO"""
-
-    def create_service(name: str,
-                       image: str,
-                       cmd: [str],
-                       cwd: str,
-                       env: dict[str, str],
-                       network_links: [object],
-                       volume_links: [object],
-                       tcp_ports: [int],
-                       udp_ports: [int],
-                       replicas: int) -> v1.interface.Future:
         """TODO"""
