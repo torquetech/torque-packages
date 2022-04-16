@@ -19,42 +19,25 @@ from demo import utils
 class Task(v1.component.Component):
     """TODO"""
 
-    @staticmethod
-    def validate_parameters(parameters: object) -> object:
-        """TODO"""
-
-        _DEFAULT_PARAMETERS = {
-        }
-
-        _PARAMETERS_SCHEMA = schema.Schema({
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {
             "path": str
-        })
+        }
+    }
 
-        return utils.validate_schema("parameters",
-                                     parameters,
-                                     _DEFAULT_PARAMETERS,
-                                     _PARAMETERS_SCHEMA)
-
-    @staticmethod
-    def validate_configuration(configuration: object) -> object:
-        """TODO"""
-
-        _DEFAULT_CONFIGURATION = {
+    _CONFIGURATION = {
+        "defaults": {
             "replicas": 1,
             "environment": {}
-        }
-
-        _CONFIGURATION_SCHEMA = schema.Schema({
+        },
+        "schema": {
             "replicas": int,
             "environment": {
                 schema.Optional(str): str
             }
-        })
-
-        return utils.validate_schema("configuration",
-                                     configuration,
-                                     _DEFAULT_CONFIGURATION,
-                                     _CONFIGURATION_SCHEMA)
+        }
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,6 +47,22 @@ class Task(v1.component.Component):
         self._secrets = []
         self._environment = []
         self._version = None
+
+    @classmethod
+    def validate_parameters(cls, parameters: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("parameters",
+                                     cls._PARAMETERS,
+                                     parameters)
+
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("configuration",
+                                     cls._CONFIGURATION,
+                                     configuration)
 
     def _path(self) -> str:
         """TODO"""

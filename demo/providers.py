@@ -16,22 +16,23 @@ from demo import utils
 class AWSK8S(v1.provider.Provider):
     """TODO"""
 
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._targets = {}
 
-    @staticmethod
-    def validate_configuration(configuration: object) -> object:
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        _DEFAULT_CONFIGURATION = {}
-        _CONFIGURATION_SCHEMA = schema.Schema({})
-
         return utils.validate_schema("configuration",
-                                     configuration,
-                                     _DEFAULT_CONFIGURATION,
-                                     _CONFIGURATION_SCHEMA)
+                                     cls._CONFIGURATION,
+                                     configuration)
 
     def _add_to_target(self, name: str, objs: [object]):
         """TODO"""

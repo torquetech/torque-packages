@@ -15,36 +15,21 @@ from demo import utils
 class Service(v1.component.Component):
     """TODO"""
 
-    @staticmethod
-    def validate_parameters(parameters: object) -> object:
-        """TODO"""
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
 
-        _DEFAULT_PARAMETERS = {}
-        _PARAMETERS_SCHEMA = schema.Schema({})
-
-        return utils.validate_schema("parameters",
-                                     parameters,
-                                     _DEFAULT_PARAMETERS,
-                                     _PARAMETERS_SCHEMA)
-
-    @staticmethod
-    def validate_configuration(configuration: object) -> object:
-        """TODO"""
-
-        _DEFAULT_CONFIGURATION = {
+    _CONFIGURATION = {
+        "defaults": {
             "version": "14.2",
-            "password": utils.generate_password()
-        }
-
-        _CONFIGURATION_SCHEMA = schema.Schema({
+            "password": None
+        },
+        "schema": {
             "version": str,
             "password": str
-        })
-
-        return utils.validate_schema("configuration",
-                                     configuration,
-                                     _DEFAULT_CONFIGURATION,
-                                     _CONFIGURATION_SCHEMA)
+        }
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,6 +37,28 @@ class Service(v1.component.Component):
         self._service_link = None
         self._secret = None
         self._volume_links = []
+
+    @classmethod
+    def validate_parameters(cls, parameters: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("parameters",
+                                     cls._PARAMETERS,
+                                     parameters)
+
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        _configuration = v1.utils.merge_dicts(cls._CONFIGURATION, {
+            "defaults": {
+                "password": utils.generate_password()
+            }
+        })
+
+        return utils.validate_schema("configuration",
+                                     _configuration,
+                                     configuration)
 
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"

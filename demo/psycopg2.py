@@ -17,37 +17,38 @@ from demo import utils
 class Link(v1.link.Link):
     """TODO"""
 
-    @staticmethod
-    def validate_parameters(parameters: object) -> object:
-        """TODO"""
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
 
-        _DEFAULT_PARAMETERS = {
+    _CONFIGURATION = {
+        "defaults": {
+            "database": "postgres"
+        },
+        "schema": {
+            "database": str
         }
+    }
 
-        _PARAMETERS_SCHEMA = schema.Schema({
-        })
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def validate_parameters(cls, parameters: object) -> object:
+        """TODO"""
 
         return utils.validate_schema("parameters",
-                                     parameters,
-                                     _DEFAULT_PARAMETERS,
-                                     _PARAMETERS_SCHEMA)
+                                     cls._PARAMETERS,
+                                     parameters)
 
-    @staticmethod
-    def validate_configuration(configuration: object) -> object:
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        _DEFAULT_CONFIGURATION = {
-            "database": "postgres"
-        }
-
-        _CONFIGURATION_SCHEMA = schema.Schema({
-            "database": str
-        })
-
         return utils.validate_schema("configuration",
-                                     configuration,
-                                     _DEFAULT_CONFIGURATION,
-                                     _CONFIGURATION_SCHEMA)
+                                     cls._CONFIGURATION,
+                                     configuration)
 
     def on_create(self):
         """TODO"""
