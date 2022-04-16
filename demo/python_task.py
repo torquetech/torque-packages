@@ -173,7 +173,7 @@ class Task(v1.component.Component):
 
         env += self._environment
 
-        with deployment.interface(interfaces.Provider, self.labels) as provider:
+        with interfaces.Provider(deployment) as provider:
             provider.push_image(self._image(deployment.name))
             provider.create_deployment(self.name,
                                        self._image(deployment.name),

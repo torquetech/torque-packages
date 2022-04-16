@@ -60,7 +60,7 @@ class Link(v1.link.Link):
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg2.py.template"))
 
-        with self.destination.interface(interfaces.PythonModules) as dst:
+        with interfaces.PythonModules(self.destination) as dst:
             target_path = f"{dst.path()}/{self.source.name}.py"
 
             if os.path.exists(v1.utils.resolve_path(target_path)):
@@ -83,20 +83,20 @@ class Link(v1.link.Link):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with self.source.interface(interfaces.PostgresService) as src:
+        with interfaces.PostgresService(self.source) as src:
             link = src.link()
             secret = src.admin()
 
-        with self.destination.interface(interfaces.NetworkLink) as dst:
+        with interfaces.NetworkLink(self.destination) as dst:
             dst.add(link)
 
         source = self.source.name.upper()
 
-        with self.destination.interface(interfaces.Secret) as dst:
-            dst.add(f"PSYCOPG2_{source}_USER", secret, "user")
-            dst.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
+        with interfaces.Secret(self.destination) as sec:
+            sec.add(f"PSYCOPG2_{source}_USER", secret, "user")
+            sec.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
 
-        with self.destination.interface(interfaces.Environment) as dst:
-            dst.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
+        with interfaces.Environment(self.destination) as env:
+            env.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
 
         return True

@@ -97,7 +97,7 @@ class Service(v1.component.Component):
             interfaces.Provider.KeyValue("PGDATA", "/data")
         ]
 
-        with deployment.interface(interfaces.Provider, self.labels) as provider:
+        with interfaces.Provider(deployment) as provider:
             self._secret = provider.create_secret(f"{self.name}_admin", [
                 interfaces.Provider.KeyValue("user", "postgres"),
                 interfaces.Provider.KeyValue("password", self.configuration["password"])
