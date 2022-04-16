@@ -71,17 +71,11 @@ class Service(v1.component.Component):
 
         return self._secret
 
-    def inbound_interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return [
-            interfaces.VolumeLink(add=self._add_volume_link)
-        ]
-
-    def outbound_interfaces(self) -> [v1.interface.Interface]:
-        """TODO"""
-
-        return [
+            interfaces.VolumeLink(add=self._add_volume_link),
             interfaces.PostgresService(link=self._link, admin=self._admin)
         ]
 

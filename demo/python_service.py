@@ -20,10 +20,10 @@ class Service(python_task.Task):
 
         return ("", 0)
 
-    def outbound_interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
-        return super().outbound_interfaces() + [
+        return super().interfaces() + [
             interfaces.Service(get_address=self._get_network_address)
         ]
 

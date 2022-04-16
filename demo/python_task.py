@@ -125,7 +125,7 @@ class Task(v1.component.Component):
         with open(f"{self._path()}/requirements.txt", "a", encoding="utf8") as file:
             file.write("\n".join(requirements))
 
-    def inbound_interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
 
         return [
@@ -136,11 +136,6 @@ class Task(v1.component.Component):
             interfaces.PythonModules(path=self._get_modules_path,
                                      add_requirements=self._add_requirements)
         ]
-
-    def outbound_interfaces(self) -> [v1.interface.Interface]:
-        """TODO"""
-
-        return []
 
     def on_create(self):
         """TODO"""

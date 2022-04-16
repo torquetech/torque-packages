@@ -52,15 +52,15 @@ class Link(v1.link.Link):
     def on_create(self):
         """TODO"""
 
-        if not self.source.has_outbound_interface(interfaces.PostgresService):
+        if not self.source.has_interface(interfaces.PostgresService):
             raise RuntimeError(f"{self.source.name}: incompatible component")
 
-        if not self.destination.has_inbound_interface(interfaces.PythonModules):
+        if not self.destination.has_interface(interfaces.PythonModules):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg2.py.template"))
 
-        with self.destination.inbound_interface(interfaces.PythonModules) as dst:
+        with self.destination.interface(interfaces.PythonModules) as dst:
             target_path = f"{dst.path()}/{self.source.name}.py"
 
             if os.path.exists(v1.utils.resolve_path(target_path)):
@@ -83,20 +83,20 @@ class Link(v1.link.Link):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with self.source.outbound_interface(interfaces.PostgresService) as src:
+        with self.source.interface(interfaces.PostgresService) as src:
             link = src.link()
             secret = src.admin()
 
-        with self.destination.inbound_interface(interfaces.NetworkLink) as dst:
+        with self.destination.interface(interfaces.NetworkLink) as dst:
             dst.add(link)
 
         source = self.source.name.upper()
 
-        with self.destination.inbound_interface(interfaces.Secret) as dst:
+        with self.destination.interface(interfaces.Secret) as dst:
             dst.add(f"PSYCOPG2_{source}_USER", secret, "user")
             dst.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
 
-        with self.destination.inbound_interface(interfaces.Environment) as dst:
+        with self.destination.interface(interfaces.Environment) as dst:
             dst.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
 
         return True
