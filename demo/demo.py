@@ -6,6 +6,7 @@
 
 from demo import python_task
 from demo import python_service
+from demo import postgres
 from demo import providers
 
 
@@ -13,7 +14,8 @@ repository = {
     "v1": {
         "components": {
             "demo/python-task": python_task.Task,
-            "demo/python-service": python_service.Service
+            "demo/python-service": python_service.Service,
+            "demo/postgres": postgres.Service
         },
         # "links": {
         #     "torquetech.dev/dummy1": DummyLink,

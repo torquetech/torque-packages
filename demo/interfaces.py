@@ -66,6 +66,15 @@ class Service(v1.interface.Interface):
         """TODO"""
 
 
+class PostgresService(Service):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def admin() -> v1.interface.Future[str]:
+        """TODO"""
+
+
 class NetworkLink(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 

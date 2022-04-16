@@ -5,6 +5,8 @@
 """TODO"""
 
 import os
+import secrets
+
 import schema
 
 from torque import v1
@@ -33,3 +35,9 @@ def validate_schema(type: str, obj: object, obj_defaults: object, obj_schema: sc
 
     except schema.SchemaError as exc:
         raise RuntimeError(f"{type} schema validation failed") from exc
+
+
+def generate_password() -> str:
+    """TODO"""
+
+    return secrets.token_urlsafe(16)
