@@ -61,6 +61,7 @@ class Task(v1.component.Component):
 
         self._network_links = []
         self._volume_links = []
+        self._secrets = []
         self._environment = []
         self._version = None
 
@@ -98,6 +99,14 @@ class Task(v1.component.Component):
 
         self._volume_links.append((mount_point, link))
 
+    def _add_secret(self,
+                    name: str,
+                    obj: object,
+                    key: str):
+        """TODO"""
+
+        self._secrets.append(interfaces.Provider.Secret(name, obj, key))
+
     def _add_environment(self, name: str, value: str):
         """TODO"""
 
@@ -122,6 +131,7 @@ class Task(v1.component.Component):
         return [
             interfaces.NetworkLink(add=self._add_network_link),
             interfaces.VolumeLink(add=self._add_volume_link),
+            interfaces.Secret(add=self._add_secret),
             interfaces.Environment(add=self._add_environment),
             interfaces.PythonModules(path=self._get_modules_path,
                                      add_requirements=self._add_requirements)
@@ -178,7 +188,7 @@ class Task(v1.component.Component):
                                        env,
                                        self._network_links,
                                        self._volume_links,
-                                       None,
+                                       self._secrets,
                                        self.configuration["replicas"])
 
         return True
