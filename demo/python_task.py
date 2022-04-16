@@ -145,7 +145,7 @@ class Task(v1.component.Component):
     def on_create(self):
         """TODO"""
 
-        source_path = f"{utils.module_path()}/templates/task"
+        source_path = f"{utils.module_path()}/templates/python_app"
         target_path = self._path()
 
         if os.path.exists(target_path):

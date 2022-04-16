@@ -19,13 +19,13 @@ def version() -> str:
 
 
 setup(
-    name="task",
+    name="app",
     version=version(),
     packages=find_packages(),
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "task=task.__main__:main"
+            "app=app.__main__:main"
         ]
     },
 )
