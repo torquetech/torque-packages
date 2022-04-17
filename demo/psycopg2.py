@@ -11,47 +11,26 @@ import schema
 from torque import v1
 
 from demo import interfaces
+from demo import network
 from demo import utils
 
 
-class Link(v1.link.Link):
+class Link(network.Link):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    _CONFIGURATION = {
+    _CONFIGURATION = v1.utils.merge_dicts(network.Link._CONFIGURATION, {
         "defaults": {
             "database": "postgres"
         },
         "schema": {
             "database": str
         }
-    }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    @classmethod
-    def validate_parameters(cls, parameters: object) -> object:
-        """TODO"""
-
-        return utils.validate_schema("parameters",
-                                     cls._PARAMETERS,
-                                     parameters)
-
-    @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
-        """TODO"""
-
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+    }, allow_overwrites=False)
 
     def on_create(self):
         """TODO"""
+
+        network.Link.on_create(self)
 
         if not self.source.has_interface(interfaces.PostgresService):
             raise RuntimeError(f"{self.source.name}: incompatible component")
@@ -59,10 +38,16 @@ class Link(v1.link.Link):
         if not self.destination.has_interface(interfaces.PythonModules):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
+        if not self.destination.has_interface(interfaces.Secret):
+            raise RuntimeError(f"{self.destination.name}: incompatible component")
+
+        if not self.destination.has_interface(interfaces.Environment):
+            raise RuntimeError(f"{self.destination.name}: incompatible component")
+
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg2.py.template"))
 
-        with interfaces.PythonModules(self.destination) as dst:
-            target_path = f"{dst.path()}/{self.source.name}.py"
+        with interfaces.PythonModules(self.destination) as modules:
+            target_path = f"{modules.path()}/{self.source.name}.py"
 
             if os.path.exists(v1.utils.resolve_path(target_path)):
                 raise RuntimeError(f"{target_path}: file already exists")
@@ -71,25 +56,16 @@ class Link(v1.link.Link):
                 file.write(template.render(COMPONENT=self.source.name.upper()))
                 file.write("\n")
 
-            dst.add_requirements(["psycopg2"])
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
-        """TODO"""
-
-        return True
+            modules.add_requirements(["psycopg2"])
 
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with interfaces.PostgresService(self.source) as src:
-            link = src.link()
-            secret = src.admin()
+        if not network.Link.on_apply(self, deployment):
+            return False
 
-        with interfaces.NetworkLink(self.destination) as dst:
-            dst.add(link)
+        with interfaces.PostgresService(self.source) as src:
+            secret = src.admin()
 
         source = self.source.name.upper()
 
