@@ -7,7 +7,7 @@
 from demo import k8s
 from demo import network
 from demo import postgres
-from demo import psycopg2
+from demo import psycopg
 from demo import python_service
 from demo import python_task
 
@@ -21,7 +21,7 @@ repository = {
         },
         "links": {
             "demo/network": network.Link,
-            "demo/psycopg2": psycopg2.Link
+            "demo/psycopg": psycopg.Link
         },
         "providers": {
             "demo/k8s": k8s.Provider,

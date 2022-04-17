@@ -44,7 +44,7 @@ class Link(network.Link):
         if not self.destination.has_interface(interfaces.Environment):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
-        template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg2.py.template"))
+        template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg.py.template"))
 
         modules = self.destination.interface(interfaces.PythonModules)
         target_path = f"{modules.path()}/{self.source.name}.py"
@@ -56,7 +56,7 @@ class Link(network.Link):
             file.write(template.render(COMPONENT=self.source.name.upper()))
             file.write("\n")
 
-        modules.add_requirements(["psycopg2"])
+        modules.add_requirements(["psycopg"])
 
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
@@ -70,10 +70,10 @@ class Link(network.Link):
         secret = src.admin()
 
         sec = self.destination.interface(interfaces.Secret)
-        sec.add(f"{source}_PSYCOPG2_USER", secret, "user")
-        sec.add(f"{source}_PSYCOPG2_PASSWORD", secret, "password")
+        sec.add(f"{source}_PSYCOPG_USER", secret, "user")
+        sec.add(f"{source}_PSYCOPG_PASSWORD", secret, "password")
 
         env = self.destination.interface(interfaces.Environment)
-        env.add(f"{source}_PSYCOPG2_DB", self.configuration["database"])
+        env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])
 
         return True
