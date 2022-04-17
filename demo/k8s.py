@@ -105,10 +105,11 @@ class Provider(v1.provider.Provider):
         if not network_links:
             return []
 
-        ndx = 0
         env = []
 
         for link in network_links:
+            ndx = 0
+
             link = link.get()
             name = link.name.upper()
 
