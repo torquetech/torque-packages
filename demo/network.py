@@ -4,8 +4,6 @@
 
 """TODO"""
 
-import os
-
 from torque import v1
 
 from demo import interfaces

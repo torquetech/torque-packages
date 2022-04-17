@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import schema
 import yaml
 
 from torque import v1

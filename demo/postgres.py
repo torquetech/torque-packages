@@ -4,8 +4,6 @@
 
 """TODO"""
 
-import schema
-
 from torque import v1
 
 from demo import interfaces

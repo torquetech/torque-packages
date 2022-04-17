@@ -7,9 +7,9 @@
 from torque import v1
 
 from demo import interfaces
-from demo import utils
 
 from demo.python_task import Task
+
 
 class Service(Task):
     """TODO"""

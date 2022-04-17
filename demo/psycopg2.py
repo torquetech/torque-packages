@@ -6,7 +6,6 @@
 
 import os
 import jinja2
-import schema
 
 from torque import v1
 
@@ -18,6 +17,7 @@ from demo import utils
 class Link(network.Link):
     """TODO"""
 
+    # pylint: disable=W0212
     _CONFIGURATION = v1.utils.merge_dicts(network.Link._CONFIGURATION, {
         "defaults": {
             "database": "postgres"
