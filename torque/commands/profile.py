@@ -72,8 +72,8 @@ def _defaults(arguments: argparse.Namespace):
                        default_flow_style=False,
                        sort_keys=False)
 
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
+    except exceptions.ProviderNotFound as exc:
+        raise RuntimeError(f"{exc}: provider not found") from exc
 
     except schema.SchemaError as exc:
         raise RuntimeError(f"{exc}: invalid configuration") from exc
