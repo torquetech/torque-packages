@@ -4,11 +4,11 @@
 
 """TODO"""
 
-from demo import python_task
-from demo import python_service
-from demo import psycopg2
 from demo import postgres
 from demo import providers
+from demo import psycopg2
+from demo import python_service
+from demo import python_task
 
 
 repository = {
