@@ -61,10 +61,9 @@ class Link(v1.link.Link):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with interfaces.Service(self.source) as src:
-            link = src.link()
+        src = self.source.interface(interfaces.Service)
+        dst = self.destination.interface(interfaces.NetworkLink)
 
-        with interfaces.NetworkLink(self.destination) as dst:
-            dst.add(link)
+        dst.add(src.link())
 
         return True

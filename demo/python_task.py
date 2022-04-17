@@ -172,17 +172,18 @@ class Task(v1.component.Component):
 
         env += self._environment
 
-        with interfaces.Provider(deployment) as provider:
-            provider.push_image(self._image(deployment.name))
-            provider.create_deployment(self.name,
-                                       self._image(deployment.name),
-                                       None,
-                                       None,
-                                       None,
-                                       env,
-                                       self._network_links,
-                                       self._volume_links,
-                                       self._secrets,
-                                       self.configuration["replicas"])
+        provider = deployment.interface(interfaces.Provider)
+
+        provider.push_image(self._image(deployment.name))
+        provider.create_deployment(self.name,
+                                   self._image(deployment.name),
+                                   None,
+                                   None,
+                                   None,
+                                   env,
+                                   self._network_links,
+                                   self._volume_links,
+                                   self._secrets,
+                                   self.configuration["replicas"])
 
         return True

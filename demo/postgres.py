@@ -104,27 +104,28 @@ class Service(v1.component.Component):
             interfaces.Provider.KeyValue("PGDATA", "/data")
         ]
 
-        with interfaces.Provider(deployment) as provider:
-            self._secret = provider.create_secret(f"{self.name}_admin", [
-                interfaces.Provider.KeyValue("user", "postgres"),
-                interfaces.Provider.KeyValue("password", self.configuration["password"])
-            ])
+        provider = deployment.interface(interfaces.Provider)
 
-            self._service_link = provider.create_service(self.name, [5432], None)
+        self._secret = provider.create_secret(f"{self.name}_admin", [
+            interfaces.Provider.KeyValue("user", "postgres"),
+            interfaces.Provider.KeyValue("password", self.configuration["password"])
+        ])
 
-            secrets = [
-                interfaces.Provider.Secret("POSTGRES_PASSWORD", self._secret, "password")
-            ]
+        self._service_link = provider.create_service(self.name, [5432], None)
 
-            provider.create_deployment(self.name,
-                                       self._image(),
-                                       None,
-                                       None,
-                                       None,
-                                       env,
-                                       None,
-                                       self._volume_links,
-                                       secrets,
-                                       1)
+        secrets = [
+            interfaces.Provider.Secret("POSTGRES_PASSWORD", self._secret, "password")
+        ]
+
+        provider.create_deployment(self.name,
+                                   self._image(),
+                                   None,
+                                   None,
+                                   None,
+                                   env,
+                                   None,
+                                   self._volume_links,
+                                   secrets,
+                                   1)
 
         return True

@@ -47,10 +47,11 @@ class Service(Task):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        with interfaces.Provider(deployment) as provider:
-            self._service_link = provider.create_service(self.name,
-                                                         self.configuration["tcp_ports"],
-                                                         self.configuration["udp_ports"])
+        provider = deployment.interface(interfaces.Provider)
+
+        self._service_link = provider.create_service(self.name,
+                                                     self.configuration["tcp_ports"],
+                                                     self.configuration["udp_ports"])
 
         Task.on_apply(self, deployment)
 

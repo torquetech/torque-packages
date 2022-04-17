@@ -46,17 +46,17 @@ class Link(network.Link):
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg2.py.template"))
 
-        with interfaces.PythonModules(self.destination) as modules:
-            target_path = f"{modules.path()}/{self.source.name}.py"
+        modules = self.destination.interface(interfaces.PythonModules)
+        target_path = f"{modules.path()}/{self.source.name}.py"
 
-            if os.path.exists(v1.utils.resolve_path(target_path)):
-                raise RuntimeError(f"{target_path}: file already exists")
+        if os.path.exists(v1.utils.resolve_path(target_path)):
+            raise RuntimeError(f"{target_path}: file already exists")
 
-            with open(v1.utils.resolve_path(target_path), "w", encoding="utf8") as file:
-                file.write(template.render(COMPONENT=self.source.name.upper()))
-                file.write("\n")
+        with open(v1.utils.resolve_path(target_path), "w", encoding="utf8") as file:
+            file.write(template.render(COMPONENT=self.source.name.upper()))
+            file.write("\n")
 
-            modules.add_requirements(["psycopg2"])
+        modules.add_requirements(["psycopg2"])
 
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
@@ -64,16 +64,16 @@ class Link(network.Link):
         if not network.Link.on_apply(self, deployment):
             return False
 
-        with interfaces.PostgresService(self.source) as src:
-            secret = src.admin()
-
         source = self.source.name.upper()
 
-        with interfaces.Secret(self.destination) as sec:
-            sec.add(f"PSYCOPG2_{source}_USER", secret, "user")
-            sec.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
+        src = self.source.interface(interfaces.PostgresService)
+        secret = src.admin()
 
-        with interfaces.Environment(self.destination) as env:
-            env.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
+        sec = self.destination.interface(interfaces.Secret)
+        sec.add(f"PSYCOPG2_{source}_USER", secret, "user")
+        sec.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
+
+        env = self.destination.interface(interfaces.Environment)
+        env.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
 
         return True
