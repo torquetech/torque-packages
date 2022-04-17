@@ -4,6 +4,7 @@
 
 """TODO"""
 
+from demo import network
 from demo import postgres
 from demo import providers
 from demo import psycopg2
@@ -19,6 +20,7 @@ repository = {
             "demo/postgres": postgres.Service
         },
         "links": {
+            "demo/network": network.Link,
             "demo/psycopg2": psycopg2.Link
         },
         "providers": {
