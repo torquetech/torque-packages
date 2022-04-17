@@ -8,8 +8,8 @@ def connect():
 
     host, port = link[6:].split(":")
 
-    return psycopg2.connect(dbname=os.getenv("PSYCOPG2_{{COMPONENT}}_DB"),
-                            user=os.getenv("PSYCOPG2_{{COMPONENT}}_USER"),
-                            password=os.getenv("PSYCOPG2_{{COMPONENT}}_PASSWORD"),
+    return psycopg2.connect(dbname=os.getenv("{{COMPONENT}}_PSYCOPG2_DB"),
+                            user=os.getenv("{{COMPONENT}}_PSYCOPG2_USER"),
+                            password=os.getenv("{{COMPONENT}}_PSYCOPG2_PASSWORD"),
                             host=host,
                             port=port)

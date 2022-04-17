@@ -70,10 +70,10 @@ class Link(network.Link):
         secret = src.admin()
 
         sec = self.destination.interface(interfaces.Secret)
-        sec.add(f"PSYCOPG2_{source}_USER", secret, "user")
-        sec.add(f"PSYCOPG2_{source}_PASSWORD", secret, "password")
+        sec.add(f"{source}_PSYCOPG2_USER", secret, "user")
+        sec.add(f"{source}_PSYCOPG2_PASSWORD", secret, "password")
 
         env = self.destination.interface(interfaces.Environment)
-        env.add(f"PSYCOPG2_{source}_DB", self.configuration["database"])
+        env.add(f"{source}_PSYCOPG2_DB", self.configuration["database"])
 
         return True
