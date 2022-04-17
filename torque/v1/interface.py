@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import functools
 import inspect
 import threading
 import typing
@@ -18,28 +19,8 @@ T = typing.TypeVar("T")
 class Interface:
     """TODO"""
 
-    def __init__(self, *args, **kwargs):
-
-        if args:
-            self._torque_get_interface(*args)
-
-        else:
-            self._torque_init_interface(**kwargs)
-
-    def __enter__(self):
-        self._torque_lock.acquire()
-        return self._torque_interface
-
-    def __exit__(self, type, value, traceback):
-        self._torque_lock.release()
-
-    def _torque_get_interface(self, *args):
-        """TODO"""
-
-        self._torque_lock, self._torque_interface = args[0].interface(self.__class__)
-
-    def _torque_init_interface(self, **kwargs):
-        """TODO"""
+    def __init__(self, **kwargs):
+        self._torque_lock: threading.Lock = None
 
         required_funcs = inspect.getmembers(self, predicate=inspect.ismethod)
         required_funcs = filter(lambda x: not x[0].startswith("_"), required_funcs)
@@ -55,7 +36,12 @@ class Interface:
             warnings.warn("extra methods provided", stacklevel=2)
 
         for name, func in kwargs.items():
-            setattr(self, name, func)
+            setattr(self, name, functools.partial(self._torque_call_wrapper, func))
+
+    def _torque_call_wrapper(self, func, *args, **kwargs):
+        # pylint: disable=E1129
+        with self._torque_lock:
+            return func(*args, **kwargs)
 
 
 class Future(typing.Generic[T]):

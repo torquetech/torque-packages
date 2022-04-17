@@ -7,6 +7,7 @@
 import inspect
 import os
 import pathlib
+import threading
 
 
 _TORQUE_CWD = None
@@ -123,7 +124,9 @@ def merge_dicts(dict1: dict[str, object],
     return new_dict
 
 
-def interfaces(instance: object, interface_type: type) -> dict[str, object]:
+def interfaces(instance: object,
+               lock: threading.Lock,
+               interface_type: type) -> dict[str, object]:
     """TODO"""
 
     interfaces = {}
@@ -132,6 +135,8 @@ def interfaces(instance: object, interface_type: type) -> dict[str, object]:
         if not issubclass(iface.__class__, interface_type):
             raise RuntimeError(f"{fqcn(iface)}: invalid interface")
 
+        # pylint: disable=W0212
+        iface._torque_lock = lock
         cls = iface.__class__
 
         while cls is not interface_type:

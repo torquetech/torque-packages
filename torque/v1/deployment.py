@@ -38,7 +38,7 @@ class Deployment:
         else:
             os.makedirs(self.path)
 
-    def _interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
+    def _interface(self, cls: type) -> interface_v1.Interface:
         """TODO"""
 
         name = utils.fqcn(cls)
@@ -54,7 +54,7 @@ class Deployment:
 
         raise RuntimeError(f"{name}: provider interface not implemented")
 
-    def interface(self, cls: type) -> (threading.Lock, interface_v1.Interface):
+    def interface(self, cls: type) -> interface_v1.Interface:
         """TODO"""
 
         with self._lock:
