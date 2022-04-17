@@ -13,6 +13,7 @@ import schema
 from torque import v1
 
 from demo import interfaces
+from demo import types
 from demo import utils
 
 
@@ -104,12 +105,12 @@ class Task(v1.component.Component):
                     key: str):
         """TODO"""
 
-        self._secrets.append(interfaces.Provider.Secret(name, obj, key))
+        self._secrets.append(types.Secret(name, obj, key))
 
     def _add_environment(self, name: str, value: str):
         """TODO"""
 
-        self._environment.append(interfaces.Provider.KeyValue(name, value))
+        self._environment.append(types.KeyValue(name, value))
 
     def _get_modules_path(self) -> str:
         """TODO"""
@@ -166,8 +167,7 @@ class Task(v1.component.Component):
         """TODO"""
 
         env = [
-            interfaces.Provider.KeyValue(name, value)
-            for name, value in self.configuration["environment"].items()
+            types.KeyValue(name, value) for name, value in self.configuration["environment"].items()
         ]
 
         env += self._environment

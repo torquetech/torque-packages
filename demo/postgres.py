@@ -9,6 +9,7 @@ import schema
 from torque import v1
 
 from demo import interfaces
+from demo import types
 from demo import utils
 
 
@@ -68,7 +69,7 @@ class Service(v1.component.Component):
 
         self._volume_links.append((mount_point, link))
 
-    def _link(self) -> v1.interface.Future[interfaces.Provider.NetworkLink]:
+    def _link(self) -> v1.interface.Future[types.NetworkLink]:
         """TODO"""
 
         return self._service_link
@@ -101,20 +102,20 @@ class Service(v1.component.Component):
         """TODO"""
 
         env = [
-            interfaces.Provider.KeyValue("PGDATA", "/data")
+            types.KeyValue("PGDATA", "/data")
         ]
 
         provider = deployment.interface(interfaces.Provider)
 
         self._secret = provider.create_secret(f"{self.name}_admin", [
-            interfaces.Provider.KeyValue("user", "postgres"),
-            interfaces.Provider.KeyValue("password", self.configuration["password"])
+            types.KeyValue("user", "postgres"),
+            types.KeyValue("password", self.configuration["password"])
         ])
 
         self._service_link = provider.create_service(self.name, [5432], None)
 
         secrets = [
-            interfaces.Provider.Secret("POSTGRES_PASSWORD", self._secret, "password")
+            types.Secret("POSTGRES_PASSWORD", self._secret, "password")
         ]
 
         provider.create_deployment(self.name,

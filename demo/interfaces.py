@@ -4,9 +4,9 @@
 
 """TODO"""
 
-from collections import namedtuple
-
 from torque import v1
+
+from demo import types
 
 
 class Provider(v1.interface.Interface):
@@ -14,27 +14,11 @@ class Provider(v1.interface.Interface):
 
     """TODO"""
 
-    KeyValue = namedtuple("KeyValue", [
-        "key",
-        "value"
-    ])
-
-    Secret = namedtuple("Secret", [
-        "env",
-        "obj",
-        "key"
-    ])
-
-    NetworkLink = namedtuple("NetworkLink", [
-        "name",
-        "uris"
-    ])
-
     def push_image(image: str):
         """TODO"""
 
     def create_secret(name: str,
-                      entries: [KeyValue]) -> v1.interface.Future[str]:
+                      entries: [types.KeyValue]) -> v1.interface.Future[str]:
         """TODO"""
 
     def create_deployment(name: str,
@@ -42,16 +26,16 @@ class Provider(v1.interface.Interface):
                           cmd: [str],
                           args: [str],
                           cwd: str,
-                          env: [KeyValue],
-                          network_links: [NetworkLink],
+                          env: [types.KeyValue],
+                          network_links: [types.NetworkLink],
                           volume_links: [object],
-                          secrets: [Secret],
+                          secrets: [types.Secret],
                           replicas: int):
         """TODO"""
 
     def create_service(name: str,
                        tcp_ports: [int],
-                       udp_ports: [int]) -> v1.interface.Future[NetworkLink]:
+                       udp_ports: [int]) -> v1.interface.Future[types.NetworkLink]:
         """TODO"""
 
 
@@ -60,7 +44,7 @@ class Service(v1.interface.Interface):
 
     """TODO"""
 
-    def link() -> v1.interface.Future[Provider.NetworkLink]:
+    def link() -> v1.interface.Future[types.NetworkLink]:
         """TODO"""
 
 
@@ -78,7 +62,7 @@ class NetworkLink(v1.interface.Interface):
 
     """TODO"""
 
-    def add(link: v1.interface.Future[Provider.NetworkLink]):
+    def add(link: v1.interface.Future[types.NetworkLink]):
         """TODO"""
 
 

@@ -10,6 +10,7 @@ import yaml
 from torque import v1
 
 from demo import interfaces
+from demo import types
 from demo import utils
 
 
@@ -44,7 +45,7 @@ class Provider(v1.provider.Provider):
 
     def _k8s_create_secret(self,
                            name: str,
-                           entries: [interfaces.Provider.KeyValue]) -> dict[str, object]:
+                           entries: [types.KeyValue]) -> dict[str, object]:
         """TODO"""
 
         return {
@@ -82,7 +83,7 @@ class Provider(v1.provider.Provider):
             }
         }
 
-    def _convert_secrets(self, secrets: [interfaces.Provider.Secret]) -> []:
+    def _convert_secrets(self, secrets: [types.Secret]) -> []:
         """TODO"""
 
         if not secrets:
@@ -99,7 +100,7 @@ class Provider(v1.provider.Provider):
         } for secret in secrets]
 
     def _convert_network_links(self,
-                               network_links: [interfaces.Provider.NetworkLink]) -> []:
+                               network_links: [types.NetworkLink]) -> []:
         """TODO"""
 
         if not network_links:
@@ -129,10 +130,10 @@ class Provider(v1.provider.Provider):
                                cmd: [str],
                                args: [str],
                                cwd: str,
-                               env: [interfaces.Provider.KeyValue],
-                               network_links: [interfaces.Provider.NetworkLink],
+                               env: [types.KeyValue],
+                               network_links: [types.NetworkLink],
                                volume_links: [object],
-                               secrets: [interfaces.Provider.Secret],
+                               secrets: [types.Secret],
                                replicas: int) -> dict[str, object]:
         """TODO"""
 
@@ -180,7 +181,7 @@ class Provider(v1.provider.Provider):
 
     def _create_secret(self,
                        name: str,
-                       entries: [interfaces.Provider.KeyValue]) -> v1.interface.Future[str]:
+                       entries: [types.KeyValue]) -> v1.interface.Future[str]:
         """TODO"""
 
         self._add_to_target(name, [
@@ -195,10 +196,10 @@ class Provider(v1.provider.Provider):
                            cmd: [str],
                            args: [str],
                            cwd: str,
-                           env: [interfaces.Provider.KeyValue],
-                           network_links: [interfaces.Provider.NetworkLink],
+                           env: [types.KeyValue],
+                           network_links: [types.NetworkLink],
                            volume_links: [object],
-                           secrets: [interfaces.Provider.Secret],
+                           secrets: [types.Secret],
                            replicas: int):
         """TODO"""
 
@@ -218,7 +219,7 @@ class Provider(v1.provider.Provider):
     def _create_service(self,
                         name: str,
                         tcp_ports: [int],
-                        udp_ports: [int]) -> v1.interface.Future[interfaces.Provider.NetworkLink]:
+                        udp_ports: [int]) -> v1.interface.Future[types.NetworkLink]:
         """TODO"""
 
         self._add_to_target(name, [
@@ -237,7 +238,7 @@ class Provider(v1.provider.Provider):
                 f"udp://{name}:{port}" for port in udp_ports
             ]
 
-        return v1.interface.Future(interfaces.Provider.NetworkLink(name, uris))
+        return v1.interface.Future(types.NetworkLink(name, uris))
 
     def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
