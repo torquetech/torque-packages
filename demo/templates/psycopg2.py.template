@@ -3,7 +3,7 @@ import psycopg2
 
 
 def connect():
-    type, port, host = os.getenv("LINK_{{COMPONENT}}_0").split(":")
+    type, port, host = os.getenv("{{COMPONENT}}_LINK_0").split(":")
     assert type == "tcp"
 
     return psycopg2.connect(dbname=os.getenv("PSYCOPG2_{{COMPONENT}}_DB"),

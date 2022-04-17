@@ -116,7 +116,7 @@ class Provider(v1.provider.Provider):
             if link.tcp_ports:
                 for port in link.tcp_ports:
                     env.append({
-                        "name": f"LINK_{name}_{ndx}",
+                        "name": f"{name}_LINK_{ndx}",
                         "value": f"tcp:{port}:{link.host}"
                     })
 
@@ -125,7 +125,7 @@ class Provider(v1.provider.Provider):
             if link.udp_ports:
                 for port in link.udp_ports:
                     env.append({
-                        "name": f"LINK_{name}_{ndx}",
+                        "name": f"{name}_LINK_{ndx}",
                         "value": f"udp:{port}:{link.host}"
                     })
 
