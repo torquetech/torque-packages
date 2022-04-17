@@ -27,12 +27,8 @@ class Component(ABC):
         self.parameters = parameters
         self.configuration = configuration
 
-        self._torque_interfaces: dict[str, interface_v1.Interface] = {}
-
-        for iface in self.interfaces():
-            self._torque_interfaces[utils.fqcn(iface)] = iface
-
         self._torque_lock = threading.Lock()
+        self._torque_interfaces = utils.interfaces(self, interface_v1.Interface)
 
     def has_interface(self, cls: type) -> bool:
         """TODO"""

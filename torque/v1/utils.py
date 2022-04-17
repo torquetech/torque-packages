@@ -121,3 +121,21 @@ def merge_dicts(dict1: dict[str, object],
             new_dict[key] = dict2[key]
 
     return new_dict
+
+
+def interfaces(instance: object, interface_type: type) -> dict[str, object]:
+    """TODO"""
+
+    interfaces = {}
+
+    for iface in instance.interfaces():
+        if not issubclass(iface.__class__, interface_type):
+            raise RuntimeError(f"{fqcn(iface)}: invalid interface")
+
+        cls = iface.__class__
+
+        while cls is not interface_type:
+            interfaces[fqcn(cls)] = iface
+            cls = cls.__bases__[0]
+
+    return interfaces
