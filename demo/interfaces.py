@@ -27,9 +27,7 @@ class Provider(v1.interface.Interface):
 
     NetworkLink = namedtuple("NetworkLink", [
         "name",
-        "host",
-        "tcp_ports",
-        "udp_ports"
+        "uris"
     ])
 
     def push_image(image: str):

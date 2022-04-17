@@ -113,23 +113,13 @@ class Provider(v1.provider.Provider):
             link = link.get()
             name = link.name.upper()
 
-            if link.tcp_ports:
-                for port in link.tcp_ports:
-                    env.append({
-                        "name": f"{name}_LINK_{ndx}",
-                        "value": f"tcp:{port}:{link.host}"
-                    })
+            for uri in link.uris:
+                env.append({
+                    "name": f"{name}_LINK_{ndx}",
+                    "value": f"{uri}"
+                })
 
-                    ndx += 1
-
-            if link.udp_ports:
-                for port in link.udp_ports:
-                    env.append({
-                        "name": f"{name}_LINK_{ndx}",
-                        "value": f"udp:{port}:{link.host}"
-                    })
-
-                    ndx += 1
+                ndx += 1
 
         return env
 
@@ -235,7 +225,19 @@ class Provider(v1.provider.Provider):
             self._k8s_create_service(name, tcp_ports, udp_ports),
         ])
 
-        return v1.interface.Future(interfaces.Provider.NetworkLink(name, name, tcp_ports, udp_ports))
+        uris = []
+
+        if tcp_ports:
+            uris += [
+                f"tcp://{name}:{port}" for port in tcp_ports
+            ]
+
+        if udp_ports:
+            uris += [
+                f"udp://{name}:{port}" for port in udp_ports
+            ]
+
+        return v1.interface.Future(interfaces.Provider.NetworkLink(name, uris))
 
     def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
