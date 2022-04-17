@@ -4,9 +4,9 @@
 
 """TODO"""
 
+from demo import k8s
 from demo import network
 from demo import postgres
-from demo import providers
 from demo import psycopg2
 from demo import python_service
 from demo import python_task
@@ -24,7 +24,7 @@ repository = {
             "demo/psycopg2": psycopg2.Link
         },
         "providers": {
-            "demo/aws-k8s": providers.AWSK8S,
+            "demo/k8s": k8s.Provider,
         }
     }
 }

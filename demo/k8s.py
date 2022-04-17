@@ -13,7 +13,7 @@ from demo import interfaces
 from demo import utils
 
 
-class AWSK8S(v1.provider.Provider):
+class Provider(v1.provider.Provider):
     """TODO"""
 
     _CONFIGURATION = {
