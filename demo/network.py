@@ -62,6 +62,6 @@ class Link(v1.link.Link):
         src = self.source.interface(interfaces.Service)
         dst = self.destination.interface(interfaces.NetworkLink)
 
-        dst.add(src.link())
+        dst.add(self.source.name, src.link())
 
         return True

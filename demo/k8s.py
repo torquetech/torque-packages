@@ -9,7 +9,6 @@ import yaml
 from torque import v1
 
 from demo import interfaces
-from demo import types
 from demo import utils
 
 
@@ -44,7 +43,7 @@ class Provider(v1.provider.Provider):
 
     def _k8s_create_secret(self,
                            name: str,
-                           entries: [types.KeyValue]) -> dict[str, object]:
+                           entries: [interfaces.Provider.KeyValue]) -> object:
         """TODO"""
 
         return {
@@ -57,7 +56,7 @@ class Provider(v1.provider.Provider):
             "type": "Opaque"
         }
 
-    def _k8s_create_service(self, name: str, tcp_ports: [int], udp_ports: [int]) -> dict[str, object]:
+    def _k8s_create_service(self, name: str, tcp_ports: [int], udp_ports: [int]) -> object:
         """TODO"""
 
         ports = []
@@ -82,24 +81,8 @@ class Provider(v1.provider.Provider):
             }
         }
 
-    def _convert_secrets(self, secrets: [types.Secret]) -> []:
-        """TODO"""
-
-        if not secrets:
-            return []
-
-        return [{
-            "name": secret.env,
-            "valueFrom": {
-                "secretKeyRef": {
-                    "name": secret.obj.get(),
-                    "key": secret.key
-                }
-            }
-        } for secret in secrets]
-
     def _convert_network_links(self,
-                               network_links: [types.NetworkLink]) -> []:
+                               network_links: [interfaces.Provider.NetworkLink]) -> [object]:
         """TODO"""
 
         if not network_links:
@@ -109,11 +92,9 @@ class Provider(v1.provider.Provider):
 
         for link in network_links:
             ndx = 0
-
-            link = link.get()
             name = link.name.upper()
 
-            for uri in link.uris:
+            for uri in link.object.get():
                 env.append({
                     "name": f"{name}_LINK_{ndx}",
                     "value": f"{uri}"
@@ -123,21 +104,38 @@ class Provider(v1.provider.Provider):
 
         return env
 
+    def _convert_secret_links(self,
+                              secret_links: [interfaces.Provider.SecretLink]) -> [object]:
+        """TODO"""
+
+        if not secret_links:
+            return []
+
+        return [{
+            "name": secret_link.name,
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": secret_link.object.get(),
+                    "key": secret_link.key
+                }
+            }
+        } for secret_link in secret_links]
+
     def _k8s_create_deployment(self,
                                name: str,
                                image: str,
                                cmd: [str],
                                args: [str],
                                cwd: str,
-                               env: [types.KeyValue],
-                               network_links: [types.NetworkLink],
-                               volume_links: [object],
-                               secrets: [types.Secret],
-                               replicas: int) -> dict[str, object]:
+                               env: [interfaces.Provider.KeyValue],
+                               network_links: [interfaces.Provider.NetworkLink],
+                               volume_links: [interfaces.Provider.VolumeLink],
+                               secret_links: [interfaces.Provider.SecretLink],
+                               replicas: int) -> object:
         """TODO"""
 
         env = [{"name": e.key, "value": e.value} for e in env]
-        env += self._convert_secrets(secrets)
+        env += self._convert_secret_links(secret_links)
         env += self._convert_network_links(network_links)
 
         return {
@@ -180,7 +178,7 @@ class Provider(v1.provider.Provider):
 
     def _create_secret(self,
                        name: str,
-                       entries: [types.KeyValue]) -> v1.interface.Future[str]:
+                       entries: [interfaces.Provider.KeyValue]) -> v1.interface.Future[object]:
         """TODO"""
 
         self._add_to_target(name, [
@@ -189,36 +187,10 @@ class Provider(v1.provider.Provider):
 
         return v1.interface.Future(name)
 
-    def _create_deployment(self,
-                           name: str,
-                           image: str,
-                           cmd: [str],
-                           args: [str],
-                           cwd: str,
-                           env: [types.KeyValue],
-                           network_links: [types.NetworkLink],
-                           volume_links: [object],
-                           secrets: [types.Secret],
-                           replicas: int):
-        """TODO"""
-
-        self._add_to_target(name, [
-            self._k8s_create_deployment(name,
-                                        image,
-                                        cmd,
-                                        args,
-                                        cwd,
-                                        env,
-                                        network_links,
-                                        volume_links,
-                                        secrets,
-                                        replicas)
-        ])
-
     def _create_service(self,
                         name: str,
                         tcp_ports: [int],
-                        udp_ports: [int]) -> v1.interface.Future[types.NetworkLink]:
+                        udp_ports: [int]) -> v1.interface.Future[object]:
         """TODO"""
 
         self._add_to_target(name, [
@@ -237,7 +209,33 @@ class Provider(v1.provider.Provider):
                 f"udp://{name}:{port}" for port in udp_ports
             ]
 
-        return v1.interface.Future(types.NetworkLink(name, uris))
+        return v1.interface.Future(uris)
+
+    def _create_deployment(self,
+                           name: str,
+                           image: str,
+                           cmd: [str],
+                           args: [str],
+                           cwd: str,
+                           env: [interfaces.Provider.KeyValue],
+                           network_links: [interfaces.Provider.NetworkLink],
+                           volume_links: [interfaces.Provider.VolumeLink],
+                           secret_links: [interfaces.Provider.SecretLink],
+                           replicas: int):
+        """TODO"""
+
+        self._add_to_target(name, [
+            self._k8s_create_deployment(name,
+                                        image,
+                                        cmd,
+                                        args,
+                                        cwd,
+                                        env,
+                                        network_links,
+                                        volume_links,
+                                        secret_links,
+                                        replicas)
+        ])
 
     def interfaces(self) -> [v1.interface.Interface]:
         """TODO"""
@@ -245,8 +243,8 @@ class Provider(v1.provider.Provider):
         return [
             interfaces.Provider(push_image=self._push_image,
                                 create_secret=self._create_secret,
-                                create_deployment=self._create_deployment,
-                                create_service=self._create_service)
+                                create_service=self._create_service,
+                                create_deployment=self._create_deployment)
         ]
 
     def on_apply(self, deployment: v1.deployment.Deployment):

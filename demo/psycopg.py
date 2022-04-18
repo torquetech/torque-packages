@@ -38,7 +38,7 @@ class Link(network.Link):
         if not self.destination.has_interface(interfaces.PythonModules):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
-        if not self.destination.has_interface(interfaces.Secret):
+        if not self.destination.has_interface(interfaces.SecretLink):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
         if not self.destination.has_interface(interfaces.Environment):
@@ -69,9 +69,9 @@ class Link(network.Link):
         src = self.source.interface(interfaces.PostgresService)
         secret = src.admin()
 
-        sec = self.destination.interface(interfaces.Secret)
-        sec.add(f"{source}_PSYCOPG_USER", secret, "user")
-        sec.add(f"{source}_PSYCOPG_PASSWORD", secret, "password")
+        sec = self.destination.interface(interfaces.SecretLink)
+        sec.add(f"{source}_PSYCOPG_USER", "user", secret)
+        sec.add(f"{source}_PSYCOPG_PASSWORD", "password", secret)
 
         env = self.destination.interface(interfaces.Environment)
         env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])

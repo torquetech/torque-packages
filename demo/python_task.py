@@ -13,7 +13,6 @@ import schema
 from torque import v1
 
 from demo import interfaces
-from demo import types
 from demo import utils
 
 
@@ -45,8 +44,9 @@ class Component(v1.component.Component):
 
         self._network_links = []
         self._volume_links = []
-        self._secrets = []
+        self._secret_links = []
         self._environment = []
+
         self._version = None
 
     @classmethod
@@ -89,28 +89,29 @@ class Component(v1.component.Component):
 
         return f"{deployment}-component-{self.name}:{self._get_version()}"
 
-    def _add_network_link(self, link: v1.interface.Future):
+    def _add_network_link(self, name: str, link: v1.interface.Future[object]):
         """TODO"""
 
+        link = interfaces.Provider.NetworkLink(name, link)
         self._network_links.append(link)
 
-    def _add_volume_link(self, mount_point: str, link: v1.interface.Future):
+    def _add_volume_link(self, name: str, mount_path: str, link: v1.interface.Future[object]):
         """TODO"""
 
-        self._volume_links.append((mount_point, link))
+        link = interfaces.Provider.VolumeLink(name, mount_path, link)
+        self._volume_links.append(link)
 
-    def _add_secret(self,
-                    name: str,
-                    obj: object,
-                    key: str):
+    def _add_secret_link(self, name: str, key: str, link: v1.interface.Future[object]):
         """TODO"""
 
-        self._secrets.append(types.Secret(name, obj, key))
+        link = interfaces.Provider.SecretLink(name, key, link)
+        self._secret_links.append(link)
 
     def _add_environment(self, name: str, value: str):
         """TODO"""
 
-        self._environment.append(types.KeyValue(name, value))
+        env = interfaces.Provider.KeyValue(name, value)
+        self._environment.append(env)
 
     def _get_modules_path(self) -> str:
         """TODO"""
@@ -131,7 +132,7 @@ class Component(v1.component.Component):
         return [
             interfaces.NetworkLink(add=self._add_network_link),
             interfaces.VolumeLink(add=self._add_volume_link),
-            interfaces.Secret(add=self._add_secret),
+            interfaces.SecretLink(add=self._add_secret_link),
             interfaces.Environment(add=self._add_environment),
             interfaces.PythonModules(path=self._get_modules_path,
                                      add_requirements=self._add_requirements)
@@ -166,13 +167,14 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
+        provider = deployment.interface(interfaces.Provider)
+
         env = [
-            types.KeyValue(name, value) for name, value in self.configuration["environment"].items()
+            interfaces.Provider.KeyValue(name, value)
+            for name, value in self.configuration["environment"].items()
         ]
 
         env += self._environment
-
-        provider = deployment.interface(interfaces.Provider)
 
         provider.push_image(self._image(deployment.name))
         provider.create_deployment(self.name,
@@ -183,7 +185,7 @@ class Component(v1.component.Component):
                                    env,
                                    self._network_links,
                                    self._volume_links,
-                                   self._secrets,
+                                   self._secret_links,
                                    self.configuration["replicas"])
 
         return True

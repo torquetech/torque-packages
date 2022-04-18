@@ -4,9 +4,9 @@
 
 """TODO"""
 
-from torque import v1
+from collections import namedtuple
 
-from demo import types
+from torque import v1
 
 
 class Provider(v1.interface.Interface):
@@ -14,11 +14,38 @@ class Provider(v1.interface.Interface):
 
     """TODO"""
 
+    KeyValue = namedtuple("KeyValue", [
+        "key",
+        "value"
+    ])
+
+    NetworkLink = namedtuple("NetworkLink", [
+        "name",
+        "object"
+    ])
+
+    VolumeLink = namedtuple("VolumeLink", [
+        "name",
+        "mount_path",
+        "object"
+    ])
+
+    SecretLink = namedtuple("SecretLink", [
+        "name",
+        "key",
+        "object"
+    ])
+
     def push_image(image: str):
         """TODO"""
 
     def create_secret(name: str,
-                      entries: [types.KeyValue]) -> v1.interface.Future[str]:
+                      entries: [KeyValue]) -> v1.interface.Future[object]:
+        """TODO"""
+
+    def create_service(name: str,
+                       tcp_ports: [int],
+                       udp_ports: [int]) -> v1.interface.Future[object]:
         """TODO"""
 
     def create_deployment(name: str,
@@ -26,16 +53,11 @@ class Provider(v1.interface.Interface):
                           cmd: [str],
                           args: [str],
                           cwd: str,
-                          env: [types.KeyValue],
-                          network_links: [types.NetworkLink],
-                          volume_links: [object],
-                          secrets: [types.Secret],
+                          env: [KeyValue],
+                          network_links: [NetworkLink],
+                          volume_links: [VolumeLink],
+                          secret_links: [SecretLink],
                           replicas: int):
-        """TODO"""
-
-    def create_service(name: str,
-                       tcp_ports: [int],
-                       udp_ports: [int]) -> v1.interface.Future[types.NetworkLink]:
         """TODO"""
 
 
@@ -44,7 +66,7 @@ class Service(v1.interface.Interface):
 
     """TODO"""
 
-    def link() -> v1.interface.Future[types.NetworkLink]:
+    def link() -> v1.interface.Future[object]:
         """TODO"""
 
 
@@ -53,7 +75,7 @@ class PostgresService(Service):
 
     """TODO"""
 
-    def admin() -> v1.interface.Future[str]:
+    def admin() -> v1.interface.Future[object]:
         """TODO"""
 
 
@@ -62,7 +84,7 @@ class NetworkLink(v1.interface.Interface):
 
     """TODO"""
 
-    def add(link: v1.interface.Future[types.NetworkLink]):
+    def add(name: str, link: v1.interface.Future[object]):
         """TODO"""
 
 
@@ -71,7 +93,7 @@ class Volume(v1.interface.Interface):
 
     """TODO"""
 
-    def get(size: int) -> v1.interface.Future:
+    def link() -> v1.interface.Future[object]:
         """TODO"""
 
 
@@ -80,16 +102,16 @@ class VolumeLink(v1.interface.Interface):
 
     """TODO"""
 
-    def add(mount_point: str, link: v1.interface.Future):
+    def add(name: str, mount_path: str, link: v1.interface.Future[object]):
         """TODO"""
 
 
-class Secret(v1.interface.Interface):
+class SecretLink(v1.interface.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
-    def add(name: str, obj: object, key: str):
+    def add(name: str, key: str, link: v1.interface.Future[object]):
         """TODO"""
 
 

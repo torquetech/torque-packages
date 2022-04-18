@@ -29,9 +29,7 @@ class Component(python_task.Component):
 
         self._service_link = None
 
-    def _link(self) -> (str, int):
-        # pylint: disable=R0201
-
+    def _link(self) -> v1.interface.Future[object]:
         """TODO"""
 
         return self._service_link
