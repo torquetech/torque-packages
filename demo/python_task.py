@@ -16,6 +16,20 @@ from demo import interfaces
 from demo import utils
 
 
+def _validate_replicas(replicas: object) -> int:
+    """TODO"""
+
+    if replicas is None:
+        raise ValueError()
+
+    replicas = int(replicas)
+
+    if replicas < 1 or replicas > 32:
+        raise ValueError()
+
+    return replicas
+
+
 class Component(v1.component.Component):
     """TODO"""
 
@@ -32,7 +46,7 @@ class Component(v1.component.Component):
             "environment": {}
         },
         "schema": {
-            "replicas": int,
+            "replicas": schema.Use(_validate_replicas),
             "environment": {
                 schema.Optional(str): str
             }
