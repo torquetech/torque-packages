@@ -7,14 +7,13 @@
 from torque import v1
 
 from demo import interfaces
+from demo import python_task
 
-from demo.python_task import Task
 
-
-class Service(Task):
+class Component(python_task.Component):
     """TODO"""
 
-    _CONFIGURATION = v1.utils.merge_dicts(Task._CONFIGURATION, {
+    _CONFIGURATION = v1.utils.merge_dicts(python_task.Component._CONFIGURATION, {
         "defaults": {
             "tcp_ports": [],
             "udp_ports": []
@@ -53,6 +52,6 @@ class Service(Task):
                                                      self.configuration["tcp_ports"],
                                                      self.configuration["udp_ports"])
 
-        Task.on_apply(self, deployment)
+        python_task.Component.on_apply(self, deployment)
 
         return True

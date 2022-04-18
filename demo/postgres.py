@@ -11,7 +11,7 @@ from demo import types
 from demo import utils
 
 
-class Service(v1.component.Component):
+class Component(v1.component.Component):
     """TODO"""
 
     _PARAMETERS = {

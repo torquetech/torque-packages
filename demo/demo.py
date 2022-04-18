@@ -15,9 +15,9 @@ from demo import python_task
 repository = {
     "v1": {
         "components": {
-            "demo/python-task": python_task.Task,
-            "demo/python-service": python_service.Service,
-            "demo/postgres": postgres.Service
+            "demo/python-task": python_task.Component,
+            "demo/python-service": python_service.Component,
+            "demo/postgres": postgres.Component
         },
         "links": {
             "demo/network": network.Link,
