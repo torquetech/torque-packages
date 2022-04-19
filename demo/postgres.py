@@ -7,6 +7,7 @@
 from torque import v1
 
 from demo import interfaces
+from demo import providers
 from demo import utils
 
 
@@ -62,23 +63,23 @@ class Component(v1.component.Component):
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"
 
-    def _add_volume_link(self, name: str, mount_path: str, link: v1.interface.Future[object]):
+    def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
         """TODO"""
 
         link = interfaces.Provider.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
-    def _link(self) -> v1.interface.Future[object]:
+    def _link(self) -> v1.utils.Future[object]:
         """TODO"""
 
         return self._service_link
 
-    def _admin(self) -> v1.interface.Future[object]:
+    def _admin(self) -> v1.utils.Future[object]:
         """TODO"""
 
         return self._secret_link
 
-    def interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
@@ -92,40 +93,37 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_build(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        return True
-
-    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        provider = deployment.interface(interfaces.Provider)
-
-        self._secret_link = provider.create_secret(f"{self.name}_admin", [
-            interfaces.Provider.KeyValue("user", "postgres"),
-            interfaces.Provider.KeyValue("password", self.configuration["password"])
+        secrets = deployment.provider(providers.SecretsProvider)
+        self._secret_link = secrets.create(f"{self.name}_admin", [
+            providers.KeyValue("user", "postgres"),
+            providers.KeyValue("password", self.configuration["password"])
         ])
 
-        self._service_link = provider.create_service(self.name, [5432], None)
+        services = deployment.provider(providers.ServicesProvider)
+        self._service_link = services.create(self.name, [5432], None)
 
         env = [
-            interfaces.Provider.KeyValue("PGDATA", "/data")
+            providers.KeyValue("PGDATA", "/data")
         ]
 
         secret_links = [
-            interfaces.Provider.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
+            providers.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
         ]
 
-        provider.create_deployment(self.name,
-                                   self._image(),
-                                   None,
-                                   None,
-                                   None,
-                                   env,
-                                   None,
-                                   self._volume_links,
-                                   secret_links,
-                                   1)
-
-        return True
+        deployments = deployment.provider(providers.DeploymentsProvider)
+        deployments.create(self.name,
+                           self._image(),
+                           None,
+                           None,
+                           None,
+                           env,
+                           None,
+                           self._volume_links,
+                           secret_links,
+                           1)

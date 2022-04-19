@@ -7,6 +7,7 @@
 from torque import v1
 
 from demo import interfaces
+from demo import providers
 from demo import python_task
 
 
@@ -29,27 +30,24 @@ class Component(python_task.Component):
 
         self._service_link = None
 
-    def _link(self) -> v1.interface.Future[object]:
+    def _link(self) -> v1.utils.Future[object]:
         """TODO"""
 
         return self._service_link
 
-    def interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return super().interfaces() + [
             interfaces.Service(link=self._link)
         ]
 
-    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        provider = deployment.interface(interfaces.Provider)
-
-        self._service_link = provider.create_service(self.name,
-                                                     self.configuration["tcp_ports"],
-                                                     self.configuration["udp_ports"])
+        services = deployment.provider(providers.ServicesProvider)
+        self._service_link = services.create(self.name,
+                                             self.configuration["tcp_ports"],
+                                             self.configuration["udp_ports"])
 
         python_task.Component.on_apply(self, deployment)
-
-        return True

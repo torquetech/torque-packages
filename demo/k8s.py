@@ -8,11 +8,34 @@ import yaml
 
 from torque import v1
 
-from demo import interfaces
+from demo import providers
 from demo import utils
 
 
-class Provider(v1.provider.Provider):
+class ImagesProvider(providers.ImagesProvider):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("configuration",
+                                     cls._CONFIGURATION,
+                                     configuration)
+
+    def push(self, image: str):
+        """TODO"""
+
+    def on_apply(self):
+        """TODO"""
+
+
+class SecretsProvider(providers.SecretsProvider):
     """TODO"""
 
     _CONFIGURATION = {
@@ -41,9 +64,7 @@ class Provider(v1.provider.Provider):
 
         self._targets[name] += objs
 
-    def _k8s_create_secret(self,
-                           name: str,
-                           entries: [interfaces.Provider.KeyValue]) -> object:
+    def _k8s_create(self, name: str, entries: [providers.KeyValue]) -> object:
         """TODO"""
 
         return {
@@ -56,7 +77,56 @@ class Provider(v1.provider.Provider):
             "type": "Opaque"
         }
 
-    def _k8s_create_service(self, name: str, tcp_ports: [int], udp_ports: [int]) -> object:
+    def create(self, name: str, entries: [providers.KeyValue]) -> v1.utils.Future[object]:
+        """TODO"""
+
+        self._add_to_target(name, [
+            self._k8s_create(name, entries)
+        ])
+
+        return v1.utils.Future(name)
+
+    def on_apply(self):
+        """TODO"""
+
+        for name, target in self._targets.items():
+            with open(f"{self.metadata.path}/{name}.yaml", "w", encoding="utf8") as file:
+                objs = [
+                    yaml.safe_dump(obj, sort_keys=False) for obj in target
+                ]
+
+                file.write("---\n".join(objs))
+
+class ServicesProvider(providers.ServicesProvider):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._targets = {}
+
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("configuration",
+                                     cls._CONFIGURATION,
+                                     configuration)
+
+    def _add_to_target(self, name: str, objs: [object]):
+        """TODO"""
+
+        if name not in self._targets:
+            self._targets[name] = []
+
+        self._targets[name] += objs
+
+    def _k8s_create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> object:
         """TODO"""
 
         ports = []
@@ -81,8 +151,69 @@ class Provider(v1.provider.Provider):
             }
         }
 
-    def _convert_network_links(self,
-                               network_links: [interfaces.Provider.NetworkLink]) -> [object]:
+    def create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> v1.utils.Future[object]:
+        """TODO"""
+
+        self._add_to_target(name, [
+            self._k8s_create(name, tcp_ports, udp_ports),
+        ])
+
+        uris = []
+
+        if tcp_ports:
+            uris += [
+                f"tcp://{name}:{port}" for port in tcp_ports
+            ]
+
+        if udp_ports:
+            uris += [
+                f"udp://{name}:{port}" for port in udp_ports
+            ]
+
+        return v1.utils.Future(uris)
+
+    def on_apply(self):
+        """TODO"""
+
+        for name, target in self._targets.items():
+            with open(f"{self.metadata.path}/{name}.yaml", "w", encoding="utf8") as file:
+                objs = [
+                    yaml.safe_dump(obj, sort_keys=False) for obj in target
+                ]
+
+                file.write("---\n".join(objs))
+
+
+class DeploymentsProvider(providers.DeploymentsProvider):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._targets = {}
+
+    @classmethod
+    def validate_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema("configuration",
+                                     cls._CONFIGURATION,
+                                     configuration)
+
+    def _add_to_target(self, name: str, objs: [object]):
+        """TODO"""
+
+        if name not in self._targets:
+            self._targets[name] = []
+
+        self._targets[name] += objs
+
+    def _convert_network_links(self, network_links: [providers.NetworkLink]) -> [object]:
         """TODO"""
 
         if not network_links:
@@ -104,8 +235,7 @@ class Provider(v1.provider.Provider):
 
         return env
 
-    def _convert_secret_links(self,
-                              secret_links: [interfaces.Provider.SecretLink]) -> [object]:
+    def _convert_secret_links(self, secret_links: [providers.SecretLink]) -> [object]:
         """TODO"""
 
         if not secret_links:
@@ -121,17 +251,17 @@ class Provider(v1.provider.Provider):
             }
         } for secret_link in secret_links]
 
-    def _k8s_create_deployment(self,
-                               name: str,
-                               image: str,
-                               cmd: [str],
-                               args: [str],
-                               cwd: str,
-                               env: [interfaces.Provider.KeyValue],
-                               network_links: [interfaces.Provider.NetworkLink],
-                               volume_links: [interfaces.Provider.VolumeLink],
-                               secret_links: [interfaces.Provider.SecretLink],
-                               replicas: int) -> object:
+    def _k8s_create(self,
+                    name: str,
+                    image: str,
+                    cmd: [str],
+                    args: [str],
+                    cwd: str,
+                    env: [providers.KeyValue],
+                    network_links: [providers.NetworkLink],
+                    volume_links: [providers.VolumeLink],
+                    secret_links: [providers.SecretLink],
+                    replicas: int) -> object:
         """TODO"""
 
         env = [{"name": e.key, "value": e.value} for e in env]
@@ -173,85 +303,37 @@ class Provider(v1.provider.Provider):
             }
         }
 
-    def _push_image(self, image: str):
-        """TODO"""
-
-    def _create_secret(self,
-                       name: str,
-                       entries: [interfaces.Provider.KeyValue]) -> v1.interface.Future[object]:
-        """TODO"""
-
-        self._add_to_target(name, [
-            self._k8s_create_secret(name, entries)
-        ])
-
-        return v1.interface.Future(name)
-
-    def _create_service(self,
-                        name: str,
-                        tcp_ports: [int],
-                        udp_ports: [int]) -> v1.interface.Future[object]:
+    def create(self,
+               name: str,
+               image: str,
+               cmd: [str],
+               args: [str],
+               cwd: str,
+               env: [providers.KeyValue],
+               network_links: [providers.NetworkLink],
+               volume_links: [providers.VolumeLink],
+               secret_links: [providers.SecretLink],
+               replicas: int):
         """TODO"""
 
         self._add_to_target(name, [
-            self._k8s_create_service(name, tcp_ports, udp_ports),
+            self._k8s_create(name,
+                             image,
+                             cmd,
+                             args,
+                             cwd,
+                             env,
+                             network_links,
+                             volume_links,
+                             secret_links,
+                             replicas)
         ])
 
-        uris = []
-
-        if tcp_ports:
-            uris += [
-                f"tcp://{name}:{port}" for port in tcp_ports
-            ]
-
-        if udp_ports:
-            uris += [
-                f"udp://{name}:{port}" for port in udp_ports
-            ]
-
-        return v1.interface.Future(uris)
-
-    def _create_deployment(self,
-                           name: str,
-                           image: str,
-                           cmd: [str],
-                           args: [str],
-                           cwd: str,
-                           env: [interfaces.Provider.KeyValue],
-                           network_links: [interfaces.Provider.NetworkLink],
-                           volume_links: [interfaces.Provider.VolumeLink],
-                           secret_links: [interfaces.Provider.SecretLink],
-                           replicas: int):
-        """TODO"""
-
-        self._add_to_target(name, [
-            self._k8s_create_deployment(name,
-                                        image,
-                                        cmd,
-                                        args,
-                                        cwd,
-                                        env,
-                                        network_links,
-                                        volume_links,
-                                        secret_links,
-                                        replicas)
-        ])
-
-    def interfaces(self) -> [v1.interface.Interface]:
-        """TODO"""
-
-        return [
-            interfaces.Provider(push_image=self._push_image,
-                                create_secret=self._create_secret,
-                                create_service=self._create_service,
-                                create_deployment=self._create_deployment)
-        ]
-
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self):
         """TODO"""
 
         for name, target in self._targets.items():
-            with open(f"{deployment.path}/{name}.yaml", "w", encoding="utf8") as file:
+            with open(f"{self.metadata.path}/{name}.yaml", "w", encoding="utf8") as file:
                 objs = [
                     yaml.safe_dump(obj, sort_keys=False) for obj in target
                 ]

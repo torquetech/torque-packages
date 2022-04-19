@@ -54,8 +54,6 @@ class Link(v1.link.Link):
     def on_build(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        return True
-
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
@@ -63,5 +61,3 @@ class Link(v1.link.Link):
         dst = self.destination.interface(interfaces.NetworkLink)
 
         dst.add(self.source.name, src.link())
-
-        return True

@@ -61,8 +61,7 @@ class Link(network.Link):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        if not network.Link.on_apply(self, deployment):
-            return False
+        network.Link.on_apply(self, deployment)
 
         source = self.source.name.upper()
 

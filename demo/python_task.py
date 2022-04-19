@@ -13,6 +13,7 @@ import schema
 from torque import v1
 
 from demo import interfaces
+from demo import providers
 from demo import utils
 
 
@@ -98,33 +99,33 @@ class Component(v1.component.Component):
         self._version = p.stdout.decode("utf8").strip()
         return self._version
 
-    def _image(self, deployment: str) -> str:
+    def _image(self, deployment: v1.deployment.Deployment) -> str:
         """TODO"""
 
-        return f"{deployment}-component-{self.name}:{self._get_version()}"
+        return f"{deployment.metadata.name}-component-{self.name}:{self._get_version()}"
 
-    def _add_network_link(self, name: str, link: v1.interface.Future[object]):
+    def _add_network_link(self, name: str, link: v1.utils.Future[object]):
         """TODO"""
 
-        link = interfaces.Provider.NetworkLink(name, link)
+        link = providers.NetworkLink(name, link)
         self._network_links.append(link)
 
-    def _add_volume_link(self, name: str, mount_path: str, link: v1.interface.Future[object]):
+    def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
         """TODO"""
 
-        link = interfaces.Provider.VolumeLink(name, mount_path, link)
+        link = providers.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
-    def _add_secret_link(self, name: str, key: str, link: v1.interface.Future[object]):
+    def _add_secret_link(self, name: str, key: str, link: v1.utils.Future[object]):
         """TODO"""
 
-        link = interfaces.Provider.SecretLink(name, key, link)
+        link = providers.SecretLink(name, key, link)
         self._secret_links.append(link)
 
     def _add_environment(self, name: str, value: str):
         """TODO"""
 
-        env = interfaces.Provider.KeyValue(name, value)
+        env = providers.KeyValue(name, value)
         self._environment.append(env)
 
     def _get_modules_path(self) -> str:
@@ -140,7 +141,7 @@ class Component(v1.component.Component):
         with open(f"{self._path()}/requirements.txt", "a", encoding="utf8") as file:
             file.write("\n".join(requirements))
 
-    def interfaces(self) -> [v1.interface.Interface]:
+    def interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
@@ -166,40 +167,37 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_build(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
         cmd = [
             "docker", "build", ".",
-            "-t", self._image(deployment.name)
+            "-t", self._image(deployment)
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
-        return True
-
-    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        provider = deployment.interface(interfaces.Provider)
-
         env = [
-            interfaces.Provider.KeyValue(name, value)
+            providers.KeyValue(name, value)
             for name, value in self.configuration["environment"].items()
         ]
 
         env += self._environment
 
-        provider.push_image(self._image(deployment.name))
-        provider.create_deployment(self.name,
-                                   self._image(deployment.name),
-                                   None,
-                                   None,
-                                   None,
-                                   env,
-                                   self._network_links,
-                                   self._volume_links,
-                                   self._secret_links,
-                                   self.configuration["replicas"])
+        images = deployment.provider(providers.ImagesProvider)
+        images.push(self._image(deployment))
 
-        return True
+        deployments = deployment.provider(providers.DeploymentsProvider)
+        deployments.create(self.name,
+                           self._image(deployment),
+                           None,
+                           None,
+                           None,
+                           env,
+                           self._network_links,
+                           self._volume_links,
+                           self._secret_links,
+                           self.configuration["replicas"])
