@@ -6,28 +6,30 @@
 
 import os
 import shutil
-import threading
 
-from . import interface as interface_v1
+from . import metadata
+from . import provider
 from . import utils
 
 
 class Deployment:
     """TODO"""
 
-    def __init__(self, name: str, profile: str, dry_run: bool, providers: "[provider.Provider]"):
-        self.name = name
-        self.profile = profile
-        self.dry_run = dry_run
-        self.path = f"{utils.torque_dir()}/local/deployments/{name}"
+    def __init__(self, metadata: metadata.Deployment, providers: [provider.Provider]):
+        self.metadata = metadata
 
-        self._providers = providers
-        self._lock = threading.Lock()
         self._interfaces = {}
 
-        if os.path.exists(self.path):
-            for path in os.listdir(self.path):
-                path = f"{self.path}/{path}"
+        for p in providers:
+            cls = p.__class__
+
+            while cls is not provider.Provider:
+                self._interfaces[utils.fqcn(cls)] = p
+                cls = cls.__bases__[0]
+
+        if os.path.exists(self.metadata.path):
+            for path in os.listdir(self.metadata.path):
+                path = f"{self.metadata.path}/{path}"
 
                 if os.path.isdir(path):
                     shutil.rmtree(path)
@@ -36,32 +38,20 @@ class Deployment:
                     os.unlink(path)
 
         else:
-            os.makedirs(self.path)
+            os.makedirs(self.metadata.path)
 
-    def _interface(self, cls: type) -> interface_v1.Interface:
+    def provider(self, cls: type) -> provider.Provider:
         """TODO"""
 
         name = utils.fqcn(cls)
 
-        if name in self._interfaces:
-            return self._interfaces[name].interface(cls)
+        if name not in self._interfaces:
+            raise RuntimeError(f"{name}: provider not implemented")
 
-        for provider in self._providers:
-            if not provider.has_interface(cls):
-                continue
-
-            return provider.interface(cls)
-
-        raise RuntimeError(f"{name}: provider interface not implemented")
-
-    def interface(self, cls: type) -> interface_v1.Interface:
-        """TODO"""
-
-        with self._lock:
-            return self._interface(cls)
+        return self._interfaces[name]
 
 
-def create(name: str, profile: str, dry_run: bool, providers: "[provider.Provider]") -> Deployment:
+def create(metadata: metadata.Deployment, providers: [provider.Provider]) -> Deployment:
     """TODO"""
 
-    return Deployment(name, profile, dry_run, providers)
+    return Deployment(metadata, providers)

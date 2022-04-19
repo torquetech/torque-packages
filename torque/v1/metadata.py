@@ -4,9 +4,12 @@
 
 """TODO"""
 
-from . import component
-from . import deployment
-from . import link
-from . import protocol
-from . import provider
-from . import utils
+from collections import namedtuple
+
+
+Deployment = namedtuple("Deployment", [
+    "name",
+    "profile",
+    "dry_run",
+    "path"
+])

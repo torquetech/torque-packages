@@ -50,6 +50,11 @@ class Deployment:
 
         self._lock = threading.Lock()
 
+    def _path(self) -> str:
+        """TODO"""
+
+        return f"{v1.utils.torque_dir()}/local/deployments/{self._name}"
+
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
 
@@ -88,14 +93,14 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _provider(self, name: str) -> v1.provider.Provider:
+    def _provider(self, meta: v1.metadata.Deployment, name: str) -> v1.provider.Provider:
         """TODO"""
 
         if name in self._providers:
             return self._providers[name]
 
         config = self._config.providers[name]
-        provider = self._repo.provider(name)(config)
+        provider = self._repo.provider(name)(meta, config)
 
         self._providers[name] = provider
         return provider
@@ -131,7 +136,8 @@ class Deployment:
     def build(self, workers: int):
         """TODO"""
 
-        deployment = v1.deployment.create(self._name, self._profile, False, [])
+        meta = v1.metadata.Deployment(self._name, self._profile, False, self._path())
+        deployment = v1.deployment.create(meta, [])
 
         def _on_build(type: str, name: str) -> bool:
             """TODO"""
@@ -155,8 +161,9 @@ class Deployment:
     def apply(self, workers: int, dry_run: bool):
         """TODO"""
 
-        providers = [self._provider(provider) for provider in self._config.providers.keys()]
-        deployment = v1.deployment.create(self._name, self._profile, dry_run, providers)
+        meta = v1.metadata.Deployment(self._name, self._profile, dry_run, self._path())
+        providers = [self._provider(meta, provider) for provider in self._config.providers.keys()]
+        deployment = v1.deployment.create(meta, providers)
 
         def _on_apply(type: str, name: str) -> bool:
             """TODO"""
@@ -178,7 +185,7 @@ class Deployment:
         self._execute(workers, _on_apply)
 
         for provider in providers:
-            provider.on_apply(deployment)
+            provider.on_apply()
 
     def delete(self, dry_run: bool):
         """TODO"""

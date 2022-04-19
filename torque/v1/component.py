@@ -4,14 +4,45 @@
 
 """TODO"""
 
+import functools
+import inspect
 import threading
+import warnings
 
 from abc import ABC
 from abc import abstractmethod
 
 from . import deployment
-from . import interface as interface_v1
 from . import utils
+
+
+class Interface:
+    """TODO"""
+
+    def __init__(self, **kwargs):
+        self._torque_lock: threading.Lock = None
+
+        required_funcs = inspect.getmembers(self, predicate=inspect.ismethod)
+        required_funcs = filter(lambda x: not x[0].startswith("_"), required_funcs)
+        required_funcs = set(map(lambda x: x[0], required_funcs))
+
+        provided_funcs = set(kwargs.keys())
+
+        if required_funcs - provided_funcs:
+            funcs = ", ".join(list(required_funcs - provided_funcs))
+            raise NotImplementedError(f"{utils.fqcn(self)}: {funcs}: not implemented")
+
+        if provided_funcs - required_funcs:
+            warnings.warn("extra methods provided", stacklevel=2)
+
+        for name, func in kwargs.items():
+            setattr(self, name, functools.partial(self._torque_call_wrapper, func))
+
+    def _torque_call_wrapper(self, func, *args, **kwargs):
+        # pylint: disable=E1129,W0212
+
+        with self._torque_lock:
+            return func(*args, **kwargs)
 
 
 class Component(ABC):
@@ -28,14 +59,26 @@ class Component(ABC):
         self.configuration = configuration
 
         self._torque_lock = threading.Lock()
-        self._torque_interfaces = utils.interfaces(self, self._torque_lock, interface_v1.Interface)
+        self._torque_interfaces = {}
+
+        for iface in self.interfaces():
+            if not issubclass(iface.__class__, Interface):
+                raise RuntimeError(f"{utils.fqcn(iface)}: invalid interface")
+
+            # pylint: disable=W0212
+            iface._torque_lock = self._torque_lock
+            cls = iface.__class__
+
+            while cls is not Interface:
+                self._torque_interfaces[utils.fqcn(cls)] = iface
+                cls = cls.__bases__[0]
 
     def has_interface(self, cls: type) -> bool:
         """TODO"""
 
         return utils.fqcn(cls) in self._torque_interfaces
 
-    def interface(self, cls: type) -> interface_v1.Interface:
+    def interface(self, cls: type) -> Interface:
         """TODO"""
 
         name = utils.fqcn(cls)
@@ -56,7 +99,7 @@ class Component(ABC):
         """TODO"""
 
     @abstractmethod
-    def interfaces(self) -> [interface_v1.Interface]:
+    def interfaces(self) -> [Interface]:
         """TODO"""
 
     @abstractmethod

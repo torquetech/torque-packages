@@ -8,6 +8,7 @@ import inspect
 import os
 import pathlib
 import threading
+import typing
 
 
 _TORQUE_CWD = None
@@ -124,23 +125,30 @@ def merge_dicts(dict1: dict[str, object],
     return new_dict
 
 
-def interfaces(instance: object,
-               lock: threading.Lock,
-               interface_type: type) -> dict[str, object]:
+T = typing.TypeVar("T")
+
+
+class Future(typing.Generic[T]):
     """TODO"""
 
-    interfaces = {}
+    def __init__(self, value=None):
+        self._condition = threading.Condition()
+        self._value = value
 
-    for iface in instance.interfaces():
-        if not issubclass(iface.__class__, interface_type):
-            raise RuntimeError(f"{fqcn(iface)}: invalid interface")
+    def get(self):
+        """TODO"""
 
-        # pylint: disable=W0212
-        iface._torque_lock = lock
-        cls = iface.__class__
+        with self._condition:
+            while self._value is None:
+                self._condition.wait()
 
-        while cls is not interface_type:
-            interfaces[fqcn(cls)] = iface
-            cls = cls.__bases__[0]
+            return self._value
 
-    return interfaces
+    def set(self, value: object):
+        """TODO"""
+
+        with self._condition:
+            assert self._value is None
+
+            self._value = value
+            self._condition.notify_all()
