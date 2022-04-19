@@ -39,7 +39,7 @@ class Checker:
                 assert depends in self._finished
 
             self._finished.append(job_name)
-            return job_name not in self._fail_on
+            assert job_name not in self._fail_on
 
     def verify(self) -> bool:
         """TODO"""

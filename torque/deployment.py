@@ -139,7 +139,7 @@ class Deployment:
         meta = v1.metadata.Deployment(self._name, self._profile, False, self._path())
         deployment = v1.deployment.create(meta, [])
 
-        def _on_build(type: str, name: str) -> bool:
+        def _on_build(type: str, name: str):
             """TODO"""
 
             with self._lock:
@@ -154,7 +154,7 @@ class Deployment:
 
             print(f"building {name}...", file=sys.stderr)
 
-            return instance.on_build(deployment)
+            instance.on_build(deployment)
 
         self._execute(workers, _on_build)
 
@@ -165,7 +165,7 @@ class Deployment:
         providers = [self._provider(meta, provider) for provider in self._config.providers.keys()]
         deployment = v1.deployment.create(meta, providers)
 
-        def _on_apply(type: str, name: str) -> bool:
+        def _on_apply(type: str, name: str):
             """TODO"""
 
             with self._lock:
@@ -180,7 +180,7 @@ class Deployment:
 
             print(f"applying {name}...", file=sys.stderr)
 
-            return instance.on_apply(deployment)
+            instance.on_apply(deployment)
 
         self._execute(workers, _on_apply)
 

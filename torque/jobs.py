@@ -96,9 +96,7 @@ class Runner:
                 break
 
             try:
-                if not job.handler(job.name):
-                    self._abort()
-                    break
+                job.handler(job.name)
 
                 with self._jobs_lock:
                     for blocked_job in job.blocks:

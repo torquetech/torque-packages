@@ -47,9 +47,9 @@ class Link(ABC):
         """TODO"""
 
     @abstractmethod
-    def on_build(self, deployment: deployment.Deployment) -> bool:
+    def on_build(self, deployment: deployment.Deployment):
         """TODO"""
 
     @abstractmethod
-    def on_apply(self, deployment: deployment.Deployment) -> bool:
+    def on_apply(self, deployment: deployment.Deployment):
         """TODO"""
