@@ -34,7 +34,6 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "pyyaml",
-        "schema",
         "pydot"
     ]
 )

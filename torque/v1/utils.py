@@ -10,6 +10,8 @@ import pathlib
 import threading
 import typing
 
+from . import schema as schema_v1
+
 
 _TORQUE_CWD = None
 _TORQUE_ROOT = None
@@ -123,6 +125,12 @@ def merge_dicts(dict1: dict[str, object],
             new_dict[key] = dict2[key]
 
     return new_dict
+
+
+def validate_schema(schema: object, defaults: object, instance: object) -> object:
+    """TODO"""
+
+    return schema_v1.Schema(schema).validate(merge_dicts(defaults, instance))
 
 
 T = typing.TypeVar("T")

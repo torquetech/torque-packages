@@ -5,7 +5,6 @@
 """TODO"""
 
 import re
-import schema
 import yaml
 
 from torque import model
@@ -14,17 +13,17 @@ from torque import v1
 
 
 _PROTO = r"^([^:]+)://"
-_CONFIGURATION_SCHEMA = schema.Schema({
+_CONFIGURATION_SCHEMA = v1.schema.Schema({
     "providers": {
-        schema.Optional(str): object,
+        v1.schema.Optional(str): object,
     },
     "dag": {
         "revision": int,
         "components": {
-            schema.Optional(str): object
+            v1.schema.Optional(str): object
         },
         "links": {
-            schema.Optional(str): object
+            v1.schema.Optional(str): object
         }
     }
 })

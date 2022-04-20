@@ -8,8 +8,6 @@ import importlib
 import traceback
 import sys
 
-import schema
-
 from torque import exceptions
 from torque import links
 from torque import protocols
@@ -40,19 +38,19 @@ def _is_provider(obj: object) -> bool:
     return issubclass(obj, v1.provider.Provider)
 
 
-_REPOSITORY_SCHEMA = schema.Schema({
-    schema.Optional("v1"): schema.Schema({
-        schema.Optional("components"): {
-            schema.Optional(str): _is_component
+_REPOSITORY_SCHEMA = v1.schema.Schema({
+    v1.schema.Optional("v1"): v1.schema.Schema({
+        v1.schema.Optional("components"): {
+            v1.schema.Optional(str): _is_component
         },
-        schema.Optional("links"): {
-            schema.Optional(str): _is_link
+        v1.schema.Optional("links"): {
+            v1.schema.Optional(str): _is_link
         },
-        schema.Optional("protocols"): {
-            schema.Optional(str): _is_protocol
+        v1.schema.Optional("protocols"): {
+            v1.schema.Optional(str): _is_protocol
         },
-        schema.Optional("providers"): {
-            schema.Optional(str): _is_provider
+        v1.schema.Optional("providers"): {
+            v1.schema.Optional(str): _is_provider
         }
     })
 }, ignore_extra_keys=True)

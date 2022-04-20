@@ -6,11 +6,11 @@
 
 import argparse
 import sys
-import schema
 import yaml
 
 from torque import exceptions
 from torque import workspace
+from torque import v1
 
 
 def _create(arguments: argparse.Namespace):
@@ -75,7 +75,7 @@ def _defaults(arguments: argparse.Namespace):
     except exceptions.ProviderNotFound as exc:
         raise RuntimeError(f"{exc}: provider not found") from exc
 
-    except schema.SchemaError as exc:
+    except v1.schema.SchemaError as exc:
         raise RuntimeError(f"{exc}: invalid configuration") from exc
 
 

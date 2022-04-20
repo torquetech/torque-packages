@@ -9,4 +9,5 @@ from . import deployment
 from . import link
 from . import protocol
 from . import provider
+from . import schema
 from . import utils

@@ -8,7 +8,6 @@ import os
 import re
 import sys
 
-import schema
 import yaml
 
 from torque import deployment
@@ -22,24 +21,24 @@ from torque import v1
 _PROTO = r"^([^:]+)://"
 _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
-_WORKSPACE_SCHEMA = schema.Schema({
+_WORKSPACE_SCHEMA = v1.schema.Schema({
     "profiles": {
-        schema.Optional(str): [str]
+        v1.schema.Optional(str): [str]
     },
     "configuration": {
-        "deployments": schema.Or(str, None)
+        "deployments": v1.schema.Or(str, None)
     },
     "dag": {
         "revision": int,
         "components": {
-            schema.Optional(str): {
+            v1.schema.Optional(str): {
                 "labels": [str],
                 "type": str,
                 "parameters": object
             }
         },
         "links": {
-            schema.Optional(str): {
+            v1.schema.Optional(str): {
                 "source": str,
                 "destination": str,
                 "type": str,
@@ -49,11 +48,11 @@ _WORKSPACE_SCHEMA = schema.Schema({
     }
 })
 
-_DEPLOYMENTS_SCHEMA = schema.Schema({
-    schema.Optional(str): {
+_DEPLOYMENTS_SCHEMA = v1.schema.Schema({
+    v1.schema.Optional(str): {
         "profile": str,
-        "lables": schema.Or([str], None),
-        "components": schema.Or([str], None)
+        "lables": v1.schema.Or([str], None),
+        "components": v1.schema.Or([str], None)
     }
 })
 
