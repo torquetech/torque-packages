@@ -21,7 +21,7 @@ class ImagesProvider(providers.ImagesProvider):
     }
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -49,7 +49,7 @@ class SecretsProvider(providers.SecretsProvider):
         self._targets = {}
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -111,7 +111,7 @@ class ServicesProvider(providers.ServicesProvider):
         self._targets = {}
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -198,7 +198,7 @@ class DeploymentsProvider(providers.DeploymentsProvider):
         self._targets = {}
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],

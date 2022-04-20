@@ -39,7 +39,7 @@ class Component(v1.component.Component):
         self._secret_link = None
 
     @classmethod
-    def validate_parameters(cls, parameters: object) -> object:
+    def parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._PARAMETERS["schema"],
@@ -47,7 +47,7 @@ class Component(v1.component.Component):
                                         parameters)
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         defaults = v1.utils.merge_dicts(cls._CONFIGURATION["defaults"], {
