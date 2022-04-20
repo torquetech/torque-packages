@@ -42,23 +42,21 @@ class Component(v1.component.Component):
     def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("parameters",
-                                     cls._PARAMETERS,
-                                     parameters)
+        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
+                                        cls._PARAMETERS["defaults"],
+                                        parameters)
 
     @classmethod
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        _configuration = v1.utils.merge_dicts(cls._CONFIGURATION, {
-            "defaults": {
-                "password": utils.generate_password()
-            }
+        defaults = v1.utils.merge_dicts(cls._CONFIGURATION["defaults"], {
+            "password": utils.generate_password()
         })
 
-        return utils.validate_schema("configuration",
-                                     _configuration,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        defaults,
+                                        configuration)
 
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"

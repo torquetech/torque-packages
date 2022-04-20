@@ -24,9 +24,9 @@ class ImagesProvider(providers.ImagesProvider):
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def push(self, image: str):
         """TODO"""
@@ -52,9 +52,9 @@ class SecretsProvider(providers.SecretsProvider):
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def _add_to_target(self, name: str, objs: [object]):
         """TODO"""
@@ -114,9 +114,9 @@ class ServicesProvider(providers.ServicesProvider):
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def _add_to_target(self, name: str, objs: [object]):
         """TODO"""
@@ -201,9 +201,9 @@ class DeploymentsProvider(providers.DeploymentsProvider):
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def _add_to_target(self, name: str, objs: [object]):
         """TODO"""

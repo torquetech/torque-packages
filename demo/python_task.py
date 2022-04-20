@@ -8,8 +8,6 @@ import os
 import shutil
 import subprocess
 
-import schema
-
 from torque import v1
 
 from demo import interfaces
@@ -47,9 +45,9 @@ class Component(v1.component.Component):
             "environment": {}
         },
         "schema": {
-            "replicas": schema.Use(_validate_replicas),
+            "replicas": v1.schema.Use(_validate_replicas),
             "environment": {
-                schema.Optional(str): str
+                v1.schema.Optional(str): str
             }
         }
     }
@@ -68,17 +66,17 @@ class Component(v1.component.Component):
     def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("parameters",
-                                     cls._PARAMETERS,
-                                     parameters)
+        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
+                                        cls._PARAMETERS["defaults"],
+                                        configuration)
 
     @classmethod
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def _path(self) -> str:
         """TODO"""

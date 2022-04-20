@@ -27,17 +27,17 @@ class Link(v1.link.Link):
     def validate_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("parameters",
-                                     cls._PARAMETERS,
-                                     parameters)
+        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
+                                        cls._PARAMETERS["defaults"],
+                                        parameters)
 
     @classmethod
     def validate_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema("configuration",
-                                     cls._CONFIGURATION,
-                                     configuration)
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
 
     def on_create(self):
         """TODO"""

@@ -49,7 +49,6 @@ setup(
     install_requires=[
         "jinja2",
         "pyyaml",
-        "schema"
     ],
     entry_points={
         "torque": [
