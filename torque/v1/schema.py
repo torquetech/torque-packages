@@ -415,13 +415,13 @@ class Schema(object):
             if not required.issubset(coverage):
                 missing_keys = required - coverage
                 s_missing_keys = ", ".join(repr(k) for k in sorted(missing_keys, key=repr))
-                message = "Missing key%s: %s" % (_plural_s(missing_keys), s_missing_keys)
+                message = "missing key%s: %s" % (_plural_s(missing_keys), s_missing_keys)
                 message = self._prepend_schema_name(message)
                 raise SchemaMissingKeyError(message, e.format(data) if e else None)
             if not self._ignore_extra_keys and (len(new) != len(data)):
                 wrong_keys = set(data.keys()) - set(new.keys())
                 s_wrong_keys = ", ".join(repr(k) for k in sorted(wrong_keys, key=repr))
-                message = "Wrong key%s %s in %r" % (_plural_s(wrong_keys), s_wrong_keys, data)
+                message = "wrong key%s: %s" % (_plural_s(wrong_keys), s_wrong_keys)
                 message = self._prepend_schema_name(message)
                 raise SchemaWrongKeyError(message, e.format(data) if e else None)
 
