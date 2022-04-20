@@ -74,6 +74,9 @@ class Component(ABC):
             cls = iface.__class__
 
             while cls is not Interface:
+                if len(cls.__bases__) != 1:
+                    raise RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
+
                 self._torque_interfaces[utils.fqcn(cls)] = iface
                 cls = cls.__bases__[0]
 

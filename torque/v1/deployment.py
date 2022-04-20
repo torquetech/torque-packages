@@ -21,9 +21,15 @@ class Deployment:
         self._interfaces = {}
 
         for p in providers:
+            if not issubclass(p.__class__, provider.Provider):
+                raise RuntimeError(f"{utils.fqcn(p)}: invalid provider")
+
             cls = p.__class__
 
             while cls is not provider.Provider:
+                if len(cls.__bases__) != 1:
+                    raise RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
+
                 self._interfaces[utils.fqcn(cls)] = p
                 cls = cls.__bases__[0]
 
