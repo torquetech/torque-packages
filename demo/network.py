@@ -7,7 +7,6 @@
 from torque import v1
 
 from demo import interfaces
-from demo import utils
 
 
 class Link(v1.link.Link):

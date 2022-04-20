@@ -9,7 +9,6 @@ import yaml
 from torque import v1
 
 from demo import providers
-from demo import utils
 
 
 class ImagesProvider(providers.ImagesProvider):

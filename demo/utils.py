@@ -7,8 +7,6 @@
 import os
 import secrets
 
-from torque import v1
-
 
 def load_file(name: str) -> str:
     """TODO"""

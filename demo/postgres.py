@@ -64,7 +64,7 @@ class Component(v1.component.Component):
     def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
         """TODO"""
 
-        link = interfaces.Provider.VolumeLink(name, mount_path, link)
+        link = providers.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
     def _link(self) -> v1.utils.Future[object]:

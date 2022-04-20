@@ -14,6 +14,7 @@ from demo import python_task
 class Component(python_task.Component):
     """TODO"""
 
+    # pylint: disable=W0212
     _CONFIGURATION = v1.utils.merge_dicts(python_task.Component._CONFIGURATION, {
         "defaults": {
             "tcp_ports": [],
