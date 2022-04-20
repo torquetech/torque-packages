@@ -63,7 +63,7 @@ class Component(v1.component.Component):
         self._version = None
 
     @classmethod
-    def parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._PARAMETERS["schema"],
@@ -71,7 +71,7 @@ class Component(v1.component.Component):
                                         parameters)
 
     @classmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -139,7 +139,7 @@ class Component(v1.component.Component):
         with open(f"{self._path()}/requirements.txt", "a", encoding="utf8") as file:
             file.write("\n".join(requirements))
 
-    def interfaces(self) -> [v1.component.Interface]:
+    def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [

@@ -35,10 +35,10 @@ class Component(python_task.Component):
 
         return self._service_link
 
-    def interfaces(self) -> [v1.component.Interface]:
+    def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
-        return super().interfaces() + [
+        return super().on_interfaces() + [
             interfaces.Service(link=self._link)
         ]
 

@@ -24,7 +24,7 @@ class Link(v1.link.Link):
     }
 
     @classmethod
-    def parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._PARAMETERS["schema"],
@@ -32,7 +32,7 @@ class Link(v1.link.Link):
                                         parameters)
 
     @classmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
