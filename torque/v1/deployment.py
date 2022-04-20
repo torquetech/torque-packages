@@ -52,7 +52,7 @@ class Deployment:
         name = utils.fqcn(cls)
 
         if name not in self._interfaces:
-            raise RuntimeError(f"{name}: provider not implemented")
+            return None
 
         return self._interfaces[name]
 

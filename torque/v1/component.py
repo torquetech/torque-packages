@@ -85,18 +85,13 @@ class Component(ABC):
 
         self._torque_lock = None
 
-    def has_interface(self, cls: type) -> bool:
-        """TODO"""
-
-        return utils.fqcn(cls) in self._torque_interfaces
-
     def interface(self, cls: type) -> Interface:
         """TODO"""
 
         name = utils.fqcn(cls)
 
         if name not in self._torque_interfaces:
-            raise RuntimeError(f"{name}: interface not found")
+            return None
 
         return self._torque_interfaces[name]
 
