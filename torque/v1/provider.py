@@ -19,7 +19,7 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

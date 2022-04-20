@@ -120,17 +120,17 @@ def defaults(providers: [str],
 
     return {
         "providers": {
-            provider: repo.provider(provider).configuration({})
+            provider: repo.provider(provider).on_configuration({})
             for provider in providers
         },
         "dag": {
             "revision": dag.revision,
             "components": {
-                component.name: repo.component(component.type).configuration({}) or {}
+                component.name: repo.component(component.type).on_configuration({}) or {}
                 for component in dag.components.values()
             },
             "links": {
-                link.name: repo.link(link.type).configuration({}) or {}
+                link.name: repo.link(link.type).on_configuration({}) or {}
                 for link in dag.links.values()
             }
         }

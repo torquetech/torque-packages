@@ -30,12 +30,12 @@ class Link(ABC):
 
     @classmethod
     @abstractmethod
-    def parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
     @classmethod
     @abstractmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

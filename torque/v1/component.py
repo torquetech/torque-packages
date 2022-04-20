@@ -65,7 +65,7 @@ class Component(ABC):
         self._torque_lock = threading.Lock()
         self._torque_interfaces = {}
 
-        for iface in self.interfaces():
+        for iface in self.on_interfaces():
             if not issubclass(iface.__class__, Interface):
                 raise RuntimeError(f"{utils.fqcn(iface)}: invalid interface")
 
@@ -102,16 +102,16 @@ class Component(ABC):
 
     @classmethod
     @abstractmethod
-    def parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
     @classmethod
     @abstractmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod
-    def interfaces(self) -> [Interface]:
+    def on_interfaces(self) -> [Interface]:
         """TODO"""
 
     @abstractmethod

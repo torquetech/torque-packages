@@ -11,13 +11,13 @@ class DependencyLink(v1.link.Link):
     """TODO"""
 
     @classmethod
-    def parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return {}
 
     @classmethod
-    def configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return {}

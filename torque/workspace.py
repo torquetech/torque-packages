@@ -381,7 +381,7 @@ class Workspace:
         component_type = self.repo.component(type)
 
         try:
-            params = component_type.parameters(params)
+            params = component_type.on_parameters(params)
 
         except v1.schema.SchemaError as exc:
             raise RuntimeError(f"component parameters: {name}: {exc}") from exc
@@ -423,7 +423,7 @@ class Workspace:
         link_type = self.repo.link(type)
 
         try:
-            params = link_type.parameters(params)
+            params = link_type.on_parameters(params)
 
         except v1.schema.SchemaError as exc:
             raise RuntimeError(f"link parameters: {name}: {exc}") from exc

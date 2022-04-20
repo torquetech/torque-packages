@@ -208,7 +208,7 @@ def _provider_config(provider: str,
     config = profile.provider(provider)
 
     try:
-        return repo.provider(provider).configuration(config or {})
+        return repo.provider(provider).on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
         raise RuntimeError(f"provider configuration: {provider}: {exc}") from exc
@@ -221,7 +221,7 @@ def _component_config(component: model.Component,
     config = profile.component(component.name)
 
     try:
-        return repo.component(component.type).configuration(config or {})
+        return repo.component(component.type).on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
         raise RuntimeError(f"component configuration: {component.name}: {exc}") from exc
@@ -234,7 +234,7 @@ def _link_config(link: model.Link,
     config = profile.link(link.name)
 
     try:
-        return repo.link(link.type).configuration(config or {})
+        return repo.link(link.type).on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
         raise RuntimeError(f"link configuration: {link.name}: {exc}") from exc
