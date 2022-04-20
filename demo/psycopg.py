@@ -30,7 +30,7 @@ class Link(network.Link):
     def on_create(self):
         """TODO"""
 
-        network.Link.on_create(self)
+        super().on_create()
 
         if not self.source.has_interface(interfaces.PostgresService):
             raise RuntimeError(f"{self.source.name}: incompatible component")
@@ -61,7 +61,7 @@ class Link(network.Link):
     def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
         """TODO"""
 
-        network.Link.on_apply(self, deployment)
+        super().on_apply(deployment)
 
         source = self.source.name.upper()
 

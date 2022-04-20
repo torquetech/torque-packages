@@ -50,4 +50,4 @@ class Component(python_task.Component):
                                              self.configuration["tcp_ports"],
                                              self.configuration["udp_ports"])
 
-        python_task.Component.on_apply(self, deployment)
+        super().on_apply(deployment)
