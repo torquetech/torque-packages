@@ -106,7 +106,11 @@ def load(name: str, uris: [str], repo: repository.Repository) -> Profile:
     for uri in uris:
         configuration = v1.utils.merge_dicts(configuration, _load_configuration(uri, repo), False)
 
-    return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
+    try:
+        return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
+
+    except v1.schema.SchemaError as exc:
+        raise RuntimeError(f"profile: {name}: {exc}") from exc
 
 
 def defaults(providers: [str],

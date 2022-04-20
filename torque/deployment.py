@@ -210,8 +210,8 @@ def _provider_config(provider: str,
     try:
         return repo.provider(provider).configuration(config or {})
 
-    except RuntimeError as exc:
-        raise RuntimeError(f"provider: {provider}: {exc}") from exc
+    except v1.schema.SchemaError as exc:
+        raise RuntimeError(f"provider configuration: {provider}: {exc}") from exc
 
 
 def _component_config(component: model.Component,
@@ -223,8 +223,8 @@ def _component_config(component: model.Component,
     try:
         return repo.component(component.type).configuration(config or {})
 
-    except RuntimeError as exc:
-        raise RuntimeError(f"component: {component.name}: {exc}") from exc
+    except v1.schema.SchemaError as exc:
+        raise RuntimeError(f"component configuration: {component.name}: {exc}") from exc
 
 
 def _link_config(link: model.Link,
@@ -236,8 +236,8 @@ def _link_config(link: model.Link,
     try:
         return repo.link(link.type).configuration(config or {})
 
-    except RuntimeError as exc:
-        raise RuntimeError(f"link: {link.name}: {exc}") from exc
+    except v1.schema.SchemaError as exc:
+        raise RuntimeError(f"link configuration: {link.name}: {exc}") from exc
 
 
 def load(name: str,

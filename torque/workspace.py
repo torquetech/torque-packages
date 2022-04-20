@@ -383,8 +383,8 @@ class Workspace:
         try:
             params = component_type.parameters(params)
 
-        except RuntimeError as exc:
-            raise RuntimeError(f"component: {name}: {exc}") from exc
+        except v1.schema.SchemaError as exc:
+            raise RuntimeError(f"component parameters: {name}: {exc}") from exc
 
         component = self.dag.create_component(name, type, labels, params)
 
@@ -425,8 +425,8 @@ class Workspace:
         try:
             params = link_type.parameters(params)
 
-        except RuntimeError as exc:
-            raise RuntimeError(f"link: {name}: {exc}") from exc
+        except v1.schema.SchemaError as exc:
+            raise RuntimeError(f"link parameters: {name}: {exc}") from exc
 
         link = self.dag.create_link(name, type, source, destination, params)
 
