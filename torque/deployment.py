@@ -145,6 +145,8 @@ class Deployment:
             with self._lock:
                 if type == "component":
                     instance = self._component(name)
+                    # pylint: disable=W0212
+                    instance._torque_clear_lock()
 
                 elif type == "link":
                     instance = self._link(name)
@@ -171,6 +173,8 @@ class Deployment:
             with self._lock:
                 if type == "component":
                     instance = self._component(name)
+                    # pylint: disable=W0212
+                    instance._torque_clear_lock()
 
                 elif type == "link":
                     instance = self._link(name)

@@ -20,7 +20,7 @@ class Interface:
     """TODO"""
 
     def __init__(self, **kwargs):
-        self._torque_lock: threading.Lock = None
+        self._torque_component = None
 
         required_funcs = inspect.getmembers(self, predicate=inspect.ismethod)
         required_funcs = filter(lambda x: not x[0].startswith("_"), required_funcs)
@@ -41,7 +41,11 @@ class Interface:
     def _torque_call_wrapper(self, func, *args, **kwargs):
         # pylint: disable=E1129,W0212
 
-        with self._torque_lock:
+        if self._torque_component._torque_lock:
+            with self._torque_component._torque_lock:
+                return func(*args, **kwargs)
+
+        else:
             return func(*args, **kwargs)
 
 
@@ -66,12 +70,17 @@ class Component(ABC):
                 raise RuntimeError(f"{utils.fqcn(iface)}: invalid interface")
 
             # pylint: disable=W0212
-            iface._torque_lock = self._torque_lock
+            iface._torque_component = self
             cls = iface.__class__
 
             while cls is not Interface:
                 self._torque_interfaces[utils.fqcn(cls)] = iface
                 cls = cls.__bases__[0]
+
+    def _torque_clear_lock(self):
+        """TODO"""
+
+        self._torque_lock = None
 
     def has_interface(self, cls: type) -> bool:
         """TODO"""
