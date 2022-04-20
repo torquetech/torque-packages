@@ -30,12 +30,12 @@ class Link(ABC):
 
     @classmethod
     @abstractmethod
-    def validate_parameters(cls, parameters: object) -> object:
+    def parameters(cls, parameters: object) -> object:
         """TODO"""
 
     @classmethod
     @abstractmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

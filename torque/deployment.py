@@ -208,7 +208,7 @@ def _provider_config(provider: str,
     config = profile.provider(provider)
 
     try:
-        return repo.provider(provider).validate_configuration(config or {})
+        return repo.provider(provider).configuration(config or {})
 
     except RuntimeError as exc:
         raise RuntimeError(f"provider: {provider}: {exc}") from exc
@@ -221,7 +221,7 @@ def _component_config(component: model.Component,
     config = profile.component(component.name)
 
     try:
-        return repo.component(component.type).validate_configuration(config or {})
+        return repo.component(component.type).configuration(config or {})
 
     except RuntimeError as exc:
         raise RuntimeError(f"component: {component.name}: {exc}") from exc
@@ -234,7 +234,7 @@ def _link_config(link: model.Link,
     config = profile.link(link.name)
 
     try:
-        return repo.link(link.type).validate_configuration(config or {})
+        return repo.link(link.type).configuration(config or {})
 
     except RuntimeError as exc:
         raise RuntimeError(f"link: {link.name}: {exc}") from exc

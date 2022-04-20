@@ -19,7 +19,7 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
     @abstractmethod

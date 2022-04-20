@@ -11,13 +11,13 @@ class DependencyLink(v1.link.Link):
     """TODO"""
 
     @classmethod
-    def validate_parameters(cls, parameters: object) -> object:
+    def parameters(cls, parameters: object) -> object:
         """TODO"""
 
         return {}
 
     @classmethod
-    def validate_configuration(cls, configuration: object) -> object:
+    def configuration(cls, configuration: object) -> object:
         """TODO"""
 
         return {}
