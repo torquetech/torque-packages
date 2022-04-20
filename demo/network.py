@@ -41,10 +41,10 @@ class Link(v1.link.Link):
     def on_create(self):
         """TODO"""
 
-        if not self.source.has_interface(interfaces.Service):
+        if not self.source.interface(interfaces.Service):
             raise RuntimeError(f"{self.source.name}: incompatible component")
 
-        if not self.destination.has_interface(interfaces.NetworkLink):
+        if not self.destination.interface(interfaces.NetworkLink):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
     def on_remove(self):

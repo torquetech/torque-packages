@@ -32,16 +32,16 @@ class Link(network.Link):
 
         super().on_create()
 
-        if not self.source.has_interface(interfaces.PostgresService):
+        if not self.source.interface(interfaces.PostgresService):
             raise RuntimeError(f"{self.source.name}: incompatible component")
 
-        if not self.destination.has_interface(interfaces.PythonModules):
+        if not self.destination.interface(interfaces.PythonModules):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
-        if not self.destination.has_interface(interfaces.SecretLink):
+        if not self.destination.interface(interfaces.SecretLink):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
-        if not self.destination.has_interface(interfaces.Environment):
+        if not self.destination.interface(interfaces.Environment):
             raise RuntimeError(f"{self.destination.name}: incompatible component")
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg.py.template"))
