@@ -27,52 +27,50 @@ class Link(network.Link):
         }
     }, allow_overwrites=False)
 
+    @classmethod
+    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+        """TODO"""
+
+        return super().on_requirements() + [
+            v1.utils.InterfaceRequirement(interfaces.PostgresService, "source", "pg"),
+            v1.utils.InterfaceRequirement(interfaces.PythonModules, "destination", "mod"),
+            v1.utils.InterfaceRequirement(interfaces.SecretLink, "destination", "sec"),
+            v1.utils.InterfaceRequirement(interfaces.Environment, "destination", "env")
+        ]
+
     def on_create(self):
         """TODO"""
 
         super().on_create()
 
-        if not self.source.interface(interfaces.PostgresService):
-            raise RuntimeError(f"{self.source.name}: incompatible component")
+        if not self.interfaces.pg:
+            raise RuntimeError(f"{self.source}: incompatible component")
 
-        if not self.destination.interface(interfaces.PythonModules):
-            raise RuntimeError(f"{self.destination.name}: incompatible component")
-
-        if not self.destination.interface(interfaces.SecretLink):
-            raise RuntimeError(f"{self.destination.name}: incompatible component")
-
-        if not self.destination.interface(interfaces.Environment):
-            raise RuntimeError(f"{self.destination.name}: incompatible component")
+        if not self.interfaces.mod \
+           or not self.interfaces.sec \
+           or not self.interfaces.env:
+            raise RuntimeError(f"{self.destination}: incompatible component")
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg.py.template"))
-
-        modules = self.destination.interface(interfaces.PythonModules)
-        target_path = f"{modules.path()}/{self.source.name}.py"
+        target_path = f"{self.interfaces.mod.path()}/{self.source}.py"
 
         if os.path.exists(v1.utils.resolve_path(target_path)):
             raise RuntimeError(f"{target_path}: file already exists")
 
         with open(v1.utils.resolve_path(target_path), "w", encoding="utf8") as file:
-            file.write(template.render(COMPONENT=self.source.name.upper()))
+            file.write(template.render(COMPONENT=self.source.upper()))
             file.write("\n")
 
-        modules.add_requirements(["psycopg"])
+        self.interfaces.mod.add_requirements(["psycopg"])
 
-    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
         super().on_apply(deployment)
 
-        source = self.source.name.upper()
+        source = self.source.upper()
+        secret = self.interfaces.pg.admin()
 
-        src = self.source.interface(interfaces.PostgresService)
-        secret = src.admin()
-
-        sec = self.destination.interface(interfaces.SecretLink)
-        sec.add(f"{source}_PSYCOPG_USER", "user", secret)
-        sec.add(f"{source}_PSYCOPG_PASSWORD", "password", secret)
-
-        env = self.destination.interface(interfaces.Environment)
-        env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])
-
-        return True
+        self.interfaces.env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])
+        self.interfaces.sec.add(f"{source}_PSYCOPG_USER", "user", secret)
+        self.interfaces.sec.add(f"{source}_PSYCOPG_PASSWORD", "password", secret)

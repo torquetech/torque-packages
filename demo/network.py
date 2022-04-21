@@ -38,25 +38,31 @@ class Link(v1.link.Link):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+        """TODO"""
+
+        return [
+            v1.utils.InterfaceRequirement(interfaces.Service, "source", "src"),
+            v1.utils.InterfaceRequirement(interfaces.NetworkLink, "destination", "dst")
+        ]
+
     def on_create(self):
         """TODO"""
 
-        if not self.source.interface(interfaces.Service):
-            raise RuntimeError(f"{self.source.name}: incompatible component")
+        if not self.interfaces.src:
+            raise RuntimeError(f"{self.source}: incompatible component")
 
-        if not self.destination.interface(interfaces.NetworkLink):
-            raise RuntimeError(f"{self.destination.name}: incompatible component")
+        if not self.interfaces.dst:
+            raise RuntimeError(f"{self.destination}: incompatible component")
 
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_build(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-    def on_apply(self, deployment: v1.deployment.Deployment) -> bool:
+    def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        src = self.source.interface(interfaces.Service)
-        dst = self.destination.interface(interfaces.NetworkLink)
-
-        dst.add(self.source.name, src.link())
+        self.interfaces.dst.add(self.source, self.interfaces.src.link())

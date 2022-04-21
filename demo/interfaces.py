@@ -4,7 +4,11 @@
 
 """TODO"""
 
+from abc import abstractmethod
+
 from torque import v1
+
+from demo import types
 
 
 class Service(v1.component.Interface):
@@ -79,4 +83,54 @@ class PythonModules(v1.component.Interface):
         """TODO"""
 
     def add_requirements(requirements: [str]):
+        """TODO"""
+
+
+class ImagesInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def push(self, image: str):
+        """TODO"""
+
+
+class SecretsInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
+        """TODO"""
+
+
+class ServicesInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> v1.utils.Future[object]:
+        """TODO"""
+
+
+class DeploymentsInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self,
+               name: str,
+               image: str,
+               cmd: [str],
+               args: [str],
+               cwd: str,
+               env: [types.KeyValue],
+               network_links: [types.NetworkLink],
+               volume_links: [types.VolumeLink],
+               secret_links: [types.SecretLink],
+               replicas: int):
         """TODO"""

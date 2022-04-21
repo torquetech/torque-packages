@@ -7,7 +7,7 @@
 from torque import v1
 
 from demo import interfaces
-from demo import providers
+from demo import types
 from demo import utils
 
 
@@ -30,14 +30,6 @@ class Component(v1.component.Component):
         }
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._volume_links = []
-
-        self._service_link = None
-        self._secret_link = None
-
     @classmethod
     def on_parameters(cls, parameters: object) -> object:
         """TODO"""
@@ -58,13 +50,31 @@ class Component(v1.component.Component):
                                         defaults,
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> [v1.provider.Interface]:
+        """TODO"""
+
+        return [
+            v1.utils.InterfaceRequirement(interfaces.SecretsInterface, "provider", "secrets"),
+            v1.utils.InterfaceRequirement(interfaces.ServicesInterface, "provider", "services"),
+            v1.utils.InterfaceRequirement(interfaces.DeploymentsInterface, "provider", "deployments")
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._volume_links = []
+
+        self._service_link = None
+        self._secret_link = None
+
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"
 
     def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
         """TODO"""
 
-        link = providers.VolumeLink(name, mount_path, link)
+        link = types.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
     def _link(self) -> v1.utils.Future[object]:
@@ -97,31 +107,28 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        secrets = deployment.provider(providers.SecretsProvider)
-        self._secret_link = secrets.create(f"{self.name}_admin", [
-            providers.KeyValue("user", "postgres"),
-            providers.KeyValue("password", self.configuration["password"])
+        self._secret_link = self.interfaces.secrets.create(f"{self.name}_admin", [
+            types.KeyValue("user", "postgres"),
+            types.KeyValue("password", self.configuration["password"])
         ])
 
-        services = deployment.provider(providers.ServicesProvider)
-        self._service_link = services.create(self.name, [5432], None)
+        self._service_link = self.interfaces.services.create(self.name, [5432], None)
 
         env = [
-            providers.KeyValue("PGDATA", "/data")
+            types.KeyValue("PGDATA", "/data")
         ]
 
         secret_links = [
-            providers.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
+            types.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
         ]
 
-        deployments = deployment.provider(providers.DeploymentsProvider)
-        deployments.create(self.name,
-                           self._image(),
-                           None,
-                           None,
-                           None,
-                           env,
-                           None,
-                           self._volume_links,
-                           secret_links,
-                           1)
+        self.interfaces.deployments.create(self.name,
+                                           self._image(),
+                                           None,
+                                           None,
+                                           None,
+                                           env,
+                                           None,
+                                           self._volume_links,
+                                           secret_links,
+                                           1)

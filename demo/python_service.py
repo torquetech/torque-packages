@@ -7,7 +7,6 @@
 from torque import v1
 
 from demo import interfaces
-from demo import providers
 from demo import python_task
 
 
@@ -25,6 +24,14 @@ class Component(python_task.Component):
             "udp_ports": [int]
         }
     }, allow_overwrites=False)
+
+    @classmethod
+    def on_requirements(cls) -> [v1.provider.Interface]:
+        """TODO"""
+
+        return super().on_requirements() + [
+            v1.utils.InterfaceRequirement(interfaces.ServicesInterface, "provider", "services")
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,9 +53,8 @@ class Component(python_task.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        services = deployment.provider(providers.ServicesProvider)
-        self._service_link = services.create(self.name,
-                                             self.configuration["tcp_ports"],
-                                             self.configuration["udp_ports"])
+        self._service_link = self.interfaces.services.create(self.name,
+                                                             self.configuration["tcp_ports"],
+                                                             self.configuration["udp_ports"])
 
         super().on_apply(deployment)

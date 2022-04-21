@@ -24,10 +24,16 @@ repository = {
             "demo/psycopg": psycopg.Link
         },
         "providers": {
-            "demo/k8s/images": k8s.ImagesProvider,
-            "demo/k8s/secrets": k8s.SecretsProvider,
-            "demo/k8s/services": k8s.ServicesProvider,
-            "demo/k8s/deployments": k8s.DeploymentsProvider
+            "demo/k8s": k8s.Provider
+        },
+        "interfaces": {
+            "demo/k8s": {
+                "images": k8s.ImagesInterface,
+                "secrets": k8s.SecretsInterface,
+                "services": k8s.ServicesInterface,
+                "deployments": k8s.DeploymentsInterface,
+                "configmaps": k8s.ConfigMapsInterface
+            }
         }
     }
 }
