@@ -76,6 +76,14 @@ class ProviderNotFound(TorqueException):
     """TODO"""
 
 
+class InterfaceNotFound(TorqueException):
+    """TODO"""
+
+
+class InvalidRequirement(TorqueException):
+    """TODO"""
+
+
 class InvalidName(TorqueException):
     """TODO"""
 

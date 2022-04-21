@@ -4,8 +4,10 @@
 
 """TODO"""
 
-import threading
+import os
+import shutil
 import sys
+import threading
 
 from collections import namedtuple
 from collections.abc import Callable
@@ -20,6 +22,7 @@ from torque import v1
 
 Configuration = namedtuple("Configuration", [
     "providers",
+    "interfaces",
     "components",
     "links"
 ])
@@ -47,15 +50,54 @@ class Deployment:
         self._components: dict[str, v1.component.Component] = {}
         self._links: dict[str, v1.link.Link] = {}
         self._providers: dict[str, v1.provider.Provider] = {}
+        self._interfaces: dict[str, v1.provider.Interface] = {}
 
         self._lock = threading.Lock()
 
-    def _path(self) -> str:
+    def _create_path(self) -> str:
         """TODO"""
 
-        return f"{v1.utils.torque_dir()}/local/deployments/{self._name}"
+        deployment_path = f"{v1.utils.torque_dir()}/local/deployments/{self._name}"
 
-    def _component(self, name: str) -> v1.component.Component:
+        if os.path.exists(deployment_path):
+            for path in os.listdir(deployment_path):
+                path = f"{deployment_path}/{path}"
+
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+
+                else:
+                    os.unlink(path)
+
+        else:
+            os.makedirs(deployment_path)
+
+        return deployment_path
+
+    def _setup_interfaces(self) -> v1.provider.Interface:
+        """TODO"""
+
+        for name in self._config.interfaces.keys():
+            interface = self._repo.interface(name)
+
+            if not issubclass(interface, v1.provider.Interface):
+                raise RuntimeError(f"{v1.utils.fqcn(interface)}: invalid provider interface")
+
+            cls = interface
+
+            while cls is not v1.provider.Interface:
+                if len(cls.__bases__) != 1:
+                    raise RuntimeError(f"{v1.utils.fqcn(interface)}: multiple inheritance not supported")
+
+                fqcn = v1.utils.fqcn(cls)
+
+                if fqcn in self._interfaces:
+                    print(f"WARNING: {name}: duplicate interface: {fqcn}")
+
+                self._interfaces[fqcn] = interface
+                cls = cls.__bases__[0]
+
+    def _component(self, name: str, build_phase: bool) -> v1.component.Component:
         """TODO"""
 
         if name in self._components:
@@ -64,15 +106,34 @@ class Deployment:
         config = self._config.components[name]
         component = self._dag.components[name]
 
-        component = self._repo.component(component.type)(component.name,
-                                                         component.labels,
-                                                         component.parameters,
-                                                         config)
+        type = self._repo.component(component.type)
+
+        interfaces = []
+
+        for i in type.on_requirements():
+            if not isinstance(i, v1.utils.InterfaceRequirement):
+                raise exceptions.InvalidRequirement(i)
+
+            if i.type != "provider":
+                raise exceptions.InvalidRequirement(i)
+
+            interface = None
+
+            if not build_phase:
+                interface = self._interface(i.interface, component.labels)
+
+            interfaces.append((i.target, interface))
+
+        component = type(component.name,
+                         component.labels,
+                         component.parameters,
+                         config,
+                         v1.utils.Interfaces(interfaces))
 
         self._components[component.name] = component
         return component
 
-    def _link(self, name: str) -> v1.link.Link:
+    def _link(self, name: str, build_phase: bool) -> v1.link.Link:
         """TODO"""
 
         if name in self._links:
@@ -81,29 +142,73 @@ class Deployment:
         config = self._config.links[name]
         link = self._dag.links[name]
 
-        source = self._component(link.source)
-        destination = self._component(link.destination)
+        source = self._component(link.source, build_phase)
+        destination = self._component(link.destination, build_phase)
 
-        link = self._repo.link(link.type)(link.name,
-                                          link.parameters,
-                                          config,
-                                          source,
-                                          destination)
+        type = self._repo.link(link.type)
+
+        interfaces = []
+
+        for i in type.on_requirements():
+            if not isinstance(i, v1.utils.InterfaceRequirement):
+                raise exceptions.InvalidRequirement(i)
+
+            if i.type == "source":
+                # pylint: disable=W0212
+                interface = source._torque_interface(i.interface)
+
+            elif i.type == "destination":
+                # pylint: disable=W0212
+                interface = destination._torque_interface(i.interface)
+
+            elif i.type == "source_provider":
+                interface = self._interface(i.interface, source.labels)
+
+            elif i.type == "destination_provider":
+                interface = self._interface(i.interface, destination.labels)
+
+            else:
+                raise exceptions.InvalidRequirement(i)
+
+            interfaces.append((i.target, interface))
+
+        link = type(link.name,
+                    link.parameters,
+                    config,
+                    v1.utils.Interfaces(interfaces),
+                    source.name,
+                    destination.name)
 
         self._links[link.name] = link
         return link
 
-    def _provider(self, meta: v1.metadata.Deployment, name: str) -> v1.provider.Provider:
+    def _provider(self, name: str) -> v1.provider.Provider:
         """TODO"""
 
         if name in self._providers:
             return self._providers[name]
 
         config = self._config.providers[name]
-        provider = self._repo.provider(name)(meta, config)
+        provider = self._repo.provider(name)(config)
 
         self._providers[name] = provider
         return provider
+
+    def _interface(self, interface: str, labels: [str]) -> v1.provider.Interface:
+        """TODO"""
+
+        fqcn = v1.utils.fqcn(interface)
+
+        if fqcn not in self._interfaces:
+            raise exceptions.InterfaceNotFound(fqcn)
+
+        interface = self._interfaces[fqcn]
+
+        # pylint: disable=W0212
+        config = self._config.interfaces[interface._TORQUE_NAME]
+        provider = self._provider(interface._TORQUE_PROVIDER)
+
+        return interface(config, provider, labels)
 
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
@@ -136,25 +241,23 @@ class Deployment:
     def build(self, workers: int):
         """TODO"""
 
-        meta = v1.metadata.Deployment(self._name, self._profile, False, self._path())
-        deployment = v1.deployment.create(meta, [])
+        path = self._create_path()
+        deployment = v1.deployment.Deployment(self._name, self._profile, False, path)
 
         def _on_build(type: str, name: str):
             """TODO"""
 
+            print(f"building {name}...", file=sys.stderr)
+
             with self._lock:
                 if type == "component":
-                    instance = self._component(name)
-                    # pylint: disable=W0212
-                    instance._torque_clear_lock()
+                    instance = self._component(name, True)
 
                 elif type == "link":
-                    instance = self._link(name)
+                    instance = self._link(name, True)
 
                 else:
                     assert False
-
-            print(f"building {name}...", file=sys.stderr)
 
             instance.on_build(deployment)
 
@@ -163,33 +266,32 @@ class Deployment:
     def apply(self, workers: int, dry_run: bool):
         """TODO"""
 
-        meta = v1.metadata.Deployment(self._name, self._profile, dry_run, self._path())
-        providers = [self._provider(meta, provider) for provider in self._config.providers.keys()]
-        deployment = v1.deployment.create(meta, providers)
+        self._setup_interfaces()
+
+        path = self._create_path()
+        deployment = v1.deployment.Deployment(self._name, self._profile, dry_run, path)
 
         def _on_apply(type: str, name: str):
             """TODO"""
 
+            print(f"applying {name}...", file=sys.stderr)
+
             with self._lock:
                 if type == "component":
-                    instance = self._component(name)
-                    # pylint: disable=W0212
-                    instance._torque_clear_lock()
+                    instance = self._component(name, False)
 
                 elif type == "link":
-                    instance = self._link(name)
+                    instance = self._link(name, False)
 
                 else:
                     assert False
-
-            print(f"applying {name}...", file=sys.stderr)
 
             instance.on_apply(deployment)
 
         self._execute(workers, _on_apply)
 
-        for provider in providers:
-            provider.on_apply()
+        for provider in self._providers.values():
+            provider.on_apply(deployment)
 
     def delete(self, dry_run: bool):
         """TODO"""
@@ -212,6 +314,20 @@ def _provider_config(provider: str,
 
     except v1.schema.SchemaError as exc:
         raise RuntimeError(f"provider configuration: {provider}: {exc}") from exc
+
+
+def _interface_config(interface: str,
+                      profile: profile.Profile,
+                      repo: repository.Repository) -> object:
+    """TODO"""
+
+    config = profile.interface(interface)
+
+    try:
+        return repo.interface(interface).on_configuration(config or {})
+
+    except v1.schema.SchemaError as exc:
+        raise RuntimeError(f"interface configuration: {interface}: {exc}") from exc
 
 
 def _component_config(component: model.Component,
@@ -262,6 +378,11 @@ def load(name: str,
         for provider in profile.providers()
     }
 
+    interfaces = {
+        interface: _interface_config(interface, profile, repo)
+        for interface in profile.interfaces()
+    }
+
     components = {
         component.name: _component_config(component, profile, repo)
         for component in dag.components.values()
@@ -272,6 +393,6 @@ def load(name: str,
         for link in dag.links.values()
     }
 
-    config = Configuration(providers, components, links)
+    config = Configuration(providers, interfaces, components, links)
 
     return Deployment(name, profile.name, dag, config, repo)

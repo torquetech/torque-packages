@@ -4,60 +4,12 @@
 
 """TODO"""
 
-import os
-import shutil
-
-from . import metadata
-from . import provider
-from . import utils
+from collections import namedtuple
 
 
-class Deployment:
-    """TODO"""
-
-    def __init__(self, metadata: metadata.Deployment, providers: [provider.Provider]):
-        self.metadata = metadata
-
-        self._interfaces = {}
-
-        for p in providers:
-            if not issubclass(p.__class__, provider.Provider):
-                raise RuntimeError(f"{utils.fqcn(p)}: invalid provider")
-
-            cls = p.__class__
-
-            while cls is not provider.Provider:
-                if len(cls.__bases__) != 1:
-                    raise RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
-
-                self._interfaces[utils.fqcn(cls)] = p
-                cls = cls.__bases__[0]
-
-        if os.path.exists(self.metadata.path):
-            for path in os.listdir(self.metadata.path):
-                path = f"{self.metadata.path}/{path}"
-
-                if os.path.isdir(path):
-                    shutil.rmtree(path)
-
-                else:
-                    os.unlink(path)
-
-        else:
-            os.makedirs(self.metadata.path)
-
-    def provider(self, cls: type) -> provider.Provider:
-        """TODO"""
-
-        name = utils.fqcn(cls)
-
-        if name not in self._interfaces:
-            return None
-
-        return self._interfaces[name]
-
-
-def create(metadata: metadata.Deployment, providers: [provider.Provider]) -> Deployment:
-    """TODO"""
-
-    return Deployment(metadata, providers)
+Deployment = namedtuple("Deployment", [
+    "name",
+    "profile",
+    "dry_run",
+    "path"
+])

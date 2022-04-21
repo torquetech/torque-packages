@@ -38,6 +38,12 @@ def _is_provider(obj: object) -> bool:
     return issubclass(obj, v1.provider.Provider)
 
 
+def _is_interface(obj: object) -> bool:
+    """TODO"""
+
+    return issubclass(obj, v1.provider.Interface)
+
+
 _REPOSITORY_SCHEMA = v1.schema.Schema({
     v1.schema.Optional("v1"): v1.schema.Schema({
         v1.schema.Optional("components"): {
@@ -51,6 +57,11 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
         },
         v1.schema.Optional("providers"): {
             v1.schema.Optional(str): _is_provider
+        },
+        v1.schema.Optional("interfaces"): {
+            v1.schema.Optional(str): {
+                v1.schema.Optional(str): _is_interface
+            }
         }
     })
 }, ignore_extra_keys=True)
@@ -66,6 +77,8 @@ _DEFAULT_REPOSITORY = {
             "file": protocols.FileProtocol
         },
         "providers": {
+        },
+        "interfaces": {
         }
     }
 }
@@ -74,68 +87,113 @@ _DEFAULT_REPOSITORY = {
 class Repository:
     """TODO"""
 
-    def __init__(self, exts: dict[str, object]):
-        self._exts = exts
+    def __init__(self, repo: dict[str, object]):
+        self._repo = repo
 
-    def components(self) -> dict[str, object]:
+        self._process_providers()
+
+    def _process_providers(self):
         """TODO"""
 
-        return self._exts["v1"]["components"]
+        providers = {}
+        interfaces = {}
 
-    def links(self) -> dict[str, object]:
+        for provider_name, provider_class in self._repo["v1"]["providers"].items():
+            # pylint: disable=W0212
+
+            providers[provider_name] = provider_class
+            provider_class._TORQUE_INTERFACES = []
+
+        for provider_name, provider_interfaces in self._repo["v1"]["interfaces"].items():
+            provider_class = self.provider(provider_name)
+
+            for interface_name, interface_class in provider_interfaces.items():
+                interface_name = f"{provider_name}/{interface_name}"
+
+                interface_class._TORQUE_PROVIDER = provider_name
+                interface_class._TORQUE_NAME = interface_name
+
+                provider_class._TORQUE_INTERFACES.append(interface_name)
+
+                interfaces[interface_name] = interface_class
+
+        self._repo["v1"]["providers"] = providers
+        self._repo["v1"]["interfaces"] = interfaces
+
+    def components(self) -> dict[str, v1.component.Component]:
         """TODO"""
 
-        return self._exts["v1"]["links"]
+        return self._repo["v1"]["components"]
 
-    def protocols(self) -> dict[str, object]:
+    def links(self) -> dict[str, v1.link.Link]:
         """TODO"""
 
-        return self._exts["v1"]["protocols"]
+        return self._repo["v1"]["links"]
 
-    def providers(self) -> dict[str, object]:
+    def protocols(self) -> dict[str, v1.protocol.Protocol]:
         """TODO"""
 
-        return self._exts["v1"]["providers"]
+        return self._repo["v1"]["protocols"]
 
-    def component(self, component_type: str) -> v1.component.Component:
+    def providers(self) -> dict[str, v1.provider.Provider]:
+        """TODO"""
+
+        return self._repo["v1"]["providers"]
+
+    def interfaces(self) -> dict[str, v1.provider.Interface]:
+        """TODO"""
+
+        return self._repo["v1"]["interfaces"]
+
+    def component(self, name: str) -> v1.component.Component:
         """TODO"""
 
         components = self.components()
 
-        if component_type not in components:
-            raise exceptions.ComponentTypeNotFound(component_type)
+        if name not in components:
+            raise exceptions.ComponentTypeNotFound(name)
 
-        return components[component_type]
+        return components[name]
 
-    def link(self, link_type: str) -> v1.link.Link:
+    def link(self, name: str) -> v1.link.Link:
         """TODO"""
 
         links = self.links()
 
-        if link_type not in links:
-            raise exceptions.LinkTypeNotFound(link_type)
+        if name not in links:
+            raise exceptions.LinkTypeNotFound(name)
 
-        return links[link_type]
+        return links[name]
 
-    def protocol(self, protocol: str) -> v1.protocol.Protocol:
+    def protocol(self, name: str) -> v1.protocol.Protocol:
         """TODO"""
 
         protocols = self.protocols()
 
-        if protocol not in protocols:
-            raise exceptions.ProtocolNotFound(protocol)
+        if name not in protocols:
+            raise exceptions.ProtocolNotFound(name)
 
-        return protocols[protocol]
+        return protocols[name]
 
-    def provider(self, provider: str) -> v1.provider.Provider:
+    def provider(self, name: str) -> v1.provider.Provider:
         """TODO"""
 
         providers = self.providers()
 
-        if provider not in providers:
-            raise exceptions.ProviderNotFound(provider)
+        if name not in providers:
+            raise exceptions.ProviderNotFound(name)
 
-        return providers[provider]
+        return providers[name]
+
+    def interface(self, name: str) -> v1.provider.Interface:
+        """TODO"""
+
+        interfaces = self.interfaces()
+
+        if name not in interfaces:
+            raise exceptions.InterfaceNotFound(name)
+
+        return interfaces[name]
 
 
 def _system_repository():

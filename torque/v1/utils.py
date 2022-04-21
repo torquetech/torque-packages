@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import collections
 import inspect
 import os
 import pathlib
@@ -160,3 +161,16 @@ class Future(typing.Generic[T]):
 
             self._value = value
             self._condition.notify_all()
+
+
+InterfaceRequirement = collections.namedtuple("InterfaceRequirement", [
+    "interface", "type", "target"
+])
+
+
+class Interfaces:
+    """TODO"""
+
+    def __init__(self, interfaces: list[(str, object)]):
+        for name, obj in interfaces:
+            setattr(self, name, obj)

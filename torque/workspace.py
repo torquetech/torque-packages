@@ -225,12 +225,24 @@ class Workspace:
     def _component(self, component: model.Component):
         """TODO"""
 
-        component_type = self.repo.component(component.type)
+        type = self.repo.component(component.type)
 
-        return component_type(component.name,
-                              component.labels,
-                              component.parameters,
-                              None)
+        interfaces = []
+
+        for i in type.on_requirements():
+            if not isinstance(i, v1.utils.InterfaceRequirement):
+                raise exceptions.InvalidRequirement(i)
+
+            if i.type != "provider":
+                raise exceptions.InvalidRequirement(i)
+
+            interfaces.append((i.target, None))
+
+        return type(component.name,
+                    component.labels,
+                    component.parameters,
+                    None,
+                    v1.utils.Interfaces(interfaces))
 
     def _link(self,
               link: model.Link,
@@ -238,13 +250,39 @@ class Workspace:
               destination: v1.component.Component) -> v1.link.Link:
         """TODO"""
 
-        link_type = self.repo.link(link.type)
+        type = self.repo.link(link.type)
 
-        return link_type(link.name,
-                         link.parameters,
-                         None,
-                         source,
-                         destination)
+        interfaces = []
+
+        for i in type.on_requirements():
+            if not isinstance(i, v1.utils.InterfaceRequirement):
+                raise exceptions.InvalidRequirement(i)
+
+            if i.type == "source":
+                # pylint: disable=W0212
+                interface = source._torque_interface(i.interface)
+
+            elif i.type == "destination":
+                # pylint: disable=W0212
+                interface = destination._torque_interface(i.interface)
+
+            elif i.type == "source_provider":
+                interface = None
+
+            elif i.type == "destination_provider":
+                interface = None
+
+            else:
+                raise exceptions.InvalidRequirement(i)
+
+            interfaces.append((i.target, interface))
+
+        return type(link.name,
+                    link.parameters,
+                    None,
+                    v1.utils.Interfaces(interfaces),
+                    source.name,
+                    destination.name)
 
     def _collect_components(self, labels: [str], components: [str]) -> [str]:
         """TODO"""

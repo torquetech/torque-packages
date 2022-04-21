@@ -15,7 +15,10 @@ from torque import v1
 _PROTO = r"^([^:]+)://"
 _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "providers": {
-        v1.schema.Optional(str): object,
+        v1.schema.Optional(str): object
+    },
+    "interfaces": {
+        v1.schema.Optional(str): object
     },
     "dag": {
         "revision": int,
@@ -46,6 +49,11 @@ class Profile:
 
         return self._config["providers"].keys()
 
+    def interfaces(self) -> [str]:
+        """TODO"""
+
+        return self._config["interfaces"].keys()
+
     def provider(self, name: str) -> object:
         """TODO"""
 
@@ -55,6 +63,16 @@ class Profile:
             return {}
 
         return providers[name]
+
+    def interface(self, name: str) -> object:
+        """TODO"""
+
+        interfaces = self._config["interfaces"]
+
+        if name not in interfaces:
+            return {}
+
+        return interfaces[name]
 
     def component(self, name: str) -> object:
         """TODO"""
@@ -118,10 +136,20 @@ def defaults(providers: [str],
              repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
+    interfaces = []
+
+    for provider_name in providers:
+        # pylint: disable=W0212
+        interfaces += repo.provider(provider_name)._TORQUE_INTERFACES
+
     return {
         "providers": {
-            provider: repo.provider(provider).on_configuration({})
-            for provider in providers
+            name: repo.provider(name).on_configuration({})
+            for name in providers
+        },
+        "interfaces": {
+            name: repo.interface(name).on_configuration({})
+            for name in interfaces
         },
         "dag": {
             "revision": dag.revision,
