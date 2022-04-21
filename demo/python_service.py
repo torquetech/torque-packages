@@ -7,14 +7,14 @@
 from torque import v1
 
 from demo import interfaces
-from demo import python_task
+from demo import python_app
 
 
-class Component(python_task.Component):
+class Component(python_app.Component):
     """TODO"""
 
     # pylint: disable=W0212
-    _CONFIGURATION = v1.utils.merge_dicts(python_task.Component._CONFIGURATION, {
+    _CONFIGURATION = v1.utils.merge_dicts(python_app.Component._CONFIGURATION, {
         "defaults": {
             "tcp_ports": [],
             "udp_ports": []

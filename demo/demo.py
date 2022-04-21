@@ -11,7 +11,7 @@ from demo import network
 from demo import postgres
 from demo import psycopg
 from demo import python_service
-from demo import python_task
+from demo import python_app
 from demo import terraform
 from demo import volume
 
@@ -19,7 +19,7 @@ from demo import volume
 repository = {
     "v1": {
         "components": {
-            "demo/python-task": python_task.Component,
+            "demo/python-app": python_app.Component,
             "demo/python-service": python_service.Component,
             "demo/postgres": postgres.Component,
             "demo/configmap": configmap.Component,
