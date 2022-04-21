@@ -8,6 +8,7 @@ from demo import configmap
 from demo import ebs_volume
 from demo import k8s
 from demo import network
+from demo import pg_data
 from demo import postgres
 from demo import psycopg
 from demo import python_service
@@ -28,7 +29,8 @@ repository = {
         "links": {
             "demo/network": network.Link,
             "demo/psycopg": psycopg.Link,
-            "demo/volume": volume.Link
+            "demo/volume": volume.Link,
+            "demo/pg_data": pg_data.Link
         },
         "providers": {
             "demo/k8s": k8s.Provider,

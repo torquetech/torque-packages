@@ -87,12 +87,19 @@ class Component(v1.component.Component):
 
         return self._secret_link
 
+    def _pg_data(self) -> str:
+        """TODO"""
+
+        return "/data"
+
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
             interfaces.VolumeLink(add=self._add_volume_link),
-            interfaces.PostgresService(link=self._link, admin=self._admin)
+            interfaces.PostgresService(link=self._link,
+                                       admin=self._admin,
+                                       pg_data=self._pg_data)
         ]
 
     def on_create(self):

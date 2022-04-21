@@ -28,6 +28,9 @@ class PostgresService(Service):
     def admin() -> v1.utils.Future[object]:
         """TODO"""
 
+    def pg_data() -> str:
+        """TODO"""
+
 
 class NetworkLink(v1.component.Interface):
     # pylint: disable=E0211,E0213
