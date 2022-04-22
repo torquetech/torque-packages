@@ -332,6 +332,34 @@ class ConfigMapsInterface(interfaces.ConfigMapsInterface):
         })
 
 
+class EBSVolumesInterface(interfaces.EBSVolumesInterface):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
+
+    def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
+        """TODO"""
+
+        return v1.utils.Future({
+            "name": name,
+            "awsElasticBlockStore": {
+                "volumeID": volume_id,
+                "fsType": "ext4"
+            }
+        })
+
+
 class Provider(v1.provider.Provider):
     """TODO"""
 

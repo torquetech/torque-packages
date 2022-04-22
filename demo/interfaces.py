@@ -144,3 +144,23 @@ class ConfigMapsInterface(v1.provider.Interface):
     @abstractmethod
     def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
         """TODO"""
+
+
+class EBSVolumesInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
+        """TODO"""
+
+
+class EBSProviderInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str, size: int) -> v1.utils.Future[object]:
+        """TODO"""
