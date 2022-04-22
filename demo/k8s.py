@@ -189,6 +189,24 @@ class DeploymentsInterface(interfaces.DeploymentsInterface):
             }
         } for secret_link in secret_links]
 
+    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([object], [object]):
+        """TODO"""
+
+        if not volume_links:
+            return None, None
+
+        mounts = [{
+            "name": volume_link.name,
+            "mountPath": volume_link.mount_path
+        } for volume_link in volume_links]
+
+        volumes = [{
+            "name": volume_link.name,
+            **volume_link.object.get(),
+        } for volume_link in volume_links]
+
+        return mounts, volumes
+
     def _k8s_create(self,
                     name: str,
                     image: str,
@@ -205,6 +223,8 @@ class DeploymentsInterface(interfaces.DeploymentsInterface):
         env = [{"name": e.key, "value": e.value} for e in env]
         env += self._convert_secret_links(secret_links)
         env += self._convert_network_links(network_links)
+
+        mounts, volumes = self._convert_volume_links(volume_links)
 
         return {
             "apiVersion": "apps/v1",
@@ -234,8 +254,10 @@ class DeploymentsInterface(interfaces.DeploymentsInterface):
                             "command": cmd,
                             "args": args,
                             "workingDir": cwd,
-                            "env": env
-                        }]
+                            "env": env,
+                            "volumeMounts": mounts
+                        }],
+                        "volumes": volumes
                     }
                 }
             }
@@ -266,6 +288,48 @@ class DeploymentsInterface(interfaces.DeploymentsInterface):
                              secret_links,
                              replicas)
         ])
+
+
+class ConfigMapsInterface(interfaces.ConfigMapsInterface):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
+
+    def _k8s_create(self, name: str, configuration: object) -> object:
+        """TODO"""
+
+        return {
+            "apiVersion": "v1",
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": name
+            },
+            "data": configuration
+        }
+
+    def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
+        """TODO"""
+
+        self.provider.add_to_target(name, [
+            self._k8s_create(name, configuration)
+        ])
+
+        return v1.utils.Future({
+            "configMap": {
+                "name": name
+            }
+        })
 
 
 class Provider(v1.provider.Provider):

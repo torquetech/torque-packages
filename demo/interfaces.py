@@ -134,3 +134,13 @@ class DeploymentsInterface(v1.provider.Interface):
                secret_links: [types.SecretLink],
                replicas: int):
         """TODO"""
+
+
+class ConfigMapsInterface(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
+        """TODO"""

@@ -4,12 +4,14 @@
 
 """TODO"""
 
+from demo import configmap
 from demo import k8s
 from demo import network
 from demo import postgres
 from demo import psycopg
 from demo import python_service
 from demo import python_task
+from demo import volume
 
 
 repository = {
@@ -17,11 +19,13 @@ repository = {
         "components": {
             "demo/python-task": python_task.Component,
             "demo/python-service": python_service.Component,
-            "demo/postgres": postgres.Component
+            "demo/postgres": postgres.Component,
+            "demo/configmap": configmap.Component
         },
         "links": {
             "demo/network": network.Link,
-            "demo/psycopg": psycopg.Link
+            "demo/psycopg": psycopg.Link,
+            "demo/volume": volume.Link
         },
         "providers": {
             "demo/k8s": k8s.Provider
