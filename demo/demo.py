@@ -38,15 +38,15 @@ repository = {
         },
         "interfaces": {
             "demo/k8s": {
-                "images": k8s.ImagesInterface,
-                "secrets": k8s.SecretsInterface,
-                "services": k8s.ServicesInterface,
-                "deployments": k8s.DeploymentsInterface,
-                "configmaps": k8s.ConfigMapsInterface,
-                "ebs-volumes": k8s.EBSVolumesInterface
+                "images": k8s.Images,
+                "secrets": k8s.Secrets,
+                "services": k8s.Services,
+                "deployments": k8s.Deployments,
+                "configmaps": k8s.ConfigMaps,
+                "ebs-volumes": k8s.EBSVolumes
             },
             "demo/terraform": {
-                "ebs-provider": terraform.EBSProviderInterface
+                "ebs-provider": terraform.EBSProvider
             }
         }
     }

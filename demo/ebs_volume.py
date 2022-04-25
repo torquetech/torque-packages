@@ -59,8 +59,8 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            v1.utils.InterfaceRequirement(interfaces.EBSProviderInterface, "provider", "t_ebs"),
-            v1.utils.InterfaceRequirement(interfaces.EBSVolumesInterface, "provider", "k_ebs")
+            v1.utils.InterfaceRequirement(interfaces.EBSProvider, "provider", "t_ebs"),
+            v1.utils.InterfaceRequirement(interfaces.EBSVolumes, "provider", "k_ebs")
         ]
 
     def __init__(self, *args, **kwargs):

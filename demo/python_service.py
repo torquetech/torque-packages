@@ -30,7 +30,7 @@ class Component(python_app.Component):
         """TODO"""
 
         return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(interfaces.ServicesInterface, "provider", "services")
+            v1.utils.InterfaceRequirement(interfaces.Services, "provider", "services")
         ]
 
     def __init__(self, *args, **kwargs):

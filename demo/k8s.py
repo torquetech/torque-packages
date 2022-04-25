@@ -13,7 +13,7 @@ from demo import interfaces
 from demo import types
 
 
-class ImagesInterface(interfaces.ImagesInterface):
+class Images(interfaces.Images):
     """TODO"""
 
     _CONFIGURATION = {
@@ -33,7 +33,7 @@ class ImagesInterface(interfaces.ImagesInterface):
         """TODO"""
 
 
-class SecretsInterface(interfaces.SecretsInterface):
+class Secrets(interfaces.Secrets):
     """TODO"""
 
     _CONFIGURATION = {
@@ -72,7 +72,7 @@ class SecretsInterface(interfaces.SecretsInterface):
         return v1.utils.Future(name)
 
 
-class ServicesInterface(interfaces.ServicesInterface):
+class Services(interfaces.Services):
     """TODO"""
 
     _CONFIGURATION = {
@@ -135,7 +135,7 @@ class ServicesInterface(interfaces.ServicesInterface):
         return v1.utils.Future(uris)
 
 
-class DeploymentsInterface(interfaces.DeploymentsInterface):
+class Deployments(interfaces.Deployments):
     """TODO"""
 
     _CONFIGURATION = {
@@ -290,7 +290,7 @@ class DeploymentsInterface(interfaces.DeploymentsInterface):
         ])
 
 
-class ConfigMapsInterface(interfaces.ConfigMapsInterface):
+class ConfigMaps(interfaces.ConfigMaps):
     """TODO"""
 
     _CONFIGURATION = {
@@ -332,7 +332,7 @@ class ConfigMapsInterface(interfaces.ConfigMapsInterface):
         })
 
 
-class EBSVolumesInterface(interfaces.EBSVolumesInterface):
+class EBSVolumes(interfaces.EBSVolumes):
     """TODO"""
 
     _CONFIGURATION = {

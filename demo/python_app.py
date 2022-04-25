@@ -73,8 +73,8 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            v1.utils.InterfaceRequirement(interfaces.ImagesInterface, "provider", "images"),
-            v1.utils.InterfaceRequirement(interfaces.DeploymentsInterface, "provider", "deployments")
+            v1.utils.InterfaceRequirement(interfaces.Images, "provider", "images"),
+            v1.utils.InterfaceRequirement(interfaces.Deployments, "provider", "deployments")
         ]
 
     def __init__(self, *args, **kwargs):

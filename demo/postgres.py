@@ -55,9 +55,9 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            v1.utils.InterfaceRequirement(interfaces.SecretsInterface, "provider", "secrets"),
-            v1.utils.InterfaceRequirement(interfaces.ServicesInterface, "provider", "services"),
-            v1.utils.InterfaceRequirement(interfaces.DeploymentsInterface, "provider", "deployments")
+            v1.utils.InterfaceRequirement(interfaces.Secrets, "provider", "secrets"),
+            v1.utils.InterfaceRequirement(interfaces.Services, "provider", "services"),
+            v1.utils.InterfaceRequirement(interfaces.Deployments, "provider", "deployments")
         ]
 
     def __init__(self, *args, **kwargs):

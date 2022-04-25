@@ -89,7 +89,7 @@ class PythonModules(v1.component.Interface):
         """TODO"""
 
 
-class ImagesInterface(v1.provider.Interface):
+class Images(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -99,7 +99,7 @@ class ImagesInterface(v1.provider.Interface):
         """TODO"""
 
 
-class SecretsInterface(v1.provider.Interface):
+class Secrets(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -109,7 +109,7 @@ class SecretsInterface(v1.provider.Interface):
         """TODO"""
 
 
-class ServicesInterface(v1.provider.Interface):
+class Services(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -119,7 +119,7 @@ class ServicesInterface(v1.provider.Interface):
         """TODO"""
 
 
-class DeploymentsInterface(v1.provider.Interface):
+class Deployments(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -139,7 +139,7 @@ class DeploymentsInterface(v1.provider.Interface):
         """TODO"""
 
 
-class ConfigMapsInterface(v1.provider.Interface):
+class ConfigMaps(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -149,7 +149,7 @@ class ConfigMapsInterface(v1.provider.Interface):
         """TODO"""
 
 
-class EBSVolumesInterface(v1.provider.Interface):
+class EBSVolumes(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -159,7 +159,7 @@ class EBSVolumesInterface(v1.provider.Interface):
         """TODO"""
 
 
-class EBSProviderInterface(v1.provider.Interface):
+class EBSProvider(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""

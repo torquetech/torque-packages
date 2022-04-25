@@ -11,7 +11,7 @@ from torque import v1
 from demo import interfaces
 
 
-class EBSProviderInterface(interfaces.EBSProviderInterface):
+class EBSProvider(interfaces.EBSProvider):
     """TODO"""
 
     _CONFIGURATION = {

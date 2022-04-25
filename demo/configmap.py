@@ -53,7 +53,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            v1.utils.InterfaceRequirement(interfaces.ConfigMapsInterface, "provider", "cmap")
+            v1.utils.InterfaceRequirement(interfaces.ConfigMaps, "provider", "cmap")
         ]
 
     def __init__(self, *args, **kwargs):
