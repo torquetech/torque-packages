@@ -260,11 +260,11 @@ class Workspace:
 
             if i.type == "source":
                 # pylint: disable=W0212
-                interface = source._torque_interface(i.interface)
+                interface = source._torque_interface(i.interface, i.required)
 
             elif i.type == "destination":
                 # pylint: disable=W0212
-                interface = destination._torque_interface(i.interface)
+                interface = destination._torque_interface(i.interface, i.required)
 
             elif i.type == "source_provider":
                 interface = None

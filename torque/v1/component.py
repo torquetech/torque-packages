@@ -85,12 +85,15 @@ class Component(ABC):
                 self._torque_interfaces[fqcn] = interface
                 cls = cls.__bases__[0]
 
-    def _torque_interface(self, cls: type) -> Interface:
+    def _torque_interface(self, cls: type, required: bool) -> Interface:
         """TODO"""
 
         name = utils.fqcn(cls)
 
         if name not in self._torque_interfaces:
+            if required:
+                raise RuntimeError(f"{self.name}: {name}: component interface not found")
+
             return None
 
         return self._torque_interfaces[name]

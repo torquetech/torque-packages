@@ -164,7 +164,10 @@ class Future(typing.Generic[T]):
 
 
 InterfaceRequirement = collections.namedtuple("InterfaceRequirement", [
-    "interface", "type", "target"
+    "interface",
+    "type",
+    "target",
+    "required"
 ])
 
 

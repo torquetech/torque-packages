@@ -120,7 +120,9 @@ class Deployment:
             interface = None
 
             if not build_phase:
-                interface = self._interface(i.interface, component.labels)
+                interface = self._interface(i.interface,
+                                            i.required,
+                                            component.labels)
 
             interfaces.append((i.target, interface))
 
@@ -155,17 +157,23 @@ class Deployment:
 
             if i.type == "source":
                 # pylint: disable=W0212
-                interface = source._torque_interface(i.interface)
+                interface = source._torque_interface(i.interface,
+                                                     i.required)
 
             elif i.type == "destination":
                 # pylint: disable=W0212
-                interface = destination._torque_interface(i.interface)
+                interface = destination._torque_interface(i.interface,
+                                                          i.required)
 
             elif i.type == "source_provider":
-                interface = self._interface(i.interface, source.labels)
+                interface = self._interface(i.interface,
+                                            i.required,
+                                            source.labels)
 
             elif i.type == "destination_provider":
-                interface = self._interface(i.interface, destination.labels)
+                interface = self._interface(i.interface,
+                                            i.required,
+                                            destination.labels)
 
             else:
                 raise exceptions.InvalidRequirement(i)
@@ -194,15 +202,21 @@ class Deployment:
         self._providers[name] = provider
         return provider
 
-    def _interface(self, interface: str, labels: [str]) -> v1.provider.Interface:
+    def _interface(self,
+                   interface: str,
+                   required: bool,
+                   labels: [str]) -> v1.provider.Interface:
         """TODO"""
 
-        fqcn = v1.utils.fqcn(interface)
+        name = v1.utils.fqcn(interface)
 
-        if fqcn not in self._interfaces:
-            raise exceptions.InterfaceNotFound(fqcn)
+        if name not in self._interfaces:
+            if required:
+                raise RuntimeError(f"{name}: provider interface not found")
 
-        interface = self._interfaces[fqcn]
+            return None
+
+        interface = self._interfaces[name]
 
         # pylint: disable=W0212
         config = self._config.interfaces[interface._TORQUE_NAME]
