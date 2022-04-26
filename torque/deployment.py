@@ -256,7 +256,10 @@ class Deployment:
         """TODO"""
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name, self._profile, False, path)
+        deployment = v1.deployment.Deployment(self._name,
+                                              self._profile,
+                                              False,
+                                              path)
 
         def _on_build(type: str, name: str):
             """TODO"""
@@ -283,7 +286,10 @@ class Deployment:
         self._setup_interfaces()
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name, self._profile, dry_run, path)
+        deployment = v1.deployment.Deployment(self._name,
+                                              self._profile,
+                                              dry_run,
+                                              path)
 
         def _on_apply(type: str, name: str):
             """TODO"""
