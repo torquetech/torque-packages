@@ -65,7 +65,7 @@ class Secrets(interfaces.Secrets):
     def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
         """TODO"""
 
-        self.provider.add_to_target(name, [
+        self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name, entries)
         ])
 
@@ -116,8 +116,8 @@ class Services(interfaces.Services):
     def create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> v1.utils.Future[object]:
         """TODO"""
 
-        self.provider.add_to_target(name, [
-            self._k8s_create(name, tcp_ports, udp_ports),
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name, type, port, target_port),
         ])
 
         uris = []
@@ -276,7 +276,7 @@ class Deployments(interfaces.Deployments):
                replicas: int):
         """TODO"""
 
-        self.provider.add_to_target(name, [
+        self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name,
                              image,
                              cmd,
@@ -321,7 +321,7 @@ class ConfigMaps(interfaces.ConfigMaps):
     def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
         """TODO"""
 
-        self.provider.add_to_target(name, [
+        self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name, configuration)
         ])
 
