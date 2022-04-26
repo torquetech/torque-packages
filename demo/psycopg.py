@@ -63,7 +63,9 @@ class Link(network.Link):
 
         super().on_create()
 
-        template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg.py.template"))
+        template_path = f"{utils.module_path()}/templates/psycopg.py.template"
+        template = jinja2.Template(utils.load_file(template_path))
+
         target_path = f"{self.interfaces.mod.path()}/{self.source}.py"
 
         if os.path.exists(v1.utils.resolve_path(target_path)):

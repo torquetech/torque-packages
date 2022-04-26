@@ -11,8 +11,8 @@ from demo import network
 from demo import pg_data
 from demo import postgres
 from demo import psycopg
-from demo import python_service
 from demo import python_app
+from demo import python_service
 from demo import terraform
 from demo import volume
 
