@@ -19,12 +19,20 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-def package_data(module: str, pattern: str) -> [str]:
-    data = glob.glob(f"{module}/{pattern}", recursive=True)
-    data = filter(lambda x: os.path.isfile(x), data)
-    data = map(lambda x: x.lstrip(f"{module}/"), data)
+def package_files(module: str, pattern: str) -> [str]:
+    files = glob.glob(f"{module}/{pattern}", recursive=True)
+    files = filter(lambda x: os.path.isfile(x), files)
 
-    return list(data)
+    return map(lambda x: x.removeprefix(f"{module}/"), files)
+
+
+def package_data(module: str, patterns: [str]) -> [str]:
+    files = []
+
+    for pattern in patterns:
+        files += package_files(module, pattern)
+
+    return files
 
 
 setup(
@@ -42,7 +50,7 @@ setup(
     ],
     packages=find_packages(),
     package_data={
-        'demo': package_data("demo", "templates/**")
+        "demo": package_data("demo", ["templates/**"])
     },
     include_package_data=True,
     python_requires=">=3.9",
