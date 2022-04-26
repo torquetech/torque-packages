@@ -20,6 +20,12 @@ class Service(v1.component.Interface):
         """TODO"""
 
 
+class HttpService(Service):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+
 class PostgresService(Service):
     # pylint: disable=E0211,E0213
 

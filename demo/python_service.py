@@ -52,7 +52,7 @@ class Component(python_app.Component):
         """TODO"""
 
         return super().on_interfaces() + [
-            interfaces.Service(link=self._link)
+            interfaces.HttpService(link=self._link)
         ]
 
     def on_apply(self, deployment: v1.deployment.Deployment):
