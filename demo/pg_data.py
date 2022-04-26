@@ -23,16 +23,13 @@ class Link(volume.Link):
         """TODO"""
 
         return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(interfaces.PostgresService, "destination", "pg"),
+            v1.utils.InterfaceRequirement(
+                interfaces.PostgresService,
+                "destination",
+                "pg",
+                True
+            ),
         ]
-
-    def on_create(self):
-        """TODO"""
-
-        super().on_create()
-
-        if not self.interfaces.pg:
-            raise RuntimeError(f"{self.destination}: incompatible component")
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""

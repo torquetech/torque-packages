@@ -45,18 +45,22 @@ class Link(v1.link.Link):
         """TODO"""
 
         return [
-            v1.utils.InterfaceRequirement(interfaces.Volume, "source", "src"),
-            v1.utils.InterfaceRequirement(interfaces.VolumeLink, "destination", "dst"),
+            v1.utils.InterfaceRequirement(
+                interfaces.Volume,
+                "source",
+                "src",
+                True
+            ),
+            v1.utils.InterfaceRequirement(
+                interfaces.VolumeLink,
+                "destination",
+                "dst",
+                True
+            ),
         ]
 
     def on_create(self):
         """TODO"""
-
-        if not self.interfaces.src:
-            raise RuntimeError(f"{self.source}: incompatible component")
-
-        if not self.interfaces.dst:
-            raise RuntimeError(f"{self.destination}: incompatible component")
 
     def on_remove(self):
         """TODO"""

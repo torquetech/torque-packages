@@ -32,24 +32,36 @@ class Link(network.Link):
         """TODO"""
 
         return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(interfaces.PostgresService, "source", "pg"),
-            v1.utils.InterfaceRequirement(interfaces.PythonModules, "destination", "mod"),
-            v1.utils.InterfaceRequirement(interfaces.SecretLink, "destination", "sec"),
-            v1.utils.InterfaceRequirement(interfaces.Environment, "destination", "env")
+            v1.utils.InterfaceRequirement(
+                interfaces.PostgresService,
+                "source",
+                "pg",
+                True
+            ),
+            v1.utils.InterfaceRequirement(
+                interfaces.PythonModules,
+                "destination",
+                "mod",
+                True
+            ),
+            v1.utils.InterfaceRequirement(
+                interfaces.SecretLink,
+                "destination",
+                "sec",
+                True
+            ),
+            v1.utils.InterfaceRequirement(
+                interfaces.Environment,
+                "destination",
+                "env",
+                True
+            )
         ]
 
     def on_create(self):
         """TODO"""
 
         super().on_create()
-
-        if not self.interfaces.pg:
-            raise RuntimeError(f"{self.source}: incompatible component")
-
-        if not self.interfaces.mod \
-           or not self.interfaces.sec \
-           or not self.interfaces.env:
-            raise RuntimeError(f"{self.destination}: incompatible component")
 
         template = jinja2.Template(utils.load_file(f"{utils.module_path()}/templates/psycopg.py.template"))
         target_path = f"{self.interfaces.mod.path()}/{self.source}.py"
