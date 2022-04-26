@@ -30,7 +30,7 @@ repository = {
             "demo/network": network.Link,
             "demo/psycopg": psycopg.Link,
             "demo/volume": volume.Link,
-            "demo/pg_data": pg_data.Link
+            "demo/pg-data": pg_data.Link,
         },
         "providers": {
             "demo/k8s": k8s.Provider,
