@@ -155,6 +155,8 @@ class Deployment:
             if not isinstance(i, v1.utils.InterfaceRequirement):
                 raise exceptions.InvalidRequirement(i)
 
+            interface = None
+
             if i.type == "source":
                 # pylint: disable=W0212
                 interface = source._torque_interface(i.interface,
@@ -166,14 +168,16 @@ class Deployment:
                                                           i.required)
 
             elif i.type == "source_provider":
-                interface = self._interface(i.interface,
-                                            i.required,
-                                            source.labels)
+                if not build_phase:
+                    interface = self._interface(i.interface,
+                                                i.required,
+                                                source.labels)
 
             elif i.type == "destination_provider":
-                interface = self._interface(i.interface,
-                                            i.required,
-                                            destination.labels)
+                if not build_phase:
+                    interface = self._interface(i.interface,
+                                                i.required,
+                                                destination.labels)
 
             else:
                 raise exceptions.InvalidRequirement(i)
