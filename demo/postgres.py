@@ -134,7 +134,7 @@ class Component(v1.component.Component):
             types.KeyValue("password", self.configuration["password"])
         ])
 
-        self._service_link = self.interfaces.services.create(self.name, [5432], None)
+        self._service_link = self.interfaces.services.create(self.name, "tcp", 5432, 5432)
 
         env = [
             types.KeyValue("PGDATA", "/data")

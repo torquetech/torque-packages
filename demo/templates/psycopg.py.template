@@ -3,7 +3,7 @@ import psycopg
 
 
 def connect():
-    link = os.getenv("{{COMPONENT}}_LINK_0")
+    link = os.getenv("{{COMPONENT}}_LINK")
     assert link.startswith("tcp://")
 
     host, port = link[6:].split(":")

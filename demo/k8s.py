@@ -88,16 +88,8 @@ class Services(interfaces.Services):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
-    def _k8s_create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> object:
+    def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> object:
         """TODO"""
-
-        ports = []
-
-        if tcp_ports:
-            ports += [{"protocol": "TCP", "port": port} for port in tcp_ports]
-
-        if udp_ports:
-            ports += [{"protocol": "UDP", "port": port} for port in udp_ports]
 
         return {
             "apiVersion": "v1",
@@ -109,30 +101,22 @@ class Services(interfaces.Services):
                 "selector": {
                     "app": name
                 },
-                "ports": ports
+                "ports": {
+                    "protocol": type.upper(),
+                    "port": port,
+                    "targetPort": target_port
+                }
             }
         }
 
-    def create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> v1.utils.Future[object]:
+    def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
         """TODO"""
 
         self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name, type, port, target_port),
         ])
 
-        uris = []
-
-        if tcp_ports:
-            uris += [
-                f"tcp://{name}:{port}" for port in tcp_ports
-            ]
-
-        if udp_ports:
-            uris += [
-                f"udp://{name}:{port}" for port in udp_ports
-            ]
-
-        return v1.utils.Future(uris)
+        return v1.utils.Future((type.lower(), name, port))
 
 
 class Deployments(interfaces.Deployments):
@@ -160,16 +144,13 @@ class Deployments(interfaces.Deployments):
         env = []
 
         for link in network_links:
-            ndx = 0
             name = link.name.upper()
+            link = link.object.get()
 
-            for uri in link.object.get():
-                env.append({
-                    "name": f"{name}_LINK_{ndx}",
-                    "value": f"{uri}"
-                })
-
-                ndx += 1
+            env.append({
+                "name": f"{name}_LINK",
+                "value": f"{link[0]}://{link[1]}:{link[2]}"
+            })
 
         return env
 

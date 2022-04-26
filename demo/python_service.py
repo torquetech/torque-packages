@@ -16,12 +16,12 @@ class Component(python_app.Component):
     # pylint: disable=W0212
     _CONFIGURATION = v1.utils.merge_dicts(python_app.Component._CONFIGURATION, {
         "defaults": {
-            "tcp_ports": [],
-            "udp_ports": []
+            "port": 8080,
+            "target_port": 8080
         },
         "schema": {
-            "tcp_ports": [int],
-            "udp_ports": [int]
+            "port": int,
+            "target_port": int
         }
     }, allow_overwrites=False)
 
@@ -59,7 +59,8 @@ class Component(python_app.Component):
         """TODO"""
 
         self._service_link = self.interfaces.services.create(self.name,
-                                                             self.configuration["tcp_ports"],
-                                                             self.configuration["udp_ports"])
+                                                             "tcp",
+                                                             self.configuration["port"],
+                                                             self.configuration["target_port"])
 
         super().on_apply(deployment)

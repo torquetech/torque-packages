@@ -115,7 +115,7 @@ class Services(v1.provider.Interface):
     """TODO"""
 
     @abstractmethod
-    def create(self, name: str, tcp_ports: [int], udp_ports: [int]) -> v1.utils.Future[object]:
+    def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
         """TODO"""
 
 
