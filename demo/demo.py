@@ -6,7 +6,9 @@
 
 from demo import configmap
 from demo import ebs_volume
+from demo import ingress
 from demo import k8s
+from demo import load_balancer
 from demo import network
 from demo import pg_data
 from demo import postgres
@@ -24,13 +26,15 @@ repository = {
             "demo/python-service": python_service.Component,
             "demo/postgres": postgres.Component,
             "demo/configmap": configmap.Component,
-            "demo/ebs-volume": ebs_volume.Component
+            "demo/ebs-volume": ebs_volume.Component,
+            "demo/load-balancer": load_balancer.Component
         },
         "links": {
             "demo/network": network.Link,
             "demo/psycopg": psycopg.Link,
             "demo/volume": volume.Link,
             "demo/pg-data": pg_data.Link,
+            "demo/ingress": ingress.Link
         },
         "providers": {
             "demo/k8s": k8s.Provider,
@@ -43,7 +47,9 @@ repository = {
                 "services": k8s.Services,
                 "deployments": k8s.Deployments,
                 "configmaps": k8s.ConfigMaps,
-                "ebs-volumes": k8s.EBSVolumes
+                "ebs-volumes": k8s.EBSVolumes,
+                "load-balancers": k8s.HttpLoadBalancers,
+                "ingress-links": k8s.HttpIngressLinks
             },
             "demo/terraform": {
                 "ebs-provider": terraform.EBSProvider

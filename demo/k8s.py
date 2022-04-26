@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import jinja2
 import threading
 import yaml
 
@@ -11,6 +12,7 @@ from torque import v1
 
 from demo import interfaces
 from demo import types
+from demo import utils
 
 
 class Images(interfaces.Images):
@@ -339,6 +341,117 @@ class EBSVolumes(interfaces.EBSVolumes):
                 "fsType": "ext4"
             }
         })
+
+
+class HttpLoadBalancers(interfaces.HttpLoadBalancers):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._created = False
+
+    def create(self, name: str):
+        """TODO"""
+
+        if self._created:
+            return
+
+        self._created = True
+
+        templates = utils.load_file(f"{utils.module_path()}/templates/ingress/deploy.yaml.template")
+        templates = templates.split("---")
+
+        templates = map(lambda x: jinja2.Template(x), templates)
+
+        for template in templates:
+            self.provider.add_to_target("k8s_http_load_balancer",
+                                        [yaml.safe_load(template.render())])
+
+
+class HttpIngressLinks(interfaces.HttpIngressLinks):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
+
+    def _convert_network_link(self,
+                              host: str,
+                              path: str,
+                              network_link: types.NetworkLink) -> object:
+        """TODO"""
+
+        link = network_link.object.get()
+
+        return [{
+            "host": host,
+            "http": {
+                "paths": {
+                    "pathType": "Prefix",
+                    "path": path,
+                    "backend": {
+                        "service": {
+                            "name": link[1],
+                            "port": {
+                                "number": link[2]
+                            }
+                        }
+                    }
+                }
+            }
+        }]
+
+    def _k8s_create(self,
+                    name: str,
+                    host: str,
+                    path: str,
+                    network_link: types.NetworkLink):
+        """TODO"""
+
+        return {
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "Ingress",
+            "metadata": {
+                "name": name,
+            },
+            "spec": {
+                "rules": self._convert_network_link(host, path, network_link)
+            }
+        }
+
+    def create(self,
+               name: str,
+               host: str,
+               path: str,
+               network_link: types.NetworkLink):
+        """TODO"""
+
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name, host, path, network_link)
+        ])
 
 
 class Provider(v1.provider.Provider):

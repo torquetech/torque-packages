@@ -95,6 +95,15 @@ class PythonModules(v1.component.Interface):
         """TODO"""
 
 
+class HttpLoadBalancer(v1.component.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def host(self) -> str:
+        """TODO"""
+
+
 class Images(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
@@ -165,6 +174,16 @@ class EBSVolumes(v1.provider.Interface):
         """TODO"""
 
 
+class HttpLoadBalancers(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self, name: str):
+        """TODO"""
+
+
 class EBSProvider(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
@@ -172,4 +191,18 @@ class EBSProvider(v1.provider.Interface):
 
     @abstractmethod
     def create(self, name: str, size: int) -> v1.utils.Future[object]:
+        """TODO"""
+
+
+class HttpIngressLinks(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    @abstractmethod
+    def create(self,
+               name: str,
+               host: str,
+               path: str,
+               network_link: types.NetworkLink):
         """TODO"""
