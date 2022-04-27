@@ -6,7 +6,8 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 from demo import python_app
 
 
@@ -26,17 +27,15 @@ class Component(python_app.Component):
     }, allow_overwrites=False)
 
     @classmethod
-    def on_requirements(cls) -> [v1.provider.Interface]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(
-                interfaces.Services,
-                "provider",
-                "services",
-                True
-            )
-        ]
+        return super().on_requirements() | {
+            "services": {
+                "interface": providers.Services,
+                "required": True
+            }
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +51,7 @@ class Component(python_app.Component):
         """TODO"""
 
         return super().on_interfaces() + [
-            interfaces.HttpService(link=self._link)
+            components.HttpService(link=self._link)
         ]
 
     def on_apply(self, deployment: v1.deployment.Deployment):

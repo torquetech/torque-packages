@@ -10,7 +10,8 @@ import subprocess
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 from demo import types
 from demo import utils
 
@@ -69,23 +70,19 @@ class Component(v1.component.Component):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> [v1.provider.Interface]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.Images,
-                "provider",
-                "images",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.Deployments,
-                "provider",
-                "deployments",
-                True
-            )
-        ]
+        return {
+            "images": {
+                "interface": providers.Images,
+                "required": True
+            },
+            "deployments": {
+                "interface": providers.Deployments,
+                "required": True
+            }
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -162,11 +159,11 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            interfaces.NetworkLink(add=self._add_network_link),
-            interfaces.VolumeLink(add=self._add_volume_link),
-            interfaces.SecretLink(add=self._add_secret_link),
-            interfaces.Environment(add=self._add_environment),
-            interfaces.PythonModules(path=self._get_modules_path,
+            components.NetworkLink(add=self._add_network_link),
+            components.VolumeLink(add=self._add_volume_link),
+            components.SecretLink(add=self._add_secret_link),
+            components.Environment(add=self._add_environment),
+            components.PythonModules(path=self._get_modules_path,
                                      add_requirements=self._add_requirements)
         ]
 

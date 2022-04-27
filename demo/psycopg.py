@@ -9,7 +9,7 @@ import jinja2
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
 from demo import network
 from demo import utils
 
@@ -28,35 +28,31 @@ class Link(network.Link):
     }, allow_overwrites=False)
 
     @classmethod
-    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(
-                interfaces.PostgresService,
-                "source",
-                "pg",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.PythonModules,
-                "destination",
-                "mod",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.SecretLink,
-                "destination",
-                "sec",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.Environment,
-                "destination",
-                "env",
-                True
-            )
-        ]
+        return super().on_requirements() | {
+            "pg": {
+                "interface": components.PostgresService,
+                "bind_to": "source",
+                "required": True
+            },
+            "mod": {
+                "interface": components.PythonModules,
+                "bind_to": "destination",
+                "required": True
+            },
+            "sec": {
+                "interface": components.SecretLink,
+                "bind_to": "destination",
+                "required": True
+            },
+            "env": {
+                "interface": components.Environment,
+                "bind_to": "destination",
+                "required": True
+            }
+        }
 
     def on_create(self):
         """TODO"""

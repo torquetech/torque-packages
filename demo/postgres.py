@@ -6,7 +6,8 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 from demo import types
 from demo import utils
 
@@ -51,29 +52,23 @@ class Component(v1.component.Component):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> [v1.provider.Interface]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.Secrets,
-                "provider",
-                "secrets",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.Services,
-                "provider",
-                "services",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.Deployments,
-                "provider",
-                "deployments",
-                True
-            )
-        ]
+        return {
+            "secrets": {
+                "interface": providers.Secrets,
+                "required": True
+            },
+            "services": {
+                "interface": providers.Services,
+                "required": True
+            },
+            "deployments": {
+                "interface": providers.Deployments,
+                "required": True
+            }
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,8 +106,8 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            interfaces.VolumeLink(add=self._add_volume_link),
-            interfaces.PostgresService(link=self._link,
+            components.VolumeLink(add=self._add_volume_link),
+            components.PostgresService(link=self._link,
                                        admin=self._admin,
                                        pg_data=self._pg_data)
         ]

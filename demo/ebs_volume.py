@@ -6,7 +6,8 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 
 
 def _validate_size(size: object) -> int:
@@ -55,23 +56,19 @@ class Component(v1.component.Component):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.EBSProvider,
-                "provider",
-                "t_ebs",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.EBSVolumes,
-                "provider",
-                "k_ebs",
-                True
-            )
-        ]
+        return {
+            "t_ebs": {
+                "interface": providers.EBSProvider,
+                "required": True
+            },
+            "k_ebs": {
+                "interface": providers.EBSVolumes,
+                "required": True
+            }
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -87,7 +84,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            interfaces.Volume(link=self._link)
+            components.Volume(link=self._link)
         ]
 
     def on_create(self):

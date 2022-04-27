@@ -6,7 +6,7 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
 
 
 class Link(v1.link.Link):
@@ -39,23 +39,21 @@ class Link(v1.link.Link):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.Service,
-                "source",
-                "src",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.NetworkLink,
-                "destination",
-                "dst",
-                True
-            )
-        ]
+        return {
+            "src": {
+                "interface": components.Service,
+                "bind_to": "source",
+                "required": True
+            },
+            "dst": {
+                "interface": components.NetworkLink,
+                "bind_to": "destination",
+                "required": True
+            }
+        }
 
     def on_create(self):
         """TODO"""

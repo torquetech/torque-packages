@@ -8,10 +8,10 @@ import threading
 
 from torque import v1
 
-from demo import interfaces
+from demo import providers
 
 
-class EBSProvider(interfaces.EBSProvider):
+class EBSProvider(providers.EBSProvider):
     """TODO"""
 
     _CONFIGURATION = {

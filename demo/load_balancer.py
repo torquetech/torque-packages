@@ -6,7 +6,8 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 from demo import types
 
 
@@ -46,14 +47,12 @@ class Component(v1.component.Component):
     def on_requirements(cls) -> [v1.provider.Interface]:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.HttpLoadBalancers,
-                "provider",
-                "lb",
-                True
-            )
-        ]
+        return {
+            "lb": {
+                "interface": providers.HttpLoadBalancers,
+                "required": True
+            }
+        }
 
     def _host(self):
         """TODO"""
@@ -64,7 +63,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            interfaces.HttpLoadBalancer(host=self._host)
+            components.HttpLoadBalancer(host=self._host)
         ]
 
     def on_create(self):

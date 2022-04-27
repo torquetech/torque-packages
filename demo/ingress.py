@@ -6,7 +6,8 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
+from demo import providers
 from demo import types
 
 
@@ -42,29 +43,26 @@ class Link(v1.link.Link):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return [
-            v1.utils.InterfaceRequirement(
-                interfaces.HttpService,
-                "source",
-                "src",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.HttpLoadBalancer,
-                "destination",
-                "lb",
-                True
-            ),
-            v1.utils.InterfaceRequirement(
-                interfaces.HttpIngressLinks,
-                "source_provider",
-                "ingress",
-                True
-            )
-        ]
+        return {
+            "service": {
+                "interface": components.HttpService,
+                "bind_to": "source",
+                "required": True
+            },
+            "lb": {
+                "interface": components.HttpLoadBalancer,
+                "bind_to": "destination",
+                "required": True
+            },
+            "ingress": {
+                "interface": providers.HttpIngressLinks,
+                "bind_to": "source",
+                "required": True
+            }
+        }
 
     def on_create(self):
         """TODO"""
@@ -82,4 +80,4 @@ class Link(v1.link.Link):
                                        self.interfaces.lb.host(),
                                        self.parameters["path"],
                                        types.NetworkLink(self.source,
-                                                         self.interfaces.src.link()))
+                                                         self.interfaces.service.link()))

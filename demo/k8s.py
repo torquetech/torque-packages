@@ -10,12 +10,12 @@ import yaml
 
 from torque import v1
 
-from demo import interfaces
+from demo import providers
 from demo import types
 from demo import utils
 
 
-class Images(interfaces.Images):
+class Images(providers.Images):
     """TODO"""
 
     _CONFIGURATION = {
@@ -35,7 +35,7 @@ class Images(interfaces.Images):
         """TODO"""
 
 
-class Secrets(interfaces.Secrets):
+class Secrets(providers.Secrets):
     """TODO"""
 
     _CONFIGURATION = {
@@ -74,7 +74,7 @@ class Secrets(interfaces.Secrets):
         return v1.utils.Future(name)
 
 
-class Services(interfaces.Services):
+class Services(providers.Services):
     """TODO"""
 
     _CONFIGURATION = {
@@ -121,7 +121,7 @@ class Services(interfaces.Services):
         return v1.utils.Future((type.lower(), name, port))
 
 
-class Deployments(interfaces.Deployments):
+class Deployments(providers.Deployments):
     """TODO"""
 
     _CONFIGURATION = {
@@ -273,7 +273,7 @@ class Deployments(interfaces.Deployments):
         ])
 
 
-class ConfigMaps(interfaces.ConfigMaps):
+class ConfigMaps(providers.ConfigMaps):
     """TODO"""
 
     _CONFIGURATION = {
@@ -315,7 +315,7 @@ class ConfigMaps(interfaces.ConfigMaps):
         })
 
 
-class EBSVolumes(interfaces.EBSVolumes):
+class EBSVolumes(providers.EBSVolumes):
     """TODO"""
 
     _CONFIGURATION = {
@@ -343,7 +343,7 @@ class EBSVolumes(interfaces.EBSVolumes):
         })
 
 
-class HttpLoadBalancers(interfaces.HttpLoadBalancers):
+class HttpLoadBalancers(providers.HttpLoadBalancers):
     """TODO"""
 
     _CONFIGURATION = {
@@ -382,7 +382,7 @@ class HttpLoadBalancers(interfaces.HttpLoadBalancers):
                                         [yaml.safe_load(template.render())])
 
 
-class HttpIngressLinks(interfaces.HttpIngressLinks):
+class HttpIngressLinks(providers.HttpIngressLinks):
     """TODO"""
 
     _CONFIGURATION = {

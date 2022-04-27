@@ -6,7 +6,7 @@
 
 from torque import v1
 
-from demo import interfaces
+from demo import components
 from demo import volume
 
 
@@ -19,17 +19,16 @@ class Link(volume.Link):
     }
 
     @classmethod
-    def on_requirements(cls) -> [v1.provider.Interface]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return super().on_requirements() + [
-            v1.utils.InterfaceRequirement(
-                interfaces.PostgresService,
-                "destination",
-                "pg",
-                True
-            ),
-        ]
+        return super().on_requirements() | {
+            "pg": {
+                "interface": components.PostgresService,
+                "bind_to": "destination",
+                "required": True
+            },
+        }
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
