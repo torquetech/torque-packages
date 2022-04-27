@@ -18,7 +18,7 @@ class Link(ABC):
                  name: str,
                  parameters: object,
                  configuration: object,
-                 interfaces: utils.Interfaces,
+                 interfaces: object,
                  source: str,
                  destination: str):
         # pylint: disable=R0913
@@ -46,7 +46,7 @@ class Link(ABC):
 
     @classmethod
     @abstractmethod
-    def on_requirements(cls) -> [utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")

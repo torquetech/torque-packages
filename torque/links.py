@@ -23,10 +23,10 @@ class DependencyLink(v1.link.Link):
         return {}
 
     @classmethod
-    def on_requirements(cls) -> [v1.utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
-        return []
+        return {}
 
     def on_create(self):
         """TODO"""

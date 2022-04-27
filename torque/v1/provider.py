@@ -40,9 +40,10 @@ class Provider(ABC):
 class Interface:
     """TODO"""
 
-    def __init__(self, configuration: object, provider: Provider, labels: [str]):
+    def __init__(self, configuration: object, provider: Provider, name: str, labels: [str]):
         self.configuration = configuration
         self.provider = provider
+        self.name = name
         self.labels = labels
 
     @classmethod

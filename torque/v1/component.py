@@ -39,6 +39,7 @@ class Interface:
             setattr(self, name, functools.partial(self._torque_call_wrapper, func))
 
     def _torque_call_wrapper(self, func, *args, **kwargs):
+        # pylint: disable=E1129
         with self._torque_lock:
             return func(*args, **kwargs)
 
@@ -53,7 +54,7 @@ class Component(ABC):
                  labels: [str],
                  parameters: object,
                  configuration: object,
-                 interfaces: utils.Interfaces):
+                 interfaces: object):
         # pylint: disable=R0913
 
         self.name = name
@@ -114,7 +115,7 @@ class Component(ABC):
 
     @classmethod
     @abstractmethod
-    def on_requirements(cls) -> [utils.InterfaceRequirement]:
+    def on_requirements(cls) -> object:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")

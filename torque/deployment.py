@@ -13,6 +13,7 @@ from collections import namedtuple
 from collections.abc import Callable
 
 from torque import exceptions
+from torque import interfaces
 from torque import jobs
 from torque import model
 from torque import profile
@@ -49,8 +50,9 @@ class Deployment:
 
         self._components: dict[str, v1.component.Component] = {}
         self._links: dict[str, v1.link.Link] = {}
-        self._providers: dict[str, v1.provider.Provider] = {}
-        self._interfaces: dict[str, v1.provider.Interface] = {}
+
+        self._providers: dict[str, v1.provider.Provider] = None
+        self._provider_interfaces: dict[str, v1.provider.Interface] = None
 
         self._lock = threading.Lock()
 
@@ -74,8 +76,11 @@ class Deployment:
 
         return deployment_path
 
-    def _setup_interfaces(self) -> v1.provider.Interface:
+    def _setup_provider_interfaces(self) -> v1.provider.Interface:
         """TODO"""
+
+        self._providers = {}
+        self._provider_interfaces = {}
 
         for name in self._config.interfaces.keys():
             interface = self._repo.interface(name)
@@ -91,13 +96,13 @@ class Deployment:
 
                 fqcn = v1.utils.fqcn(cls)
 
-                if fqcn in self._interfaces:
-                    print(f"WARNING: {name}: duplicate interface: {fqcn}")
+                if fqcn in self._provider_interfaces:
+                    print(f"WARNING: {name}: duplicate provider interface: {fqcn}")
 
-                self._interfaces[fqcn] = interface
+                self._provider_interfaces[fqcn] = interface
                 cls = cls.__bases__[0]
 
-    def _component(self, name: str, build_phase: bool) -> v1.component.Component:
+    def _component(self, name: str) -> v1.component.Component:
         """TODO"""
 
         if name in self._components:
@@ -107,35 +112,21 @@ class Deployment:
         component = self._dag.components[name]
 
         type = self._repo.component(component.type)
-
-        interfaces = []
-
-        for i in type.on_requirements():
-            if not isinstance(i, v1.utils.InterfaceRequirement):
-                raise exceptions.InvalidRequirement(i)
-
-            if i.type != "provider":
-                raise exceptions.InvalidRequirement(i)
-
-            interface = None
-
-            if not build_phase:
-                interface = self._interface(i.interface,
-                                            i.required,
-                                            component.labels)
-
-            interfaces.append((i.target, interface))
+        bound_interfaces = interfaces.bind_to_component(type,
+                                                        component.name,
+                                                        component.labels,
+                                                        self._provider_interface)
 
         component = type(component.name,
                          component.labels,
                          component.parameters,
                          config,
-                         v1.utils.Interfaces(interfaces))
+                         bound_interfaces)
 
         self._components[component.name] = component
         return component
 
-    def _link(self, name: str, build_phase: bool) -> v1.link.Link:
+    def _link(self, name: str) -> v1.link.Link:
         """TODO"""
 
         if name in self._links:
@@ -144,50 +135,19 @@ class Deployment:
         config = self._config.links[name]
         link = self._dag.links[name]
 
-        source = self._component(link.source, build_phase)
-        destination = self._component(link.destination, build_phase)
+        source = self._component(link.source)
+        destination = self._component(link.destination)
 
         type = self._repo.link(link.type)
-
-        interfaces = []
-
-        for i in type.on_requirements():
-            if not isinstance(i, v1.utils.InterfaceRequirement):
-                raise exceptions.InvalidRequirement(i)
-
-            interface = None
-
-            if i.type == "source":
-                # pylint: disable=W0212
-                interface = source._torque_interface(i.interface,
-                                                     i.required)
-
-            elif i.type == "destination":
-                # pylint: disable=W0212
-                interface = destination._torque_interface(i.interface,
-                                                          i.required)
-
-            elif i.type == "source_provider":
-                if not build_phase:
-                    interface = self._interface(i.interface,
-                                                i.required,
-                                                source.labels)
-
-            elif i.type == "destination_provider":
-                if not build_phase:
-                    interface = self._interface(i.interface,
-                                                i.required,
-                                                destination.labels)
-
-            else:
-                raise exceptions.InvalidRequirement(i)
-
-            interfaces.append((i.target, interface))
+        bound_interfaces = interfaces.bind_to_link(type,
+                                                   source,
+                                                   destination,
+                                                   self._provider_interface)
 
         link = type(link.name,
                     link.parameters,
                     config,
-                    v1.utils.Interfaces(interfaces),
+                    bound_interfaces,
                     source.name,
                     destination.name)
 
@@ -206,27 +166,31 @@ class Deployment:
         self._providers[name] = provider
         return provider
 
-    def _interface(self,
-                   interface: str,
-                   required: bool,
-                   labels: [str]) -> v1.provider.Interface:
+    def _provider_interface(self,
+                            interface: str,
+                            required: bool,
+                            name: str,
+                            labels: [str]) -> v1.provider.Interface:
         """TODO"""
+
+        if self._provider_interfaces is None:
+            return None
 
         name = v1.utils.fqcn(interface)
 
-        if name not in self._interfaces:
+        if name not in self._provider_interfaces:
             if required:
                 raise RuntimeError(f"{name}: provider interface not found")
 
             return None
 
-        interface = self._interfaces[name]
+        interface = self._provider_interfaces[name]
 
         # pylint: disable=W0212
         config = self._config.interfaces[interface._TORQUE_NAME]
         provider = self._provider(interface._TORQUE_PROVIDER)
 
-        return interface(config, provider, labels)
+        return interface(config, provider, name, labels)
 
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""
@@ -272,10 +236,10 @@ class Deployment:
 
             with self._lock:
                 if type == "component":
-                    instance = self._component(name, True)
+                    instance = self._component(name)
 
                 elif type == "link":
-                    instance = self._link(name, True)
+                    instance = self._link(name)
 
                 else:
                     assert False
@@ -287,7 +251,7 @@ class Deployment:
     def apply(self, workers: int, dry_run: bool):
         """TODO"""
 
-        self._setup_interfaces()
+        self._setup_provider_interfaces()
 
         path = self._create_path()
         deployment = v1.deployment.Deployment(self._name,
@@ -302,10 +266,10 @@ class Deployment:
 
             with self._lock:
                 if type == "component":
-                    instance = self._component(name, False)
+                    instance = self._component(name)
 
                 elif type == "link":
-                    instance = self._link(name, False)
+                    instance = self._link(name)
 
                 else:
                     assert False

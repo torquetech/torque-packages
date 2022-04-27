@@ -108,6 +108,8 @@ class Repository:
             provider_class = self.provider(provider_name)
 
             for interface_name, interface_class in provider_interfaces.items():
+                # pylint: disable=W0212
+
                 interface_name = f"{provider_name}/{interface_name}"
 
                 interface_class._TORQUE_PROVIDER = provider_name

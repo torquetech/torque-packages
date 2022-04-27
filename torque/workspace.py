@@ -12,6 +12,7 @@ import yaml
 
 from torque import deployment
 from torque import exceptions
+from torque import interfaces
 from torque import model
 from torque import profile
 from torque import repository
@@ -222,27 +223,31 @@ class Workspace:
         self._path = path
         self._config = config
 
+    def _provider_interface(self,
+                            interface: object,
+                            required: bool,
+                            name: str,
+                            labels: [str]) -> v1.provider.Interface:
+        # pylint: disable=R0201,W0613
+
+        """TODO"""
+
+        return None
+
     def _component(self, component: model.Component):
         """TODO"""
 
         type = self.repo.component(component.type)
-
-        interfaces = []
-
-        for i in type.on_requirements():
-            if not isinstance(i, v1.utils.InterfaceRequirement):
-                raise exceptions.InvalidRequirement(i)
-
-            if i.type != "provider":
-                raise exceptions.InvalidRequirement(i)
-
-            interfaces.append((i.target, None))
+        bound_interfaces = interfaces.bind_to_component(type,
+                                                        component.name,
+                                                        component.labels,
+                                                        self._provider_interface)
 
         return type(component.name,
                     component.labels,
                     component.parameters,
                     None,
-                    v1.utils.Interfaces(interfaces))
+                    bound_interfaces)
 
     def _link(self,
               link: model.Link,
@@ -251,36 +256,15 @@ class Workspace:
         """TODO"""
 
         type = self.repo.link(link.type)
-
-        interfaces = []
-
-        for i in type.on_requirements():
-            if not isinstance(i, v1.utils.InterfaceRequirement):
-                raise exceptions.InvalidRequirement(i)
-
-            if i.type == "source":
-                # pylint: disable=W0212
-                interface = source._torque_interface(i.interface, i.required)
-
-            elif i.type == "destination":
-                # pylint: disable=W0212
-                interface = destination._torque_interface(i.interface, i.required)
-
-            elif i.type == "source_provider":
-                interface = None
-
-            elif i.type == "destination_provider":
-                interface = None
-
-            else:
-                raise exceptions.InvalidRequirement(i)
-
-            interfaces.append((i.target, interface))
+        bound_interfaces = interfaces.bind_to_link(type,
+                                                   source,
+                                                   destination,
+                                                   self._provider_interface)
 
         return type(link.name,
                     link.parameters,
                     None,
-                    v1.utils.Interfaces(interfaces),
+                    bound_interfaces,
                     source.name,
                     destination.name)
 
