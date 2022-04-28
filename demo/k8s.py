@@ -31,6 +31,12 @@ class Images(providers.Images):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
+
     def push(self, image: str):
         """TODO"""
 
@@ -50,6 +56,12 @@ class Secrets(providers.Secrets):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
 
     def _k8s_create(self, name: str, entries: [types.KeyValue]) -> object:
         """TODO"""
@@ -89,6 +101,12 @@ class Services(providers.Services):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
 
     def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> object:
         """TODO"""
@@ -136,6 +154,12 @@ class Deployments(providers.Deployments):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
 
     def _convert_network_links(self, network_links: [types.NetworkLink]) -> [object]:
         """TODO"""
@@ -289,6 +313,12 @@ class ConfigMaps(providers.ConfigMaps):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
+
     def _k8s_create(self, name: str, configuration: object) -> object:
         """TODO"""
 
@@ -331,6 +361,12 @@ class EBSVolumes(providers.EBSVolumes):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
+
     def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
         """TODO"""
 
@@ -358,6 +394,12 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -397,6 +439,12 @@ class HttpIngressLinks(providers.HttpIngressLinks):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
 
     def _convert_network_link(self,
                               host: str,

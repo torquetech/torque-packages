@@ -27,6 +27,12 @@ class EBSProvider(providers.EBSProvider):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
+
     def create(self, name: str, size: int) -> v1.utils.Future[str]:
         """TODO"""
 
