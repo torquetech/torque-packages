@@ -184,13 +184,18 @@ class Deployment:
 
             return None
 
-        interface = self._provider_interfaces[name]
+        type = self._provider_interfaces[name]
 
         # pylint: disable=W0212
-        config = self._config.interfaces[interface._TORQUE_NAME]
-        provider = self._provider(interface._TORQUE_PROVIDER)
+        config = self._config.interfaces[type._TORQUE_NAME]
+        provider = self._provider(type._TORQUE_PROVIDER)
 
-        return interface(config, provider, name, labels)
+        bound_interfaces = interfaces.bind_to_component(type,
+                                                        name,
+                                                        labels,
+                                                        self._provider_interface)
+
+        return type(config, provider, name, labels, bound_interfaces)
 
     def _execute(self, workers: int, callback: Callable[[object], bool]):
         """TODO"""

@@ -40,13 +40,28 @@ class Provider(ABC):
 class Interface:
     """TODO"""
 
-    def __init__(self, configuration: object, provider: Provider, name: str, labels: [str]):
+    def __init__(self,
+                 configuration: object,
+                 provider: Provider,
+                 name: str,
+                 labels: [str],
+                 interfaces: object):
         self.configuration = configuration
         self.provider = provider
         self.name = name
         self.labels = labels
+        self.interfaces = interfaces
 
     @classmethod
     @abstractmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
+
+        raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
+
+    @classmethod
+    @abstractmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
