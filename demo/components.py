@@ -32,7 +32,7 @@ class PostgresService(Service):
     def admin() -> v1.utils.Future[object]:
         """TODO"""
 
-    def pg_data() -> str:
+    def data_path() -> str:
         """TODO"""
 
 

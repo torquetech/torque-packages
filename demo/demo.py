@@ -10,7 +10,6 @@ from demo import ingress
 from demo import k8s
 from demo import load_balancer
 from demo import network
-from demo import pg_data
 from demo import postgres
 from demo import psycopg
 from demo import python_app
@@ -33,7 +32,7 @@ repository = {
             "demo/network": network.Link,
             "demo/psycopg": psycopg.Link,
             "demo/volume": volume.Link,
-            "demo/pg-data": pg_data.Link,
+            "demo/postgres-data": postgres.DataLink,
             "demo/ingress": ingress.Link
         },
         "providers": {

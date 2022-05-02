@@ -10,6 +10,7 @@ from demo import components
 from demo import providers
 from demo import types
 from demo import utils
+from demo import volume
 
 
 class Component(v1.component.Component):
@@ -74,7 +75,6 @@ class Component(v1.component.Component):
         super().__init__(*args, **kwargs)
 
         self._volume_links = []
-
         self._service_link = None
         self._secret_link = None
 
@@ -97,7 +97,7 @@ class Component(v1.component.Component):
 
         return self._secret_link
 
-    def _pg_data(self) -> str:
+    def _data_path(self) -> str:
         """TODO"""
 
         return "/data"
@@ -109,7 +109,7 @@ class Component(v1.component.Component):
             components.VolumeLink(add=self._add_volume_link),
             components.PostgresService(link=self._link,
                                        admin=self._admin,
-                                       pg_data=self._pg_data)
+                                       data_path=self._data_path)
         ]
 
     def on_create(self):
@@ -149,3 +149,31 @@ class Component(v1.component.Component):
                                            self._volume_links,
                                            secret_links,
                                            1)
+
+
+class DataLink(volume.Link):
+    """TODO"""
+
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return super().on_requirements() | {
+            "pg": {
+                "interface": components.PostgresService,
+                "bind_to": "destination",
+                "required": True
+            },
+        }
+
+    def on_apply(self, deployment: v1.deployment.Deployment):
+        """TODO"""
+
+        self.interfaces.dst.add(self.source,
+                                self.interfaces.pg.data_path(),
+                                self.interfaces.src.link())
