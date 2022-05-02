@@ -4,8 +4,9 @@
 
 """TODO"""
 
-import jinja2
 import threading
+
+import jinja2
 import yaml
 
 from torque import v1
@@ -427,7 +428,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
         templates = utils.load_file(f"{utils.module_path()}/templates/ingress/deploy.yaml.template")
         templates = templates.split("---")
 
-        templates = map(lambda x: jinja2.Template(x), templates)
+        templates = map(jinja2.Template, templates)
 
         for template in templates:
             self.provider.add_to_target("k8s_http_load_balancer",

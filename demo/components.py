@@ -6,8 +6,6 @@
 
 from torque import v1
 
-from demo import types
-
 
 class Service(v1.component.Interface):
     # pylint: disable=E0211,E0213
