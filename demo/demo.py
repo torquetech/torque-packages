@@ -15,6 +15,7 @@ from demo import postgres
 from demo import psycopg
 from demo import python_app
 from demo import python_service
+from demo import react_app
 from demo import terraform
 from demo import volume
 from demo import zookeeper
@@ -30,7 +31,8 @@ repository = {
             "demo/kafka": kafka.Component,
             "demo/configmap": configmap.Component,
             "demo/ebs-volume": ebs_volume.Component,
-            "demo/load-balancer": load_balancer.Component
+            "demo/load-balancer": load_balancer.Component,
+            "demo/react-app": react_app.Component
         },
         "links": {
             "demo/network": network.Link,
