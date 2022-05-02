@@ -36,6 +36,27 @@ class PostgresService(Service):
         """TODO"""
 
 
+class ZookeeperService(Service):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def data_path() -> str:
+        """TODO"""
+
+
+class KafkaService(Service):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def data_path() -> str:
+        """TODO"""
+
+    def zookeeper(link: v1.utils.Future[object]):
+        """TODO"""
+
+
 class NetworkLink(v1.component.Interface):
     # pylint: disable=E0211,E0213
 

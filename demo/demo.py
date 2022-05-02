@@ -8,6 +8,8 @@ from demo import configmap
 from demo import ebs_volume
 from demo import ingress
 from demo import k8s
+from demo import kafka
+from demo import kafka_python
 from demo import load_balancer
 from demo import network
 from demo import postgres
@@ -16,6 +18,7 @@ from demo import python_app
 from demo import python_service
 from demo import terraform
 from demo import volume
+from demo import zookeeper
 
 
 repository = {
@@ -24,6 +27,8 @@ repository = {
             "demo/python-app": python_app.Component,
             "demo/python-service": python_service.Component,
             "demo/postgres": postgres.Component,
+            "demo/zookeeper": zookeeper.Component,
+            "demo/kafka": kafka.Component,
             "demo/configmap": configmap.Component,
             "demo/ebs-volume": ebs_volume.Component,
             "demo/load-balancer": load_balancer.Component
@@ -33,6 +38,10 @@ repository = {
             "demo/psycopg": psycopg.Link,
             "demo/volume": volume.Link,
             "demo/postgres-data": postgres.DataLink,
+            "demo/zookeeper-data": zookeeper.DataLink,
+            "demo/kafka-data": kafka.DataLink,
+            "demo/zookeeper-kafka": kafka.ZookeeperLink,
+            "demo/kafka-python": kafka_python.Link,
             "demo/ingress": ingress.Link
         },
         "providers": {
