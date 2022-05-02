@@ -425,7 +425,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         self._created = True
 
-        templates = utils.load_file(f"{utils.module_path()}/templates/ingress/deploy.yaml.template")
+        templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
         templates = templates.split("---")
 
         templates = map(jinja2.Template, templates)
