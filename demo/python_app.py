@@ -99,7 +99,7 @@ class Component(v1.component.Component):
 
         return v1.utils.resolve_path(self.parameters["path"])
 
-    def _get_version(self):
+    def _get_version(self) -> str:
         if self._version:
             return self._version
 
