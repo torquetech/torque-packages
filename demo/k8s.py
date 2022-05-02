@@ -161,6 +161,16 @@ class Deployments(providers.Deployments):
 
         return {}
 
+    def _convert_environment(self, env: [types.KeyValue]):
+        """TODO"""
+
+        if not env:
+            return []
+
+        return [
+            {"name": e.key, "value": e.value} for e in env
+        ]
+
     def _convert_network_links(self, network_links: [types.NetworkLink]) -> [object]:
         """TODO"""
 
@@ -227,7 +237,7 @@ class Deployments(providers.Deployments):
                     replicas: int) -> object:
         """TODO"""
 
-        env = [{"name": e.key, "value": e.value} for e in env]
+        env = self._convert_environment(env)
         env += self._convert_secret_links(secret_links)
         env += self._convert_network_links(network_links)
 
