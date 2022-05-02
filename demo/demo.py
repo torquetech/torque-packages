@@ -6,7 +6,6 @@
 
 from demo import configmap
 from demo import ebs_volume
-from demo import ingress
 from demo import k8s
 from demo import kafka
 from demo import kafka_python
@@ -42,7 +41,7 @@ repository = {
             "demo/kafka-data": kafka.DataLink,
             "demo/zookeeper-kafka": kafka.ZookeeperLink,
             "demo/kafka-python": kafka_python.Link,
-            "demo/ingress": ingress.Link
+            "demo/ingress": load_balancer.Link
         },
         "providers": {
             "demo/k8s": k8s.Provider,
