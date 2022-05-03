@@ -276,6 +276,17 @@ class Deployment:
     def delete(self, dry_run: bool):
         """TODO"""
 
+        self._setup_providers()
+
+        path = self._create_path()
+        deployment = v1.deployment.Deployment(self._name,
+                                              self._profile,
+                                              dry_run,
+                                              path)
+
+        for provider in self._providers.values():
+            provider.on_delete(deployment)
+
     def dot(self) -> str:
         """TODO"""
 
