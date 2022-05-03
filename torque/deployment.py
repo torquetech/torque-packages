@@ -66,10 +66,18 @@ class Deployment:
 
         return deployment_path
 
-    def _setup_provider_interfaces(self) -> v1.provider.Interface:
+    def _setup_providers(self):
         """TODO"""
 
         self._providers = {}
+
+        for name, config in self._config.providers.items():
+            provider = self._repo.provider(name)(config)
+            self._providers[name] = provider
+
+    def _setup_provider_interfaces(self) -> v1.provider.Interface:
+        """TODO"""
+
         self._provider_interfaces = {}
 
         for name in self._config.interfaces.keys():
@@ -144,18 +152,6 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _provider(self, name: str) -> v1.provider.Provider:
-        """TODO"""
-
-        if name in self._providers:
-            return self._providers[name]
-
-        config = self._config.providers[name]
-        provider = self._repo.provider(name)(config)
-
-        self._providers[name] = provider
-        return provider
-
     def _provider_interface(self,
                             interface: str,
                             required: bool,
@@ -178,7 +174,7 @@ class Deployment:
 
         # pylint: disable=W0212
         config = self._config.interfaces[type._TORQUE_NAME]
-        provider = self._provider(type._TORQUE_PROVIDER)
+        provider = self._providers[type._TORQUE_PROVIDER]
 
         bound_interfaces = interfaces.bind_to_component(type,
                                                         name,
@@ -246,6 +242,7 @@ class Deployment:
     def apply(self, workers: int, dry_run: bool):
         """TODO"""
 
+        self._setup_providers()
         self._setup_provider_interfaces()
 
         path = self._create_path()
