@@ -61,11 +61,11 @@ class Component(v1.component.Component):
 
         return {
             "t_ebs": {
-                "interface": providers.EBSProvider,
+                "interface": providers.PersistentVolumesProvider,
                 "required": True
             },
             "k_ebs": {
-                "interface": providers.EBSVolumes,
+                "interface": providers.PersistentVolumes,
                 "required": True
             }
         }

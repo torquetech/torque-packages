@@ -11,7 +11,7 @@ from torque import v1
 from demo import providers
 
 
-class EBSProvider(providers.EBSProvider):
+class PersistentVolumesProvider(providers.PersistentVolumesProvider):
     """TODO"""
 
     _CONFIGURATION = {

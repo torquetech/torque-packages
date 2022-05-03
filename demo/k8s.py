@@ -308,7 +308,7 @@ class Deployments(providers.Deployments):
         ])
 
 
-class EBSVolumes(providers.EBSVolumes):
+class PersistentVolumes(providers.PersistentVolumes):
     """TODO"""
 
     _CONFIGURATION = {

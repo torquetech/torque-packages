@@ -61,17 +61,7 @@ class Deployments(v1.provider.Interface):
         """TODO"""
 
 
-class ConfigMaps(v1.provider.Interface):
-    # pylint: disable=E0211,E0213
-
-    """TODO"""
-
-    @abstractmethod
-    def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
-        """TODO"""
-
-
-class EBSVolumes(v1.provider.Interface):
+class PersistentVolumes(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -91,7 +81,7 @@ class HttpLoadBalancers(v1.provider.Interface):
         """TODO"""
 
 
-class EBSProvider(v1.provider.Interface):
+class PersistentVolumesProvider(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""

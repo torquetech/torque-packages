@@ -4,12 +4,12 @@
 
 """TODO"""
 
-from demo import ebs_volume
 from demo import k8s
 from demo import kafka
 from demo import kafka_python
 from demo import load_balancer
 from demo import network
+from demo import persistent_volume
 from demo import postgres
 from demo import psycopg
 from demo import python_app
@@ -28,7 +28,7 @@ repository = {
             "demo/postgres": postgres.Component,
             "demo/zookeeper": zookeeper.Component,
             "demo/kafka": kafka.Component,
-            "demo/ebs-volume": ebs_volume.Component,
+            "demo/persistent-volume": persistent_volume.Component,
             "demo/load-balancer": load_balancer.Component,
             "demo/react-app": react_app.Component
         },
@@ -53,12 +53,12 @@ repository = {
                 "secrets": k8s.Secrets,
                 "services": k8s.Services,
                 "deployments": k8s.Deployments,
-                "ebs-volumes": k8s.EBSVolumes,
+                "persistent-volumes": k8s.PersistentVolumes,
                 "load-balancers": k8s.HttpLoadBalancers,
                 "ingress-links": k8s.HttpIngressLinks
             },
             "demo/terraform": {
-                "ebs-provider": terraform.EBSProvider
+                "persistent-volumes-provider": terraform.PersistentVolumesProvider
             }
         }
     }
