@@ -139,7 +139,7 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self._service_link = self.interfaces.services.create(self.name, "tcp", 8080, 8080)
+        self._service_link = self.interfaces.services.create(self.name, "tcp", 80, 80)
 
         self.interfaces.images.push(self._image(deployment))
         self.interfaces.deployments.create(self.name,
