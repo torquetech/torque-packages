@@ -6,13 +6,9 @@ COPY . /app/
 RUN npm install
 RUN npm run build
 
-FROM node:18.0.0
+FROM nginx:stable
 
-EXPOSE 8080
-WORKDIR /app
-CMD ["node", "./index.html"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
-COPY --from=build /app/build/ /app/
-COPY package.json /app
-
-RUN npm install -only=production
+COPY --from=build /app/build/ /usr/share/nginx/html
