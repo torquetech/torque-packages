@@ -61,17 +61,7 @@ class Deployment:
 
         deployment_path = f"{v1.utils.torque_dir()}/local/deployments/{self._name}"
 
-        if os.path.exists(deployment_path):
-            for path in os.listdir(deployment_path):
-                path = f"{deployment_path}/{path}"
-
-                if os.path.isdir(path):
-                    shutil.rmtree(path)
-
-                else:
-                    os.unlink(path)
-
-        else:
+        if not os.path.exists(deployment_path):
             os.makedirs(deployment_path)
 
         return deployment_path
