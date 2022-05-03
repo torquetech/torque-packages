@@ -129,6 +129,7 @@ class Component(v1.component.Component):
                                            None,
                                            env,
                                            None,
+                                           None,
                                            self._volume_links,
                                            None,
                                            1)

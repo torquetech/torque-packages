@@ -28,3 +28,9 @@ SecretLink = namedtuple("SecretLink", [
     "key",
     "object"
 ])
+
+Port = namedtuple("Port", [
+    "name",
+    "protocol",
+    "port"
+])

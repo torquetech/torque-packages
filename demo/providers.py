@@ -54,6 +54,7 @@ class Deployments(v1.provider.Interface):
                args: [str],
                cwd: str,
                env: [types.KeyValue],
+               ports: [types.Port],
                network_links: [types.NetworkLink],
                volume_links: [types.VolumeLink],
                secret_links: [types.SecretLink],

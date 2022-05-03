@@ -207,6 +207,18 @@ class Deployments(providers.Deployments):
             }
         } for link in secret_links]
 
+    def _convert_ports(self, ports: [types.Port]) -> [object]:
+        """TODO"""
+
+        if not ports:
+            return []
+
+        return [{
+            "name": port.name,
+            "protocol": port.protocol.upper(),
+            "containerPort": port.port
+        } for port in ports]
+
     def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([object], [object]):
         """TODO"""
 
@@ -232,6 +244,7 @@ class Deployments(providers.Deployments):
                     args: [str],
                     cwd: str,
                     env: [types.KeyValue],
+                    ports: [types.Port],
                     network_links: [types.NetworkLink],
                     volume_links: [types.VolumeLink],
                     secret_links: [types.SecretLink],
@@ -241,6 +254,8 @@ class Deployments(providers.Deployments):
         env = self._convert_environment(env)
         env += self._convert_network_links(network_links)
         env += self._convert_secret_links(secret_links)
+
+        ports = self._convert_ports(ports)
 
         mounts, volumes = self._convert_volume_links(volume_links)
 
@@ -273,6 +288,7 @@ class Deployments(providers.Deployments):
                             "args": args,
                             "workingDir": cwd,
                             "env": env,
+                            "ports": ports,
                             "volumeMounts": mounts
                         }],
                         "volumes": volumes
@@ -288,6 +304,7 @@ class Deployments(providers.Deployments):
                args: [str],
                cwd: str,
                env: [types.KeyValue],
+               ports: [types.Port],
                network_links: [types.NetworkLink],
                volume_links: [types.VolumeLink],
                secret_links: [types.SecretLink],
@@ -301,6 +318,7 @@ class Deployments(providers.Deployments):
                              args,
                              cwd,
                              env,
+                             ports,
                              network_links,
                              volume_links,
                              secret_links,
