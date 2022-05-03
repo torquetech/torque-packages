@@ -118,7 +118,8 @@ class Component(v1.component.Component):
         zk_link = self._zookeeper_link.get()
 
         env = [
-            types.KeyValue("KAFKA_CFG_ZOOKEEPER_CONNECT", f"{zk_link[1]}:{zk_link[2]}")
+            types.KeyValue("KAFKA_CFG_ZOOKEEPER_CONNECT", f"{zk_link[1]}:{zk_link[2]}"),
+            types.KeyValue("ALLOW_PLAINTEXT_LISTENER", "yes")
         ]
 
         self.interfaces.deployments.create(self.name,
