@@ -308,54 +308,6 @@ class Deployments(providers.Deployments):
         ])
 
 
-class ConfigMaps(providers.ConfigMaps):
-    """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> object:
-        """TODO"""
-
-        return {}
-
-    def _k8s_create(self, name: str, configuration: object) -> object:
-        """TODO"""
-
-        return {
-            "apiVersion": "v1",
-            "kind": "ConfigMap",
-            "metadata": {
-                "name": name
-            },
-            "data": configuration
-        }
-
-    def create(self, name: str, configuration: object) -> v1.utils.Future[object]:
-        """TODO"""
-
-        self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name, configuration)
-        ])
-
-        return v1.utils.Future({
-            "configMap": {
-                "name": name
-            }
-        })
-
-
 class EBSVolumes(providers.EBSVolumes):
     """TODO"""
 

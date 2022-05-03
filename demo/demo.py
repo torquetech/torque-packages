@@ -4,7 +4,6 @@
 
 """TODO"""
 
-from demo import configmap
 from demo import ebs_volume
 from demo import k8s
 from demo import kafka
@@ -29,7 +28,6 @@ repository = {
             "demo/postgres": postgres.Component,
             "demo/zookeeper": zookeeper.Component,
             "demo/kafka": kafka.Component,
-            "demo/configmap": configmap.Component,
             "demo/ebs-volume": ebs_volume.Component,
             "demo/load-balancer": load_balancer.Component,
             "demo/react-app": react_app.Component
@@ -55,7 +53,6 @@ repository = {
                 "secrets": k8s.Secrets,
                 "services": k8s.Services,
                 "deployments": k8s.Deployments,
-                "configmaps": k8s.ConfigMaps,
                 "ebs-volumes": k8s.EBSVolumes,
                 "load-balancers": k8s.HttpLoadBalancers,
                 "ingress-links": k8s.HttpIngressLinks
