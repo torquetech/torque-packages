@@ -4,6 +4,7 @@
 
 """TODO"""
 
+from demo import docker_compose
 from demo import k8s
 from demo import kafka
 from demo import kafka_python
@@ -45,7 +46,8 @@ repository = {
         },
         "providers": {
             "demo/k8s": k8s.Provider,
-            "demo/terraform": terraform.Provider
+            "demo/terraform": terraform.Provider,
+            "demo/docker-compose": docker_compose.Provider
         },
         "interfaces": {
             "demo/k8s": {
@@ -59,6 +61,16 @@ repository = {
             },
             "demo/terraform": {
                 "persistent-volumes-provider": terraform.PersistentVolumesProvider
+            },
+            "demo/docker-compose": {
+                "images": docker_compose.Images,
+                "secrets": docker_compose.Secrets,
+                "services": docker_compose.Services,
+                "deployments": docker_compose.Deployments,
+                "persistent-volumes": docker_compose.PersistentVolumes,
+                "persistent-volumes-provider": docker_compose.PersistentVolumesProvider,
+                "load-balancers": docker_compose.HttpLoadBalancers,
+                "ingress-links": docker_compose.HttpIngressLinks
             }
         }
     }
