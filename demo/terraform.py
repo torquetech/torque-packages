@@ -47,11 +47,6 @@ class Provider(v1.provider.Provider):
         "schema": {}
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._lock = threading.Lock()
-
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
@@ -60,8 +55,13 @@ class Provider(v1.provider.Provider):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._lock = threading.Lock()
+
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-    def on_delete(self, deployment: str):
+    def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""

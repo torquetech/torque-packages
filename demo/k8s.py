@@ -162,7 +162,7 @@ class Deployments(providers.Deployments):
 
         return {}
 
-    def _convert_environment(self, env: [types.KeyValue]):
+    def _convert_environment(self, env: [types.KeyValue]) -> [object]:
         """TODO"""
 
         if not env:
@@ -198,14 +198,14 @@ class Deployments(providers.Deployments):
             return []
 
         return [{
-            "name": secret_link.name,
+            "name": link.name,
             "valueFrom": {
                 "secretKeyRef": {
-                    "name": secret_link.object.get(),
-                    "key": secret_link.key
+                    "name": link.object.get(),
+                    "key": link.key
                 }
             }
-        } for secret_link in secret_links]
+        } for link in secret_links]
 
     def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([object], [object]):
         """TODO"""
@@ -214,14 +214,14 @@ class Deployments(providers.Deployments):
             return None, None
 
         mounts = [{
-            "name": volume_link.name,
-            "mountPath": volume_link.mount_path
-        } for volume_link in volume_links]
+            "name": link.name,
+            "mountPath": link.mount_path
+        } for link in volume_links]
 
         volumes = [{
-            "name": volume_link.name,
-            **volume_link.object.get(),
-        } for volume_link in volume_links]
+            "name": link.name,
+            **link.object.get(),
+        } for link in volume_links]
 
         return mounts, volumes
 
@@ -239,8 +239,8 @@ class Deployments(providers.Deployments):
         """TODO"""
 
         env = self._convert_environment(env)
-        env += self._convert_secret_links(secret_links)
         env += self._convert_network_links(network_links)
+        env += self._convert_secret_links(secret_links)
 
         mounts, volumes = self._convert_volume_links(volume_links)
 
@@ -477,12 +477,6 @@ class Provider(v1.provider.Provider):
         }
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._targets = {}
-        self._lock = threading.Lock()
-
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
@@ -490,6 +484,12 @@ class Provider(v1.provider.Provider):
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._targets = {}
+        self._lock = threading.Lock()
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
@@ -502,7 +502,7 @@ class Provider(v1.provider.Provider):
 
                 file.write("---\n".join(objs))
 
-    def on_delete(self, deployment: str):
+    def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
     def add_to_target(self, name: str, objs: [object]):
