@@ -6,8 +6,6 @@
 
 import threading
 
-from collections.abc import Callable
-
 from torque import exceptions
 
 
@@ -17,7 +15,7 @@ class Job:
     def __init__(self,
                  name: str,
                  depends: [str],
-                 handler: Callable[[str, object], bool]):
+                 handler: callable):
         self.name = name
         self.depends = depends
         self.handler = handler
@@ -34,7 +32,7 @@ class _Job:
                  name: str,
                  blocks: [str],
                  depends: int,
-                 handler: Callable[[str, object], bool]):
+                 handler: callable):
         self.name = name
         self.blocks = blocks
         self.depends = depends

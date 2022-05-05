@@ -10,7 +10,6 @@ import sys
 import threading
 
 from collections import namedtuple
-from collections.abc import Callable
 
 from torque import exceptions
 from torque import interfaces
@@ -183,7 +182,7 @@ class Deployment:
 
         return type(config, provider, name, labels, bound_interfaces)
 
-    def _execute(self, workers: int, callback: Callable[[object], bool]):
+    def _execute(self, workers: int, callback: callable):
         """TODO"""
 
         def _callback_helper(name: str) -> bool:
