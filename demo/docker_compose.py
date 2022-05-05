@@ -394,6 +394,9 @@ class Provider(v1.provider.Provider):
         with open(f"{deployment.path}/docker-compose.yaml", "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(compose, sort_keys=False))
 
+        if deployment.dry_run:
+            return
+
         cmd = [
             "docker", "compose", "up",
             "-d", "--remove-orphans"
@@ -403,6 +406,9 @@ class Provider(v1.provider.Provider):
 
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
+
+        if deployment.dry_run:
+            return
 
         cmd = [
             "docker", "compose", "down",
