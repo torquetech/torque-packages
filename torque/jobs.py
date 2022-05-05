@@ -8,6 +8,8 @@ import threading
 
 from collections.abc import Callable
 
+from torque import exceptions
+
 
 class Job:
     """TODO"""
@@ -51,6 +53,8 @@ class Runner:
 
         self._jobs_lock = threading.Lock()
         self._jobs = {}
+
+        self._exception = False
 
     def _pop(self):
         """TODO"""
@@ -112,7 +116,9 @@ class Runner:
                     if len(self._jobs) == 0:
                         self._quit()
 
-            except Exception:
+            except BaseException as exc:
+                self._exception = True
+
                 self._abort()
                 raise
 
@@ -156,6 +162,9 @@ class Runner:
             self._queue = []
             self._jobs = {}
             self._workers = []
+
+            if self._exception:
+                raise exceptions.OperationAborted()
 
 
 def execute(worker_count: int, jobs: [Job]):

@@ -88,6 +88,9 @@ def _build(arguments: argparse.Namespace):
     except exceptions.NoComponentsSelected as exc:
         raise RuntimeError("no components selected") from exc
 
+    except exceptions.OperationAborted as exc:
+        raise RuntimeError("build aborted") from exc
+
 
 def _apply(arguments: argparse.Namespace):
     """TODO"""
@@ -109,6 +112,9 @@ def _apply(arguments: argparse.Namespace):
 
     except exceptions.NoComponentsSelected as exc:
         raise RuntimeError("no components selected") from exc
+
+    except exceptions.OperationAborted as exc:
+        raise RuntimeError("apply aborted") from exc
 
 
 def _delete(arguments: argparse.Namespace):

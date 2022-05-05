@@ -98,3 +98,7 @@ class DeploymentNotFound(TorqueException):
 
 class NoComponentsSelected(TorqueException):
     """TODO"""
+
+
+class OperationAborted(TorqueException):
+    """TODO"""
