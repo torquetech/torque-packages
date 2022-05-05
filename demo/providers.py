@@ -4,8 +4,6 @@
 
 """TODO"""
 
-from abc import abstractmethod
-
 from torque import v1
 
 from demo import types
@@ -16,9 +14,10 @@ class Images(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def push(self, image: str):
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: push: not implemented")
 
 
 class Secrets(v1.provider.Interface):
@@ -26,9 +25,10 @@ class Secrets(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
 class Services(v1.provider.Interface):
@@ -36,9 +36,10 @@ class Services(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
 class Deployments(v1.provider.Interface):
@@ -46,7 +47,6 @@ class Deployments(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self,
                name: str,
                image: str,
@@ -61,15 +61,18 @@ class Deployments(v1.provider.Interface):
                replicas: int):
         """TODO"""
 
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
+
 
 class PersistentVolumes(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
 
-    @abstractmethod
     def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
 class HttpLoadBalancers(v1.provider.Interface):
@@ -77,9 +80,10 @@ class HttpLoadBalancers(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self, name: str):
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
 class PersistentVolumesProvider(v1.provider.Interface):
@@ -87,9 +91,10 @@ class PersistentVolumesProvider(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self, name: str, size: int) -> v1.utils.Future[object]:
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
 class HttpIngressLinks(v1.provider.Interface):
@@ -97,10 +102,11 @@ class HttpIngressLinks(v1.provider.Interface):
 
     """TODO"""
 
-    @abstractmethod
     def create(self,
                name: str,
                host: str,
                path: str,
                network_link: types.NetworkLink):
         """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
