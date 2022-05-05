@@ -64,6 +64,28 @@ class Deployments(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
+class Development(v1.provider.Interface):
+    # pylint: disable=E0211,E0213
+
+    """TODO"""
+
+    def create_deployment(self,
+                          name: str,
+                          image: str,
+                          cmd: [str],
+                          args: [str],
+                          cwd: str,
+                          env: [types.KeyValue],
+                          ports: [types.Port],
+                          network_links: [types.NetworkLink],
+                          volume_links: [types.VolumeLink],
+                          secret_links: [types.SecretLink],
+                          local_volume_links: [types.VolumeLink]):
+        """TODO"""
+
+        raise RuntimeError(f"{v1.utils.fqcn(self)}: create_deployment: not implemented")
+
+
 class PersistentVolumes(v1.provider.Interface):
     # pylint: disable=E0211,E0213
 

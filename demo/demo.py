@@ -70,7 +70,8 @@ repository = {
                 "persistent-volumes": docker_compose.PersistentVolumes,
                 "persistent-volumes-provider": docker_compose.PersistentVolumesProvider,
                 "load-balancers": docker_compose.HttpLoadBalancers,
-                "ingress-links": docker_compose.HttpIngressLinks
+                "ingress-links": docker_compose.HttpIngressLinks,
+                "development": docker_compose.Development
             }
         }
     }

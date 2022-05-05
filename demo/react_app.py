@@ -28,8 +28,12 @@ class Component(v1.component.Component):
     }
 
     _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
+        "defaults": {
+            "development_mode": False
+        },
+        "schema": {
+            "development_mode": bool
+        }
     }
 
     @classmethod
@@ -64,6 +68,10 @@ class Component(v1.component.Component):
             "services": {
                 "interface": providers.Services,
                 "required": True
+            },
+            "development": {
+                "interface": providers.Development,
+                "required": False
             }
         }
 
@@ -134,6 +142,9 @@ class Component(v1.component.Component):
             "-t", self._image(deployment)
         ]
 
+        if self.configuration["development_mode"]:
+            cmd += ["-f", "Dockerfile.dev"]
+
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
     def on_apply(self, deployment: v1.deployment.Deployment):
@@ -142,14 +153,36 @@ class Component(v1.component.Component):
         self._service_link = self.interfaces.services.create(self.name, "tcp", 80, 80)
 
         self.interfaces.images.push(self._image(deployment))
-        self.interfaces.deployments.create(self.name,
-                                           self._image(deployment),
-                                           None,
-                                           None,
-                                           None,
-                                           None,
-                                           None,
-                                           None,
-                                           None,
-                                           None,
-                                           1)
+
+        if not self.configuration["development_mode"]:
+            self.interfaces.deployments.create(self.name,
+                                               self._image(deployment),
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               1)
+
+        else:
+            if not self.interfaces.development:
+                raise RuntimeError("providers.Development: implementation not found")
+
+            local_volume_links = [
+                types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
+            ]
+
+            self.interfaces.development.create_deployment(self.name,
+                                                          self._image(deployment),
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          local_volume_links)

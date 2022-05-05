@@ -43,10 +43,12 @@ class Component(v1.component.Component):
     _CONFIGURATION = {
         "defaults": {
             "replicas": 1,
+            "development_mode": False,
             "environment": {}
         },
         "schema": {
             "replicas": v1.schema.Use(_validate_replicas),
+            "development_mode": bool,
             "environment": {
                 v1.schema.Optional(str): str
             }
@@ -81,6 +83,10 @@ class Component(v1.component.Component):
             "deployments": {
                 "interface": providers.Deployments,
                 "required": True
+            },
+            "development": {
+                "interface": providers.Development,
+                "required": False
             }
         }
 
@@ -190,6 +196,9 @@ class Component(v1.component.Component):
             "-t", self._image(deployment)
         ]
 
+        if self.configuration["development_mode"]:
+            cmd += ["-f", "Dockerfile.dev"]
+
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
     def on_apply(self, deployment: v1.deployment.Deployment):
@@ -203,14 +212,36 @@ class Component(v1.component.Component):
         env += self._environment
 
         self.interfaces.images.push(self._image(deployment))
-        self.interfaces.deployments.create(self.name,
-                                           self._image(deployment),
-                                           None,
-                                           None,
-                                           None,
-                                           env,
-                                           self._ports,
-                                           self._network_links,
-                                           self._volume_links,
-                                           self._secret_links,
-                                           self.configuration["replicas"])
+
+        if not self.configuration["development_mode"]:
+            self.interfaces.deployments.create(self.name,
+                                               self._image(deployment),
+                                               None,
+                                               None,
+                                               None,
+                                               env,
+                                               self._ports,
+                                               self._network_links,
+                                               self._volume_links,
+                                               self._secret_links,
+                                               self.configuration["replicas"])
+
+        else:
+            if not self.interfaces.development:
+                raise RuntimeError("providers.Development: implementation not found")
+
+            local_volume_links = [
+                types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
+            ]
+
+            self.interfaces.development.create_deployment(self.name,
+                                                          self._image(deployment),
+                                                          None,
+                                                          None,
+                                                          None,
+                                                          env,
+                                                          self._ports,
+                                                          self._network_links,
+                                                          self._volume_links,
+                                                          self._secret_links,
+                                                          local_volume_links)

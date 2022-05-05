@@ -151,7 +151,63 @@ class Deployments(providers.Deployments):
                                   ports,
                                   network_links,
                                   volume_links,
-                                  secret_links)
+                                  secret_links,
+                                  [])
+
+
+class Development(providers.Development):
+    """TODO"""
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
+                                        cls._CONFIGURATION["defaults"],
+                                        configuration)
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        return {}
+
+    def create_deployment(self,
+                          name: str,
+                          image: str,
+                          cmd: [str],
+                          args: [str],
+                          cwd: str,
+                          env: [types.KeyValue],
+                          ports: [types.Port],
+                          network_links: [types.NetworkLink],
+                          volume_links: [types.VolumeLink],
+                          secret_links: [types.SecretLink],
+                          local_volume_links: [types.VolumeLink]):
+        """TODO"""
+
+        if args:
+            if cmd:
+                cmd += args
+
+            else:
+                cmd = args
+
+        self.provider.add_service(name,
+                                  image,
+                                  cmd,
+                                  cwd,
+                                  env,
+                                  ports,
+                                  network_links,
+                                  volume_links,
+                                  secret_links,
+                                  local_volume_links)
 
 
 class PersistentVolumes(providers.PersistentVolumes):
@@ -283,7 +339,9 @@ class Provider(v1.provider.Provider):
 
     _CONFIGURATION = {
         "defaults": {},
-        "schema": {}
+        "schema": {
+            v1.schema.Optional("workspace_path"): str
+        }
     }
 
     @classmethod
@@ -383,6 +441,36 @@ class Provider(v1.provider.Provider):
 
         return volumes
 
+    def _convert_local_volume_links(self, local_volume_links: [types.VolumeLink]) -> [object]:
+        """TODO"""
+
+        if not local_volume_links:
+            return []
+
+        volumes = []
+
+        if "workspace_path" in self.configuration:
+            workspace_path = self.configuration["workspace_path"]
+
+        else:
+            workspace_path = None
+
+        for link in local_volume_links:
+            if workspace_path is None:
+                path = v1.utils.resolve_path(link.object.get())
+
+            else:
+                path = os.path.join(workspace_path, link.object.get())
+                path = os.path.normpath(path)
+
+            volumes.append({
+                "type": "bind",
+                "source": path,
+                "target": link.mount_path
+            })
+
+        return volumes
+
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
@@ -432,7 +520,8 @@ class Provider(v1.provider.Provider):
                     ports: [types.Port],
                     network_links: [types.NetworkLink],
                     volume_links: [types.VolumeLink],
-                    secret_links: [types.SecretLink]):
+                    secret_links: [types.SecretLink],
+                    local_volume_links: [types.VolumeLink]):
         """TODO"""
 
         env = self._convert_environment(env)
@@ -441,6 +530,7 @@ class Provider(v1.provider.Provider):
 
         ports = self._convert_ports(ports)
         volumes = self._convert_volume_links(volume_links)
+        volumes += self._convert_local_volume_links(local_volume_links)
 
         service = {
             "image": image,
