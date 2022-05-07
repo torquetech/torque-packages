@@ -78,7 +78,7 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.interfaces.lb.create(self.name)
+        self.interfaces.lb.create(self.name, self.configuration["host"])
 
 
 class Link(v1.link.Link):

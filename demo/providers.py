@@ -102,7 +102,7 @@ class HttpLoadBalancers(v1.provider.Interface):
 
     """TODO"""
 
-    def create(self, name: str):
+    def create(self, name: str, host: str):
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")

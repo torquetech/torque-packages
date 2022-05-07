@@ -295,7 +295,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         self._created = False
 
-    def create(self, name: str):
+    def create(self, name: str, host: str):
         """TODO"""
 
         if self._created:
