@@ -18,12 +18,10 @@ class Component(python_app.Component):
     # pylint: disable=W0212
     _CONFIGURATION = v1.utils.merge_dicts(python_app.Component._CONFIGURATION, {
         "defaults": {
-            "port": 8080,
-            "target_port": 8080
+            "port": 8080
         },
         "schema": {
-            "port": int,
-            "target_port": int
+            "port": int
         }
     }, allow_overwrites=False)
 
@@ -61,6 +59,6 @@ class Component(python_app.Component):
         self._service_link = self.interfaces.services.create(self.name,
                                                              "tcp",
                                                              self.configuration["port"],
-                                                             self.configuration["target_port"])
+                                                             self.configuration["port"])
 
         super().on_apply(deployment)
