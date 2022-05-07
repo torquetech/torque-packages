@@ -16,14 +16,16 @@ class Component(v1.component.Component):
 
     _PARAMETERS = {
         "defaults": {},
-        "schema": {
-            "host": str
-        }
+        "schema": {}
     }
 
     _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
+        "defaults": {
+            "host": "www.example.com"
+        },
+        "schema": {
+            "host": str
+        }
     }
 
     @classmethod
@@ -57,7 +59,7 @@ class Component(v1.component.Component):
     def _host(self):
         """TODO"""
 
-        return self.parameters["host"]
+        return self.configuration["host"]
 
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
