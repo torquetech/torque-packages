@@ -4,6 +4,8 @@
 
 """TODO"""
 
+import collections
+import json
 import os
 import subprocess
 import threading
@@ -16,6 +18,28 @@ from torque import v1
 from demo import providers
 from demo import types
 from demo import utils
+
+
+LoadBalancerLink = collections.namedtuple("LoadBalancerLink", [
+    "name",
+    "host",
+    "path",
+    "service",
+    "port"
+])
+
+
+_LOAD_BALANCER_TEMPLATE = """server {
+  listen 80;
+  server_name {{host}};
+{%- for link in links %}
+
+  location {{link.path}} {
+    proxy_pass http://{{link.service}}:{{link.port}};
+  }
+{%- endfor %}
+}
+"""
 
 
 class Images(providers.Images):
@@ -288,18 +312,10 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         return {}
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._created = False
-
     def create(self, name: str, host: str):
         """TODO"""
 
-        if self._created:
-            return
-
-        self._created = True
+        self.provider.add_load_balancer(name, host)
 
 
 class HttpIngressLinks(providers.HttpIngressLinks):
@@ -331,6 +347,8 @@ class HttpIngressLinks(providers.HttpIngressLinks):
                network_link: types.NetworkLink):
         """TODO"""
 
+        self.provider.add_load_balancer_link(name, host, path, network_link)
+
 
 class Provider(v1.provider.Provider):
     """TODO"""
@@ -355,6 +373,8 @@ class Provider(v1.provider.Provider):
 
         self._deployments = {}
         self._volumes = {}
+        self._load_balancers = {}
+        self._load_balancer_links = []
 
         self._lock = threading.Lock()
 
@@ -457,11 +477,52 @@ class Provider(v1.provider.Provider):
 
         return volumes
 
+    def _generate_load_balancers(self, deployment_path: str):
+        """TODO"""
+
+        services = {}
+
+        if "workspace_path" in self.configuration:
+            workspace_path = self.configuration["workspace_path"]
+
+        else:
+            workspace_path = None
+
+        for name, host in self._load_balancers.items():
+            conf_path = f"{deployment_path}/lb.{name}.conf"
+            conf_path = conf_path[len(v1.utils.torque_root())+1:]
+
+            with open(v1.utils.resolve_path(conf_path), "w", encoding="utf8") as file:
+                links = filter(lambda x: x.host == host, self._load_balancer_links)
+
+                template = jinja2.Template(_LOAD_BALANCER_TEMPLATE)
+                file.write(template.render(host=host, links=links))
+
+            if workspace_path is None:
+                conf_path = v1.utils.resolve_path(conf_path)
+
+            else:
+                conf_path = os.path.join(workspace_path, conf_path)
+                conf_path = os.path.normpath(conf_path)
+
+            services[f"lb.{name}"] = {
+                "image": "nginx:stable",
+                "volumes": [{
+                    "type": "bind",
+                    "source": conf_path,
+                    "target": "/etc/nginx/conf.d/default.conf"
+                }]
+            }
+
+        return services
+
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
+        deployments = self._deployments | self._generate_load_balancers(deployment.path)
+
         compose = {
-            "services": self._deployments,
+            "services": deployments,
             "volumes": self._volumes
         }
 
@@ -477,6 +538,49 @@ class Provider(v1.provider.Provider):
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
+
+        print("\nComponent ip addresses:\n")
+
+        cmd = [
+            "docker", "compose", "ps",
+            "--status", "running",
+            "--format", "json"
+        ]
+
+        p = subprocess.run(cmd,
+                           env=os.environ,
+                           cwd=deployment.path,
+                           check=True,
+                           capture_output=True)
+
+        containers = json.loads(p.stdout.decode("utf8"))
+
+        for container in containers:
+            name = container["Name"]
+
+            cmd = [
+                "docker", "inspect",
+                f"--format={{{{.NetworkSettings.Networks.local_default.IPAddress}}}}",
+                name
+            ]
+
+            p = subprocess.run(cmd,
+                               env=os.environ,
+                               cwd=deployment.path,
+                               check=True,
+                               capture_output=True)
+
+            ip = p.stdout.decode("utf8").strip()
+
+            if ip:
+                name = name.split("-")[1]
+
+                if name.startswith("lb."):
+                    name = name[3:]
+
+                name += ":"
+
+                print(f"{name:20} {ip}")
 
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
@@ -531,3 +635,31 @@ class Provider(v1.provider.Provider):
 
         with self._lock:
             self._deployments[name] = deployment
+
+    def add_load_balancer(self, name: str, host: str):
+        """TODO"""
+
+        with self._lock:
+            if any([i.host == host for i in self._load_balancers.values()]):
+                raise RuntimeError(f"{host}: load balancer already exists")
+
+            self._load_balancers[name] = host
+
+    def add_load_balancer_link(self,
+                               name: str,
+                               host: str,
+                               path: str,
+                               network_link: types.NetworkLink):
+        """TODO"""
+
+        link = network_link.object.get()
+
+        service = link[1]
+        port = link[2]
+
+        with self._lock:
+            self._load_balancer_links.append(LoadBalancerLink(name,
+                                                              host,
+                                                              path,
+                                                              service,
+                                                              port))
