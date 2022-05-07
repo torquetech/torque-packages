@@ -139,8 +139,9 @@ def defaults(providers: [str],
     interfaces = []
 
     for provider_name in providers:
-        # pylint: disable=W0212
-        interfaces += repo.provider(provider_name)._TORQUE_INTERFACES
+        for interface_name, mapped_provider_name in repo.interface_maps().items():
+            if provider_name == mapped_provider_name:
+                interfaces.append(interface_name)
 
     return {
         "providers": {

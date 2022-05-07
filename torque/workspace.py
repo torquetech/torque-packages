@@ -223,11 +223,11 @@ class Workspace:
         self._path = path
         self._config = config
 
-    def _provider_interface(self,
-                            interface: object,
-                            required: bool,
-                            name: str,
-                            labels: [str]) -> v1.provider.Interface:
+    def _interface(self,
+                   interface: object,
+                   required: bool,
+                   name: str,
+                   labels: [str]) -> v1.provider.Interface:
         # pylint: disable=R0201,W0613
 
         """TODO"""
@@ -241,7 +241,7 @@ class Workspace:
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         component.labels,
-                                                        self._provider_interface)
+                                                        self._interface)
 
         return type(component.name,
                     component.labels,
@@ -259,7 +259,7 @@ class Workspace:
         bound_interfaces = interfaces.bind_to_link(type,
                                                    source,
                                                    destination,
-                                                   self._provider_interface)
+                                                   self._interface)
 
         return type(link.name,
                     link.parameters,

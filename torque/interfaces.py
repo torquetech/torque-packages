@@ -23,7 +23,7 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 def bind_to_component(type: object,
                       name: str,
                       labels: [str],
-                      provider_interface: callable) -> object:
+                      get_interface: callable) -> object:
     """TODO"""
 
     interfaces = types.SimpleNamespace()
@@ -41,10 +41,10 @@ def bind_to_component(type: object,
         if not issubclass(r["interface"], v1.provider.Interface):
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        interface = provider_interface(r["interface"],
-                                       r["required"],
-                                       name,
-                                       labels)
+        interface = get_interface(r["interface"],
+                                  r["required"],
+                                  name,
+                                  labels)
 
         setattr(interfaces, r_name, interface)
 
@@ -54,7 +54,7 @@ def bind_to_component(type: object,
 def bind_to_link(type: object,
                  source: model.Component,
                  destination: model.Component,
-                 provider_interface: callable) -> object:
+                 get_interface: callable) -> object:
     """TODO"""
 
     interfaces = types.SimpleNamespace()
@@ -87,16 +87,16 @@ def bind_to_link(type: object,
 
         elif issubclass(r["interface"], v1.provider.Interface):
             if r["bind_to"] == "source":
-                interface = provider_interface(r["interface"],
-                                               r["required"],
-                                               source.name,
-                                               source.labels)
+                interface = get_interface(r["interface"],
+                                          r["required"],
+                                          source.name,
+                                          source.labels)
 
             elif r["bind_to"] == "destination":
-                interface = provider_interface(r["interface"],
-                                               r["required"],
-                                               destination.name,
-                                               destination.labels)
+                interface = get_interface(r["interface"],
+                                          r["required"],
+                                          destination.name,
+                                          destination.labels)
 
         else:
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))

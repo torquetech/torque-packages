@@ -51,7 +51,7 @@ class Deployment:
         self._links: dict[str, v1.link.Link] = {}
 
         self._providers: dict[str, v1.provider.Provider] = None
-        self._provider_interfaces: dict[str, v1.provider.Interface] = None
+        self._interfaces: dict[str, v1.provider.Interface] = None
 
         self._lock = threading.Lock()
 
@@ -74,10 +74,10 @@ class Deployment:
             provider = self._repo.provider(name)(config)
             self._providers[name] = provider
 
-    def _setup_provider_interfaces(self) -> v1.provider.Interface:
+    def _setup_interfaces(self):
         """TODO"""
 
-        self._provider_interfaces = {}
+        self._interfaces = {}
 
         for name in self._config.interfaces.keys():
             interface = self._repo.interface(name)
@@ -93,10 +93,10 @@ class Deployment:
 
                 fqcn = v1.utils.fqcn(cls)
 
-                if fqcn in self._provider_interfaces:
+                if fqcn in self._interfaces:
                     print(f"WARNING: {name}: duplicate provider interface: {fqcn}")
 
-                self._provider_interfaces[fqcn] = interface
+                self._interfaces[fqcn] = name
                 cls = cls.__bases__[0]
 
     def _component(self, name: str) -> v1.component.Component:
@@ -112,7 +112,7 @@ class Deployment:
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         component.labels,
-                                                        self._provider_interface)
+                                                        self._interface)
 
         component = type(component.name,
                          component.labels,
@@ -139,7 +139,7 @@ class Deployment:
         bound_interfaces = interfaces.bind_to_link(type,
                                                    source,
                                                    destination,
-                                                   self._provider_interface)
+                                                   self._interface)
 
         link = type(link.name,
                     link.parameters,
@@ -151,36 +151,38 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _provider_interface(self,
-                            interface: str,
-                            required: bool,
-                            name: str,
-                            labels: [str]) -> v1.provider.Interface:
+    def _interface(self,
+                   interface: str,
+                   required: bool,
+                   name: str,
+                   labels: [str]) -> v1.provider.Interface:
         """TODO"""
 
-        if self._provider_interfaces is None:
+        if self._interfaces is None:
             return None
 
-        name = v1.utils.fqcn(interface)
+        interface_class = v1.utils.fqcn(interface)
 
-        if name not in self._provider_interfaces:
+        if interface_class not in self._interfaces:
             if required:
-                raise RuntimeError(f"{name}: provider interface not found")
+                raise RuntimeError(f"{interface_class}: interface not found")
 
             return None
 
-        type = self._provider_interfaces[name]
+        interface_name = self._interfaces[interface_class]
+        interface_type = self._repo.interface(interface_name)
 
-        # pylint: disable=W0212
-        config = self._config.interfaces[type._TORQUE_NAME]
-        provider = self._providers[type._TORQUE_PROVIDER]
+        provider_name = self._repo.provider_for(interface_name)
 
-        bound_interfaces = interfaces.bind_to_component(type,
-                                                        name,
+        config = self._config.interfaces[interface_name]
+        provider = self._providers[provider_name]
+
+        bound_interfaces = interfaces.bind_to_component(interface_type,
+                                                        interface_name,
                                                         labels,
-                                                        self._provider_interface)
+                                                        self._interface)
 
-        return type(config, provider, name, labels, bound_interfaces)
+        return interface_type(config, provider, name, labels, bound_interfaces)
 
     def _execute(self, workers: int, callback: callable):
         """TODO"""
@@ -242,7 +244,7 @@ class Deployment:
         """TODO"""
 
         self._setup_providers()
-        self._setup_provider_interfaces()
+        self._setup_interfaces()
 
         path = self._create_path()
         deployment = v1.deployment.Deployment(self._name,

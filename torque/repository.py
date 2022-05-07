@@ -97,30 +97,20 @@ class Repository:
 
         providers = {}
         interfaces = {}
+        interface_maps = {}
 
         for provider_name, provider_class in self._repo["v1"]["providers"].items():
-            # pylint: disable=W0212
-
             providers[provider_name] = provider_class
-            provider_class._TORQUE_INTERFACES = []
 
         for provider_name, provider_interfaces in self._repo["v1"]["interfaces"].items():
-            provider_class = self.provider(provider_name)
-
             for interface_name, interface_class in provider_interfaces.items():
-                # pylint: disable=W0212
-
                 interface_name = f"{provider_name}/{interface_name}"
-
-                interface_class._TORQUE_PROVIDER = provider_name
-                interface_class._TORQUE_NAME = interface_name
-
-                provider_class._TORQUE_INTERFACES.append(interface_name)
-
                 interfaces[interface_name] = interface_class
+                interface_maps[interface_name] = provider_name
 
         self._repo["v1"]["providers"] = providers
         self._repo["v1"]["interfaces"] = interfaces
+        self._repo["v1"]["interface_maps"] = interface_maps
 
     def components(self) -> dict[str, v1.component.Component]:
         """TODO"""
@@ -146,6 +136,11 @@ class Repository:
         """TODO"""
 
         return self._repo["v1"]["interfaces"]
+
+    def interface_maps(self) -> dict[str, str]:
+        """TODO"""
+
+        return self._repo["v1"]["interface_maps"]
 
     def component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -196,6 +191,16 @@ class Repository:
             raise exceptions.InterfaceNotFound(name)
 
         return interfaces[name]
+
+    def provider_for(self, name: str) -> str:
+        """TODO"""
+
+        interface_maps = self.interface_maps()
+
+        if name not in interface_maps:
+            raise exceptions.InterfaceNotFound(name)
+
+        return interface_maps[name]
 
 
 def _system_repository():
