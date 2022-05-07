@@ -113,7 +113,6 @@ class Component(v1.component.Component):
         p = subprocess.run(["./version.sh"],
                            cwd=self._path(),
                            env=os.environ,
-                           shell=True,
                            check=True,
                            capture_output=True)
 
