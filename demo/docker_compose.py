@@ -409,18 +409,6 @@ class Provider(v1.provider.Provider):
 
         return env
 
-    def _convert_ports(self, ports: [types.Port]) -> [object]:
-        """TODO"""
-
-        if not ports:
-            return []
-
-        return [{
-            "protocol": port.protocol,
-            "target": port.port,
-            "published": port.port
-        } for port in ports]
-
     def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> [object]:
         """TODO"""
 
@@ -528,7 +516,6 @@ class Provider(v1.provider.Provider):
         env += self._convert_network_links(network_links)
         env += self._convert_secret_links(secret_links)
 
-        ports = self._convert_ports(ports)
         volumes = self._convert_volume_links(volume_links)
         volumes += self._convert_local_volume_links(local_volume_links)
 
@@ -536,7 +523,6 @@ class Provider(v1.provider.Provider):
             "image": image,
             "user": "root",
             "environment": env,
-            "ports": ports,
             "volumes": volumes
         }
 

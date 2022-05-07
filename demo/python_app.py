@@ -97,7 +97,6 @@ class Component(v1.component.Component):
         self._volume_links = []
         self._secret_links = []
         self._environment = []
-        self._ports = []
 
         self._version = None
 
@@ -219,7 +218,7 @@ class Component(v1.component.Component):
                                                None,
                                                None,
                                                env,
-                                               self._ports,
+                                               None,
                                                self._network_links,
                                                self._volume_links,
                                                self._secret_links,
@@ -239,7 +238,7 @@ class Component(v1.component.Component):
                                                           None,
                                                           None,
                                                           env,
-                                                          self._ports,
+                                                          None,
                                                           self._network_links,
                                                           self._volume_links,
                                                           self._secret_links,

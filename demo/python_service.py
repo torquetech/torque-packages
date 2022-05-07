@@ -58,10 +58,6 @@ class Component(python_app.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self._ports = [
-            types.Port("service", "tcp", self.configuration["port"])
-        ]
-
         self._service_link = self.interfaces.services.create(self.name,
                                                              "tcp",
                                                              self.configuration["port"],
