@@ -143,16 +143,15 @@ class Deployments(providers.Deployments):
             else:
                 cmd = args
 
-        self.provider.add_service(name,
-                                  image,
-                                  cmd,
-                                  cwd,
-                                  env,
-                                  ports,
-                                  network_links,
-                                  volume_links,
-                                  secret_links,
-                                  [])
+        self.provider.add_deployment(name,
+                                     image,
+                                     cmd,
+                                     cwd,
+                                     env,
+                                     network_links,
+                                     volume_links,
+                                     secret_links,
+                                     [])
 
 
 class Development(providers.Development):
@@ -198,16 +197,15 @@ class Development(providers.Development):
             else:
                 cmd = args
 
-        self.provider.add_service(name,
-                                  image,
-                                  cmd,
-                                  cwd,
-                                  env,
-                                  ports,
-                                  network_links,
-                                  volume_links,
-                                  secret_links,
-                                  local_volume_links)
+        self.provider.add_deployment(name,
+                                     image,
+                                     cmd,
+                                     cwd,
+                                     env,
+                                     network_links,
+                                     volume_links,
+                                     secret_links,
+                                     local_volume_links)
 
 
 class PersistentVolumes(providers.PersistentVolumes):
@@ -355,7 +353,7 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._services = {}
+        self._deployments = {}
         self._volumes = {}
 
         self._lock = threading.Lock()
@@ -463,7 +461,7 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         compose = {
-            "services": self._services,
+            "services": self._deployments,
             "volumes": self._volumes
         }
 
@@ -499,17 +497,16 @@ class Provider(v1.provider.Provider):
         with self._lock:
             self._volumes[name] = None
 
-    def add_service(self,
-                    name: str,
-                    image: str,
-                    cmd: [str],
-                    cwd: str,
-                    env: [types.KeyValue],
-                    ports: [types.Port],
-                    network_links: [types.NetworkLink],
-                    volume_links: [types.VolumeLink],
-                    secret_links: [types.SecretLink],
-                    local_volume_links: [types.VolumeLink]):
+    def add_deployment(self,
+                       name: str,
+                       image: str,
+                       cmd: [str],
+                       cwd: str,
+                       env: [types.KeyValue],
+                       network_links: [types.NetworkLink],
+                       volume_links: [types.VolumeLink],
+                       secret_links: [types.SecretLink],
+                       local_volume_links: [types.VolumeLink]):
         """TODO"""
 
         env = self._convert_environment(env)
@@ -519,7 +516,7 @@ class Provider(v1.provider.Provider):
         volumes = self._convert_volume_links(volume_links)
         volumes += self._convert_local_volume_links(local_volume_links)
 
-        service = {
+        deployment = {
             "image": image,
             "user": "root",
             "environment": env,
@@ -527,10 +524,10 @@ class Provider(v1.provider.Provider):
         }
 
         if cmd:
-            service["command"] = cmd
+            deployment["command"] = cmd
 
         if cwd:
-            service["working_dir"] = cwd
+            deployment["working_dir"] = cwd
 
         with self._lock:
-            self._services[name] = service
+            self._deployments[name] = deployment
