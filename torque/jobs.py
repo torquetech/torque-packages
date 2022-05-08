@@ -114,7 +114,7 @@ class Runner:
                     if len(self._jobs) == 0:
                         self._quit()
 
-            except BaseException as exc:
+            except BaseException:
                 self._exception = True
 
                 self._abort()
