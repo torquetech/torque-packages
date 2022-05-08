@@ -296,7 +296,7 @@ class Deployment:
 
 def _provider_config(provider: str,
                      profile: profile.Profile,
-                     repo: repository.Repository) -> object:
+                     repo: repository.Repository) -> dict:
     """TODO"""
 
     config = profile.provider(provider)
@@ -310,7 +310,7 @@ def _provider_config(provider: str,
 
 def _interface_config(interface: str,
                       profile: profile.Profile,
-                      repo: repository.Repository) -> object:
+                      repo: repository.Repository) -> dict:
     """TODO"""
 
     config = profile.interface(interface)
@@ -324,7 +324,7 @@ def _interface_config(interface: str,
 
 def _component_config(component: model.Component,
                       profile: profile.Profile,
-                      repo: repository.Repository) -> object:
+                      repo: repository.Repository) -> dict:
     """TODO"""
     config = profile.component(component.name)
 
@@ -337,7 +337,7 @@ def _component_config(component: model.Component,
 
 def _link_config(link: model.Link,
                  profile: profile.Profile,
-                 repo: repository.Repository) -> object:
+                 repo: repository.Repository) -> dict:
     """TODO"""
     config = profile.link(link.name)
 

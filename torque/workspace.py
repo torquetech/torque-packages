@@ -35,7 +35,7 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
             v1.schema.Optional(str): {
                 "labels": [str],
                 "type": str,
-                "parameters": object
+                "parameters": dict
             }
         },
         "links": {
@@ -43,7 +43,7 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
                 "source": str,
                 "destination": str,
                 "type": str,
-                "parameters": object
+                "parameters": dict
             }
         }
     }

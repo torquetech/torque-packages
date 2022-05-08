@@ -52,8 +52,8 @@ class Component(ABC):
     def __init__(self,
                  name: str,
                  labels: [str],
-                 parameters: object,
-                 configuration: object,
+                 parameters: dict,
+                 configuration: dict,
                  interfaces: object):
         # pylint: disable=R0913
 
@@ -101,21 +101,21 @@ class Component(ABC):
 
     @classmethod
     @abstractmethod
-    def on_parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
 
     @classmethod
     @abstractmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
     @classmethod
     @abstractmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")

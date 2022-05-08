@@ -16,8 +16,8 @@ class Link(ABC):
 
     def __init__(self,
                  name: str,
-                 parameters: object,
-                 configuration: object,
+                 parameters: dict,
+                 configuration: dict,
                  interfaces: object,
                  source: str,
                  destination: str):
@@ -32,21 +32,21 @@ class Link(ABC):
 
     @classmethod
     @abstractmethod
-    def on_parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
 
     @classmethod
     @abstractmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
     @classmethod
     @abstractmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")

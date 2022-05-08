@@ -15,21 +15,21 @@ from torque import v1
 _PROTO = r"^([^:]+)://"
 _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "providers": {
-        v1.schema.Optional(str): object
+        v1.schema.Optional(str): dict
     },
     "interfaces": {
-        v1.schema.Optional(str): object
+        v1.schema.Optional(str): dict
     },
     "dag": {
         "revision": int,
         "components": {
             v1.schema.Optional(str): {
-                "configuration": object
+                "configuration": dict
             }
         },
         "links": {
             v1.schema.Optional(str): {
-                "configuration": object
+                "configuration": dict
             }
         }
     }
@@ -58,7 +58,7 @@ class Profile:
 
         return self._config["interfaces"].keys()
 
-    def provider(self, name: str) -> object:
+    def provider(self, name: str) -> dict:
         """TODO"""
 
         providers = self._config["providers"]
@@ -68,7 +68,7 @@ class Profile:
 
         return providers[name]
 
-    def interface(self, name: str) -> object:
+    def interface(self, name: str) -> dict:
         """TODO"""
 
         interfaces = self._config["interfaces"]
@@ -78,7 +78,7 @@ class Profile:
 
         return interfaces[name]
 
-    def component(self, name: str) -> object:
+    def component(self, name: str) -> dict:
         """TODO"""
 
         dag_config = self._config["dag"]
@@ -89,7 +89,7 @@ class Profile:
 
         return components[name]["configuration"]
 
-    def link(self, name: str) -> object:
+    def link(self, name: str) -> dict:
         """TODO"""
 
         dag_config = self._config["dag"]
