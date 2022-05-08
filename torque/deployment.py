@@ -152,7 +152,7 @@ class Deployment:
         return link
 
     def _interface(self,
-                   interface: str,
+                   interface: type,
                    required: bool,
                    name: str,
                    labels: [str]) -> v1.provider.Interface:
