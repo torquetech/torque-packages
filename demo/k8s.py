@@ -25,7 +25,7 @@ class Images(providers.Images):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -33,7 +33,7 @@ class Images(providers.Images):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -51,7 +51,7 @@ class Secrets(providers.Secrets):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -59,12 +59,12 @@ class Secrets(providers.Secrets):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
 
-    def _k8s_create(self, name: str, entries: [types.KeyValue]) -> object:
+    def _k8s_create(self, name: str, entries: [types.KeyValue]) -> dict:
         """TODO"""
 
         return {
@@ -96,7 +96,7 @@ class Services(providers.Services):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -104,12 +104,12 @@ class Services(providers.Services):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
 
-    def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> object:
+    def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> dict:
         """TODO"""
 
         return {
@@ -149,7 +149,7 @@ class Deployments(providers.Deployments):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -157,12 +157,12 @@ class Deployments(providers.Deployments):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
 
-    def _convert_environment(self, env: [types.KeyValue]) -> [object]:
+    def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
         """TODO"""
 
         if not env:
@@ -172,7 +172,7 @@ class Deployments(providers.Deployments):
             {"name": e.key, "value": e.value} for e in env
         ]
 
-    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [object]:
+    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [dict]:
         """TODO"""
 
         if not network_links:
@@ -191,7 +191,7 @@ class Deployments(providers.Deployments):
 
         return env
 
-    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [object]:
+    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [dict]:
         """TODO"""
 
         if not secret_links:
@@ -207,7 +207,7 @@ class Deployments(providers.Deployments):
             }
         } for link in secret_links]
 
-    def _convert_ports(self, ports: [types.Port]) -> [object]:
+    def _convert_ports(self, ports: [types.Port]) -> [dict]:
         """TODO"""
 
         if not ports:
@@ -219,7 +219,7 @@ class Deployments(providers.Deployments):
             "containerPort": port.port
         } for port in ports]
 
-    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([object], [object]):
+    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([dict], [dict]):
         """TODO"""
 
         if not volume_links:
@@ -248,7 +248,7 @@ class Deployments(providers.Deployments):
                     network_links: [types.NetworkLink],
                     volume_links: [types.VolumeLink],
                     secret_links: [types.SecretLink],
-                    replicas: int) -> object:
+                    replicas: int) -> dict:
         """TODO"""
 
         env = self._convert_environment(env)
@@ -335,7 +335,7 @@ class PersistentVolumes(providers.PersistentVolumes):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -343,12 +343,12 @@ class PersistentVolumes(providers.PersistentVolumes):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
 
-    def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
+    def create(self, name: str, volume_id: str) -> v1.utils.Future[dict]:
         """TODO"""
 
         return v1.utils.Future({
@@ -369,7 +369,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -377,7 +377,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -414,7 +414,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -422,7 +422,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -430,7 +430,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
     def _convert_network_link(self,
                               host: str,
                               path: str,
-                              network_link: types.NetworkLink) -> object:
+                              network_link: types.NetworkLink) -> dict:
         """TODO"""
 
         link = network_link.object.get()
@@ -496,7 +496,7 @@ class Provider(v1.provider.Provider):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -523,7 +523,7 @@ class Provider(v1.provider.Provider):
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-    def add_to_target(self, name: str, objs: [object]):
+    def add_to_target(self, name: str, objs: [dict]):
         """TODO"""
 
         with self._lock:

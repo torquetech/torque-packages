@@ -37,7 +37,7 @@ class Component(v1.component.Component):
     }
 
     @classmethod
-    def on_parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._PARAMETERS["schema"],
@@ -45,7 +45,7 @@ class Component(v1.component.Component):
                                         parameters)
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -53,7 +53,7 @@ class Component(v1.component.Component):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {
@@ -86,7 +86,7 @@ class Component(v1.component.Component):
 
         return v1.utils.resolve_path(self.parameters["path"])
 
-    def _load_package(self) -> object:
+    def _load_package(self) -> dict:
         """TODO"""
 
         package_path = f"{self._path()}/package.json"

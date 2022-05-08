@@ -51,7 +51,7 @@ class Images(providers.Images):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -59,7 +59,7 @@ class Images(providers.Images):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -77,7 +77,7 @@ class Secrets(providers.Secrets):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -85,7 +85,7 @@ class Secrets(providers.Secrets):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -105,7 +105,7 @@ class Services(providers.Services):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -113,7 +113,7 @@ class Services(providers.Services):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -133,7 +133,7 @@ class Deployments(providers.Deployments):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -141,7 +141,7 @@ class Deployments(providers.Deployments):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -187,7 +187,7 @@ class Development(providers.Development):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -195,7 +195,7 @@ class Development(providers.Development):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -241,7 +241,7 @@ class PersistentVolumes(providers.PersistentVolumes):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -249,7 +249,7 @@ class PersistentVolumes(providers.PersistentVolumes):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -271,7 +271,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -279,7 +279,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -299,7 +299,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -307,7 +307,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -327,7 +327,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -335,7 +335,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -361,7 +361,7 @@ class Provider(v1.provider.Provider):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -378,7 +378,7 @@ class Provider(v1.provider.Provider):
 
         self._lock = threading.Lock()
 
-    def _convert_environment(self, env: [types.KeyValue]) -> [object]:
+    def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
         """TODO"""
 
         if not env:
@@ -388,7 +388,7 @@ class Provider(v1.provider.Provider):
             f"{e.key}={e.value}" for e in env
         ]
 
-    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [object]:
+    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [dict]:
         """TODO"""
 
         if not network_links:
@@ -406,7 +406,7 @@ class Provider(v1.provider.Provider):
 
         return env
 
-    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [object]:
+    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [dict]:
         """TODO"""
 
         if not secret_links:
@@ -427,7 +427,7 @@ class Provider(v1.provider.Provider):
 
         return env
 
-    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> [object]:
+    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> [dict]:
         """TODO"""
 
         if not volume_links:
@@ -447,7 +447,7 @@ class Provider(v1.provider.Provider):
 
         return volumes
 
-    def _convert_local_volume_links(self, local_volume_links: [types.VolumeLink]) -> [object]:
+    def _convert_local_volume_links(self, local_volume_links: [types.VolumeLink]) -> [dict]:
         """TODO"""
 
         if not local_volume_links:

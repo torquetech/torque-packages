@@ -26,7 +26,7 @@ class Component(python_app.Component):
     }, allow_overwrites=False)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return super().on_requirements() | {

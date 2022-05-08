@@ -26,7 +26,7 @@ class Component(v1.component.Component):
     }
 
     @classmethod
-    def on_parameters(cls, parameters: object) -> object:
+    def on_parameters(cls, parameters: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._PARAMETERS["schema"],
@@ -34,7 +34,7 @@ class Component(v1.component.Component):
                                         parameters)
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -42,7 +42,7 @@ class Component(v1.component.Component):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {
@@ -127,7 +127,7 @@ class DataLink(volume.Link):
     }
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return super().on_requirements() | {

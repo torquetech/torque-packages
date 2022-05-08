@@ -20,7 +20,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
@@ -28,7 +28,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
                                         configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return {}
@@ -48,7 +48,7 @@ class Provider(v1.provider.Provider):
     }
 
     @classmethod
-    def on_configuration(cls, configuration: object) -> object:
+    def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],

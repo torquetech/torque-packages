@@ -18,7 +18,7 @@ class Link(network.Link):
     """TODO"""
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict:
         """TODO"""
 
         return super().on_requirements() | {
