@@ -9,7 +9,6 @@ from torque import v1
 from demo import components
 from demo import providers
 from demo import types
-from demo import utils
 from demo import volume
 
 

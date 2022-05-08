@@ -9,7 +9,6 @@ from torque import v1
 from demo import components
 from demo import providers
 from demo import python_app
-from demo import types
 
 
 class Component(python_app.Component):

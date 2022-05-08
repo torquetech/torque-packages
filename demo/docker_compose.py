@@ -17,7 +17,6 @@ from torque import v1
 
 from demo import providers
 from demo import types
-from demo import utils
 
 
 LoadBalancer = collections.namedtuple("LoadBalancer", [
@@ -387,6 +386,9 @@ class Provider(v1.provider.Provider):
 
         self._lock = threading.Lock()
 
+        if "workspace_path" not in self.configuration:
+            self.configuration["workspace_path"] = None
+
     def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
         """TODO"""
 
@@ -428,11 +430,9 @@ class Provider(v1.provider.Provider):
             key = link.key
             link = link.object.get()
 
-            for l in link:
-                if l.key == key:
-                    env.append(
-                        f"{name}={l.value}"
-                    )
+            for el in link:
+                if el.key == key:
+                    env.append(f"{name}={el.value}")
 
         return env
 
@@ -462,13 +462,9 @@ class Provider(v1.provider.Provider):
         if not local_volume_links:
             return []
 
+        workspace_path = self.configuration["workspace_path"]
+
         volumes = []
-
-        if "workspace_path" in self.configuration:
-            workspace_path = self.configuration["workspace_path"]
-
-        else:
-            workspace_path = None
 
         for link in local_volume_links:
             if workspace_path is None:
@@ -489,15 +485,13 @@ class Provider(v1.provider.Provider):
     def _generate_load_balancers(self, deployment_path: str):
         """TODO"""
 
+        workspace_path = self.configuration["workspace_path"]
+
         services = {}
 
-        if "workspace_path" in self.configuration:
-            workspace_path = self.configuration["workspace_path"]
-
-        else:
-            workspace_path = None
-
         for name, lb in self._load_balancers.items():
+            # pylint: disable=W0640
+
             conf_path = f"{deployment_path}/lb.{name}.conf"
             conf_path = conf_path[len(v1.utils.torque_root())+1:]
 
@@ -550,7 +544,7 @@ class Provider(v1.provider.Provider):
 
             cmd = [
                 "docker", "inspect",
-                f"--format={{{{.NetworkSettings.Networks.local_default.IPAddress}}}}",
+                "--format={{.NetworkSettings.Networks.local_default.IPAddress}}",
                 name
             ]
 

@@ -44,7 +44,6 @@ class Component(v1.component.Component):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
-
     @classmethod
     def on_requirements(cls) -> [v1.provider.Interface]:
         """TODO"""
