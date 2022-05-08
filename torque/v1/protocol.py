@@ -6,14 +6,10 @@
 
 import io
 
-from abc import ABC
-from abc import abstractmethod
 
-
-class Protocol(ABC):
+class Protocol:
     """TODO"""
 
     @staticmethod
-    @abstractmethod
     def fetch(uri: str) -> io.TextIOWrapper:
         """TODO"""

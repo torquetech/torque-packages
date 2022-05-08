@@ -4,33 +4,27 @@
 
 """TODO"""
 
-from abc import ABC
-from abc import abstractmethod
-
 from . import deployment
 from . import utils
 
 
-class Provider(ABC):
+class Provider:
     """TODO"""
 
     def __init__(self, configuration: object):
         self.configuration = configuration
 
     @classmethod
-    @abstractmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
-    @abstractmethod
     def on_apply(self, deployment: deployment.Deployment):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
 
-    @abstractmethod
     def on_delete(self, deployment: deployment.Deployment):
         """TODO"""
 
@@ -53,14 +47,12 @@ class Interface:
         self.interfaces = interfaces
 
     @classmethod
-    @abstractmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
     @classmethod
-    @abstractmethod
     def on_requirements(cls) -> object:
         """TODO"""
 

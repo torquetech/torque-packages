@@ -9,9 +9,6 @@ import inspect
 import threading
 import warnings
 
-from abc import ABC
-from abc import abstractmethod
-
 from . import deployment
 from . import utils
 
@@ -44,7 +41,7 @@ class Interface:
             return func(*args, **kwargs)
 
 
-class Component(ABC):
+class Component:
     # pylint: disable=R0902
 
     """TODO"""
@@ -100,51 +97,43 @@ class Component(ABC):
         return self._torque_interfaces[name]
 
     @classmethod
-    @abstractmethod
     def on_parameters(cls, parameters: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
 
     @classmethod
-    @abstractmethod
     def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
     @classmethod
-    @abstractmethod
     def on_requirements(cls) -> dict:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
-    @abstractmethod
     def on_interfaces(self) -> [Interface]:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_interfaces: not implemented")
 
-    @abstractmethod
     def on_create(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_create: not implemented")
 
-    @abstractmethod
     def on_remove(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_remove: not implemented")
 
-    @abstractmethod
     def on_build(self, deployment: deployment.Deployment):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_build: not implemented")
 
-    @abstractmethod
     def on_apply(self, deployment: deployment.Deployment):
         """TODO"""
 
