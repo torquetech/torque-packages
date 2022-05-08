@@ -526,28 +526,8 @@ class Provider(v1.provider.Provider):
 
         return services
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def _print_info(self, deployment: v1.deployment.Deployment):
         """TODO"""
-
-        deployments = self._deployments | self._generate_load_balancers(deployment.path)
-
-        compose = {
-            "services": deployments,
-            "volumes": self._volumes
-        }
-
-        with open(f"{deployment.path}/docker-compose.yaml", "w", encoding="utf8") as file:
-            file.write(yaml.safe_dump(compose, sort_keys=False))
-
-        if deployment.dry_run:
-            return
-
-        cmd = [
-            "docker", "compose", "up",
-            "-d", "--remove-orphans"
-        ]
-
-        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
         print("\nComponent ip addresses:\n")
 
@@ -590,7 +570,38 @@ class Provider(v1.provider.Provider):
 
                 name += ":"
 
-                print(f"{name:20} {ip}")
+                print(f"{name:30} {ip}")
+
+        print("\nLoad balancers:\n")
+
+        for name, lb in self._load_balancers.items():
+            name = f"{name} ({lb.host}):"
+            print(f"{name:30} http://localhost:{lb.port}")
+
+    def on_apply(self, deployment: v1.deployment.Deployment):
+        """TODO"""
+
+        deployments = self._deployments | self._generate_load_balancers(deployment.path)
+
+        compose = {
+            "services": deployments,
+            "volumes": self._volumes
+        }
+
+        with open(f"{deployment.path}/docker-compose.yaml", "w", encoding="utf8") as file:
+            file.write(yaml.safe_dump(compose, sort_keys=False))
+
+        if deployment.dry_run:
+            return
+
+        cmd = [
+            "docker", "compose", "up",
+            "-d", "--remove-orphans"
+        ]
+
+        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
+
+        self._print_info(deployment)
 
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
