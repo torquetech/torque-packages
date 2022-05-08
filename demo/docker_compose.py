@@ -20,6 +20,11 @@ from demo import types
 from demo import utils
 
 
+LoadBalancer = collections.namedtuple("LoadBalancer", [
+    "host",
+    "port"
+])
+
 LoadBalancerLink = collections.namedtuple("LoadBalancerLink", [
     "name",
     "host",
@@ -294,8 +299,12 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
     """TODO"""
 
     _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
+        "defaults": {
+            "port": 8080
+        },
+        "schema": {
+            "port": int
+        }
     }
 
     @classmethod
@@ -315,7 +324,7 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
     def create(self, name: str, host: str):
         """TODO"""
 
-        self.provider.add_load_balancer(name, host)
+        self.provider.add_load_balancer(name, host, self.configuration["port"])
 
 
 class HttpIngressLinks(providers.HttpIngressLinks):
@@ -488,15 +497,15 @@ class Provider(v1.provider.Provider):
         else:
             workspace_path = None
 
-        for name, host in self._load_balancers.items():
+        for name, lb in self._load_balancers.items():
             conf_path = f"{deployment_path}/lb.{name}.conf"
             conf_path = conf_path[len(v1.utils.torque_root())+1:]
 
             with open(v1.utils.resolve_path(conf_path), "w", encoding="utf8") as file:
-                links = filter(lambda x: x.host == host, self._load_balancer_links)
+                links = filter(lambda x: x.host == lb.host, self._load_balancer_links)
 
                 template = jinja2.Template(_LOAD_BALANCER_TEMPLATE)
-                file.write(template.render(host=host, links=links))
+                file.write(template.render(host=lb.host, links=links))
 
             if workspace_path is None:
                 conf_path = v1.utils.resolve_path(conf_path)
@@ -507,6 +516,7 @@ class Provider(v1.provider.Provider):
 
             services[f"lb.{name}"] = {
                 "image": "nginx:stable",
+                "ports": [f"{lb.port}:80"],
                 "volumes": [{
                     "type": "bind",
                     "source": conf_path,
@@ -636,14 +646,17 @@ class Provider(v1.provider.Provider):
         with self._lock:
             self._deployments[name] = deployment
 
-    def add_load_balancer(self, name: str, host: str):
+    def add_load_balancer(self, name: str, host: str, port: int):
         """TODO"""
 
         with self._lock:
             if any([i.host == host for i in self._load_balancers.values()]):
                 raise RuntimeError(f"{host}: load balancer already exists")
 
-            self._load_balancers[name] = host
+            if any([i.port == port for i in self._load_balancers.values()]):
+                raise RuntimeError(f"{port}: duplicate load balancer port")
+
+            self._load_balancers[name] = LoadBalancer(host, port)
 
     def add_load_balancer_link(self,
                                name: str,
