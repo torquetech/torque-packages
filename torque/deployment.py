@@ -337,7 +337,9 @@ def _component_interfaces(component: model.Component,
 
     interfaces = {}
 
-    for name, config in profile.component_interfaces(component.name).items():
+    for name, interface in profile.component_interfaces(component.name).items():
+        config = interface["configuration"]
+
         try:
             config = repo.interface(name).on_configuration(config or {})
 

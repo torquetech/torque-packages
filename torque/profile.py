@@ -15,10 +15,14 @@ from torque import v1
 _PROTO = r"^([^:]+)://"
 _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "providers": {
-        v1.schema.Optional(str): dict
+        v1.schema.Optional(str): {
+            "configuration": dict
+        }
     },
     "interfaces": {
-        v1.schema.Optional(str): dict
+        v1.schema.Optional(str): {
+            "configuration": dict
+        }
     },
     "dag": {
         "revision": int,
@@ -26,7 +30,9 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
             v1.schema.Optional(str): {
                 "configuration": dict,
                 v1.schema.Optional("interfaces"): {
-                    v1.schema.Optional(str): dict
+                    v1.schema.Optional(str): {
+                        "configuration": dict
+                    }
                 }
             }
         },
@@ -80,7 +86,7 @@ class Profile:
         if name not in providers:
             return {}
 
-        return providers[name]
+        return providers[name]["configuration"]
 
     def interface(self, name: str) -> dict:
         """TODO"""
@@ -90,7 +96,7 @@ class Profile:
         if name not in interfaces:
             return {}
 
-        return interfaces[name]
+        return interfaces[name]["configuration"]
 
     def component_interfaces(self, name: str) -> dict:
         """TODO"""
@@ -175,12 +181,14 @@ def defaults(providers: [str],
 
     return {
         "providers": {
-            name: repo.provider(name).on_configuration({})
-            for name in providers
+            name: {
+                "configuration": repo.provider(name).on_configuration({})
+            } for name in providers
         },
         "interfaces": {
-            name: repo.interface(name).on_configuration({})
-            for name in interfaces
+            name: {
+                "configuration": repo.interface(name).on_configuration({})
+            } for name in interfaces
         },
         "dag": {
             "revision": dag.revision,
