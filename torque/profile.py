@@ -158,7 +158,9 @@ def load(name: str, uris: [str], repo: repository.Repository) -> Profile:
     configuration = {}
 
     for uri in uris:
-        configuration = v1.utils.merge_dicts(configuration, _load_configuration(uri, repo), False)
+        configuration = v1.utils.merge_dicts(configuration,
+                                             _load_configuration(uri, repo),
+                                             True)
 
     try:
         return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
