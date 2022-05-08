@@ -14,32 +14,47 @@ from torque import protocols
 from torque import v1
 
 
-def _is_component(obj: object) -> bool:
+def _is_component(obj: type) -> bool:
     """TODO"""
+
+    if not isinstance(obj, type):
+        return False
 
     return issubclass(obj, v1.component.Component)
 
 
-def _is_link(obj: object) -> bool:
+def _is_link(obj: type) -> bool:
     """TODO"""
+
+    if not isinstance(obj, type):
+        return False
 
     return issubclass(obj, v1.link.Link)
 
 
-def _is_protocol(obj: object) -> bool:
+def _is_protocol(obj: type) -> bool:
     """TODO"""
+
+    if not isinstance(obj, type):
+        return False
 
     return issubclass(obj, v1.protocol.Protocol)
 
 
-def _is_provider(obj: object) -> bool:
+def _is_provider(obj: type) -> bool:
     """TODO"""
+
+    if not isinstance(obj, type):
+        return False
 
     return issubclass(obj, v1.provider.Provider)
 
 
-def _is_interface(obj: object) -> bool:
+def _is_interface(obj: type) -> bool:
     """TODO"""
+
+    if not isinstance(obj, type):
+        return False
 
     return issubclass(obj, v1.provider.Interface)
 
