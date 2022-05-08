@@ -80,6 +80,9 @@ class Deployment:
         self._interfaces = {}
 
         for name in self._config.interfaces.keys():
+            if name.startswith("::"):
+                continue
+
             interface = self._repo.interface(name)
 
             if not issubclass(interface, v1.provider.Interface):
@@ -173,8 +176,14 @@ class Deployment:
         interface_type = self._repo.interface(interface_name)
 
         provider_name = self._repo.provider_for(interface_name)
+        compound_name = f"::{name}::{interface_name}"
 
-        config = self._config.interfaces[interface_name]
+        if compound_name in self._config.interfaces:
+            config = self._config.interfaces[compound_name]
+
+        else:
+            config = self._config.interfaces[interface_name]
+
         provider = self._providers[provider_name]
 
         bound_interfaces = interfaces.bind_to_component(interface_type,
@@ -322,6 +331,26 @@ def _interface_config(interface: str,
         raise RuntimeError(f"interface configuration: {interface}: {exc}") from exc
 
 
+def _component_interfaces(component: model.Component,
+                          profile: profile.Profile,
+                          repo: repository.Repository) -> dict:
+    """TODO"""
+
+    interfaces = {}
+
+    for name, config in profile.component_interfaces(component.name).items():
+        try:
+            config = repo.interface(name).on_configuration(config or {})
+
+        except v1.schema.SchemaError as exc:
+            raise RuntimeError(f"interface configuration: {component.name}::{name}: {exc}") from exc
+
+        name = f"::{component.name}::{name}"
+        interfaces[name] = config
+
+    return interfaces
+
+
 def _component_config(component: model.Component,
                       profile: profile.Profile,
                       repo: repository.Repository) -> dict:
@@ -374,6 +403,9 @@ def load(name: str,
         interface: _interface_config(interface, profile, repo)
         for interface in profile.interfaces()
     }
+
+    for component in dag.components.values():
+        interfaces = interfaces | _component_interfaces(component, profile, repo)
 
     components = {
         component.name: _component_config(component, profile, repo)

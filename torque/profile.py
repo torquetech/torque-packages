@@ -24,7 +24,10 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         "revision": int,
         "components": {
             v1.schema.Optional(str): {
-                "configuration": dict
+                "configuration": dict,
+                v1.schema.Optional("interfaces"): {
+                    v1.schema.Optional(str): dict
+                }
             }
         },
         "links": {
@@ -42,6 +45,17 @@ class Profile:
     def __init__(self, name: str, config: dict[str, object]):
         self.name = name
         self._config = config
+
+    def _component(self, name: str) -> dict:
+        """TODO"""
+
+        dag_config = self._config["dag"]
+        components = dag_config["components"]
+
+        if name not in components:
+            return {}
+
+        return components[name]
 
     def revision(self) -> int:
         """TODO"""
@@ -78,16 +92,28 @@ class Profile:
 
         return interfaces[name]
 
+    def component_interfaces(self, name: str) -> dict:
+        """TODO"""
+
+        component = self._component(name)
+
+        if not component:
+            return {}
+
+        if "interfaces" not in component:
+            return {}
+
+        return component["interfaces"]
+
     def component(self, name: str) -> dict:
         """TODO"""
 
-        dag_config = self._config["dag"]
-        components = dag_config["components"]
+        component = self._component(name)
 
-        if name not in components:
+        if not component:
             return {}
 
-        return components[name]["configuration"]
+        return component["configuration"]
 
     def link(self, name: str) -> dict:
         """TODO"""
