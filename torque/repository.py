@@ -127,32 +127,32 @@ class Repository:
         self._repo["v1"]["interfaces"] = interfaces
         self._repo["v1"]["interface_maps"] = interface_maps
 
-    def components(self) -> dict[str, v1.component.Component]:
+    def components(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["components"]
 
-    def links(self) -> dict[str, v1.link.Link]:
+    def links(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["links"]
 
-    def protocols(self) -> dict[str, v1.protocol.Protocol]:
+    def protocols(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["protocols"]
 
-    def providers(self) -> dict[str, v1.provider.Provider]:
+    def providers(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["providers"]
 
-    def interfaces(self) -> dict[str, v1.provider.Interface]:
+    def interfaces(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["interfaces"]
 
-    def interface_maps(self) -> dict[str, str]:
+    def interface_maps(self) -> dict:
         """TODO"""
 
         return self._repo["v1"]["interface_maps"]
@@ -218,7 +218,7 @@ class Repository:
         return interface_maps[name]
 
 
-def _system_repository():
+def _system_repository() -> list:
     """TODO"""
 
     entry_points = importlib.metadata.entry_points()
@@ -229,7 +229,7 @@ def _system_repository():
     return []
 
 
-def _local_repository():
+def _local_repository() -> list:
     """TODO"""
 
     try:
