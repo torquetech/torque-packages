@@ -164,8 +164,7 @@ class Component(v1.component.Component):
                                                None,
                                                None,
                                                None,
-                                               None,
-                                               1)
+                                               None)
 
         else:
             if not self.interfaces.development:

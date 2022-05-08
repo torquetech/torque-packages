@@ -247,8 +247,7 @@ class Deployments(providers.Deployments):
                     ports: [types.Port],
                     network_links: [types.NetworkLink],
                     volume_links: [types.VolumeLink],
-                    secret_links: [types.SecretLink],
-                    replicas: int) -> dict:
+                    secret_links: [types.SecretLink]) -> dict:
         """TODO"""
 
         env = self._convert_environment(env)
@@ -269,7 +268,7 @@ class Deployments(providers.Deployments):
                 }
             },
             "spec": {
-                "replicas": replicas,
+                "replicas": 1,
                 "selector": {
                     "app": name
                 },
@@ -307,8 +306,7 @@ class Deployments(providers.Deployments):
                ports: [types.Port],
                network_links: [types.NetworkLink],
                volume_links: [types.VolumeLink],
-               secret_links: [types.SecretLink],
-               replicas: int):
+               secret_links: [types.SecretLink]):
         """TODO"""
 
         self.provider.add_to_target(f"component_{name}", [
@@ -321,8 +319,7 @@ class Deployments(providers.Deployments):
                              ports,
                              network_links,
                              volume_links,
-                             secret_links,
-                             replicas)
+                             secret_links)
         ])
 
 

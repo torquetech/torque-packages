@@ -57,8 +57,7 @@ class Deployments(v1.provider.Interface):
                ports: [types.Port],
                network_links: [types.NetworkLink],
                volume_links: [types.VolumeLink],
-               secret_links: [types.SecretLink],
-               replicas: int):
+               secret_links: [types.SecretLink]):
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")

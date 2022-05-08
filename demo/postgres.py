@@ -148,8 +148,7 @@ class Component(v1.component.Component):
                                            None,
                                            None,
                                            self._volume_links,
-                                           secret_links,
-                                           1)
+                                           secret_links)
 
 
 class DataLink(volume.Link):

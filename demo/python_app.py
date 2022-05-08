@@ -16,20 +16,6 @@ from demo import types
 from demo import utils
 
 
-def _validate_replicas(replicas: object) -> int:
-    """TODO"""
-
-    if replicas is None:
-        raise ValueError()
-
-    replicas = int(replicas)
-
-    if replicas < 1 or replicas > 32:
-        raise ValueError()
-
-    return replicas
-
-
 class Component(v1.component.Component):
     """TODO"""
 
@@ -42,12 +28,10 @@ class Component(v1.component.Component):
 
     _CONFIGURATION = {
         "defaults": {
-            "replicas": 1,
             "development_mode": False,
             "environment": {}
         },
         "schema": {
-            "replicas": v1.schema.Use(_validate_replicas),
             "development_mode": bool,
             "environment": {
                 v1.schema.Optional(str): str
@@ -221,8 +205,7 @@ class Component(v1.component.Component):
                                                None,
                                                self._network_links,
                                                self._volume_links,
-                                               self._secret_links,
-                                               self.configuration["replicas"])
+                                               self._secret_links)
 
         else:
             if not self.interfaces.development:

@@ -160,8 +160,7 @@ class Deployments(providers.Deployments):
                ports: [types.Port],
                network_links: [types.NetworkLink],
                volume_links: [types.VolumeLink],
-               secret_links: [types.SecretLink],
-               replicas: int):
+               secret_links: [types.SecretLink]):
         """TODO"""
 
         if args:
