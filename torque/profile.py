@@ -23,10 +23,14 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "dag": {
         "revision": int,
         "components": {
-            v1.schema.Optional(str): object
+            v1.schema.Optional(str): {
+                "configuration": object
+            }
         },
         "links": {
-            v1.schema.Optional(str): object
+            v1.schema.Optional(str): {
+                "configuration": object
+            }
         }
     }
 })
@@ -83,7 +87,7 @@ class Profile:
         if name not in components:
             return {}
 
-        return components[name]
+        return components[name]["configuration"]
 
     def link(self, name: str) -> object:
         """TODO"""
@@ -94,7 +98,7 @@ class Profile:
         if name not in links:
             return {}
 
-        return links[name]
+        return links[name]["configuration"]
 
 
 def _load_configuration(uri: str, repo: repository.Repository) -> dict[str, object]:
@@ -155,12 +159,14 @@ def defaults(providers: [str],
         "dag": {
             "revision": dag.revision,
             "components": {
-                component.name: repo.component(component.type).on_configuration({}) or {}
-                for component in dag.components.values()
+                component.name: {
+                    "configuration": repo.component(component.type).on_configuration({}) or {}
+                } for component in dag.components.values()
             },
             "links": {
-                link.name: repo.link(link.type).on_configuration({}) or {}
-                for link in dag.links.values()
+                link.name: {
+                    "configuration": repo.link(link.type).on_configuration({}) or {}
+                } for link in dag.links.values()
             }
         }
     }
