@@ -226,8 +226,8 @@ class Workspace:
     def _bind_interface(self,
                         interface: object,
                         required: bool,
-                        name: str,
-                        labels: [str]) -> v1.provider.Interface:
+                        component_name: str,
+                        component_labels: [str]) -> v1.provider.Interface:
         # pylint: disable=R0201,W0613
 
         """TODO"""

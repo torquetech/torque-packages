@@ -73,10 +73,13 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
         v1.schema.Optional("providers"): {
             v1.schema.Optional(str): _is_provider
         },
+        v1.schema.Optional("interfaces"): [
+            _is_interface
+        ],
         v1.schema.Optional("binds"): {
-            v1.schema.Optional(str): {
-                v1.schema.Optional(str): _is_interface
-            }
+            v1.schema.Optional(str): [
+                _is_interface
+            ]
         }
     })
 }, ignore_extra_keys=True)
@@ -119,7 +122,6 @@ class Repository:
 
         for provider_name, provider_binds in self._repo["v1"]["binds"].items():
             for bind_name, bind_class in provider_binds.items():
-                bind_name = f"{provider_name}/{bind_name}"
                 binds[bind_name] = bind_class
                 bind_maps[bind_name] = provider_name
 
@@ -146,6 +148,11 @@ class Repository:
         """TODO"""
 
         return self._repo["v1"]["providers"]
+
+    def interfaces(self) -> dict:
+        """TODO"""
+
+        return self._repo["v1"]["interfaces"]
 
     def binds(self) -> dict:
         """TODO"""
@@ -197,6 +204,16 @@ class Repository:
 
         return providers[name]
 
+    def interface(self, name: str) -> v1.provider.Interface:
+        """TODO"""
+
+        interfaces = self.interfaces()
+
+        if name not in interfaces:
+            raise exceptions.InterfaceNotFound(name)
+
+        return interfaces[name]
+
     def bind(self, name: str) -> v1.provider.Interface:
         """TODO"""
 
@@ -245,6 +262,34 @@ def _local_repository() -> list:
         return []
 
 
+def _process_interfaces(_repository: dict) -> dict:
+    """TODO"""
+
+    if "interfaces" not in _repository["v1"]:
+        return _repository
+
+    _repository["v1"]["interfaces"] = {
+        v1.utils.fqcn(interface): interface
+        for interface in _repository["v1"]["interfaces"]
+    }
+
+    return _repository
+
+
+def _process_binds(_repository: dict) -> dict:
+    """TODO"""
+
+    if "binds" not in _repository["v1"]:
+        return _repository
+
+    for provider_name, provider_binds in _repository["v1"]["binds"].items():
+        _repository["v1"]["binds"][provider_name] = {
+            v1.utils.fqcn(bind): bind for bind in provider_binds
+        }
+
+    return _repository
+
+
 def load() -> Repository:
     """TODO"""
 
@@ -259,6 +304,9 @@ def load() -> Repository:
         try:
             _repository = entry_point.load()
             _repository = _REPOSITORY_SCHEMA.validate(_repository)
+
+            _repository = _process_interfaces(_repository)
+            _repository = _process_binds(_repository)
 
             repository = v1.utils.merge_dicts(repository, _repository, False)
 

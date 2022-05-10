@@ -80,6 +80,10 @@ class BindNotFound(TorqueException):
     """TODO"""
 
 
+class InvalidBind(TorqueException):
+    """TODO"""
+
+
 class InvalidRequirement(TorqueException):
     """TODO"""
 
