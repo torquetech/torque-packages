@@ -15,7 +15,7 @@ class Link:
                  name: str,
                  parameters: dict,
                  configuration: dict,
-                 interfaces: object,
+                 binds: object,
                  source: str,
                  destination: str):
         # pylint: disable=R0913
@@ -23,7 +23,7 @@ class Link:
         self.name = name
         self.parameters = parameters
         self.configuration = configuration
-        self.interfaces = interfaces
+        self.binds = binds
         self.source = source
         self.destination = destination
 

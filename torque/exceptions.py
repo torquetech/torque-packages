@@ -76,7 +76,7 @@ class ProviderNotFound(TorqueException):
     """TODO"""
 
 
-class InterfaceNotFound(TorqueException):
+class BindNotFound(TorqueException):
     """TODO"""
 
 

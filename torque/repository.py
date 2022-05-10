@@ -73,7 +73,7 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
         v1.schema.Optional("providers"): {
             v1.schema.Optional(str): _is_provider
         },
-        v1.schema.Optional("interfaces"): {
+        v1.schema.Optional("binds"): {
             v1.schema.Optional(str): {
                 v1.schema.Optional(str): _is_interface
             }
@@ -93,7 +93,7 @@ _DEFAULT_REPOSITORY = {
         },
         "providers": {
         },
-        "interfaces": {
+        "binds": {
         }
     }
 }
@@ -111,21 +111,21 @@ class Repository:
         """TODO"""
 
         providers = {}
-        interfaces = {}
-        interface_maps = {}
+        binds = {}
+        bind_maps = {}
 
         for provider_name, provider_class in self._repo["v1"]["providers"].items():
             providers[provider_name] = provider_class
 
-        for provider_name, provider_interfaces in self._repo["v1"]["interfaces"].items():
-            for interface_name, interface_class in provider_interfaces.items():
-                interface_name = f"{provider_name}/{interface_name}"
-                interfaces[interface_name] = interface_class
-                interface_maps[interface_name] = provider_name
+        for provider_name, provider_binds in self._repo["v1"]["binds"].items():
+            for bind_name, bind_class in provider_binds.items():
+                bind_name = f"{provider_name}/{bind_name}"
+                binds[bind_name] = bind_class
+                bind_maps[bind_name] = provider_name
 
         self._repo["v1"]["providers"] = providers
-        self._repo["v1"]["interfaces"] = interfaces
-        self._repo["v1"]["interface_maps"] = interface_maps
+        self._repo["v1"]["binds"] = binds
+        self._repo["v1"]["bind_maps"] = bind_maps
 
     def components(self) -> dict:
         """TODO"""
@@ -147,15 +147,15 @@ class Repository:
 
         return self._repo["v1"]["providers"]
 
-    def interfaces(self) -> dict:
+    def binds(self) -> dict:
         """TODO"""
 
-        return self._repo["v1"]["interfaces"]
+        return self._repo["v1"]["binds"]
 
-    def interface_maps(self) -> dict:
+    def bind_maps(self) -> dict:
         """TODO"""
 
-        return self._repo["v1"]["interface_maps"]
+        return self._repo["v1"]["bind_maps"]
 
     def component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -197,25 +197,25 @@ class Repository:
 
         return providers[name]
 
-    def interface(self, name: str) -> v1.provider.Interface:
+    def bind(self, name: str) -> v1.provider.Interface:
         """TODO"""
 
-        interfaces = self.interfaces()
+        binds = self.binds()
 
-        if name not in interfaces:
-            raise exceptions.InterfaceNotFound(name)
+        if name not in binds:
+            raise exceptions.BindNotFound(name)
 
-        return interfaces[name]
+        return binds[name]
 
     def provider_for(self, name: str) -> str:
         """TODO"""
 
-        interface_maps = self.interface_maps()
+        bind_maps = self.bind_maps()
 
-        if name not in interface_maps:
-            raise exceptions.InterfaceNotFound(name)
+        if name not in bind_maps:
+            raise exceptions.BindNotFound(name)
 
-        return interface_maps[name]
+        return bind_maps[name]
 
 
 def _system_repository() -> list:

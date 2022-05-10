@@ -39,12 +39,12 @@ class Interface:
                  provider: Provider,
                  name: str,
                  labels: [str],
-                 interfaces: object):
+                 binds: object):
         self.configuration = configuration
         self.provider = provider
         self.name = name
         self.labels = labels
-        self.interfaces = interfaces
+        self.binds = binds
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

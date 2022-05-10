@@ -21,7 +21,7 @@ from torque import v1
 
 Configuration = namedtuple("Configuration", [
     "providers",
-    "interfaces",
+    "binds",
     "components",
     "links"
 ])
@@ -50,7 +50,7 @@ class Deployment:
         self._links: dict[str, v1.link.Link] = {}
 
         self._providers: dict[str, v1.provider.Provider] = None
-        self._interfaces: dict[str, v1.provider.Interface] = None
+        self._binds: dict[str, v1.provider.Interface] = None
 
         self._lock = threading.Lock()
 
@@ -73,32 +73,32 @@ class Deployment:
             provider = self._repo.provider(name)(config)
             self._providers[name] = provider
 
-    def _setup_interfaces(self):
+    def _setup_binds(self):
         """TODO"""
 
-        self._interfaces = {}
+        self._binds = {}
 
-        for name in self._config.interfaces.keys():
+        for name in self._config.binds.keys():
             if name.startswith("::"):
                 continue
 
-            interface = self._repo.interface(name)
+            bind = self._repo.bind(name)
 
-            if not issubclass(interface, v1.provider.Interface):
-                raise RuntimeError(f"{v1.utils.fqcn(interface)}: invalid provider interface")
+            if not issubclass(bind, v1.provider.Interface):
+                raise RuntimeError(f"{v1.utils.fqcn(bind)}: invalid bind")
 
-            cls = interface
+            cls = bind
 
             while cls is not v1.provider.Interface:
                 if len(cls.__bases__) != 1:
-                    raise RuntimeError(f"{v1.utils.fqcn(interface)}: multiple inheritance not supported")
+                    raise RuntimeError(f"{v1.utils.fqcn(bind)}: multiple inheritance not supported")
 
                 fqcn = v1.utils.fqcn(cls)
 
-                if fqcn in self._interfaces:
-                    print(f"WARNING: {name}: duplicate provider interface: {fqcn}")
+                if fqcn in self._binds:
+                    print(f"WARNING: {name}: duplicate bind: {fqcn}")
 
-                self._interfaces[fqcn] = name
+                self._binds[fqcn] = name
                 cls = cls.__bases__[0]
 
     def _component(self, name: str) -> v1.component.Component:
@@ -114,7 +114,7 @@ class Deployment:
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         component.labels,
-                                                        self._interface)
+                                                        self._bind_interface)
 
         component = type(component.name,
                          component.labels,
@@ -141,7 +141,7 @@ class Deployment:
         bound_interfaces = interfaces.bind_to_link(type,
                                                    source,
                                                    destination,
-                                                   self._interface)
+                                                   self._bind_interface)
 
         link = type(link.name,
                     link.parameters,
@@ -153,44 +153,44 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _interface(self,
-                   interface: type,
-                   required: bool,
-                   name: str,
-                   labels: [str]) -> v1.provider.Interface:
+    def _bind_interface(self,
+                        interface: type,
+                        required: bool,
+                        name: str,
+                        labels: [str]) -> v1.provider.Interface:
         """TODO"""
 
-        if self._interfaces is None:
+        if self._binds is None:
             return None
 
         interface_class = v1.utils.fqcn(interface)
 
-        if interface_class not in self._interfaces:
+        if interface_class not in self._binds:
             if required:
                 raise RuntimeError(f"{interface_class}: interface not found")
 
             return None
 
-        interface_name = self._interfaces[interface_class]
-        interface_type = self._repo.interface(interface_name)
+        bind_name = self._binds[interface_class]
+        bind_type = self._repo.bind(bind_name)
 
-        provider_name = self._repo.provider_for(interface_name)
-        compound_name = f"::{name}::{interface_name}"
+        provider_name = self._repo.provider_for(bind_name)
+        compound_name = f"::{name}::{bind_name}"
 
-        if compound_name in self._config.interfaces:
-            config = self._config.interfaces[compound_name]
+        if compound_name in self._config.binds:
+            config = self._config.binds[compound_name]
 
         else:
-            config = self._config.interfaces[interface_name]
+            config = self._config.binds[bind_name]
 
         provider = self._providers[provider_name]
 
-        bound_interfaces = interfaces.bind_to_component(interface_type,
-                                                        interface_name,
+        bound_interfaces = interfaces.bind_to_component(bind_type,
+                                                        name,
                                                         labels,
-                                                        self._interface)
+                                                        self._bind_interface)
 
-        return interface_type(config, provider, name, labels, bound_interfaces)
+        return bind_type(config, provider, name, labels, bound_interfaces)
 
     def _execute(self, workers: int, callback: callable):
         """TODO"""
@@ -252,7 +252,7 @@ class Deployment:
         """TODO"""
 
         self._setup_providers()
-        self._setup_interfaces()
+        self._setup_binds()
 
         path = self._create_path()
         deployment = v1.deployment.Deployment(self._name,
@@ -302,54 +302,54 @@ class Deployment:
         return self._dag.dot(self._name)
 
 
-def _provider_config(provider: str,
+def _provider_config(name: str,
                      profile: profile.Profile,
                      repo: repository.Repository) -> dict:
     """TODO"""
 
-    config = profile.provider(provider)
+    config = profile.provider(name)
 
     try:
-        return repo.provider(provider).on_configuration(config or {})
+        return repo.provider(name).on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"provider configuration: {provider}: {exc}") from exc
+        raise RuntimeError(f"provider configuration: {name}: {exc}") from exc
 
 
-def _interface_config(interface: str,
-                      profile: profile.Profile,
-                      repo: repository.Repository) -> dict:
+def _bind_config(name: str,
+                 profile: profile.Profile,
+                 repo: repository.Repository) -> dict:
     """TODO"""
 
-    config = profile.interface(interface)
+    config = profile.bind(name)
 
     try:
-        return repo.interface(interface).on_configuration(config or {})
+        return repo.bind(name).on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"interface configuration: {interface}: {exc}") from exc
+        raise RuntimeError(f"bind configuration: {name}: {exc}") from exc
 
 
-def _component_interfaces(component: model.Component,
-                          profile: profile.Profile,
-                          repo: repository.Repository) -> dict:
+def _component_binds(component: model.Component,
+                     profile: profile.Profile,
+                     repo: repository.Repository) -> dict:
     """TODO"""
 
-    interfaces = {}
+    binds = {}
 
-    for name, interface in profile.component_interfaces(component.name).items():
-        config = interface["configuration"]
+    for name, bind in profile.component_binds(component.name).items():
+        config = bind["configuration"]
 
         try:
-            config = repo.interface(name).on_configuration(config or {})
+            config = repo.bind(name).on_configuration(config or {})
 
         except v1.schema.SchemaError as exc:
-            raise RuntimeError(f"interface configuration: {component.name}::{name}: {exc}") from exc
+            raise RuntimeError(f"bind configuration: {component.name}::{name}: {exc}") from exc
 
         name = f"::{component.name}::{name}"
-        interfaces[name] = config
+        binds[name] = config
 
-    return interfaces
+    return binds
 
 
 def _component_config(component: model.Component,
@@ -400,13 +400,13 @@ def load(name: str,
         for provider in profile.providers()
     }
 
-    interfaces = {
-        interface: _interface_config(interface, profile, repo)
-        for interface in profile.interfaces()
+    binds = {
+        bind: _bind_config(bind, profile, repo)
+        for bind in profile.binds()
     }
 
     for component in dag.components.values():
-        interfaces = interfaces | _component_interfaces(component, profile, repo)
+        binds = binds | _component_binds(component, profile, repo)
 
     components = {
         component.name: _component_config(component, profile, repo)
@@ -418,6 +418,6 @@ def load(name: str,
         for link in dag.links.values()
     }
 
-    config = Configuration(providers, interfaces, components, links)
+    config = Configuration(providers, binds, components, links)
 
     return Deployment(name, profile.name, dag, config, repo)

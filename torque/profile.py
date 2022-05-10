@@ -19,7 +19,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
             "configuration": dict
         }
     },
-    "interfaces": {
+    "binds": {
         v1.schema.Optional(str): {
             "configuration": dict
         }
@@ -29,7 +29,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         "components": {
             v1.schema.Optional(str): {
                 "configuration": dict,
-                v1.schema.Optional("interfaces"): {
+                v1.schema.Optional("binds"): {
                     v1.schema.Optional(str): {
                         "configuration": dict
                     }
@@ -73,10 +73,10 @@ class Profile:
 
         return self._config["providers"].keys()
 
-    def interfaces(self) -> [str]:
+    def binds(self) -> [str]:
         """TODO"""
 
-        return self._config["interfaces"].keys()
+        return self._config["binds"].keys()
 
     def provider(self, name: str) -> dict:
         """TODO"""
@@ -88,17 +88,17 @@ class Profile:
 
         return providers[name]["configuration"]
 
-    def interface(self, name: str) -> dict:
+    def bind(self, name: str) -> dict:
         """TODO"""
 
-        interfaces = self._config["interfaces"]
+        binds = self._config["binds"]
 
-        if name not in interfaces:
+        if name not in binds:
             return {}
 
-        return interfaces[name]["configuration"]
+        return binds[name]["configuration"]
 
-    def component_interfaces(self, name: str) -> dict:
+    def component_binds(self, name: str) -> dict:
         """TODO"""
 
         component = self._component(name)
@@ -106,10 +106,10 @@ class Profile:
         if not component:
             return {}
 
-        if "interfaces" not in component:
+        if "binds" not in component:
             return {}
 
-        return component["interfaces"]
+        return component["binds"]
 
     def component(self, name: str) -> dict:
         """TODO"""
@@ -174,12 +174,12 @@ def defaults(providers: [str],
              repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
-    interfaces = []
+    binds = []
 
     for provider_name in providers:
-        for interface_name, mapped_provider_name in repo.interface_maps().items():
+        for bind_name, mapped_provider_name in repo.bind_maps().items():
             if provider_name == mapped_provider_name:
-                interfaces.append(interface_name)
+                binds.append(bind_name)
 
     return {
         "providers": {
@@ -187,10 +187,10 @@ def defaults(providers: [str],
                 "configuration": repo.provider(name).on_configuration({})
             } for name in providers
         },
-        "interfaces": {
+        "binds": {
             name: {
-                "configuration": repo.interface(name).on_configuration({})
-            } for name in interfaces
+                "configuration": repo.bind(name).on_configuration({})
+            } for name in binds
         },
         "dag": {
             "revision": dag.revision,
