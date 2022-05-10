@@ -99,5 +99,5 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        volume_id = self.interfaces.t_ebs.create(self.name, self.parameters["size"])
-        self._volume_link = self.interfaces.k_ebs.create(self.name, volume_id.get())
+        volume_id = self.binds.t_ebs.create(self.name, self.parameters["size"])
+        self._volume_link = self.binds.k_ebs.create(self.name, volume_id.get())

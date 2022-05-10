@@ -42,7 +42,7 @@ class Link(network.Link):
         template_path = f"{utils.module_path()}/templates/kafka_python.py.template"
         template = jinja2.Template(utils.load_file(template_path))
 
-        target_path = f"{self.interfaces.mod.path()}/{self.source}.py"
+        target_path = f"{self.binds.mod.path()}/{self.source}.py"
 
         if os.path.exists(v1.utils.resolve_path(target_path)):
             raise RuntimeError(f"{target_path}: file already exists")
@@ -51,4 +51,4 @@ class Link(network.Link):
             file.write(template.render(COMPONENT=self.source.upper()))
             file.write("\n")
 
-        self.interfaces.mod.add_requirements(["kafka-python"])
+        self.binds.mod.add_requirements(["kafka-python"])

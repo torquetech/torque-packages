@@ -99,22 +99,22 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self._service_link = self.interfaces.services.create(self.name, "tcp", 2181, 2181)
+        self._service_link = self.binds.services.create(self.name, "tcp", 2181, 2181)
 
         env = [
             types.KeyValue("ALLOW_ANONYMOUS_LOGIN", "yes")
         ]
 
-        self.interfaces.deployments.create(self.name,
-                                           "bitnami/zookeeper:latest",
-                                           None,
-                                           None,
-                                           None,
-                                           env,
-                                           None,
-                                           None,
-                                           self._volume_links,
-                                           None)
+        self.binds.deployments.create(self.name,
+                                      "bitnami/zookeeper:latest",
+                                      None,
+                                      None,
+                                      None,
+                                      env,
+                                      None,
+                                      None,
+                                      self._volume_links,
+                                      None)
 
 
 class DataLink(volume.Link):
@@ -140,6 +140,6 @@ class DataLink(volume.Link):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.interfaces.dst.add(self.source,
-                                self.interfaces.zk.data_path(),
-                                self.interfaces.src.link())
+        self.binds.dst.add(self.source,
+                           self.binds.zk.data_path(),
+                           self.binds.src.link())

@@ -49,7 +49,7 @@ repository = {
             "demo/terraform": terraform.Provider,
             "demo/docker-compose": docker_compose.Provider
         },
-        "interfaces": {
+        "binds": {
             "demo/k8s": {
                 "images": k8s.Images,
                 "secrets": k8s.Secrets,

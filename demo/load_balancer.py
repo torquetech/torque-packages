@@ -79,7 +79,7 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.interfaces.lb.create(self.name, self.configuration["host"])
+        self.binds.lb.create(self.name, self.configuration["host"])
 
 
 class Link(v1.link.Link):
@@ -147,8 +147,8 @@ class Link(v1.link.Link):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.interfaces.ingress.create(self.source,
-                                       self.interfaces.lb.host(),
-                                       self.parameters["path"],
-                                       types.NetworkLink(self.source,
-                                                         self.interfaces.service.link()))
+        self.binds.ingress.create(self.source,
+                                  self.binds.lb.host(),
+                                  self.parameters["path"],
+                                  types.NetworkLink(self.source,
+                                                    self.binds.service.link()))

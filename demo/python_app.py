@@ -193,36 +193,36 @@ class Component(v1.component.Component):
 
         env += self._environment
 
-        self.interfaces.images.push(self._image(deployment))
+        self.binds.images.push(self._image(deployment))
 
         if not self.configuration["development_mode"]:
-            self.interfaces.deployments.create(self.name,
-                                               self._image(deployment),
-                                               None,
-                                               None,
-                                               None,
-                                               env,
-                                               None,
-                                               self._network_links,
-                                               self._volume_links,
-                                               self._secret_links)
+            self.binds.deployments.create(self.name,
+                                          self._image(deployment),
+                                          None,
+                                          None,
+                                          None,
+                                          env,
+                                          None,
+                                          self._network_links,
+                                          self._volume_links,
+                                          self._secret_links)
 
         else:
-            if not self.interfaces.development:
+            if not self.binds.development:
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
                 types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
             ]
 
-            self.interfaces.development.create_deployment(self.name,
-                                                          self._image(deployment),
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          env,
-                                                          None,
-                                                          self._network_links,
-                                                          self._volume_links,
-                                                          self._secret_links,
-                                                          local_volume_links)
+            self.binds.development.create_deployment(self.name,
+                                                     self._image(deployment),
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     env,
+                                                     None,
+                                                     self._network_links,
+                                                     self._volume_links,
+                                                     self._secret_links,
+                                                     local_volume_links)

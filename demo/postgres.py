@@ -124,12 +124,12 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self._secret_link = self.interfaces.secrets.create(f"{self.name}_admin", [
+        self._secret_link = self.binds.secrets.create(f"{self.name}_admin", [
             types.KeyValue("user", "postgres"),
             types.KeyValue("password", self.configuration["password"])
         ])
 
-        self._service_link = self.interfaces.services.create(self.name, "tcp", 5432, 5432)
+        self._service_link = self.binds.services.create(self.name, "tcp", 5432, 5432)
 
         env = [
             types.KeyValue("PGDATA", "/data")
@@ -139,16 +139,16 @@ class Component(v1.component.Component):
             types.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
         ]
 
-        self.interfaces.deployments.create(self.name,
-                                           self._image(),
-                                           None,
-                                           None,
-                                           None,
-                                           env,
-                                           None,
-                                           None,
-                                           self._volume_links,
-                                           secret_links)
+        self.binds.deployments.create(self.name,
+                                      self._image(),
+                                      None,
+                                      None,
+                                      None,
+                                      env,
+                                      None,
+                                      None,
+                                      self._volume_links,
+                                      secret_links)
 
 
 class DataLink(volume.Link):
@@ -174,6 +174,6 @@ class DataLink(volume.Link):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.interfaces.dst.add(self.source,
-                                self.interfaces.pg.data_path(),
-                                self.interfaces.src.link())
+        self.binds.dst.add(self.source,
+                           self.binds.pg.data_path(),
+                           self.binds.src.link())

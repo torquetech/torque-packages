@@ -150,38 +150,38 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self._service_link = self.interfaces.services.create(self.name, "tcp", 80, 80)
+        self._service_link = self.binds.services.create(self.name, "tcp", 80, 80)
 
-        self.interfaces.images.push(self._image(deployment))
+        self.binds.images.push(self._image(deployment))
 
         if not self.configuration["development_mode"]:
-            self.interfaces.deployments.create(self.name,
-                                               self._image(deployment),
-                                               None,
-                                               None,
-                                               None,
-                                               None,
-                                               None,
-                                               None,
-                                               None,
-                                               None)
+            self.binds.deployments.create(self.name,
+                                          self._image(deployment),
+                                          None,
+                                          None,
+                                          None,
+                                          None,
+                                          None,
+                                          None,
+                                          None,
+                                          None)
 
         else:
-            if not self.interfaces.development:
+            if not self.binds.development:
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
                 types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
             ]
 
-            self.interfaces.development.create_deployment(self.name,
-                                                          self._image(deployment),
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          None,
-                                                          local_volume_links)
+            self.binds.development.create_deployment(self.name,
+                                                     self._image(deployment),
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     None,
+                                                     local_volume_links)
