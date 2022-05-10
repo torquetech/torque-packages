@@ -12,6 +12,7 @@ from demo import load_balancer
 from demo import network
 from demo import persistent_volume
 from demo import postgres
+from demo import providers
 from demo import psycopg
 from demo import python_app
 from demo import python_service
@@ -49,30 +50,41 @@ repository = {
             "demo/terraform": terraform.Provider,
             "demo/docker-compose": docker_compose.Provider
         },
+        "interfaces": [
+            providers.Images,
+            providers.Secrets,
+            providers.Services,
+            providers.Deployments,
+            providers.Development,
+            providers.PersistentVolumes,
+            providers.HttpLoadBalancers,
+            providers.PersistentVolumesProvider,
+            providers.HttpIngressLinks
+        ],
         "binds": {
-            "demo/k8s": {
-                "images": k8s.Images,
-                "secrets": k8s.Secrets,
-                "services": k8s.Services,
-                "deployments": k8s.Deployments,
-                "persistent-volumes": k8s.PersistentVolumes,
-                "load-balancers": k8s.HttpLoadBalancers,
-                "ingress-links": k8s.HttpIngressLinks
-            },
-            "demo/terraform": {
-                "persistent-volumes-provider": terraform.PersistentVolumesProvider
-            },
-            "demo/docker-compose": {
-                "images": docker_compose.Images,
-                "secrets": docker_compose.Secrets,
-                "services": docker_compose.Services,
-                "deployments": docker_compose.Deployments,
-                "persistent-volumes": docker_compose.PersistentVolumes,
-                "persistent-volumes-provider": docker_compose.PersistentVolumesProvider,
-                "load-balancers": docker_compose.HttpLoadBalancers,
-                "ingress-links": docker_compose.HttpIngressLinks,
-                "development": docker_compose.Development
-            }
+            "demo/k8s": [
+                k8s.Images,
+                k8s.Secrets,
+                k8s.Services,
+                k8s.Deployments,
+                k8s.PersistentVolumes,
+                k8s.HttpLoadBalancers,
+                k8s.HttpIngressLinks
+            ],
+            "demo/terraform": [
+                terraform.PersistentVolumesProvider
+            ],
+            "demo/docker-compose": [
+                docker_compose.Images,
+                docker_compose.Secrets,
+                docker_compose.Services,
+                docker_compose.Deployments,
+                docker_compose.PersistentVolumes,
+                docker_compose.PersistentVolumesProvider,
+                docker_compose.HttpLoadBalancers,
+                docker_compose.HttpIngressLinks,
+                docker_compose.Development
+            ]
         }
     }
 }
