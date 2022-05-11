@@ -296,7 +296,7 @@ class Deployment:
                                               dry_run,
                                               path)
 
-        for provider in self._providers.values():
+        for provider in reversed(self._providers.values()):
             provider.on_delete(deployment)
 
     def dot(self) -> str:
