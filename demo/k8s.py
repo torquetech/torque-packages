@@ -343,15 +343,20 @@ class PersistentVolumes(providers.PersistentVolumes):
     def on_requirements(cls) -> dict:
         """TODO"""
 
-        return {}
+        return {
+            "vol": {
+                "interface": providers.PersistentVolumesProvider,
+                "required": True
+            }
+        }
 
-    def create(self, name: str, volume_id: str) -> v1.utils.Future[dict]:
+    def create(self, name: str, size: int) -> v1.utils.Future[dict]:
         """TODO"""
 
         return v1.utils.Future({
             "name": name,
             "awsElasticBlockStore": {
-                "volumeID": volume_id,
+                "volumeID": self.binds.vol.create(name, size).get(),
                 "fsType": "ext4"
             }
         })

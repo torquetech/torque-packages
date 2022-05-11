@@ -90,7 +90,7 @@ class PersistentVolumes(v1.provider.Interface):
 
     """TODO"""
 
-    def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> v1.utils.Future[object]:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
