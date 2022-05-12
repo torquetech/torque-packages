@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import functools
 import threading
 
 import jinja2
@@ -178,18 +179,18 @@ class Deployments(providers.Deployments):
         if not network_links:
             return []
 
-        env = []
-
-        for link in network_links:
+        def resolve_future(link: types.NetworkLink) -> dict:
             name = link.name.upper()
             link = link.object.get()
 
-            env.append({
+            return {
                 "name": f"{name}_LINK",
                 "value": f"{link[0]}://{link[1]}:{link[2]}"
-            })
+            }
 
-        return env
+        return [
+            functools.partial(resolve_future, link) for link in network_links
+        ]
 
     def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [dict]:
         """TODO"""
@@ -197,15 +198,20 @@ class Deployments(providers.Deployments):
         if not secret_links:
             return []
 
-        return [{
-            "name": link.name,
-            "valueFrom": {
-                "secretKeyRef": {
-                    "name": link.object.get(),
-                    "key": link.key
+        def resolve_future(link: types.SecretLink) -> dict:
+            return {
+                "name": link.name,
+                "valueFrom": {
+                    "secretKeyRef": {
+                        "name": link.object.get(),
+                        "key": link.key
+                    }
                 }
             }
-        } for link in secret_links]
+
+        return [
+            functools.partial(resolve_future, link) for link in secret_links
+        ]
 
     def _convert_ports(self, ports: [types.Port]) -> [dict]:
         """TODO"""
@@ -230,10 +236,15 @@ class Deployments(providers.Deployments):
             "mountPath": link.mount_path
         } for link in volume_links]
 
-        volumes = [{
-            "name": link.name,
-            **link.object.get(),
-        } for link in volume_links]
+        def resolve_future(link: types.VolumeLink) -> dict:
+            return {
+                "name": link.name,
+                **link.object.get(),
+            }
+
+        volumes = [
+            functools.partial(resolve_future, link) for link in volume_links
+        ]
 
         return mounts, volumes
 
@@ -350,13 +361,13 @@ class PersistentVolumes(providers.PersistentVolumes):
             }
         }
 
-    def create(self, name: str, size: int) -> v1.utils.Future[dict]:
+    def create(self, name: str, size: int) -> v1.utils.Future[object]:
         """TODO"""
 
         return v1.utils.Future({
             "name": name,
             "awsElasticBlockStore": {
-                "volumeID": self.binds.vol.create(name, size).get(),
+                "volumeID": self.binds.vol.create(name, size),
                 "fsType": "ext4"
             }
         })
@@ -435,25 +446,28 @@ class HttpIngressLinks(providers.HttpIngressLinks):
                               network_link: types.NetworkLink) -> dict:
         """TODO"""
 
-        link = network_link.object.get()
+        def resolve_future() -> list:
+            link = network_link.object.get()
 
-        return [{
-            "host": host,
-            "http": {
-                "paths": {
-                    "pathType": "Prefix",
-                    "path": path,
-                    "backend": {
-                        "service": {
-                            "name": link[1],
-                            "port": {
-                                "number": link[2]
+            return [{
+                "host": host,
+                "http": {
+                    "paths": {
+                        "pathType": "Prefix",
+                        "path": path,
+                        "backend": {
+                            "service": {
+                                "name": link[1],
+                                "port": {
+                                    "number": link[2]
+                                }
                             }
                         }
                     }
                 }
-            }
-        }]
+            }]
+
+        return resolve_future
 
     def _k8s_create(self,
                     name: str,
@@ -485,6 +499,28 @@ class HttpIngressLinks(providers.HttpIngressLinks):
         ])
 
 
+def _process_futures(obj: object) -> object:
+    """TODO"""
+
+    if isinstance(obj, dict):
+        return {
+            k: _process_futures(v) for k, v in obj.items()
+        }
+
+    if isinstance(obj, list):
+        return [
+            _process_futures(v) for v in obj
+        ]
+
+    if isinstance(obj, v1.utils.Future):
+        return _process_futures(obj.get())
+
+    if callable(obj):
+        return _process_futures(obj())
+
+    return obj
+
+
 class Provider(v1.provider.Provider):
     """TODO"""
 
@@ -514,7 +550,9 @@ class Provider(v1.provider.Provider):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        for name, target in self._targets.items():
+        targets = _process_futures(self._targets)
+
+        for name, target in targets.items():
             with open(f"{deployment.path}/{name}.yaml", "w", encoding="utf8") as file:
                 objs = [
                     yaml.safe_dump(obj, sort_keys=False) for obj in target
