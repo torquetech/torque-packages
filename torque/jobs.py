@@ -5,6 +5,7 @@
 """TODO"""
 
 import threading
+import typing
 
 from torque import exceptions
 
@@ -15,7 +16,7 @@ class Job:
     def __init__(self,
                  name: str,
                  depends: [str],
-                 handler: callable):
+                 handler: typing.Callable):
         self.name = name
         self.depends = depends
         self.handler = handler
@@ -32,7 +33,7 @@ class _Job:
                  name: str,
                  blocks: [str],
                  depends: int,
-                 handler: callable):
+                 handler: typing.Callable):
         self.name = name
         self.blocks = blocks
         self.depends = depends

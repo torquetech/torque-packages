@@ -7,6 +7,7 @@
 import os
 import sys
 import threading
+import typing
 
 from collections import namedtuple
 
@@ -196,7 +197,7 @@ class Deployment:
                          component_labels,
                          bound_interfaces)
 
-    def _execute(self, workers: int, callback: callable):
+    def _execute(self, workers: int, callback: typing.Callable):
         """TODO"""
 
         def _callback_helper(name: str) -> bool:

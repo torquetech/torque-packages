@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import typing
 import types
 
 from torque import exceptions
@@ -23,7 +24,7 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 def bind_to_component(type: object,
                       name: str,
                       labels: [str],
-                      get_interface: callable) -> object:
+                      get_interface: typing.Callable) -> object:
     """TODO"""
 
     interfaces = types.SimpleNamespace()
@@ -54,7 +55,7 @@ def bind_to_component(type: object,
 def bind_to_link(type: object,
                  source: model.Component,
                  destination: model.Component,
-                 get_interface: callable) -> object:
+                 get_interface: typing.Callable) -> object:
     """TODO"""
 
     interfaces = types.SimpleNamespace()
