@@ -14,7 +14,7 @@ class Images(v1.provider.Interface):
 
     """TODO"""
 
-    def push(self, image: str):
+    def push(self, image: str) -> str:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: push: not implemented")

@@ -5,6 +5,8 @@
 """TODO"""
 
 import functools
+import os
+import subprocess
 import threading
 
 import jinja2
@@ -39,8 +41,17 @@ class Images(providers.Images):
 
         return {}
 
-    def push(self, image: str):
+    def push(self, image: str) -> str:
         """TODO"""
+
+        self.provider.add_image(image)
+
+        ns = self.provider.namespace()
+
+        if ns:
+            return f"{self.provider.namespace()}/{image}"
+
+        return image
 
 
 class Secrets(providers.Secrets):
@@ -526,10 +537,18 @@ class Provider(v1.provider.Provider):
 
     _CONFIGURATION = {
         "defaults": {
-            "namespace": "test"
+            "registry": {
+                "server": "index.docker.io",
+                "namespace": "user",
+                "run_login": True
+            }
         },
         "schema": {
-            "namespace": str
+            "registry": {
+                "server": str,
+                "namespace": str,
+                "run_login": bool
+            }
         }
     }
 
@@ -544,8 +563,49 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._images = []
         self._targets = {}
         self._lock = threading.Lock()
+
+    def _push_images(self, deployment: v1.deployment.Deployment):
+        """TODO"""
+
+        if self.configuration["registry"]["run_login"]:
+            cmd = [
+                "docker", "login",
+                self.configuration["registry"]["server"]
+            ]
+
+            subprocess.run(cmd,
+                           env=os.environ,
+                           cwd=deployment.path,
+                           check=True)
+
+        ns = self.namespace()
+
+        for image in self._images:
+            if ns:
+                namespaced_image = f"{self.namespace()}/{image}"
+
+                cmd = [
+                    "docker", "tag",
+                    image, namespaced_image
+                ]
+
+                subprocess.run(cmd,
+                               env=os.environ,
+                               cwd=deployment.path,
+                               check=True)
+
+            cmd = [
+                "docker", "push",
+                namespaced_image
+            ]
+
+            subprocess.run(cmd,
+                           env=os.environ,
+                           cwd=deployment.path,
+                           check=True)
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
@@ -560,8 +620,24 @@ class Provider(v1.provider.Provider):
 
                 file.write("---\n".join(objs))
 
+        if deployment.dry_run:
+            return
+
+        self._push_images(deployment)
+
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
+
+    def namespace(self) -> str:
+        """TODO"""
+
+        return self.configuration["registry"]["namespace"]
+
+    def add_image(self, image: str):
+        """TODO"""
+
+        with self._lock:
+            self._images.append(image)
 
     def add_to_target(self, name: str, objs: [dict]):
         """TODO"""

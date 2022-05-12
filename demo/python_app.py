@@ -81,7 +81,6 @@ class Component(v1.component.Component):
         self._volume_links = []
         self._secret_links = []
         self._environment = []
-
         self._version = None
 
     def _path(self) -> str:
@@ -193,11 +192,11 @@ class Component(v1.component.Component):
 
         env += self._environment
 
-        self.binds.images.push(self._image(deployment))
+        image = self.binds.images.push(self._image(deployment))
 
         if not self.configuration["development_mode"]:
             self.binds.deployments.create(self.name,
-                                          self._image(deployment),
+                                          image,
                                           None,
                                           None,
                                           None,
@@ -216,7 +215,7 @@ class Component(v1.component.Component):
             ]
 
             self.binds.development.create_deployment(self.name,
-                                                     self._image(deployment),
+                                                     image,
                                                      None,
                                                      None,
                                                      None,

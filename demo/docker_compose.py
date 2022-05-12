@@ -68,8 +68,10 @@ class Images(providers.Images):
 
         return {}
 
-    def push(self, image: str):
+    def push(self, image: str) -> str:
         """TODO"""
+
+        return image
 
 
 class Secrets(providers.Secrets):

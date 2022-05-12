@@ -78,8 +78,8 @@ class Component(v1.component.Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._version = None
         self._service_link = None
+        self._version = None
 
     def _path(self) -> str:
         """TODO"""
@@ -152,11 +152,11 @@ class Component(v1.component.Component):
 
         self._service_link = self.binds.services.create(self.name, "tcp", 80, 80)
 
-        self.binds.images.push(self._image(deployment))
+        image = self.binds.images.push(self._image(deployment))
 
         if not self.configuration["development_mode"]:
             self.binds.deployments.create(self.name,
-                                          self._image(deployment),
+                                          image,
                                           None,
                                           None,
                                           None,
@@ -175,7 +175,7 @@ class Component(v1.component.Component):
             ]
 
             self.binds.development.create_deployment(self.name,
-                                                     self._image(deployment),
+                                                     image,
                                                      None,
                                                      None,
                                                      None,
