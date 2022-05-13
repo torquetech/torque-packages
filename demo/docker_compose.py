@@ -565,13 +565,13 @@ class Provider(v1.provider.Provider):
 
                 name += ":"
 
-                print(f"{name:30} {ip}")
+                print(f"{name:25} {ip}")
 
         print("\nLoad balancers:\n")
 
         for name, lb in self._load_balancers.items():
             name = f"{name} ({lb.host}):"
-            print(f"{name:30} http://localhost:{lb.port}")
+            print(f"{name:25} http://localhost:{lb.port}")
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
