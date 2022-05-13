@@ -6,8 +6,10 @@
 
 import codecs
 import functools
+import json
 import os
 import subprocess
+import time
 import threading
 
 import jinja2
@@ -432,18 +434,11 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         return {}
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._created = False
-
     def create(self, name: str, host: str):
         """TODO"""
 
-        if self._created:
+        if self.provider.add_load_balancer(name, host):
             return
-
-        self._created = True
 
         templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
         templates = templates.split("---")
@@ -592,6 +587,8 @@ class Provider(v1.provider.Provider):
 
         self._images = []
         self._targets = {}
+        self._load_balancers = {}
+
         self._lock = threading.Lock()
 
     def _push_images(self, deployment: v1.deployment.Deployment):
@@ -669,6 +666,54 @@ class Provider(v1.provider.Provider):
         with open(f"{target_path}/Chart.yaml", "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(chart, sort_keys=False))
 
+    def _print_info(self, deployment: v1.deployment.Deployment):
+        """TODO"""
+
+        retrys = 10
+
+        while retrys != 0:
+            cmd = [
+                "kubectl", "get",
+                "-o", "json",
+                "--namespace", "ingress-nginx",
+                "service/ingress-nginx-controller"
+            ]
+
+            print(f"+ {' '.join(cmd)}")
+            p = subprocess.run(cmd,
+                           env=os.environ,
+                           cwd=deployment.path,
+                           check=True,
+                           capture_output=True)
+
+            ingress_ctrl = json.loads(p.stdout.decode("utf8"))
+
+            try:
+                lb = ingress_ctrl["status"]["loadBalancer"]
+
+                ingress = lb["ingress"][0]
+                lb_host = ingress["hostname"]
+
+                break
+
+            except IndexError:
+                pass
+
+            except KeyError:
+                pass
+
+            time.sleep(1)
+            retrys -= 1
+
+        if retrys == 0:
+            return
+
+        print("\nLoad balancers:\n")
+
+        for name, host in self._load_balancers.items():
+            name = f"{name} ({host}):"
+            print(f"{name:25} http://{lb_host}")
+
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
@@ -688,6 +733,8 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
+        self._print_info(deployment)
+
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
@@ -696,7 +743,8 @@ class Provider(v1.provider.Provider):
 
         cmd = [
             "helm", "uninstall",
-            utils.normalize(deployment.name)
+            utils.normalize(deployment.name),
+            "--debug"
         ]
 
         print(f"+ {' '.join(cmd)}")
@@ -712,6 +760,17 @@ class Provider(v1.provider.Provider):
 
         with self._lock:
             self._images.append(image)
+
+    def add_load_balancer(self, name: str, host: str) -> bool:
+        """TODO"""
+
+        with self._lock:
+            if any([i == host for i in self._load_balancers.values()]):
+                raise RuntimeError(f"{host}: load balancer already exists")
+
+            self._load_balancers[name] = host
+
+            return len(self._load_balancers) > 1
 
     def add_to_target(self, name: str, objs: [dict]):
         """TODO"""
