@@ -132,7 +132,7 @@ class Component(v1.component.Component):
         self._service_link = self.binds.services.create(self.name, "tcp", 5432, 5432)
 
         env = [
-            types.KeyValue("PGDATA", "/data")
+            types.KeyValue("PGDATA", f"/data/{self.configuration['version']}")
         ]
 
         secret_links = [
