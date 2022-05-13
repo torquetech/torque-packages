@@ -517,9 +517,10 @@ class HttpIngressLinks(providers.HttpIngressLinks):
             "apiVersion": "networking.k8s.io/v1",
             "kind": "Ingress",
             "metadata": {
-                "name": utils.normalize(name),
+                "name": f"{utils.normalize(name)}-{host}",
             },
             "spec": {
+                "ingressClassName": "nginx",
                 "rules": self._convert_network_link(host, path, network_link)
             }
         }
