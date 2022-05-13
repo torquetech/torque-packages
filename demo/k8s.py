@@ -633,30 +633,42 @@ class Provider(v1.provider.Provider):
                            cwd=deployment.path,
                            check=True)
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def _apply_targets(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
+        target_path = f"{deployment.path}/helm"
+
+        try:
+            os.makedirs(f"{target_path}/templates")
+
+        except FileExistsError:
+            pass
+
         targets = _process_futures(self._targets)
-        kustomization = {
-            "apiVersion": "kustomize.config.k8s.io/v1beta1",
-            "kind": "Kustomization",
-            "resources": []
+
+        chart = {
+            "apiVersion": "v2",
+            "name": utils.normalize(deployment.name),
+            "type": "application",
+            "version": "0.1.0",
+            "appVersion": "1.16.0"
         }
 
-        resources = kustomization["resources"]
-
         for name, target in targets.items():
-            resources.append(f"{name}.yaml")
-
-            with open(f"{deployment.path}/{name}.yaml", "w", encoding="utf8") as file:
+            with open(f"{target_path}/templates/{name}.yaml", "w", encoding="utf8") as file:
                 objs = [
                     yaml.safe_dump(obj, sort_keys=False) for obj in target
                 ]
 
                 file.write("---\n".join(objs))
 
-        with open(f"{deployment.path}/kustomization.yaml", "w", encoding="utf8") as file:
-            file.write(yaml.safe_dump(kustomization, sort_keys=False))
+        with open(f"{target_path}/Chart.yaml", "w", encoding="utf8") as file:
+            file.write(yaml.safe_dump(chart, sort_keys=False))
+
+    def on_apply(self, deployment: v1.deployment.Deployment):
+        """TODO"""
+
+        self._apply_targets(deployment)
 
         if deployment.dry_run:
             return
@@ -664,9 +676,9 @@ class Provider(v1.provider.Provider):
         self._push_images(deployment)
 
         cmd = [
-            "kubectl", "apply",
-            "--prune", "--all",
-            "-k", "."
+            "helm", "upgrade",
+            "-i", utils.normalize(deployment.name), "helm",
+            "--debug"
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
@@ -678,8 +690,8 @@ class Provider(v1.provider.Provider):
             return
 
         cmd = [
-            "kubectl", "delete",
-            "-k", "."
+            "helm", "uninstall",
+            utils.normalize(deployment.name)
         ]
 
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
