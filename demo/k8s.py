@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import codecs
 import functools
 import os
 import subprocess
@@ -76,8 +77,20 @@ class Secrets(providers.Secrets):
 
         return {}
 
+    @staticmethod
+    def encode_b64(string: str) -> str:
+        """TODO"""
+
+        string = bytes(string, encoding="utf8")
+        string = codecs.encode(string, "base64")
+        string = str(string, encoding="utf8")
+
+        return string.strip()
+
     def _k8s_create(self, name: str, entries: [types.KeyValue]) -> dict:
         """TODO"""
+
+        name = utils.normalize(name)
 
         return {
             "apiVersion": "v1",
@@ -85,7 +98,10 @@ class Secrets(providers.Secrets):
             "metadata": {
                 "name": name
             },
-            "data": {entry.key: entry.value for entry in entries},
+            "data": {
+                entry.key: self.encode_b64(entry.value)
+                for entry in entries
+            },
             "type": "Opaque"
         }
 
@@ -124,6 +140,8 @@ class Services(providers.Services):
     def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> dict:
         """TODO"""
 
+        name = utils.normalize(name)
+
         return {
             "apiVersion": "v1",
             "kind": "Service",
@@ -134,11 +152,11 @@ class Services(providers.Services):
                 "selector": {
                     "app": name
                 },
-                "ports": {
+                "ports": [{
                     "protocol": type.upper(),
                     "port": port,
                     "targetPort": target_port
-                }
+                }]
             }
         }
 
@@ -180,9 +198,10 @@ class Deployments(providers.Deployments):
         if not env:
             return []
 
-        return [
-            {"name": e.key, "value": e.value} for e in env
-        ]
+        return [{
+            "name": entry.key,
+            "value": entry.value
+        } for entry in env]
 
     def _convert_network_links(self, network_links: [types.NetworkLink]) -> [dict]:
         """TODO"""
@@ -214,7 +233,7 @@ class Deployments(providers.Deployments):
                 "name": link.name,
                 "valueFrom": {
                     "secretKeyRef": {
-                        "name": link.object.get(),
+                        "name": utils.normalize(link.object.get()),
                         "key": link.key
                     }
                 }
@@ -243,13 +262,13 @@ class Deployments(providers.Deployments):
             return None, None
 
         mounts = [{
-            "name": link.name,
+            "name": utils.normalize(link.name),
             "mountPath": link.mount_path
         } for link in volume_links]
 
         def resolve_future(link: types.VolumeLink) -> dict:
             return {
-                "name": link.name,
+                "name": utils.normalize(link.name),
                 **link.object.get(),
             }
 
@@ -280,6 +299,8 @@ class Deployments(providers.Deployments):
 
         mounts, volumes = self._convert_volume_links(volume_links)
 
+        name = utils.normalize(name)
+
         return {
             "apiVersion": "apps/v1",
             "kind": "Deployment",
@@ -292,7 +313,9 @@ class Deployments(providers.Deployments):
             "spec": {
                 "replicas": 1,
                 "selector": {
-                    "app": name
+                    "matchLabels": {
+                        "app": name
+                    }
                 },
                 "template": {
                     "metadata": {
@@ -312,7 +335,10 @@ class Deployments(providers.Deployments):
                             "ports": ports,
                             "volumeMounts": mounts
                         }],
-                        "volumes": volumes
+                        "volumes": volumes,
+                        "securityContext": {
+                            "runAsUser": 0
+                        }
                     }
                 }
             }
@@ -376,7 +402,7 @@ class PersistentVolumes(providers.PersistentVolumes):
         """TODO"""
 
         return v1.utils.Future({
-            "name": name,
+            "name": utils.normalize(name),
             "awsElasticBlockStore": {
                 "volumeID": self.binds.vol.create(name, size),
                 "fsType": "ext4"
@@ -463,18 +489,18 @@ class HttpIngressLinks(providers.HttpIngressLinks):
             return [{
                 "host": host,
                 "http": {
-                    "paths": {
+                    "paths": [{
                         "pathType": "Prefix",
                         "path": path,
                         "backend": {
                             "service": {
-                                "name": link[1],
+                                "name": utils.normalize(link[1]),
                                 "port": {
                                     "number": link[2]
                                 }
                             }
                         }
-                    }
+                    }]
                 }
             }]
 
@@ -491,7 +517,7 @@ class HttpIngressLinks(providers.HttpIngressLinks):
             "apiVersion": "networking.k8s.io/v1",
             "kind": "Ingress",
             "metadata": {
-                "name": name,
+                "name": utils.normalize(name),
             },
             "spec": {
                 "rules": self._convert_network_link(host, path, network_link)
@@ -611,8 +637,17 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         targets = _process_futures(self._targets)
+        kustomization = {
+            "apiVersion": "kustomize.config.k8s.io/v1beta1",
+            "kind": "Kustomization",
+            "resources": []
+        }
+
+        resources = kustomization["resources"]
 
         for name, target in targets.items():
+            resources.append(f"{name}.yaml")
+
             with open(f"{deployment.path}/{name}.yaml", "w", encoding="utf8") as file:
                 objs = [
                     yaml.safe_dump(obj, sort_keys=False) for obj in target
@@ -620,13 +655,34 @@ class Provider(v1.provider.Provider):
 
                 file.write("---\n".join(objs))
 
+        with open(f"{deployment.path}/kustomization.yaml", "w", encoding="utf8") as file:
+            file.write(yaml.safe_dump(kustomization, sort_keys=False))
+
         if deployment.dry_run:
             return
 
         self._push_images(deployment)
 
+        cmd = [
+            "kubectl", "apply",
+            "--prune", "--all",
+            "-k", "."
+        ]
+
+        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
+
     def on_delete(self, deployment: v1.deployment.Deployment):
         """TODO"""
+
+        if deployment.dry_run:
+            return
+
+        cmd = [
+            "kubectl", "delete",
+            "-k", "."
+        ]
+
+        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
     def namespace(self) -> str:
         """TODO"""

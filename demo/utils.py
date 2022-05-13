@@ -25,3 +25,9 @@ def generate_password() -> str:
     """TODO"""
 
     return secrets.token_urlsafe(16)
+
+
+def normalize(name: str) -> str:
+    """TODO"""
+
+    return name.replace("_", "-")
