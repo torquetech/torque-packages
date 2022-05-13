@@ -594,6 +594,7 @@ class Provider(v1.provider.Provider):
             "-d", "--remove-orphans"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
         self._print_info(deployment)
@@ -609,6 +610,7 @@ class Provider(v1.provider.Provider):
             "--volumes"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
     def add_volume(self, name: str):

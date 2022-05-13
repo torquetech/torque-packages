@@ -247,6 +247,7 @@ class Provider(v1.provider.Provider):
             "terraform", "init"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
                        cwd=deployment.path,
@@ -257,6 +258,7 @@ class Provider(v1.provider.Provider):
             "-auto-approve"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
                        cwd=deployment.path,
@@ -267,6 +269,7 @@ class Provider(v1.provider.Provider):
             "-json"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         p = subprocess.run(cmd,
                            env=os.environ,
                            cwd=deployment.path,
@@ -289,6 +292,7 @@ class Provider(v1.provider.Provider):
             "-auto-approve", "-destroy"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
     def add_target(self, key: object, value: object):

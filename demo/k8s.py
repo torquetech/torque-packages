@@ -602,6 +602,7 @@ class Provider(v1.provider.Provider):
                 self.configuration["registry"]["server"]
             ]
 
+            print(f"+ {' '.join(cmd)}")
             subprocess.run(cmd,
                            env=os.environ,
                            cwd=deployment.path,
@@ -618,6 +619,7 @@ class Provider(v1.provider.Provider):
                     image, namespaced_image
                 ]
 
+                print(f"+ {' '.join(cmd)}")
                 subprocess.run(cmd,
                                env=os.environ,
                                cwd=deployment.path,
@@ -628,6 +630,7 @@ class Provider(v1.provider.Provider):
                 namespaced_image
             ]
 
+            print(f"+ {' '.join(cmd)}")
             subprocess.run(cmd,
                            env=os.environ,
                            cwd=deployment.path,
@@ -681,6 +684,7 @@ class Provider(v1.provider.Provider):
             "--debug"
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
     def on_delete(self, deployment: v1.deployment.Deployment):
@@ -694,6 +698,7 @@ class Provider(v1.provider.Provider):
             utils.normalize(deployment.name)
         ]
 
+        print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
 
     def namespace(self) -> str:
