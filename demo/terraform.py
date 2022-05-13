@@ -151,6 +151,10 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
         })
 
         def resolve_future(future: v1.utils.Future[object], state: dict):
+            if state is None:
+                future.set(f"<{name}_id>")
+                return
+
             resources = state["values"]["root_module"]["resources"]
 
             for resource in resources:
