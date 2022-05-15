@@ -640,7 +640,12 @@ class Provider(v1.provider.Provider):
 
         target_path = f"{deployment.path}/helm"
 
-        shutil.rmtree(target_path)
+        try:
+            shutil.rmtree(target_path)
+
+        except FileNotFoundError:
+            pass
+
         os.makedirs(f"{target_path}/templates")
 
         targets = _process_futures(self._targets)
