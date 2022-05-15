@@ -49,7 +49,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     },
     "interfaces": {
         v1.schema.Optional(str): {
-            "binds": [
+            v1.schema.Optional("binds"): [
                 v1.schema.Optional(str)
             ],
             v1.schema.Optional("default"): str

@@ -461,11 +461,11 @@ def load(name: str,
     overrides = {}
 
     for component in dag.components.values():
-        binds = binds | _component_binds_configs(component, profile, repo)
-        overrides = overrides | _component_binds_overrides(component, profile, repo)
+        binds = v1.utils.merge_dicts(binds,  _component_binds_configs(component, profile, repo))
+        overrides = v1.utils.merge_dicts(overrides, _component_binds_overrides(component, profile, repo))
 
     interfaces = _load_all_interfaces(providers, repo)
-    interfaces = interfaces | profile.interfaces()
+    interfaces = v1.utils.merge_dicts(interfaces, profile.interfaces())
 
     config = Configuration(providers,
                            components,
