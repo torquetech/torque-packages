@@ -562,15 +562,13 @@ class Provider(v1.provider.Provider):
         "defaults": {
             "registry": {
                 "server": "index.docker.io",
-                "namespace": "user",
-                "run_login": True
+                "namespace": "user"
             }
         },
         "schema": {
             "registry": {
                 "server": str,
-                "namespace": str,
-                "run_login": bool
+                "namespace": str
             }
         }
     }
@@ -595,17 +593,16 @@ class Provider(v1.provider.Provider):
     def _push_images(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        if self.configuration["registry"]["run_login"]:
-            cmd = [
-                "docker", "login",
-                self.configuration["registry"]["server"]
-            ]
+        cmd = [
+            "docker", "login",
+            self.configuration["registry"]["server"]
+        ]
 
-            print(f"+ {' '.join(cmd)}")
-            subprocess.run(cmd,
-                           env=os.environ,
-                           cwd=deployment.path,
-                           check=True)
+        print(f"+ {' '.join(cmd)}")
+        subprocess.run(cmd,
+                       env=os.environ,
+                       cwd=deployment.path,
+                       check=True)
 
         ns = self.namespace()
 
