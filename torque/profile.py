@@ -223,8 +223,6 @@ def defaults(providers: [str],
 
         if len(interface_binds) > 1:
             interfaces[interface_name] = {}
-
-            interfaces[interface_name]["binds"] = interface_binds
             interfaces[interface_name]["default"] = interface_binds[0]
 
     binds = {}
