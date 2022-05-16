@@ -435,11 +435,10 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         return {}
 
-    def create(self, name: str, host: str):
+    def create(self):
         """TODO"""
 
-        if self.provider.add_load_balancer(name, host):
-            return
+        self.provider.add_load_balancer()
 
         templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
         templates = templates.split("---")
@@ -473,17 +472,13 @@ class HttpIngressLinks(providers.HttpIngressLinks):
 
         return {}
 
-    def _convert_network_link(self,
-                              host: str,
-                              path: str,
-                              network_link: types.NetworkLink) -> dict:
+    def _convert_network_link(self, path: str, network_link: types.NetworkLink) -> dict:
         """TODO"""
 
         def resolve_future() -> list:
             link = network_link.object.get()
 
             return [{
-                "host": host,
                 "http": {
                     "paths": [{
                         "pathType": "Prefix",
@@ -502,34 +497,26 @@ class HttpIngressLinks(providers.HttpIngressLinks):
 
         return resolve_future
 
-    def _k8s_create(self,
-                    name: str,
-                    host: str,
-                    path: str,
-                    network_link: types.NetworkLink):
+    def _k8s_create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
         return {
             "apiVersion": "networking.k8s.io/v1",
             "kind": "Ingress",
             "metadata": {
-                "name": f"{utils.normalize(name)}-{host}",
+                "name": f"{utils.normalize(name)}",
             },
             "spec": {
                 "ingressClassName": "nginx",
-                "rules": self._convert_network_link(host, path, network_link)
+                "rules": self._convert_network_link(path, network_link)
             }
         }
 
-    def create(self,
-               name: str,
-               host: str,
-               path: str,
-               network_link: types.NetworkLink):
+    def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
         self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name, host, path, network_link)
+            self._k8s_create(name, path, network_link)
         ])
 
 
@@ -586,7 +573,7 @@ class Provider(v1.provider.Provider):
 
         self._images = []
         self._targets = {}
-        self._load_balancers = {}
+        self._load_balancer = False
 
         self._lock = threading.Lock()
 
@@ -669,6 +656,9 @@ class Provider(v1.provider.Provider):
     def _print_info(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
+        if not self._load_balancer:
+            return
+
         retrys = 10
 
         while retrys != 0:
@@ -708,11 +698,7 @@ class Provider(v1.provider.Provider):
         if retrys == 0:
             return
 
-        print("\nLoad balancers:\n")
-
-        for name, host in self._load_balancers.items():
-            name = f"{name} ({host}):"
-            print(f"{name:25} http://{lb_host}")
+        print("\n" f"Load balancer: http://{lb_host}")
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
@@ -761,16 +747,14 @@ class Provider(v1.provider.Provider):
         with self._lock:
             self._images.append(image)
 
-    def add_load_balancer(self, name: str, host: str) -> bool:
+    def add_load_balancer(self) -> bool:
         """TODO"""
 
         with self._lock:
-            if any([i == host for i in self._load_balancers.values()]):
-                raise RuntimeError(f"{host}: load balancer already exists")
+            if self._load_balancer:
+                raise RuntimeError("multiple load balancers not supported")
 
-            self._load_balancers[name] = host
-
-            return len(self._load_balancers) > 1
+            self._load_balancer = True
 
     def add_to_target(self, name: str, objs: [dict]):
         """TODO"""

@@ -19,23 +19,16 @@ from demo import providers
 from demo import types
 
 
-LoadBalancer = collections.namedtuple("LoadBalancer", [
-    "host",
-    "port"
-])
-
 LoadBalancerLink = collections.namedtuple("LoadBalancerLink", [
-    "name",
-    "host",
-    "path",
     "service",
+    "path",
     "port"
 ])
 
 
 _LOAD_BALANCER_TEMPLATE = """server {
   listen 80;
-  server_name {{host}};
+  server_name localhost;
 {%- for link in links %}
 
   location {{link.path}} {
@@ -321,10 +314,10 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
         return {}
 
-    def create(self, name: str, host: str):
+    def create(self):
         """TODO"""
 
-        self.provider.add_load_balancer(name, host, self.configuration["port"])
+        self.provider.add_load_balancer(self.configuration["port"])
 
 
 class HttpIngressLinks(providers.HttpIngressLinks):
@@ -349,14 +342,10 @@ class HttpIngressLinks(providers.HttpIngressLinks):
 
         return {}
 
-    def create(self,
-               name: str,
-               host: str,
-               path: str,
-               network_link: types.NetworkLink):
+    def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
-        self.provider.add_load_balancer_link(name, host, path, network_link)
+        self.provider.add_load_balancer_link(path, network_link)
 
 
 class Provider(v1.provider.Provider):
@@ -382,7 +371,7 @@ class Provider(v1.provider.Provider):
 
         self._deployments = {}
         self._volumes = {}
-        self._load_balancers = {}
+        self._load_balancer = False
         self._load_balancer_links = []
 
         self._lock = threading.Lock()
@@ -483,24 +472,22 @@ class Provider(v1.provider.Provider):
 
         return volumes
 
-    def _generate_load_balancers(self, deployment_path: str):
+    def _generate_load_balancer(self, deployment_path: str):
         """TODO"""
 
         workspace_path = self.configuration["workspace_path"]
 
-        services = {}
+        service = {}
 
-        for name, lb in self._load_balancers.items():
+        if self._load_balancer:
             # pylint: disable=W0640
 
-            conf_path = f"{deployment_path}/lb.{name}.conf"
+            conf_path = f"{deployment_path}/lb.conf"
             conf_path = conf_path[len(v1.utils.torque_root())+1:]
 
             with open(v1.utils.resolve_path(conf_path), "w", encoding="utf8") as file:
-                links = filter(lambda x: x.host == lb.host, self._load_balancer_links)
-
                 template = jinja2.Template(_LOAD_BALANCER_TEMPLATE)
-                file.write(template.render(host=lb.host, links=links))
+                file.write(template.render(links=self._load_balancer_links))
 
             if workspace_path is None:
                 conf_path = v1.utils.resolve_path(conf_path)
@@ -509,9 +496,9 @@ class Provider(v1.provider.Provider):
                 conf_path = os.path.join(workspace_path, conf_path)
                 conf_path = os.path.normpath(conf_path)
 
-            services[f"lb.{name}"] = {
+            service[f"torque-lb"] = {
                 "image": "nginx:stable",
-                "ports": [f"{lb.port}:80"],
+                "ports": [f"{self._load_balancer}:80"],
                 "volumes": [{
                     "type": "bind",
                     "source": conf_path,
@@ -519,7 +506,7 @@ class Provider(v1.provider.Provider):
                 }]
             }
 
-        return services
+        return service
 
     def _print_info(self, deployment: v1.deployment.Deployment):
         """TODO"""
@@ -567,16 +554,13 @@ class Provider(v1.provider.Provider):
 
                 print(f"{name:25} {ip}")
 
-        print("\nLoad balancers:\n")
-
-        for name, lb in self._load_balancers.items():
-            name = f"{name} ({lb.host}):"
-            print(f"{name:25} http://localhost:{lb.port}")
+        if self._load_balancer:
+            print("\n" f"Load balancer: http://localhost:{self._load_balancer}")
 
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        deployments = self._deployments | self._generate_load_balancers(deployment.path)
+        deployments = self._deployments | self._generate_load_balancer(deployment.path)
 
         compose = {
             "services": deployments,
@@ -654,23 +638,16 @@ class Provider(v1.provider.Provider):
         with self._lock:
             self._deployments[name] = deployment
 
-    def add_load_balancer(self, name: str, host: str, port: int):
+    def add_load_balancer(self, port: int):
         """TODO"""
 
         with self._lock:
-            if any([i.host == host for i in self._load_balancers.values()]):
-                raise RuntimeError(f"{host}: load balancer already exists")
+            if self._load_balancer:
+                raise RuntimeError("multiple load balancers not supported")
 
-            if any([i.port == port for i in self._load_balancers.values()]):
-                raise RuntimeError(f"{port}: duplicate load balancer port")
+            self._load_balancer = port
 
-            self._load_balancers[name] = LoadBalancer(host, port)
-
-    def add_load_balancer_link(self,
-                               name: str,
-                               host: str,
-                               path: str,
-                               network_link: types.NetworkLink):
+    def add_load_balancer_link(self, path: str, network_link: types.NetworkLink):
         """TODO"""
 
         link = network_link.object.get()
@@ -679,8 +656,4 @@ class Provider(v1.provider.Provider):
         port = link[2]
 
         with self._lock:
-            self._load_balancer_links.append(LoadBalancerLink(name,
-                                                              host,
-                                                              path,
-                                                              service,
-                                                              port))
+            self._load_balancer_links.append(LoadBalancerLink(service, path, port))

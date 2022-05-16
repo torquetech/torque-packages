@@ -20,12 +20,8 @@ class Component(v1.component.Component):
     }
 
     _CONFIGURATION = {
-        "defaults": {
-            "host": "www.example.com"
-        },
-        "schema": {
-            "host": str
-        }
+        "defaults": {},
+        "schema": {}
     }
 
     @classmethod
@@ -55,16 +51,11 @@ class Component(v1.component.Component):
             }
         }
 
-    def _host(self):
-        """TODO"""
-
-        return self.configuration["host"]
-
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
-            components.HttpLoadBalancer(host=self._host)
+            components.HttpLoadBalancer()
         ]
 
     def on_create(self):
@@ -79,7 +70,7 @@ class Component(v1.component.Component):
     def on_apply(self, deployment: v1.deployment.Deployment):
         """TODO"""
 
-        self.binds.lb.create(self.name, self.configuration["host"])
+        self.binds.lb.create()
 
 
 class Link(v1.link.Link):
@@ -148,7 +139,6 @@ class Link(v1.link.Link):
         """TODO"""
 
         self.binds.ingress.create(self.source,
-                                  self.binds.lb.host(),
                                   self.parameters["path"],
                                   types.NetworkLink(self.source,
                                                     self.binds.service.link()))

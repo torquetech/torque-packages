@@ -101,7 +101,7 @@ class HttpLoadBalancers(v1.provider.Interface):
 
     """TODO"""
 
-    def create(self, name: str, host: str):
+    def create(self):
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
@@ -123,11 +123,7 @@ class HttpIngressLinks(v1.provider.Interface):
 
     """TODO"""
 
-    def create(self,
-               name: str,
-               host: str,
-               path: str,
-               network_link: types.NetworkLink):
+    def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")

@@ -116,6 +116,3 @@ class HttpLoadBalancer(v1.component.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
-
-    def host(self) -> str:
-        """TODO"""
