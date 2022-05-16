@@ -133,10 +133,6 @@ Whenever services and apps need to be accessed from the internet, or they need t
 
 This component does not have a dedicated directory in the workspace.
 
-#### Configuration
-
-- `host` - A URL where linked service components are exposed.
-
 ### `demo/react-app`
 
 The `demo/react-app` code was generated using the `create-react-app` utility. It includes everything required to run the react app locally inside a docker image and then deploy it to a _Kubernetes_ cluster.
