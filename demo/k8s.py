@@ -748,7 +748,7 @@ class Provider(v1.provider.Provider):
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
+        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=False)
 
     def namespace(self) -> str:
         """TODO"""
