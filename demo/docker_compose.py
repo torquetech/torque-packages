@@ -532,7 +532,7 @@ class Provider(v1.provider.Provider):
 
             cmd = [
                 "docker", "inspect",
-                "--format={{.NetworkSettings.Networks.local_default.IPAddress}}",
+                f"--format={{{{.NetworkSettings.Networks.{deployment.name}_default.IPAddress}}}}",
                 name
             ]
 
