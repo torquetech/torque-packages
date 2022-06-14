@@ -252,12 +252,12 @@ class PersistentVolumes(providers.PersistentVolumes):
 
         return {}
 
-    def create(self, name: str, volume_id: str) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> v1.utils.Future[object]:
         """TODO"""
 
         self.provider.add_volume(name)
 
-        return v1.utils.Future(volume_id)
+        return v1.utils.Future(name)
 
 
 class PersistentVolumesProvider(providers.PersistentVolumesProvider):
@@ -437,7 +437,7 @@ class Provider(v1.provider.Provider):
         for link in volume_links:
             volumes.append({
                 "type": "volume",
-                "source": link.name,
+                "source": link.object.get(),
                 "target": link.mount_path,
                 "volume": {
                     "nocopy": True
