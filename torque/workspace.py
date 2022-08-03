@@ -85,7 +85,7 @@ def install_deps(root: str):
 
     cmd = [
         ".torque/local/venv/bin/python",
-        "-m", "torque.install_deps"
+        "-m", "torque.hooks.install_deps"
     ]
 
     env = os.environ | {

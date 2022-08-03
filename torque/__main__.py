@@ -46,7 +46,7 @@ def pass_through_command(root: str, argv):
 
     cmd = [
         f"{root}/.torque/local/venv/bin/python",
-        "-m", "torque"
+        "-m", "torque.hooks.main"
     ]
 
     cmd += argv
