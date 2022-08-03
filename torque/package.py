@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import json
 import os
 import re
 import subprocess
@@ -18,16 +19,43 @@ from torque import v1
 _URI = r"^[^:]+://"
 
 
-def install_deps(upgrade: bool):
+def package_dist(path: str):
     """TODO"""
 
-    requirements = []
+    return metadata.Distribution.at(path)
+
+
+def installed_packages():
+    """TODO"""
+
+    packages = {}
 
     for entry in os.listdir(f"{v1.utils.torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        dist = metadata.Distribution.at(f"{v1.utils.torque_dir()}/system/{entry}")
+        path = f"{v1.utils.torque_dir()}/system/{entry}"
+        dist = package_dist(path)
+
+        with open(f"{path}/direct_url.json", encoding="utf-8") as f:
+            uri = json.loads(f.read())["url"]
+
+        packages[dist.name] = {
+            "version": dist.metadata["Version"],
+            "path": path,
+            "uri": uri
+        }
+
+    return packages
+
+
+def install_deps():
+    """TODO"""
+
+    requirements = []
+
+    for metadata in installed_packages().values():
+        dist = package_dist(metadata["path"])
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
@@ -49,11 +77,9 @@ def install_deps(upgrade: bool):
     cmd = [
         ".torque/local/venv/bin/python",
         "-m", "pip",
-        "install", "-r", ".torque/local/requirements.txt"
+        "install", "-r", ".torque/local/requirements.txt",
+        "--upgrade"
     ]
-
-    if upgrade:
-        cmd += ["--upgrade"]
 
     try:
         subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
@@ -62,13 +88,13 @@ def install_deps(upgrade: bool):
         raise exceptions.ExecuteFailed("pip") from exc
 
 
-def install_package(package: str, upgrade: bool):
+def install_package(uri: str):
     """TODO"""
 
-    if re.match(_URI, package) is None and os.path.exists(package):
-        if not os.path.isabs(package):
-            package = os.path.join(v1.utils.torque_cwd(), package)
-            package = os.path.normpath(package)
+    if re.match(_URI, uri) is None and os.path.exists(uri):
+        if not os.path.isabs(uri):
+            uri = os.path.join(v1.utils.torque_cwd(), uri)
+            uri = os.path.normpath(uri)
 
     env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv"
@@ -80,16 +106,13 @@ def install_package(package: str, upgrade: bool):
         "install"
     ]
 
-    if upgrade:
-        cmd += ["--upgrade"]
-
     cmd += [
         "-t", ".torque/system",
         "--platform", "torque",
         "--implementation", "py3",
         "--no-deps",
         "--no-index",
-        package
+        uri
     ]
 
     try:
@@ -98,29 +121,16 @@ def install_package(package: str, upgrade: bool):
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
 
-    install_deps(upgrade)
 
-
-def remove_package(package: str, used_component_types: set[str], used_link_types: set[str]):
+def remove_package(name: str):
     """TODO"""
 
-    dist = metadata.Distribution.at(f"{v1.utils.torque_dir()}/system/{package}.dist-info")
+    packages = installed_packages()
 
-    if not dist.files:
-        raise exceptions.PackageNotFound(package)
+    if name not in packages:
+        raise exceptions.PackageNotFound(name)
 
-    component_types = filter(lambda x: x.group == "torque.components.v1", dist.entry_points)
-    component_types = {i.name for i in list(component_types)}
-
-    if len(component_types & used_component_types) != 0:
-        raise exceptions.PackageInUse(package)
-
-    link_types = filter(lambda x: x.group == "torque.links.v1", dist.entry_points)
-    link_types = {i.name for i in list(link_types)}
-
-    if len(link_types & used_link_types) != 0:
-        raise exceptions.PackageInUse(package)
-
+    dist = metadata.Distribution.at(packages[name]["path"])
     files = set()
 
     for file in dist.files:
@@ -148,15 +158,29 @@ def remove_package(package: str, used_component_types: set[str], used_link_types
 def list_packages():
     """TODO"""
 
-    for entry in os.listdir(f"{v1.utils.torque_dir()}/system"):
-        if not entry.endswith(".dist-info"):
-            continue
+    for name, metadata in installed_packages().items():
+        print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}", file=sys.stdout)
 
-        dist = metadata.Distribution.at(f"{v1.utils.torque_dir()}/system/{entry}")
-        name = dist.metadata.get("Name")
-        version = dist.metadata.get("Version")
 
-        with open(dist.locate_file(f"{entry}/direct_url.json"), encoding="utf-8") as f:
-            url = json.loads(f.read())["url"]
+def upgrade_package(name: str):
+    """TODO"""
 
-        print(f"{name}: version: {version}, url: {url}", file=sys.stdout)
+    packages = installed_packages()
+
+    if name not in packages:
+        raise exceptions.PackageNotFound(name)
+
+    remove_package(name)
+    install_package(packages[name]["uri"])
+
+    install_deps()
+
+
+def upgrade_all_packages():
+    """TODO"""
+
+    for name, metadata in installed_packages().items():
+        remove_package(name)
+        install_package(metadata["uri"])
+
+    install_deps()

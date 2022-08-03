@@ -7,7 +7,6 @@
 import argparse
 
 from torque import exceptions
-from torque import workspace
 from torque import package
 
 
@@ -16,24 +15,16 @@ def _install(arguments: argparse.Namespace):
 
     """TODO"""
 
-    package.install_package(arguments.uri, arguments.upgrade)
+    package.install_package(arguments.uri)
+    package.install_deps()
 
 
 def _remove(arguments: argparse.Namespace):
+    # pylint: disable=W0613
+
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
-
-    try:
-        package.remove_package(arguments.name,
-                               ws.dag.used_component_types(),
-                               ws.dag.used_link_types())
-
-    except exceptions.PackageNotFound as exc:
-        raise RuntimeError(f"{exc}: package not found") from exc
-
-    except exceptions.PackageInUse as exc:
-        raise RuntimeError(f"{exc}: package in use") from exc
+    package.remove_package(arguments.name)
 
 
 def _list(arguments: argparse.Namespace):
@@ -44,6 +35,20 @@ def _list(arguments: argparse.Namespace):
     package.list_packages()
 
 
+def _upgrade(arguments: argparse.Namespace):
+    """TODO"""
+
+    package.upgrade_package(arguments.name)
+
+
+def _upgrade_all(arguments: argparse.Namespace):
+    # pylint: disable=W0613
+
+    """TODO"""
+
+    package.upgrade_all_packages()
+
+
 def add_arguments(subparsers):
     """TODO"""
 
@@ -51,12 +56,15 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="package_cmd", metavar="command")
 
     install_parser = subparsers.add_parser("install", help="install package")
-    install_parser.add_argument("--upgrade", action="store_true", help="upgrade package")
     install_parser.add_argument("uri", help="package uri")
+
+    upgrade_parser = subparsers.add_parser("upgrade", help="upgrade package")
+    upgrade_parser.add_argument("name", help="upgrade package")
 
     remove_parser = subparsers.add_parser("remove", help="remove package")
     remove_parser.add_argument("name", help="package name")
 
+    subparsers.add_parser("upgrade-all", help="upgrade all packages")
     subparsers.add_parser("list", help="list installed packages")
 
 
@@ -66,6 +74,8 @@ def run(arguments: argparse.Namespace):
     cmds = {
         "install": _install,
         "remove": _remove,
+        "upgrade": _upgrade,
+        "upgrade-all": _upgrade_all,
         "list": _list
     }
 
