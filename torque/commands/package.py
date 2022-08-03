@@ -16,7 +16,7 @@ def _install(arguments: argparse.Namespace):
 
     """TODO"""
 
-    package.install_package(arguments.uri, arguments.force, arguments.upgrade)
+    package.install_package(arguments.uri, arguments.upgrade)
 
 
 def _remove(arguments: argparse.Namespace):
@@ -52,7 +52,6 @@ def add_arguments(subparsers):
 
     install_parser = subparsers.add_parser("install", help="install package")
     install_parser.add_argument("--upgrade", action="store_true", help="upgrade package")
-    install_parser.add_argument("--force", action="store_true", help="force install")
     install_parser.add_argument("uri", help="package uri")
 
     remove_parser = subparsers.add_parser("remove", help="remove package")

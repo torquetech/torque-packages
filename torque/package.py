@@ -18,7 +18,7 @@ from torque import v1
 _URI = r"^[^:]+://"
 
 
-def install_deps(force: bool, upgrade: bool):
+def install_deps(upgrade: bool):
     """TODO"""
 
     requirements = []
@@ -52,9 +52,6 @@ def install_deps(force: bool, upgrade: bool):
         "install", "-r", ".torque/local/requirements.txt"
     ]
 
-    if force:
-        cmd += ["--force-reinstall"]
-
     if upgrade:
         cmd += ["--upgrade"]
 
@@ -65,7 +62,7 @@ def install_deps(force: bool, upgrade: bool):
         raise exceptions.ExecuteFailed("pip") from exc
 
 
-def install_package(package: str, force: bool, upgrade: bool):
+def install_package(package: str, upgrade: bool):
     """TODO"""
 
     if re.match(_URI, package) is None and os.path.exists(package):
@@ -82,9 +79,6 @@ def install_package(package: str, force: bool, upgrade: bool):
         "-m", "pip",
         "install"
     ]
-
-    if force:
-        cmd += ["--force-reinstall"]
 
     if upgrade:
         cmd += ["--upgrade"]
@@ -104,7 +98,7 @@ def install_package(package: str, force: bool, upgrade: bool):
     except subprocess.CalledProcessError as exc:
         raise exceptions.ExecuteFailed("pip") from exc
 
-    install_deps(force, upgrade)
+    install_deps(upgrade)
 
 
 def remove_package(package: str, used_component_types: set[str], used_link_types: set[str]):

@@ -12,7 +12,7 @@ from torque import package
 def main():
     """TODO"""
 
-    package.install_deps(True, True)
+    package.install_deps(True)
 
 
 if __name__ == "__main__":
