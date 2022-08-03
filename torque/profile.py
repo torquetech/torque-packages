@@ -221,19 +221,19 @@ def defaults(providers: [str],
             if issubclass(repo.bind(bind_name), interface_class):
                 interface_binds.append(bind_name)
 
-        if len(interface_binds) > 1:
-            interfaces[interface_name] = {}
-            interfaces[interface_name]["default"] = interface_binds[0]
+        interfaces[interface_name] = {
+            "default": interface_binds[0] if len(interface_binds) > 0 else None,
+            "binds": interface_binds
+        }
 
     binds = {}
 
     for bind_name in provider_binds:
         config = repo.bind(bind_name).on_configuration({})
 
-        if config:
-            binds[bind_name] = {
-                "configuration": config
-            }
+        binds[bind_name] = {
+            "configuration": config
+        }
 
     return {
         "providers": {
@@ -254,6 +254,6 @@ def defaults(providers: [str],
                 } for link in dag.links.values()
             }
         },
-        "interfaces": interfaces,
-        "binds": binds
+        "binds": binds,
+        "interfaces": interfaces
     }
