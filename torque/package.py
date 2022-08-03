@@ -152,5 +152,11 @@ def list_packages():
         if not entry.endswith(".dist-info"):
             continue
 
-        package = entry.removesuffix(".dist-info")
-        print(f"{package}", file=sys.stdout)
+        dist = metadata.Distribution.at(f"{v1.utils.torque_dir()}/system/{entry}")
+        name = dist.metadata.get("Name")
+        version = dist.metadata.get("Version")
+
+        with open(dist.locate_file(f"{entry}/direct_url.json"), encoding="utf-8") as f:
+            url = json.loads(f.read())["url"]
+
+        print(f"{name}: version: {version}, url: {url}", file=sys.stdout)
