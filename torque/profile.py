@@ -53,7 +53,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
             v1.schema.Optional("binds"): [
                 v1.schema.Optional(str)
             ],
-            v1.schema.Optional("default"): str
+            v1.schema.Optional("default"): v1.schema.Or(str, None)
         }
     }
 })
