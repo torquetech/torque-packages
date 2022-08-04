@@ -131,6 +131,8 @@ class Deployment:
                         required: bool,
                         component_name: str,
                         component_labels: [str]) -> v1.provider.Interface:
+        # pylint: disable=R0914
+
         """TODO"""
 
         if self._providers is None:
@@ -359,6 +361,8 @@ def _component_binds_configs(component: model.Component,
 def _component_binds_overrides(component: model.Component,
                                profile: profile.Profile,
                                repo: repository.Repository) -> dict:
+    # pylint: disable=W0613
+
     """TODO"""
 
     bind_overrides = {}

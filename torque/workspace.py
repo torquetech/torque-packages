@@ -228,7 +228,7 @@ class Workspace:
                         required: bool,
                         component_name: str,
                         component_labels: [str]) -> v1.provider.Interface:
-        # pylint: disable=R0201,W0613
+        # pylint: disable=W0613
 
         """TODO"""
 
