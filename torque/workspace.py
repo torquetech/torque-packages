@@ -23,6 +23,7 @@ _PROTO = r"^([^:]+)://"
 _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
 _WORKSPACE_SCHEMA = v1.schema.Schema({
+    "version": str,
     "profiles": {
         v1.schema.Optional(str): [str]
     },
@@ -50,10 +51,13 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
 })
 
 _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
-    v1.schema.Optional(str): {
-        "profile": str,
-        "lables": v1.schema.Or([str], None),
-        "components": v1.schema.Or([str], None)
+    "version": str,
+    "deployments": {
+        v1.schema.Optional(str): {
+            "profile": str,
+            "labels": v1.schema.Or([str], None),
+            "components": v1.schema.Or([str], None)
+        }
     }
 })
 
@@ -119,11 +123,17 @@ def _to_deployments(config: Configuration) -> dict[str, Deployment]:
     with open(path, encoding="utf8") as file:
         deployments = yaml.safe_load(file)
 
+    deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
+
+    if deployments["version"] != "torquetech.dev/v1":
+        raise RuntimeError(f"{deployments['version']}: invalid deployments version")
+
     return {
         name: Deployment(name,
                          deployment["profile"],
                          deployment["labels"],
-                         deployment["components"]) for name, deployment in deployments.items()
+                         deployment["components"])
+        for name, deployment in deployments["deployments"].items()
     }
 
 
@@ -172,11 +182,14 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
     """TODO"""
 
     return {
-        deployment.name: {
-            "profile": deployment.profile,
-            "labels": deployment.labels,
-            "components": deployment.components
-        } for deployment in deployments.values()
+        "version": "torquetech.dev/v1",
+        "deployments": {
+            deployment.name: {
+                "profile": deployment.profile,
+                "labels": deployment.labels,
+                "components": deployment.components
+            } for deployment in deployments.values()
+        }
     }
 
 
@@ -483,6 +496,7 @@ class Workspace:
         """TODO"""
 
         workspace = {
+            "version": "torquetech.dev/v1",
             "profiles": _from_profiles(self.profiles),
             "configuration": _from_configuration(self._config),
             "dag": {
@@ -526,23 +540,29 @@ def load(path: str) -> Workspace:
     path = v1.utils.torque_path(path)
     path = v1.utils.resolve_path(path)
 
-    workspace = {
-        "profiles": {},
-        "configuration": {
-            "deployments": ".torque/local/deployments.yaml"
-        },
-        "dag": {
-            "revision": 0,
-            "components": {},
-            "links": {}
-        }
-    }
-
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
-            workspace = v1.utils.merge_dicts(workspace, yaml.safe_load(file))
+            workspace = yaml.safe_load(file)
+
+    else:
+        workspace = {
+            "version": "torquetech.dev/v1",
+            "profiles": {},
+            "configuration": {
+                "deployments": ".torque/local/deployments.yaml"
+            },
+            "dag": {
+                "revision": 0,
+                "components": {},
+                "links": {}
+            }
+        }
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
+
+    if workspace["version"] != "torquetech.dev/v1":
+        raise RuntimeError(f"{workspace['version']}: invalid workspace version")
+
     repo = repository.load()
 
     profiles = _to_profiles(workspace)

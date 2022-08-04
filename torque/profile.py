@@ -14,6 +14,7 @@ from torque import v1
 
 _PROTO = r"^([^:]+)://"
 _CONFIGURATION_SCHEMA = v1.schema.Schema({
+    "version": str,
     "providers": {
         v1.schema.Optional(str): {
             "configuration": dict
@@ -194,10 +195,18 @@ def load(name: str, uris: [str], repo: repository.Repository) -> Profile:
                                              True)
 
     try:
-        return Profile(name, _CONFIGURATION_SCHEMA.validate(configuration))
+        configuration = _CONFIGURATION_SCHEMA.validate(configuration)
 
     except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"profile: {name}: {exc}") from exc
+        exc_str = str(exc)
+        exc_str = " " + exc_str.replace("\n", "\n ")
+
+        raise RuntimeError(f"profile: {name}:\n{exc_str}") from exc
+
+    if configuration["version"] != "torquetech.dev/v1":
+        raise RuntimeError(f"{configuration['version']}: invalid configuration version")
+
+    return Profile(name, configuration)
 
 
 def defaults(providers: [str],
@@ -236,6 +245,7 @@ def defaults(providers: [str],
         }
 
     return {
+        "version": "torquetech.dev/v1",
         "providers": {
             name: {
                 "configuration": repo.provider(name).on_configuration({})
