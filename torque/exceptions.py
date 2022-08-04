@@ -106,3 +106,7 @@ class NoComponentsSelected(TorqueException):
 
 class OperationAborted(TorqueException):
     """TODO"""
+
+
+class InterfaceNotFound(TorqueException):
+    """TODO"""
