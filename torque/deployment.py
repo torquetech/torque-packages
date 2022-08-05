@@ -9,8 +9,6 @@ import sys
 import threading
 import typing
 
-from collections import namedtuple
-
 from torque import exceptions
 from torque import interfaces
 from torque import jobs
@@ -20,14 +18,23 @@ from torque import repository
 from torque import v1
 
 
-Configuration = namedtuple("Configuration", [
-    "providers",
-    "components",
-    "links",
-    "interfaces",
-    "binds",
-    "overrides"
-])
+def _validate_config(name: str, type: object, config: dict):
+    """TODO"""
+
+    try:
+        return type.on_configuration(config or {})
+
+    except v1.schema.SchemaError as exc:
+        if isinstance(type, v1.component.Component):
+            type = "component"
+
+        elif isinstance(type, v1.link.Link):
+            type = "link"
+
+        elif isinstance(type, v1.provider.Interface):
+            type = "bind"
+
+        raise RuntimeError(f"{type} configuration: {name}: {exc}") from exc
 
 
 class Deployment:
@@ -39,14 +46,16 @@ class Deployment:
                  name: str,
                  profile: str,
                  dag: model.DAG,
-                 config: Configuration,
+                 interfaces: dict,
+                 binds: dict,
                  repo: repository.Repository):
         # pylint: disable=R0913
 
         self._name = name
         self._profile = profile
         self._dag = dag
-        self._config = config
+        self._interfaces = interfaces
+        self._binds = binds
         self._repo = repo
 
         self._components: dict[str, v1.component.Component] = {}
@@ -70,8 +79,10 @@ class Deployment:
 
         self._providers = {}
 
-        for name, config in self._config.providers.items():
+        for name in self._profile.providers():
+            config = self._profile.provider(name)["configuration"]
             provider = self._repo.provider(name)(config)
+
             self._providers[name] = provider
 
     def _component(self, name: str) -> v1.component.Component:
@@ -80,20 +91,24 @@ class Deployment:
         if name in self._components:
             return self._components[name]
 
-        config = self._config.components[name]
         component = self._dag.components[name]
+        component_config = self._profile.component(name)["configuration"]
+        component_type = self._repo.component(component.type)
 
-        type = self._repo.component(component.type)
-        bound_interfaces = interfaces.bind_to_component(type,
+        component_config = _validate_config(component.name,
+                                            component_type,
+                                            component_config)
+
+        bound_interfaces = interfaces.bind_to_component(component_type,
                                                         component.name,
                                                         component.labels,
                                                         self._bind_interface)
 
-        component = type(component.name,
-                         component.labels,
-                         component.parameters,
-                         config,
-                         bound_interfaces)
+        component = component_type(component.name,
+                                   component.labels,
+                                   component.parameters,
+                                   component_config,
+                                   bound_interfaces)
 
         self._components[component.name] = component
         return component
@@ -104,27 +119,61 @@ class Deployment:
         if name in self._links:
             return self._links[name]
 
-        config = self._config.links[name]
         link = self._dag.links[name]
+        link_config = self._profile.link(name)["configuration"]
+        link_type = self._repo.link(link.type)
+
+        link_config = _validate_config(link.name,
+                                       link_type,
+                                       link_config)
 
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        type = self._repo.link(link.type)
-        bound_interfaces = interfaces.bind_to_link(type,
+        bound_interfaces = interfaces.bind_to_link(link_type,
                                                    source,
                                                    destination,
                                                    self._bind_interface)
 
-        link = type(link.name,
-                    link.parameters,
-                    config,
-                    bound_interfaces,
-                    source.name,
-                    destination.name)
+        link = link_type(link.name,
+                         link.parameters,
+                         link_config,
+                         bound_interfaces,
+                         source.name,
+                         destination.name)
 
         self._links[link.name] = link
         return link
+
+    def _bind_for(self, interface: type, required: bool, component_name: str) -> (str, dict):
+        """TODO"""
+
+        interface_class = v1.utils.fqcn(interface)
+
+        local_interfaces = self._profile.component(component_name)["interfaces"]
+        local_binds = self._profile.component(component_name)["binds"]
+
+        if interface_class in local_interfaces:
+            bind_name = local_interfaces[interface_class]["bind"]
+
+        else:
+            if interface_class not in self._interfaces:
+                if required:
+                    RuntimeError(f"{interface_class}: interface not bound")
+
+                else:
+                    return (None, None)
+
+            bind_name = self._interfaces[interface_class]
+
+        bind_config = self._binds[bind_name]["configuration"]
+
+        if bind_name in local_binds:
+            local_bind_config = local_binds[bind_name]["configuration"]
+            bind_config = v1.utils.merge_dicts(bind_config, local_bind_config)
+
+        return bind_name, bind_config
+
 
     def _bind_interface(self,
                         interface: type,
@@ -138,54 +187,21 @@ class Deployment:
         if self._providers is None:
             return None
 
-        interface_class = v1.utils.fqcn(interface)
-        override_name = f"{component_name}::{interface_class}"
+        bind_name, bind_config = self._bind_for(interface, required, component_name)
 
-        if override_name in self._config.overrides:
-            bind_name = self._config.overrides[override_name]
-
-        else:
-            interface_binds = self._config.interfaces[interface_class]
-            binds = interface_binds["binds"]
-
-            if not binds:
-                if required:
-                    RuntimeError(f"{interface_class}: interface not bound")
-
-                else:
-                    return None
-
-            if len(binds) == 1:
-                bind_name = binds[0]
-
-            else:
-                if "default" not in interface_binds:
-                    bind_name = binds[0]
-
-                    print(f"WARNING: {component_name}: {interface_class}: multiple binds found" "\n"
-                          f"WARNING: default bind not specified, using {bind_name}")
-
-                else:
-                    bind_name = interface_binds["default"]
+        if not bind_name:
+            return None
 
         bind_type = self._repo.bind(bind_name)
 
         if not issubclass(bind_type, interface):
             raise exceptions.InvalidBind(bind_name, interface_class)
 
+        bind_config = _validate_config(bind_name,
+                                       bind_type,
+                                       bind_config)
+
         provider_name = self._repo.provider_for(bind_name)
-        compound_name = f"{component_name}::{bind_name}"
-
-        if compound_name in self._config.binds:
-            config = self._config.binds[compound_name]
-
-        else:
-            if bind_name in self._config.binds:
-                config = self._config.binds[bind_name]
-
-            else:
-                config = self._repo.bind(bind_name).on_configuration({})
-
         provider = self._providers[provider_name]
 
         bound_interfaces = interfaces.bind_to_component(bind_type,
@@ -193,7 +209,7 @@ class Deployment:
                                                         component_labels,
                                                         self._bind_interface)
 
-        return bind_type(config,
+        return bind_type(bind_config,
                          provider,
                          component_name,
                          component_labels,
@@ -308,123 +324,6 @@ class Deployment:
         return self._dag.dot(self._name)
 
 
-def _provider_config(name: str,
-                     profile: profile.Profile,
-                     repo: repository.Repository) -> dict:
-    """TODO"""
-
-    config = profile.provider(name)
-
-    try:
-        return repo.provider(name).on_configuration(config or {})
-
-    except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"provider configuration: {name}: {exc}") from exc
-
-
-def _bind_config(name: str,
-                 profile: profile.Profile,
-                 repo: repository.Repository) -> dict:
-    """TODO"""
-
-    config = profile.bind(name)
-
-    try:
-        return repo.bind(name).on_configuration(config or {})
-
-    except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"bind configuration: {name}: {exc}") from exc
-
-
-def _component_binds_configs(component: model.Component,
-                             profile: profile.Profile,
-                             repo: repository.Repository) -> dict:
-    """TODO"""
-
-    binds = {}
-
-    for name, bind in profile.component_binds(component.name).items():
-        config = bind["configuration"]
-
-        try:
-            config = repo.bind(name).on_configuration(config or {})
-
-        except v1.schema.SchemaError as exc:
-            raise RuntimeError(f"bind configuration: {component.name}::{name}: {exc}") from exc
-
-        name = f"{component.name}::{name}"
-        binds[name] = config
-
-    return binds
-
-
-def _component_binds_overrides(component: model.Component,
-                               profile: profile.Profile,
-                               repo: repository.Repository) -> dict:
-    # pylint: disable=W0613
-
-    """TODO"""
-
-    bind_overrides = {}
-
-    for name, interface in profile.component_interfaces(component.name).items():
-        name = f"{component.name}::{name}"
-        bind_overrides[name] = interface["bind"]
-
-    return bind_overrides
-
-
-def _component_config(component: model.Component,
-                      profile: profile.Profile,
-                      repo: repository.Repository) -> dict:
-    """TODO"""
-    config = profile.component(component.name)
-
-    try:
-        return repo.component(component.type).on_configuration(config or {})
-
-    except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"component configuration: {component.name}: {exc}") from exc
-
-
-def _link_config(link: model.Link,
-                 profile: profile.Profile,
-                 repo: repository.Repository) -> dict:
-    """TODO"""
-    config = profile.link(link.name)
-
-    try:
-        return repo.link(link.type).on_configuration(config or {})
-
-    except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"link configuration: {link.name}: {exc}") from exc
-
-
-def _load_all_interfaces(providers: dict, repo: repository.Repository) -> dict:
-    """TODO"""
-
-    binds = []
-
-    for provider_name in providers.keys():
-        for bind_name, mapped_provider_name in repo.bind_maps().items():
-            if provider_name == mapped_provider_name:
-                binds.append(bind_name)
-
-    interfaces = {}
-
-    for interface_name, interface_class in repo.interfaces().items():
-        interfaces[interface_name] = {}
-        interface_binds = []
-
-        for bind_name in binds:
-            if issubclass(repo.bind(bind_name), interface_class):
-                interface_binds.append(bind_name)
-
-        interfaces[interface_name]["binds"] = interface_binds
-
-    return interfaces
-
-
 def load(name: str,
          components: [str],
          profile: profile.Profile,
@@ -440,42 +339,14 @@ def load(name: str,
     if components is not None and len(components) == 0:
         raise exceptions.NoComponentsSelected()
 
-    dag = dag.subset(components)
-
-    providers = {
-        provider: _provider_config(provider, profile, repo)
-        for provider in profile.providers()
-    }
-
-    components = {
-        component.name: _component_config(component, profile, repo)
-        for component in dag.components.values()
-    }
-
-    links = {
-        link.name: _link_config(link, profile, repo)
-        for link in dag.links.values()
+    interfaces = {
+        name: profile.interface(name)["bind"] for name in profile.interfaces()
     }
 
     binds = {
-        bind: _bind_config(bind, profile, repo)
-        for bind in profile.binds()
+        name: profile.bind(name) for name in profile.binds()
     }
 
-    overrides = {}
+    dag = dag.subset(components)
 
-    for component in dag.components.values():
-        binds = v1.utils.merge_dicts(binds,  _component_binds_configs(component, profile, repo))
-        overrides = v1.utils.merge_dicts(overrides, _component_binds_overrides(component, profile, repo))
-
-    interfaces = _load_all_interfaces(providers, repo)
-    interfaces = v1.utils.merge_dicts(interfaces, profile.interfaces())
-
-    config = Configuration(providers,
-                           components,
-                           links,
-                           interfaces,
-                           binds,
-                           overrides)
-
-    return Deployment(name, profile.name, dag, config, repo)
+    return Deployment(name, profile, dag, interfaces, binds, repo)

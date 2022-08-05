@@ -25,12 +25,12 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         "components": {
             v1.schema.Optional(str): {
                 "configuration": dict,
-                v1.schema.Optional("binds"): {
+                "binds": {
                     v1.schema.Optional(str): {
                         "configuration": dict
                     }
                 },
-                v1.schema.Optional("interfaces"): {
+                "interfaces": {
                     v1.schema.Optional(str): {
                         "bind": str
                     }
@@ -50,10 +50,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     },
     "interfaces": {
         v1.schema.Optional(str): {
-            v1.schema.Optional("binds"): [
-                v1.schema.Optional(str)
-            ],
-            v1.schema.Optional("default"): v1.schema.Or(str, None)
+            "bind": str
         }
     }
 })
@@ -65,17 +62,6 @@ class Profile:
     def __init__(self, name: str, config: dict[str, object]):
         self.name = name
         self._config = config
-
-    def _component(self, name: str) -> dict:
-        """TODO"""
-
-        dag_config = self._config["dag"]
-        components = dag_config["components"]
-
-        if name not in components:
-            return {}
-
-        return components[name]
 
     def revision(self) -> int:
         """TODO"""
@@ -92,77 +78,39 @@ class Profile:
 
         return self._config["binds"].keys()
 
-    def interfaces(self) -> dict:
+    def interfaces(self) -> [str]:
         """TODO"""
 
-        return self._config["interfaces"]
+        return self._config["interfaces"].keys()
 
     def provider(self, name: str) -> dict:
         """TODO"""
 
-        providers = self._config["providers"]
-
-        if name not in providers:
-            return {}
-
-        return providers[name]["configuration"]
+        return self._config["providers"][name]
 
     def bind(self, name: str) -> dict:
         """TODO"""
 
-        binds = self._config["binds"]
+        return self._config["binds"][name]
 
-        if name not in binds:
-            return {}
-
-        return binds[name]["configuration"]
-
-    def component_interfaces(self, name: str) -> dict:
+    def interface(self, name: str) -> dict:
         """TODO"""
 
-        component = self._component(name)
-
-        if not component:
-            return {}
-
-        if "interfaces" not in component:
-            return {}
-
-        return component["interfaces"]
-
-    def component_binds(self, name: str) -> dict:
-        """TODO"""
-
-        component = self._component(name)
-
-        if not component:
-            return {}
-
-        if "binds" not in component:
-            return {}
-
-        return component["binds"]
+        return self._config["interfaces"][name]
 
     def component(self, name: str) -> dict:
         """TODO"""
 
-        component = self._component(name)
+        dag_config = self._config["dag"]
 
-        if not component:
-            return {}
-
-        return component["configuration"]
+        return dag_config["components"][name]
 
     def link(self, name: str) -> dict:
         """TODO"""
 
         dag_config = self._config["dag"]
-        links = dag_config["links"]
 
-        if name not in links:
-            return {}
-
-        return links[name]["configuration"]
+        return dag_config["links"][name]
 
 
 def _load_configuration(uri: str, repo: repository.Repository) -> dict[str, object]:
@@ -222,27 +170,24 @@ def defaults(providers: [str],
                 provider_binds.append(bind_name)
 
     interfaces = {}
+    binds = {}
 
     for interface_name, interface_class in repo.interfaces().items():
-        interface_binds = []
+        bind = None
 
         for bind_name in provider_binds:
             if issubclass(repo.bind(bind_name), interface_class):
-                interface_binds.append(bind_name)
+                if not bind:
+                    bind = bind_name
 
-        interfaces[interface_name] = {
-            "default": interface_binds[0] if len(interface_binds) > 0 else None,
-            "binds": interface_binds
-        }
+                binds[bind_name] = {
+                    "configuration": repo.bind(bind_name).on_configuration({})
+                }
 
-    binds = {}
-
-    for bind_name in provider_binds:
-        config = repo.bind(bind_name).on_configuration({})
-
-        binds[bind_name] = {
-            "configuration": config
-        }
+        if bind:
+            interfaces[interface_name] = {
+                "bind": bind,
+            }
 
     return {
         "version": "torquetech.dev/v1",
@@ -251,11 +196,15 @@ def defaults(providers: [str],
                 "configuration": repo.provider(name).on_configuration({})
             } for name in providers
         },
+        "binds": binds,
+        "interfaces": interfaces,
         "dag": {
             "revision": dag.revision,
             "components": {
                 component.name: {
-                    "configuration": repo.component(component.type).on_configuration({}) or {}
+                    "configuration": repo.component(component.type).on_configuration({}) or {},
+                    "binds": {},
+                    "interfaces": {}
                 } for component in dag.components.values()
             },
             "links": {
@@ -263,7 +212,5 @@ def defaults(providers: [str],
                     "configuration": repo.link(link.type).on_configuration({}) or {}
                 } for link in dag.links.values()
             }
-        },
-        "binds": binds,
-        "interfaces": interfaces
+        }
     }
