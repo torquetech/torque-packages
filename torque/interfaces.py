@@ -24,14 +24,14 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 def bind_to_component(type: object,
                       name: str,
                       labels: [str],
-                      get_interface: typing.Callable) -> object:
+                      get_bind: typing.Callable) -> object:
     """TODO"""
 
-    interfaces = types.SimpleNamespace()
+    binds = types.SimpleNamespace()
     requirements = type.on_requirements()
 
     if not requirements:
-        return interfaces
+        return binds
 
     requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
 
@@ -42,27 +42,27 @@ def bind_to_component(type: object,
         if not issubclass(r["interface"], v1.provider.Interface):
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        interface = get_interface(r["interface"],
-                                  r["required"],
-                                  name,
-                                  labels)
+        bind = get_bind(r["interface"],
+                        r["required"],
+                        name,
+                        labels)
 
-        setattr(interfaces, r_name, interface)
+        setattr(binds, r_name, bind)
 
-    return interfaces
+    return binds
 
 
 def bind_to_link(type: object,
                  source: model.Component,
                  destination: model.Component,
-                 get_interface: typing.Callable) -> object:
+                 get_bind: typing.Callable) -> object:
     """TODO"""
 
-    interfaces = types.SimpleNamespace()
+    binds = types.SimpleNamespace()
     requirements = type.on_requirements()
 
     if not requirements:
-        return interfaces
+        return binds
 
     requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
 
@@ -73,35 +73,35 @@ def bind_to_link(type: object,
         if r["bind_to"] == "provider":
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        interface = None
+        bind = None
 
         if issubclass(r["interface"], v1.component.Interface):
             if r["bind_to"] == "source":
                 # pylint: disable=W0212
-                interface = source._torque_interface(r["interface"],
-                                                     r["required"])
+                bind = source._torque_interface(r["interface"],
+                                                r["required"])
 
             elif r["bind_to"] == "destination":
                 # pylint: disable=W0212
-                interface = destination._torque_interface(r["interface"],
-                                                          r["required"])
+                bind = destination._torque_interface(r["interface"],
+                                                     r["required"])
 
         elif issubclass(r["interface"], v1.provider.Interface):
             if r["bind_to"] == "source":
-                interface = get_interface(r["interface"],
-                                          r["required"],
-                                          source.name,
-                                          source.labels)
+                bind = get_bind(r["interface"],
+                                r["required"],
+                                source.name,
+                                source.labels)
 
             elif r["bind_to"] == "destination":
-                interface = get_interface(r["interface"],
-                                          r["required"],
-                                          destination.name,
-                                          destination.labels)
+                bind = get_bind(r["interface"],
+                                r["required"],
+                                destination.name,
+                                destination.labels)
 
         else:
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        setattr(interfaces, r_name, interface)
+        setattr(binds, r_name, bind)
 
-    return interfaces
+    return binds
