@@ -549,7 +549,7 @@ def load(path: str) -> Workspace:
             "version": "torquetech.dev/v1",
             "profiles": {},
             "configuration": {
-                "deployments": ".torque/local/deployments.yaml"
+                "deployments": ".torque/deployments.yaml"
             },
             "dag": {
                 "revision": 0,
