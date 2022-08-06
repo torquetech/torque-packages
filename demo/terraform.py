@@ -199,6 +199,12 @@ class Provider(v1.provider.Provider):
                                         cls._CONFIGURATION["defaults"],
                                         configuration)
 
+    @classmethod
+    def on_requirements(cls) -> dict:
+        """TODO"""
+
+        return {}
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
