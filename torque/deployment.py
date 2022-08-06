@@ -178,8 +178,7 @@ class Deployment:
                 if required:
                     raise RuntimeError(f"{interface_class}: interface not bound")
 
-                else:
-                    return (None, None)
+                return None, None
 
             bind_name = self._interfaces[interface_class]
 
@@ -255,8 +254,7 @@ class Deployment:
                 if required:
                     RuntimeError(f"{interface_class}: interface not bound")
 
-                else:
-                    return (None, None)
+                return None, None
 
             bind_name = self._interfaces[interface_class]
 

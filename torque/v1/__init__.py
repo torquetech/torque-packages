@@ -6,6 +6,8 @@
 
 import schema
 
+# pylint: disable=R0401
+
 from . import component
 from . import deployment
 from . import link
