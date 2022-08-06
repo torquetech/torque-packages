@@ -26,7 +26,7 @@ def main() -> int:
     # For 'python -m module' python always puts in current directory
     # as the first path element and that can mess up the whole environment
     # if the current directory has a file or a directory with the same
-    # name as some torque and/or system module. Fix it here util it's
+    # name as some torque and/or system module. Fix it here until it's
     # fixed upstream.
     fix_paths()
 
