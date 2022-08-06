@@ -7,7 +7,6 @@
 import argparse
 import sys
 
-from torque import exceptions
 from torque import workspace
 
 
@@ -16,23 +15,13 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        params = workspace.process_parameters(arguments.params_file, arguments.params)
+    params = workspace.process_parameters(arguments.params_file, arguments.params)
 
-        ws.create_component(arguments.name,
-                            arguments.type,
-                            arguments.labels or [],
-                            params)
-        ws.store()
-
-    except exceptions.ComponentExists as exc:
-        raise RuntimeError(f"{exc}: component exists") from exc
-
-    except exceptions.ComponentTypeNotFound as exc:
-        raise RuntimeError(f"{exc}: component type not found") from exc
-
-    except exceptions.InvalidName as exc:
-        raise RuntimeError(f"{exc}: invalid name") from exc
+    ws.create_component(arguments.name,
+                        arguments.type,
+                        arguments.labels or [],
+                        params)
+    ws.store()
 
 
 def _remove(arguments: argparse.Namespace):
@@ -40,16 +29,8 @@ def _remove(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.remove_component(arguments.name)
-
-        ws.store()
-
-    except exceptions.ComponentNotFound as exc:
-        raise RuntimeError(f"{exc}: component not found") from exc
-
-    except exceptions.ComponentStillConnected as exc:
-        raise RuntimeError(f"{exc}: component still connected") from exc
+    ws.remove_component(arguments.name)
+    ws.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -79,12 +60,8 @@ def _show_type(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        component_type = ws.repo.component(arguments.name)
-        print(f"{arguments.name}: {component_type}", file=sys.stdout)
-
-    except exceptions.ComponentTypeNotFound as exc:
-        raise RuntimeError(f"{exc}: component type not found") from exc
+    component_type = ws.repo.component(arguments.name)
+    print(f"{arguments.name}: {component_type}", file=sys.stdout)
 
 
 def _list_types(arguments: argparse.Namespace):

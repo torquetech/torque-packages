@@ -8,7 +8,6 @@
 import argparse
 import sys
 
-from torque import exceptions
 from torque import workspace
 
 
@@ -17,21 +16,11 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.create_deployment(arguments.name,
-                             arguments.profile,
-                             arguments.labels,
-                             arguments.components)
-        ws.store()
-
-    except exceptions.DeploymentExists as exc:
-        raise RuntimeError(f"{exc}: deployment exists") from exc
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
-
-    except exceptions.ComponentNotFound as exc:
-        raise RuntimeError(f"{exc}: component not found") from exc
+    ws.create_deployment(arguments.name,
+                         arguments.profile,
+                         arguments.labels,
+                         arguments.components)
+    ws.store()
 
 
 def _remove(arguments: argparse.Namespace):
@@ -39,12 +28,8 @@ def _remove(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.remove_deployment(arguments.name)
-        ws.store()
-
-    except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{exc}: deployment not found") from exc
+    ws.remove_deployment(arguments.name)
+    ws.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -72,24 +57,8 @@ def _build(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        deployment = ws.load_deployment(arguments.name)
-        deployment.build(arguments.workers)
-
-    except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{exc}: deployment not found") from exc
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
-
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{exc}: provider not found") from exc
-
-    except exceptions.NoComponentsSelected as exc:
-        raise RuntimeError("no components selected") from exc
-
-    except exceptions.OperationAborted as exc:
-        raise RuntimeError("build aborted") from exc
+    deployment = ws.load_deployment(arguments.name)
+    deployment.build(arguments.workers)
 
 
 def _apply(arguments: argparse.Namespace):
@@ -97,24 +66,8 @@ def _apply(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        deployment = ws.load_deployment(arguments.name)
-        deployment.apply(arguments.workers, arguments.dry_run)
-
-    except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{exc}: deployment not found") from exc
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
-
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{exc}: provider not found") from exc
-
-    except exceptions.NoComponentsSelected as exc:
-        raise RuntimeError("no components selected") from exc
-
-    except exceptions.OperationAborted as exc:
-        raise RuntimeError("apply aborted") from exc
+    deployment = ws.load_deployment(arguments.name)
+    deployment.apply(arguments.workers, arguments.dry_run)
 
 
 def _delete(arguments: argparse.Namespace):
@@ -122,21 +75,8 @@ def _delete(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        deployment = ws.load_deployment(arguments.name)
-        deployment.delete(arguments.dry_run)
-
-    except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{exc}: deployment not found") from exc
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
-
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{exc}: provider not found") from exc
-
-    except exceptions.NoComponentsSelected as exc:
-        raise RuntimeError("no components selected") from exc
+    deployment = ws.load_deployment(arguments.name)
+    deployment.delete(arguments.dry_run)
 
 
 def _dot(arguments: argparse.Namespace):
@@ -144,21 +84,8 @@ def _dot(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        deployment = ws.load_deployment(arguments.name)
-        print(deployment.dot(), file=sys.stdout)
-
-    except exceptions.DeploymentNotFound as exc:
-        raise RuntimeError(f"{exc}: deployment not found") from exc
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
-
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{exc}: provider not found") from exc
-
-    except exceptions.NoComponentsSelected as exc:
-        raise RuntimeError("no components selected") from exc
+    deployment = ws.load_deployment(arguments.name)
+    print(deployment.dot(), file=sys.stdout)
 
 
 def add_arguments(subparsers):

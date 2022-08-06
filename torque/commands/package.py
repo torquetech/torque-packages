@@ -6,7 +6,6 @@
 
 import argparse
 
-from torque import exceptions
 from torque import package
 
 

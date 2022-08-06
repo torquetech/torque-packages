@@ -9,6 +9,7 @@ import os
 import sys
 
 from torque import commands
+from torque import exceptions
 from torque import v1
 
 
@@ -56,6 +57,9 @@ def main() -> int:
         cmds[args.main_cmd].run(args)
 
         return 0
+
+    except exceptions.TorqueException as exc:
+        print(exc, file=sys.stderr)
 
     except RuntimeError as exc:
         print(exc, file=sys.stderr)

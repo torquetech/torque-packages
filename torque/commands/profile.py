@@ -8,9 +8,7 @@ import argparse
 import sys
 import yaml
 
-from torque import exceptions
 from torque import workspace
-from torque import v1
 
 
 def _create(arguments: argparse.Namespace):
@@ -18,12 +16,8 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.create_profile(arguments.name, arguments.uris)
-        ws.store()
-
-    except exceptions.ProfileExists as exc:
-        raise RuntimeError(f"{exc}: profile exists") from exc
+    ws.create_profile(arguments.name, arguments.uris)
+    ws.store()
 
 
 def _remove(arguments: argparse.Namespace):
@@ -31,12 +25,8 @@ def _remove(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.remove_profile(arguments.name)
-        ws.store()
-
-    except exceptions.ProfileNotFound as exc:
-        raise RuntimeError(f"{exc}: profile not found") from exc
+    ws.remove_profile(arguments.name)
+    ws.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -64,19 +54,12 @@ def _defaults(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        defaults = ws.profile_defaults(arguments.provider)
+    defaults = ws.profile_defaults(arguments.provider)
 
-        yaml.safe_dump(defaults,
-                       stream=sys.stdout,
-                       default_flow_style=False,
-                       sort_keys=False)
-
-    except exceptions.ProviderNotFound as exc:
-        raise RuntimeError(f"{exc}: provider not found") from exc
-
-    except v1.schema.SchemaError as exc:
-        raise RuntimeError(f"{exc}: invalid configuration") from exc
+    yaml.safe_dump(defaults,
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def add_arguments(subparsers):

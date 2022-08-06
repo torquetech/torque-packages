@@ -7,7 +7,6 @@
 import argparse
 import sys
 
-from torque import exceptions
 from torque import workspace
 
 
@@ -39,31 +38,15 @@ def _create(arguments: argparse.Namespace):
     else:
         name = arguments.name
 
-    try:
-        params = workspace.process_parameters(arguments.params_file, arguments.params)
+    params = workspace.process_parameters(arguments.params_file, arguments.params)
 
-        ws.create_link(name,
-                       arguments.type,
-                       params,
-                       arguments.source,
-                       arguments.destination)
+    ws.create_link(name,
+                   arguments.type,
+                   params,
+                   arguments.source,
+                   arguments.destination)
 
-        ws.store()
-
-    except exceptions.LinkExists as exc:
-        raise RuntimeError(f"{exc}: link exists") from exc
-
-    except exceptions.ComponentNotFound as exc:
-        raise RuntimeError(f"{exc}: component not found") from exc
-
-    except exceptions.LinkTypeNotFound as exc:
-        raise RuntimeError(f"{exc}: link type not found") from exc
-
-    except exceptions.CycleDetected as exc:
-        raise RuntimeError("cycle detected") from exc
-
-    except exceptions.InvalidName as exc:
-        raise RuntimeError(f"{exc}: invalid name") from exc
+    ws.store()
 
 
 def _remove(arguments: argparse.Namespace):
@@ -71,12 +54,8 @@ def _remove(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        ws.remove_link(arguments.name)
-        ws.store()
-
-    except exceptions.LinkNotFound as exc:
-        raise RuntimeError(f"{exc}: link not found") from exc
+    ws.remove_link(arguments.name)
+    ws.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -106,12 +85,8 @@ def _show_type(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    try:
-        link_type = ws.repo.link(arguments.name)
-        print(f"{arguments.name}: {link_type}", file=sys.stdout)
-
-    except exceptions.LinkTypeNotFound as exc:
-        raise RuntimeError(f"{exc}: link type not found") from exc
+    link_type = ws.repo.link(arguments.name)
+    print(f"{arguments.name}: {link_type}", file=sys.stdout)
 
 
 def _list_types(arguments: argparse.Namespace):
