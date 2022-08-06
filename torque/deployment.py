@@ -166,6 +166,9 @@ class Deployment:
 
             bind_name = self._interfaces[interface_class]
 
+        if bind_name not in self._binds:
+            raise RuntimeError(f"{bind_name}: bind not configured")
+
         bind_config = self._binds[bind_name]["configuration"]
 
         if bind_name in local_binds:
