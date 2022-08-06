@@ -67,7 +67,7 @@ def add_arguments(subparsers):
     subparsers.add_parser("list", help="list installed packages")
 
 
-def run(arguments: argparse.Namespace):
+def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     """TODO"""
 
     cmds = {

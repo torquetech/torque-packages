@@ -30,6 +30,18 @@ def main() -> int:
     # fixed upstream.
     fix_paths()
 
+    argv = sys.argv[1:]
+    unparsed_argv = []
+
+    try:
+        n = argv.index("--")
+
+        unparsed_argv = argv[n+1:]
+        argv = argv[:n]
+
+    except ValueError:
+            pass
+
     # pylint: disable=W0703
     try:
         parser = argparse.ArgumentParser(prog="torque", description="torque command line interface.")
@@ -52,9 +64,9 @@ def main() -> int:
         for cmd in cmds.values():
             cmd.add_arguments(subparsers)
 
-        args = parser.parse_args()
+        args = parser.parse_args(argv)
 
-        cmds[args.main_cmd].run(args)
+        cmds[args.main_cmd].run(args, unparsed_argv)
 
         return 0
 

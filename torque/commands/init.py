@@ -14,5 +14,5 @@ def add_arguments(subparsers):
 
 
 # pylint: disable=W0613
-def run(arguments: Namespace):
+def run(arguments: Namespace, unparsed_argv: [str]):
     """TODO"""

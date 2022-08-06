@@ -87,7 +87,7 @@ def add_arguments(subparsers):
     defaults_parser.add_argument("provider", nargs="+", help="provider name")
 
 
-def run(arguments: argparse.Namespace):
+def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     """TODO"""
 
     cmds = {

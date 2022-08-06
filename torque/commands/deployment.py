@@ -135,7 +135,7 @@ def add_arguments(subparsers):
     dot_parser.add_argument("name", help="deployment name")
 
 
-def run(arguments: argparse.Namespace):
+def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     """TODO"""
 
     cmds = {
