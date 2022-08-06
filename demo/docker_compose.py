@@ -603,6 +603,9 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=False)
 
+    def on_command(self, deployment: v1.deployment.Deployment, argv: [str]):
+        """TODO"""
+
     def add_volume(self, name: str):
         """TODO"""
 
