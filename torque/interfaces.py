@@ -21,10 +21,10 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 })
 
 
-def bind_to_component(type: object,
-                      name: str,
-                      labels: [str],
-                      get_bind: typing.Callable) -> object:
+def _bind_to(type: object,
+             name: str,
+             labels: [str],
+             get_bind: typing.Callable) -> object:
     """TODO"""
 
     binds = types.SimpleNamespace()
@@ -50,6 +50,24 @@ def bind_to_component(type: object,
         setattr(binds, r_name, bind)
 
     return binds
+
+
+def bind_to_provider(type: object,
+                     name: str,
+                     labels: [str],
+                     get_bind: typing.Callable) -> object:
+    """TODO"""
+
+    return _bind_to(type, name, labels, get_bind)
+
+
+def bind_to_component(type: object,
+                      name: str,
+                      labels: [str],
+                      get_bind: typing.Callable) -> object:
+    """TODO"""
+
+    return _bind_to(type, name, labels, get_bind)
 
 
 def bind_to_link(type: object,

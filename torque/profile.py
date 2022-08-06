@@ -17,7 +17,18 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
     "providers": {
         v1.schema.Optional(str): {
-            "configuration": dict
+            "labels": [str],
+            "configuration": dict,
+            "binds": {
+                v1.schema.Optional(str): {
+                    "configuration": dict
+                }
+            },
+            "interfaces": {
+                v1.schema.Optional(str): {
+                    "bind": str
+                }
+            }
         }
     },
     "dag": {
@@ -193,7 +204,10 @@ def defaults(providers: [str],
         "version": "torquetech.dev/v1",
         "providers": {
             name: {
-                "configuration": repo.provider(name).on_configuration({})
+                "labels": [],
+                "configuration": repo.provider(name).on_configuration({}),
+                "binds": {},
+                "interfaces": {}
             } for name in providers
         },
         "binds": binds,

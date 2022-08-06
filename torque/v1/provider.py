@@ -11,14 +11,23 @@ from . import utils
 class Provider:
     """TODO"""
 
-    def __init__(self, configuration: object):
+    def __init__(self,
+                 configuration: object,
+                 binds: object):
         self.configuration = configuration
+        self.binds = binds
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
+
+    @classmethod
+    def on_requirements(cls) -> object:
+        """TODO"""
+
+        raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
     def on_apply(self, deployment: deployment.Deployment):
         """TODO"""
