@@ -39,6 +39,11 @@ class Provider:
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
 
+    def on_command(self, deployment: deployment.Deployment, argv: [str]):
+        """TODO"""
+
+        raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")
+
 
 class Interface:
     """TODO"""

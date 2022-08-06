@@ -413,6 +413,19 @@ class Deployment:
         for provider in reversed(self._providers.values()):
             provider.on_delete(deployment)
 
+    def command(self, provider: str, dry_run: bool, argv: [str]):
+        """TODO"""
+
+        self._setup_providers()
+
+        path = self._create_path()
+        deployment = v1.deployment.Deployment(self._name,
+                                              self._profile,
+                                              dry_run,
+                                              path)
+
+        self._providers[provider].on_command(deployment, argv)
+
     def dot(self) -> str:
         """TODO"""
 
