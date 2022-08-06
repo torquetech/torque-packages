@@ -158,7 +158,7 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _bind_for_provider(self,
+    def _get_provider_bind(self,
                            interface: type,
                            required: bool,
                            provider_name: str) -> (str, dict):
@@ -206,7 +206,7 @@ class Deployment:
         if self._providers is None:
             return None
 
-        bind_name, bind_config = self._bind_for_provider(interface,
+        bind_name, bind_config = self._get_provider_bind(interface,
                                                          required,
                                                          provider_name)
 
@@ -235,7 +235,7 @@ class Deployment:
                          provider_labels,
                          bound_interfaces)
 
-    def _bind_for_component(self,
+    def _get_component_bind(self,
                             interface: type,
                             required: bool,
                             component_name: str) -> (str, dict):
@@ -283,7 +283,7 @@ class Deployment:
         if self._providers is None:
             return None
 
-        bind_name, bind_config = self._bind_for_component(interface,
+        bind_name, bind_config = self._get_component_bind(interface,
                                                           required,
                                                           component_name)
 
