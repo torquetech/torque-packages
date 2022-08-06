@@ -211,7 +211,6 @@ class Deployment:
 
         return bind_type(bind_config,
                          provider,
-                         component_name,
                          component_labels,
                          bound_interfaces)
 

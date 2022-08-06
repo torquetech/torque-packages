@@ -37,12 +37,10 @@ class Interface:
     def __init__(self,
                  configuration: object,
                  provider: Provider,
-                 name: str,
                  labels: [str],
                  binds: object):
         self.configuration = configuration
         self.provider = provider
-        self.name = name
         self.labels = labels
         self.binds = binds
 
