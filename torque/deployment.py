@@ -215,7 +215,7 @@ class Deployment:
         bind_type = self._repo.bind(bind_name)
 
         if not issubclass(bind_type, interface):
-            raise exceptions.InvalidBind(bind_name, interface_class)
+            raise exceptions.InvalidBind(bind_name, v1.utils.fqcn(interface))
 
         bind_config = _validate_config(bind_name,
                                        bind_type,
@@ -291,7 +291,7 @@ class Deployment:
         bind_type = self._repo.bind(bind_name)
 
         if not issubclass(bind_type, interface):
-            raise exceptions.InvalidBind(bind_name, interface_class)
+            raise exceptions.InvalidBind(bind_name, v1.utils.fqcn(interface))
 
         bind_config = _validate_config(bind_name,
                                        bind_type,
