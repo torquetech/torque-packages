@@ -252,7 +252,7 @@ class Deployment:
         else:
             if interface_class not in self._interfaces:
                 if required:
-                    RuntimeError(f"{interface_class}: interface not bound")
+                    raise RuntimeError(f"{interface_class}: interface not bound")
 
                 return None, None
 

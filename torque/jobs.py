@@ -5,7 +5,9 @@
 """TODO"""
 
 import threading
+import traceback
 import typing
+import sys
 
 from torque import exceptions
 
@@ -115,11 +117,23 @@ class Runner:
                     if len(self._jobs) == 0:
                         self._quit()
 
-            except BaseException:
-                self._exception = True
+            except exceptions.TorqueException as exc:
+                print(exc, file=sys.stderr)
 
+                self._exception = True
                 self._abort()
-                raise
+
+            except RuntimeError as exc:
+                print(exc, file=sys.stderr)
+
+                self._exception = True
+                self._abort()
+
+            except BaseException as exc:
+                traceback.print_exc()
+
+                self._exception = True
+                self._abort()
 
     def execute(self, jobs: [Job]):
         """TODO"""

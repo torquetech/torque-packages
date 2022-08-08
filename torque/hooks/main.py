@@ -70,6 +70,9 @@ def main() -> int:
 
         return 0
 
+    except exceptions.OperationAborted:
+        pass
+
     except exceptions.TorqueException as exc:
         print(exc, file=sys.stderr)
 

@@ -81,11 +81,7 @@ def install_deps():
         "--upgrade"
     ]
 
-    try:
-        subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
-
-    except subprocess.CalledProcessError as exc:
-        raise exceptions.ExecuteFailed("pip") from exc
+    subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
 
 
 def install_package(uri: str):
@@ -115,11 +111,7 @@ def install_package(uri: str):
         uri
     ]
 
-    try:
-        subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
-
-    except subprocess.CalledProcessError as exc:
-        raise exceptions.ExecuteFailed("pip") from exc
+    subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
 
 
 def remove_package(name: str):
