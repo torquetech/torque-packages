@@ -6,6 +6,7 @@
 
 import json
 import os
+import pathlib
 import re
 import subprocess
 import sys
@@ -13,10 +14,58 @@ import sys
 from importlib import metadata
 
 from torque import exceptions
-from torque import v1
 
 
 _URI = r"^[^:]+://"
+_TORQUE_CWD = None
+_TORQUE_ROOT = None
+
+
+def torque_cwd() -> str:
+    # pylint: disable=W0603
+
+    """TODO"""
+
+    global _TORQUE_CWD
+
+    if _TORQUE_CWD:
+        return _TORQUE_CWD
+
+    _TORQUE_CWD = os.getenv("PWD", os.getcwd())
+
+    return _TORQUE_CWD
+
+
+def torque_root() -> str:
+    # pylint: disable=W0603
+
+    """TODO"""
+
+    global _TORQUE_ROOT
+
+    if _TORQUE_ROOT:
+        return _TORQUE_ROOT
+
+    cwd = pathlib.Path(torque_cwd())
+
+    while True:
+        if os.path.isdir(f"{cwd}/.torque"):
+            break
+
+        if cwd.parent == cwd:
+            raise RuntimeError("workspace root not found!")
+
+        cwd = cwd.parent
+
+    _TORQUE_ROOT = str(cwd)
+
+    return _TORQUE_ROOT
+
+
+def torque_dir() -> str:
+    """TODO"""
+
+    return f"{torque_root()}/.torque"
 
 
 def package_dist(path: str):
@@ -30,11 +79,11 @@ def installed_packages():
 
     packages = {}
 
-    for entry in os.listdir(f"{v1.utils.torque_dir()}/system"):
+    for entry in os.listdir(f"{torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        path = f"{v1.utils.torque_dir()}/system/{entry}"
+        path = f"{torque_dir()}/system/{entry}"
         dist = package_dist(path)
 
         with open(f"{path}/direct_url.json", encoding="utf-8") as f:
@@ -61,13 +110,13 @@ def install_deps():
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(f"{v1.utils.torque_dir()}/requirements.txt"):
-        with open(f"{v1.utils.torque_dir()}/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{torque_dir()}/requirements.txt"):
+        with open(f"{torque_dir()}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(f"{v1.utils.torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
@@ -81,7 +130,7 @@ def install_deps():
         "--upgrade"
     ]
 
-    subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
+    subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
 
 
 def install_package(uri: str):
@@ -89,7 +138,7 @@ def install_package(uri: str):
 
     if re.match(_URI, uri) is None and os.path.exists(uri):
         if not os.path.isabs(uri):
-            uri = os.path.join(v1.utils.torque_cwd(), uri)
+            uri = os.path.join(torque_cwd(), uri)
             uri = os.path.normpath(uri)
 
     env = os.environ | {
@@ -111,7 +160,7 @@ def install_package(uri: str):
         uri
     ]
 
-    subprocess.run(cmd, cwd=v1.utils.torque_root(), env=env, check=True)
+    subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
 
 
 def remove_package(name: str):
@@ -130,7 +179,7 @@ def remove_package(name: str):
             files.add(os.path.join(*file.parts[:i+1]))
 
     for file in sorted(files, reverse=True):
-        path = f"{v1.utils.torque_dir()}/system/{file}"
+        path = f"{torque_dir()}/system/{file}"
 
         try:
             if os.path.isdir(path):
