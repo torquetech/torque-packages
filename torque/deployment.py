@@ -61,6 +61,7 @@ class Deployment:
         self._components: dict[str, v1.component.Component] = {}
         self._links: dict[str, v1.link.Link] = {}
         self._providers: dict[str, v1.provider.Provider] = None
+        self._deployment = None
 
         self._lock = threading.Lock()
 
@@ -232,7 +233,8 @@ class Deployment:
         return bind_type(bind_config,
                          bind_provider,
                          provider_labels,
-                         bound_interfaces)
+                         bound_interfaces,
+                         self._deployment)
 
     def _get_component_bind(self,
                             interface: type,
@@ -308,7 +310,8 @@ class Deployment:
         return bind_type(bind_config,
                          bind_provider,
                          component_labels,
-                         bound_interfaces)
+                         bound_interfaces,
+                         self._deployment)
 
     def _execute(self, workers: int, callback: typing.Callable):
         """TODO"""
@@ -342,10 +345,10 @@ class Deployment:
         """TODO"""
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name,
-                                              self._profile,
-                                              False,
-                                              path)
+        self._deployment = v1.deployment.Deployment(self._name,
+                                                    self._profile,
+                                                    False,
+                                                    path)
 
         def _on_build(type: str, name: str):
             """TODO"""
@@ -362,7 +365,7 @@ class Deployment:
                 else:
                     assert False
 
-            instance.on_build(deployment)
+            instance.on_build(self._deployment)
 
         self._execute(workers, _on_build)
 
@@ -372,10 +375,10 @@ class Deployment:
         self._setup_providers()
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name,
-                                              self._profile,
-                                              dry_run,
-                                              path)
+        self._deployment = v1.deployment.Deployment(self._name,
+                                                    self._profile,
+                                                    dry_run,
+                                                    path)
 
         def _on_apply(type: str, name: str):
             """TODO"""
@@ -392,12 +395,12 @@ class Deployment:
                 else:
                     assert False
 
-            instance.on_apply(deployment)
+            instance.on_apply(self._deployment)
 
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
-            provider.on_apply(deployment)
+            provider.on_apply(self._deployment)
 
     def delete(self, dry_run: bool):
         """TODO"""
@@ -405,13 +408,13 @@ class Deployment:
         self._setup_providers()
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name,
-                                              self._profile,
-                                              dry_run,
-                                              path)
+        self._deployment = v1.deployment.Deployment(self._name,
+                                                    self._profile,
+                                                    dry_run,
+                                                    path)
 
         for provider in reversed(self._providers.values()):
-            provider.on_delete(deployment)
+            provider.on_delete(self._deployment)
 
     def command(self, provider: str, dry_run: bool, argv: [str]):
         """TODO"""
@@ -419,12 +422,12 @@ class Deployment:
         self._setup_providers()
 
         path = self._create_path()
-        deployment = v1.deployment.Deployment(self._name,
-                                              self._profile,
-                                              dry_run,
-                                              path)
+        self._deployment = v1.deployment.Deployment(self._name,
+                                                    self._profile,
+                                                    dry_run,
+                                                    path)
 
-        self._providers[provider].on_command(deployment, argv)
+        self._providers[provider].on_command(self._deployment, argv)
 
     def dot(self) -> str:
         """TODO"""

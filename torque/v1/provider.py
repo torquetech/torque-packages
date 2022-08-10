@@ -52,11 +52,13 @@ class Interface:
                  configuration: object,
                  provider: Provider,
                  labels: [str],
-                 binds: object):
+                 binds: object,
+                 deployment: deployment.Deployment):
         self.configuration = configuration
         self.provider = provider
         self.labels = labels
         self.binds = binds
+        self.deployment = deployment
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
