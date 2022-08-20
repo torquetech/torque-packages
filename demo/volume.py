@@ -63,12 +63,12 @@ class Link(v1.link.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment):
+    def on_build(self, context: v1.deployment.Context):
         """TODO"""
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.interfaces.dst.add(self.source,
-                                self.parameters["mount_point"],
-                                self.interfaces.src.link())
+        self.binds.dst.add(self.source,
+                           self.parameters["mount_point"],
+                           self.binds.src.link())

@@ -106,10 +106,10 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment):
+    def on_build(self, context: v1.deployment.Context):
         """TODO"""
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
         self._service_link = self.binds.services.create(self.name, "tcp", 9092, 9092)
@@ -153,7 +153,7 @@ class DataLink(volume.Link):
             },
         }
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
         self.binds.dst.add(self.source,
@@ -213,10 +213,10 @@ class ZookeeperLink(v1.link.Link):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, deployment: v1.deployment.Deployment):
+    def on_build(self, context: v1.deployment.Context):
         """TODO"""
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
         self.binds.kafka.zookeeper(self.binds.zk.link())

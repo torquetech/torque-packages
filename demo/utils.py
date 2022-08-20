@@ -30,4 +30,7 @@ def generate_password() -> str:
 def normalize(name: str) -> str:
     """TODO"""
 
-    return name.replace("_", "-")
+    name = name.replace("_", "-")
+    name = name.replace(".", "-")
+
+    return name

@@ -73,10 +73,10 @@ class Link(network.Link):
 
         self.binds.mod.add_requirements(["psycopg"])
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        super().on_apply(deployment)
+        super().on_apply(context)
 
         source = self.source.upper()
         secret = self.binds.pg.admin()

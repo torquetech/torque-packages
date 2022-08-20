@@ -29,6 +29,7 @@ class _Block:
 
         return f"{self._name} {args}"
 
+
 class _Key:
     """TODO"""
 
@@ -144,6 +145,9 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
     def create(self, name: str, size: int) -> v1.utils.Future[str]:
         """TODO"""
 
+        name = f"{self.context.deployment_name}.{name}"
+        name = name.replace(".", "-")
+
         self.provider.add_target(_Block("resource", "aws_ebs_volume", name), {
             _Key("availability_zone"): _Str(self.configuration["zone"]),
             _Key("type"): _Str(self.configuration["type"]),
@@ -237,13 +241,13 @@ class Provider(v1.provider.Provider):
             _Key("region"): _Str(config["region"])
         }
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
-        with open(f"{deployment.path}/main.tf", "w", encoding="utf8") as file:
+        with open(f"{context.path()}/main.tf", "w", encoding="utf8") as file:
             file.write(_to_tf(self._targets, 0))
 
-        if deployment.dry_run:
+        if dry_run:
             for future in self._futures:
                 future(None)
 
@@ -256,7 +260,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=deployment.path,
+                       cwd=context.path(),
                        check=True)
 
         cmd = [
@@ -267,7 +271,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=deployment.path,
+                       cwd=context.path(),
                        check=True)
 
         cmd = [
@@ -278,7 +282,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         p = subprocess.run(cmd,
                            env=os.environ,
-                           cwd=deployment.path,
+                           cwd=context.path(),
                            check=True,
                            capture_output=True)
 
@@ -287,10 +291,10 @@ class Provider(v1.provider.Provider):
         for future in self._futures:
             future(state)
 
-    def on_delete(self, deployment: v1.deployment.Deployment):
+    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
-        if deployment.dry_run:
+        if dry_run:
             return
 
         cmd = [
@@ -299,9 +303,9 @@ class Provider(v1.provider.Provider):
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=False)
+        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=False)
 
-    def on_command(self, deployment: v1.deployment.Deployment, argv: [str]):
+    def on_command(self, context: v1.deployment.Context, argv: [str]):
         """TODO"""
 
     def add_target(self, key: object, value: object):

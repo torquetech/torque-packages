@@ -583,7 +583,7 @@ class Provider(v1.provider.Provider):
 
         self._lock = threading.Lock()
 
-    def _push_images(self, deployment: v1.deployment.Deployment):
+    def _push_images(self, context: v1.deployment.Context):
         """TODO"""
 
         cmd = [
@@ -594,7 +594,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=deployment.path,
+                       cwd=context.path(),
                        check=True)
 
         ns = self.namespace()
@@ -611,7 +611,7 @@ class Provider(v1.provider.Provider):
                 print(f"+ {' '.join(cmd)}")
                 subprocess.run(cmd,
                                env=os.environ,
-                               cwd=deployment.path,
+                               cwd=context.path(),
                                check=True)
 
             cmd = [
@@ -622,13 +622,13 @@ class Provider(v1.provider.Provider):
             print(f"+ {' '.join(cmd)}")
             subprocess.run(cmd,
                            env=os.environ,
-                           cwd=deployment.path,
+                           cwd=context.path(),
                            check=True)
 
-    def _apply_targets(self, deployment: v1.deployment.Deployment):
+    def _apply_targets(self, context: v1.deployment.Context):
         """TODO"""
 
-        target_path = f"{deployment.path}/helm"
+        target_path = f"{context.path()}/helm"
 
         try:
             shutil.rmtree(target_path)
@@ -642,7 +642,7 @@ class Provider(v1.provider.Provider):
 
         chart = {
             "apiVersion": "v2",
-            "name": utils.normalize(deployment.name),
+            "name": utils.normalize(context.deployment_name),
             "type": "application",
             "version": "0.1.0",
             "appVersion": "1.16.0"
@@ -659,7 +659,7 @@ class Provider(v1.provider.Provider):
         with open(f"{target_path}/Chart.yaml", "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(chart, sort_keys=False))
 
-    def _print_info(self, deployment: v1.deployment.Deployment):
+    def _print_info(self, context: v1.deployment.Context):
         """TODO"""
 
         if not self._load_balancer:
@@ -677,10 +677,10 @@ class Provider(v1.provider.Provider):
 
             print(f"+ {' '.join(cmd)}")
             p = subprocess.run(cmd,
-                           env=os.environ,
-                           cwd=deployment.path,
-                           check=True,
-                           capture_output=True)
+                               env=os.environ,
+                               cwd=context.path(),
+                               check=True,
+                               capture_output=True)
 
             ingress_ctrl = json.loads(p.stdout.decode("utf8"))
 
@@ -706,43 +706,44 @@ class Provider(v1.provider.Provider):
 
         print("\n" f"Load balancer: http://{lb_host}")
 
-    def on_apply(self, deployment: v1.deployment.Deployment):
+    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
-        self._apply_targets(deployment)
+        self._apply_targets(context)
 
-        if deployment.dry_run:
+        if dry_run:
             return
 
-        self._push_images(deployment)
+        self._push_images(context)
 
         cmd = [
             "helm", "upgrade",
-            "-i", utils.normalize(deployment.name), "helm",
+            "-i", utils.normalize(context.deployment_name), "helm",
             "--debug"
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=True)
+        print(context.path())
+        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=True)
 
-        self._print_info(deployment)
+        self._print_info(context)
 
-    def on_delete(self, deployment: v1.deployment.Deployment):
+    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
-        if deployment.dry_run:
+        if dry_run:
             return
 
         cmd = [
             "helm", "uninstall",
-            utils.normalize(deployment.name),
+            utils.normalize(context.deployment_name),
             "--debug"
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=deployment.path, check=False)
+        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=False)
 
-    def on_command(self, deployment: v1.deployment.Deployment, argv: [str]):
+    def on_command(self, context: v1.deployment.Context, argv: [str]):
         """TODO"""
 
     def namespace(self) -> str:
