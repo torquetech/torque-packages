@@ -23,12 +23,10 @@ class Component(v1.component.Component):
 
     _CONFIGURATION = {
         "defaults": {
-            "version": "14.2",
-            "password": None
+            "version": "14.2"
         },
         "schema": {
-            "version": str,
-            "password": str
+            "version": str
         }
     }
 
@@ -44,12 +42,8 @@ class Component(v1.component.Component):
     def on_configuration(cls, configuration: dict) -> dict:
         """TODO"""
 
-        defaults = v1.utils.merge_dicts(cls._CONFIGURATION["defaults"], {
-            "password": utils.generate_password()
-        })
-
         return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        defaults,
+                                        cls._CONFIGURATION["defaults"],
                                         configuration)
 
     @classmethod
@@ -126,9 +120,11 @@ class Component(v1.component.Component):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
+        password = context.secret(f"{self.name}.postgres-password")
+
         self._secret_link = self.binds.secrets.create(f"{self.name}_admin", [
             types.KeyValue("user", "postgres"),
-            types.KeyValue("password", self.configuration["password"])
+            types.KeyValue("password", password)
         ])
 
         self._service_link = self.binds.services.create(self.name, "tcp", 5432, 5432)

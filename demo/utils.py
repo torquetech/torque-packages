@@ -5,7 +5,6 @@
 """TODO"""
 
 import os
-import secrets
 
 
 def load_file(name: str) -> str:
@@ -19,12 +18,6 @@ def module_path() -> str:
     """TODO"""
 
     return os.path.dirname(__file__)
-
-
-def generate_password() -> str:
-    """TODO"""
-
-    return secrets.token_urlsafe(16)
 
 
 def normalize(name: str) -> str:
