@@ -280,7 +280,8 @@ class DAG:
         graph = pydot.Dot(name, graph_type="digraph")
 
         for component in self.components.values():
-            node = pydot.Node(component.name)
+            short_name = component.name.split(".")[0]
+            node = pydot.Node(component.name, label=short_name)
             graph.add_node(node)
 
         for link in self.links.values():

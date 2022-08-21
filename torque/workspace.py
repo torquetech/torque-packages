@@ -6,6 +6,7 @@
 
 import os
 import re
+import secrets
 import sys
 
 import yaml
@@ -356,6 +357,69 @@ class Workspace:
 
         return profile.defaults(provider, self.dag, self.repo)
 
+    def _process_names(self, names: list) -> dict[str, [str]]:
+        """TODO"""
+
+        names = [n.split(".") for n in names]
+        processed = {}
+
+        for n, r in names:
+            if n in processed:
+                processed[n].append(r)
+
+            else:
+                processed[n] = [r]
+
+        return processed
+
+    def _get_full_component_name(self, name: str) -> str:
+        """TODO"""
+
+        if '.' in name:
+            return name
+
+        processed = self._process_names(self.dag.components.keys())
+
+        if name not in processed:
+            raise exceptions.ComponentNotFound(name)
+
+        if len(processed[name]) != 1:
+            raise RuntimeError(f"{name}: ambigous component name")
+
+        return f"{name}.{processed[name][0]}"
+
+    def _get_full_link_name(self, name: str) -> str:
+        """TODO"""
+
+        if '.' in name:
+            return name
+
+        processed = self._process_names(self.dag.links.keys())
+
+        if name not in processed:
+            raise exceptions.LinkNotFound(name)
+
+        if len(processed[name]) != 1:
+            raise RuntimeError(f"{name}: ambigous link name")
+
+        return f"{name}.{processed[name][0]}"
+
+    def _get_full_deployment_name(self, name: str) -> str:
+        """TODO"""
+
+        if '.' in name:
+            return name
+
+        processed = self._process_names(self.deployments.keys())
+
+        if name not in processed:
+            raise exceptions.DeploymentNotFound(name)
+
+        if len(processed[name]) != 1:
+            raise RuntimeError(f"{name}: ambigous deployment name")
+
+        return f"{name}.{processed[name][0]}"
+
     def create_deployment(self,
                           name: str,
                           profile: str,
@@ -365,6 +429,8 @@ class Workspace:
 
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
+
+        name = f"{name}.{secrets.token_hex(4)}"
 
         if name in self.deployments:
             raise exceptions.DeploymentExists(name)
@@ -384,6 +450,8 @@ class Workspace:
     def remove_deployment(self, name: str) -> Deployment:
         """TODO"""
 
+        name = self._get_full_deployment_name(name)
+
         if name not in self.deployments:
             raise exceptions.DeploymentNotFound(name)
 
@@ -391,6 +459,8 @@ class Workspace:
 
     def load_deployment(self, name: str) -> deployment.Deployment:
         """TODO"""
+
+        name = self._get_full_deployment_name(name)
 
         if name not in self.deployments:
             raise exceptions.DeploymentNotFound(name)
@@ -413,6 +483,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
+        name = f"{name}.{secrets.token_hex(4)}"
         component_type = self.repo.component(type)
 
         try:
@@ -433,6 +504,7 @@ class Workspace:
     def remove_component(self, name: str) -> model.Component:
         """TODO"""
 
+        name = self._get_full_component_name(name)
         component = self.dag.remove_component(name)
 
         instance = self._component(component)
@@ -455,6 +527,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
+        name = f"{name}.{secrets.token_hex(4)}"
         link_type = self.repo.link(type)
 
         try:
@@ -462,6 +535,9 @@ class Workspace:
 
         except v1.schema.SchemaError as exc:
             raise RuntimeError(f"link parameters: {name}: {exc}") from exc
+
+        source = self._get_full_component_name(source)
+        destination = self._get_full_component_name(destination)
 
         link = self.dag.create_link(name, type, source, destination, params)
 
@@ -480,6 +556,7 @@ class Workspace:
     def remove_link(self, name: str) -> model.Link:
         """TODO"""
 
+        name = self._get_full_link_name(name)
         link = self.dag.remove_link(name)
 
         source = self._component(self.dag.components[link.source])

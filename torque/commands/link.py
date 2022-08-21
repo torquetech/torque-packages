@@ -10,22 +10,6 @@ import sys
 from torque import workspace
 
 
-def _generate_unique_name(names: set[str], name: str) -> str:
-    """TODO"""
-
-    if name in names:
-        i = 1
-        new_name = f"{name}_{i}"
-
-        while new_name in names:
-            new_name = f"{name}_{i}"
-            i += 1
-
-        name = new_name
-
-    return name
-
-
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
@@ -33,10 +17,6 @@ def _create(arguments: argparse.Namespace):
 
     if not arguments.name:
         name = f"{arguments.source}_{arguments.destination}"
-        name = _generate_unique_name(set(ws.dag.links.keys()), name)
-
-    else:
-        name = arguments.name
 
     params = workspace.process_parameters(arguments.params_file, arguments.params)
 
