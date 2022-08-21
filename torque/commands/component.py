@@ -83,9 +83,17 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="component_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create component")
-    create_parser.add_argument("--params-file", help="parameters file")
-    create_parser.add_argument("--param", "-p", action="append", dest="params", help="component param")
-    create_parser.add_argument("--label", action="append", dest="labels", help="component label")
+    create_parser.add_argument("--params-file", help="component parameters file")
+    create_parser.add_argument("--param", "-p",
+                               action="append",
+                               metavar="NAME=VALUE",
+                               dest="params",
+                               help="component parameter")
+    create_parser.add_argument("--label",
+                               action="append",
+                               metavar="LABEL",
+                               dest="labels",
+                               help="component label")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 
@@ -104,6 +112,8 @@ def add_arguments(subparsers):
 
 
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
+    # pylint: disable=W0613
+
     """TODO"""
 
     cmds = {

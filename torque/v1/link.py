@@ -13,8 +13,8 @@ class Link:
 
     def __init__(self,
                  name: str,
-                 parameters: dict,
-                 configuration: dict,
+                 parameters: dict[str, object],
+                 configuration: dict[str, object],
                  binds: object,
                  source: str,
                  destination: str):
@@ -28,19 +28,19 @@ class Link:
         self.destination = destination
 
     @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
+    def on_parameters(cls, parameters: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
 
     @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
+    def on_configuration(cls, configuration: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
     @classmethod
-    def on_requirements(cls) -> dict:
+    def on_requirements(cls) -> dict[str, object]:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")

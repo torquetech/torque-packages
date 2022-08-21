@@ -48,7 +48,7 @@ class CycleDetected(TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
-        return f"cycle detected, can't continue"
+        return "cycle detected, can't continue"
 
 
 class ComponentsNotConnected(TorqueException):

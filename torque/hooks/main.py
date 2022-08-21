@@ -40,7 +40,7 @@ def main() -> int:
         argv = argv[:n]
 
     except ValueError:
-            pass
+        pass
 
     # pylint: disable=W0703
     try:

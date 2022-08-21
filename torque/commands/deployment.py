@@ -101,11 +101,22 @@ def add_arguments(subparsers):
     """TODO"""
 
     parser = subparsers.add_parser("deployment", help="deployment management")
-    subparsers = parser.add_subparsers(required=True, dest="deployment_cmd", metavar="command")
+
+    subparsers = parser.add_subparsers(required=True,
+                                       dest="deployment_cmd",
+                                       metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create deployment")
-    create_parser.add_argument("--label", action="append", dest="labels", help="label")
-    create_parser.add_argument("--component", action="append", dest="components", help="component")
+    create_parser.add_argument("--label",
+                               action="append",
+                               metavar="LABEL",
+                               dest="labels",
+                               help="label")
+    create_parser.add_argument("--component",
+                               action="append",
+                               metavar="COMPONENT",
+                               dest="components",
+                               help="component")
     create_parser.add_argument("name", help="deployment name")
     create_parser.add_argument("profile", help="profile to use")
 

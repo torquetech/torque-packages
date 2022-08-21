@@ -18,7 +18,7 @@ from torque import repository
 from torque import v1
 
 
-def _validate_config(name: str, type: object, config: dict):
+def _validate_config(name: str, type: object, config: dict[str, object]):
     """TODO"""
 
     try:
@@ -162,7 +162,7 @@ class Deployment:
     def _get_provider_bind(self,
                            interface: type,
                            required: bool,
-                           provider_name: str) -> (str, dict):
+                           provider_name: str) -> (str, dict[str, object]):
         """TODO"""
 
         interface_class = v1.utils.fqcn(interface)
@@ -239,7 +239,7 @@ class Deployment:
     def _get_component_bind(self,
                             interface: type,
                             required: bool,
-                            component_name: str) -> (str, dict):
+                            component_name: str) -> (str, dict[str, object]):
         """TODO"""
 
         interface_class = v1.utils.fqcn(interface)

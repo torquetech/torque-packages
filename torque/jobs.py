@@ -100,6 +100,7 @@ class Runner:
             if job is None:
                 break
 
+            # pylint: disable=W0703
             try:
                 job.handler(job.name)
 

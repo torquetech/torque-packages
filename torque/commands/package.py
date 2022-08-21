@@ -68,6 +68,8 @@ def add_arguments(subparsers):
 
 
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
+    # pylint: disable=W0613
+
     """TODO"""
 
     cmds = {

@@ -108,8 +108,12 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create link")
-    create_parser.add_argument("--params-file", help="parameters file")
-    create_parser.add_argument("--param", "-p", action="append", dest="params", help="link param")
+    create_parser.add_argument("--params-file", help="link parameters file")
+    create_parser.add_argument("--param", "-p",
+                               action="append",
+                               metavar="NAME=VALUE",
+                               dest="params",
+                               help="link parameter")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",
                                default="torquetech.dev/dependency",
@@ -132,6 +136,8 @@ def add_arguments(subparsers):
 
 
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
+    # pylint: disable=W0613
+
     """TODO"""
 
     cmds = {

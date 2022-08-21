@@ -129,12 +129,12 @@ class Repository:
         self._repo["v1"]["binds"] = binds
         self._repo["v1"]["bind_maps"] = bind_maps
 
-    def components(self) -> dict:
+    def components(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["components"]
 
-    def links(self) -> dict:
+    def links(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["links"]
@@ -144,22 +144,22 @@ class Repository:
 
         return self._repo["v1"]["protocols"]
 
-    def providers(self) -> dict:
+    def providers(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["providers"]
 
-    def interfaces(self) -> dict:
+    def interfaces(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["interfaces"]
 
-    def binds(self) -> dict:
+    def binds(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["binds"]
 
-    def bind_maps(self) -> dict:
+    def bind_maps(self) -> dict[str, str]:
         """TODO"""
 
         return self._repo["v1"]["bind_maps"]
@@ -262,7 +262,7 @@ def _local_repository() -> list:
         return []
 
 
-def _process_interfaces(_repository: dict) -> dict:
+def _process_interfaces(_repository: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
     if "interfaces" not in _repository["v1"]:
@@ -276,7 +276,7 @@ def _process_interfaces(_repository: dict) -> dict:
     return _repository
 
 
-def _process_binds(_repository: dict) -> dict:
+def _process_binds(_repository: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
     if "binds" not in _repository["v1"]:

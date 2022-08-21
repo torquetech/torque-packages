@@ -34,16 +34,16 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
         "revision": int,
         "components": {
             v1.schema.Optional(str): {
-                "labels": [str],
                 "type": str,
+                "labels": [str],
                 "parameters": dict
             }
         },
         "links": {
             v1.schema.Optional(str): {
+                "type": str,
                 "source": str,
                 "destination": str,
-                "type": str,
                 "parameters": dict
             }
         }
@@ -153,26 +153,26 @@ def _from_configuration(config: Configuration) -> dict[str, str]:
     }
 
 
-def _from_components(components: dict[str, model.Component]) -> dict[str: object]:
+def _from_components(components: dict[str, model.Component]) -> dict[str, object]:
     """TODO"""
 
     return {
         component.name: {
-            "labels": component.labels,
             "type": component.type,
+            "labels": component.labels,
             "parameters": component.parameters
         } for component in components.values()
     }
 
 
-def _from_links(links: dict[str, model.Link]) -> dict[str: object]:
+def _from_links(links: dict[str, model.Link]) -> dict[str, object]:
     """TODO"""
 
     return {
         link.name: {
+            "type": link.type,
             "source": link.source,
             "destination": link.destination,
-            "type": link.type,
             "parameters": link.parameters
         } for link in links.values()
     }
