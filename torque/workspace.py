@@ -28,9 +28,6 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
     "profiles": {
         v1.schema.Optional(str): [str]
     },
-    "configuration": {
-        "deployments": v1.schema.Or(str, None)
-    },
     "dag": {
         "revision": int,
         "components": {
@@ -90,13 +87,6 @@ class Deployment:
             f", labels={self.labels}, components={self.components})"
 
 
-class Configuration:
-    """TODO"""
-
-    def __init__(self, deployments: str):
-        self.deployments = deployments
-
-
 def _to_profiles(workspace: dict[str, object]) -> Profile:
     """TODO"""
 
@@ -105,18 +95,10 @@ def _to_profiles(workspace: dict[str, object]) -> Profile:
     }
 
 
-def _to_configuration(workspace: dict[str, object]) -> Configuration:
+def _to_deployments(deployments_path: str) -> dict[str, Deployment]:
     """TODO"""
 
-    config = workspace["configuration"]
-
-    return Configuration(config["deployments"])
-
-
-def _to_deployments(config: Configuration) -> dict[str, Deployment]:
-    """TODO"""
-
-    path = v1.utils.resolve_path(config.deployments)
+    path = v1.utils.resolve_path(deployments_path)
 
     if not os.path.exists(path):
         return {}
@@ -143,14 +125,6 @@ def _from_profiles(profiles: dict[str, Profile]) -> dict[str, object]:
 
     return {
         profile.name: profile.uris for profile in profiles.values()
-    }
-
-
-def _from_configuration(config: Configuration) -> dict[str, str]:
-    """TODO"""
-
-    return {
-        "deployments": config.deployments
     }
 
 
@@ -222,9 +196,9 @@ class Workspace:
     """TODO"""
 
     def __init__(self,
-                 path: str,
+                 workspace_path: str,
+                 deployments_path: str,
                  profiles: dict[str, Profile],
-                 config: Configuration,
                  deployments: dict[str, Deployment],
                  dag: model.DAG,
                  repo: repository.Repository):
@@ -234,8 +208,9 @@ class Workspace:
         self.repo = repo
         self.deployments = deployments
         self.profiles = profiles
-        self._path = path
-        self._config = config
+
+        self._workspace_path = workspace_path
+        self._deployments_path = deployments_path
 
     def _bind_interface(self,
                         interface: object,
@@ -575,7 +550,6 @@ class Workspace:
         workspace = {
             "version": "torquetech.dev/v1",
             "profiles": _from_profiles(self.profiles),
-            "configuration": _from_configuration(self._config),
             "dag": {
                 "revision": self.dag.revision,
                 "components": _from_components(self.dag.components),
@@ -583,26 +557,27 @@ class Workspace:
             }
         }
 
-        with open(f"{self._path}.tmp", "w", encoding="utf8") as file:
+        with open(f"{self._workspace_path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(workspace,
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{self._path}.tmp", self._path)
+        os.replace(f"{self._workspace_path}.tmp", self._workspace_path)
 
     def _store_deployments(self):
         """TODO"""
 
-        path = v1.utils.resolve_path(self._config.deployments)
+        if not self._deployments_path:
+            return
 
-        with open(f"{path}.tmp", "w", encoding="utf8") as file:
+        with open(f"{self._deployments_path}.tmp", "w", encoding="utf8") as file:
             yaml.safe_dump(_from_deployments(self.deployments),
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{path}.tmp", path)
+        os.replace(f"{self._deployments_path}.tmp", self._deployments_path)
 
     def store(self):
         """TODO"""
@@ -611,23 +586,24 @@ class Workspace:
         self._store_deployments()
 
 
-def load(path: str) -> Workspace:
+def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     """TODO"""
 
-    path = v1.utils.torque_path(path)
-    path = v1.utils.resolve_path(path)
+    workspace_path = v1.utils.torque_path(workspace_path)
+    workspace_path = v1.utils.resolve_path(workspace_path)
 
-    if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
+    if deployments_path:
+        deployments_path = v1.utils.torque_path(deployments_path)
+        deployments_path = v1.utils.resolve_path(deployments_path)
+
+    if os.path.exists(workspace_path):
+        with open(workspace_path, encoding="utf8") as file:
             workspace = yaml.safe_load(file)
 
     else:
         workspace = {
             "version": "torquetech.dev/v1",
             "profiles": {},
-            "configuration": {
-                "deployments": ".torque/deployments.yaml"
-            },
             "dag": {
                 "revision": 0,
                 "components": {},
@@ -643,12 +619,11 @@ def load(path: str) -> Workspace:
     repo = repository.load()
 
     profiles = _to_profiles(workspace)
-    configuration = _to_configuration(workspace)
-    deployments = _to_deployments(configuration)
+    deployments = _to_deployments(deployment_path)
 
     dag = _generate_dag(workspace)
 
-    return Workspace(path, profiles, configuration, deployments, dag, repo)
+    return Workspace(workspace_path, deployments_path, profiles, deployments, dag, repo)
 
 
 def _load_params(path: str) -> object:

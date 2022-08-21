@@ -14,7 +14,7 @@ from torque import workspace
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     ws.create_deployment(arguments.name,
                          arguments.profile,
@@ -26,7 +26,7 @@ def _create(arguments: argparse.Namespace):
 def _remove(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     ws.remove_deployment(arguments.name)
     ws.store()
@@ -35,7 +35,7 @@ def _remove(arguments: argparse.Namespace):
 def _show(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     if arguments.name not in ws.deployments:
         raise RuntimeError(f"{arguments.name}: deployment not found")
@@ -46,7 +46,7 @@ def _show(arguments: argparse.Namespace):
 def _list(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     for deployment in ws.deployments.values():
         print(f"{deployment}", file=sys.stdout)
@@ -55,8 +55,7 @@ def _list(arguments: argparse.Namespace):
 def _build(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
-
+    ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
     deployment.build(arguments.workers)
 
@@ -64,8 +63,7 @@ def _build(arguments: argparse.Namespace):
 def _apply(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
-
+    ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
     deployment.apply(arguments.workers, arguments.dry_run)
 
@@ -73,8 +71,7 @@ def _apply(arguments: argparse.Namespace):
 def _delete(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
-
+    ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
     deployment.delete(arguments.dry_run)
 
@@ -82,7 +79,7 @@ def _delete(arguments: argparse.Namespace):
 def _dot(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     deployment = ws.load_deployment(arguments.name)
     print(deployment.dot(), file=sys.stdout)
@@ -91,7 +88,7 @@ def _dot(arguments: argparse.Namespace):
 def _command(arguments: argparse.Namespace, argv: [str]):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
+    ws = workspace.load(arguments.workspace, arguments.deployments)
 
     deployment = ws.load_deployment(arguments.name)
     deployment.command(arguments.provider, arguments.dry_run, argv)
@@ -101,6 +98,10 @@ def add_arguments(subparsers):
     """TODO"""
 
     parser = subparsers.add_parser("deployment", help="deployment management")
+    parser.add_argument("--deployments",
+                        default=f"{v1.utils.torque_root()}/.torque/deployments.yaml",
+                        metavar="PATH",
+                        help="deployments path")
 
     subparsers = parser.add_subparsers(required=True,
                                        dest="deployment_cmd",
