@@ -79,13 +79,13 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         return type.on_configuration(config or {})
 
     except v1.schema.SchemaError as exc:
-        if isinstance(type, v1.component.Component):
+        if issubclass(type, v1.component.Component):
             type = "component"
 
-        elif isinstance(type, v1.link.Link):
+        elif issubclass(type, v1.link.Link):
             type = "link"
 
-        elif isinstance(type, v1.provider.Interface):
+        elif issubclass(type, v1.provider.Interface):
             type = "bind"
 
         exc_str = str(exc)
