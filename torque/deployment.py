@@ -534,11 +534,10 @@ class Deployment:
         for provider in reversed(self._providers.values()):
             provider.on_delete(self._context)
 
-    def command(self, provider: str, dry_run: bool, argv: [str]):
+    def command(self, provider: str, argv: [str]):
         """TODO"""
 
         self._setup_providers()
-        self._context.dry_run = dry_run
 
         self._providers[provider].on_command(self._context, argv)
 
