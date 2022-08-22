@@ -20,7 +20,6 @@ class Context:
 
         self.deployment_name = deployment_name
         self.configuration = configuration
-        self.dry_run = False
 
         self._objects: dict[str, object] = None
         self._objects_lock = threading.Lock()

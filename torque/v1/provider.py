@@ -29,12 +29,12 @@ class Provider:
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
-    def on_apply(self, context: deployment.Context):
+    def on_apply(self, context: deployment.Context, dry_run: bool):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
 
-    def on_delete(self, context: deployment.Context):
+    def on_delete(self, context: deployment.Context, dry_run: bool):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
