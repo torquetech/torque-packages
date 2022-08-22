@@ -15,7 +15,6 @@ from torque import deployment
 from torque import exceptions
 from torque import interfaces
 from torque import model
-from torque import profile
 from torque import repository
 from torque import v1
 
@@ -25,9 +24,6 @@ _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
 _WORKSPACE_SCHEMA = v1.schema.Schema({
     "version": str,
-    "profiles": {
-        v1.schema.Optional(str): [str]
-    },
     "dag": {
         "revision": int,
         "components": {
@@ -52,7 +48,12 @@ _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
     "version": str,
     "deployments": {
         v1.schema.Optional(str): {
-            "profile": str,
+            "context": {
+                "type": str,
+                "configuration": dict
+            },
+            "providers": [str],
+            "extra_configuration": [str],
             "labels": v1.schema.Or([str], None),
             "components": v1.schema.Or([str], None)
         }
@@ -60,72 +61,32 @@ _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
 })
 
 
-class Profile:
-    """TODO"""
-
-    def __init__(self, name: str, uris: [str]):
-        self.name = name
-        self.uris = uris
-
-    def __repr__(self) -> str:
-        uris = ", ".join(self.uris)
-        return f"Profile({self.name}, uris=[{uris}])"
-
-
 class Deployment:
     """TODO"""
 
-    def __init__(self, name: str, profile: str, labels: [str], components: [str]):
+    def __init__(self,
+                 name: str,
+                 context_type: str,
+                 context_config: dict[str, object],
+                 providers: str,
+                 extra_configs: [str],
+                 labels: [str],
+                 components: [str]):
         self.name = name
-        self.profile = profile
+        self.context_type = context_type
+        self.context_config = context_config
+        self.providers = providers
+        self.extra_configs = extra_configs
         self.labels = labels
         self.components = components
 
     def __repr__(self) -> str:
         return \
-            f"Deployment({self.name}, profile={self.profile}" \
-            f", labels={self.labels}, components={self.components})"
-
-
-def _to_profiles(workspace: dict[str, object]) -> Profile:
-    """TODO"""
-
-    return {
-        name: Profile(name, uris) for name, uris in workspace["profiles"].items()
-    }
-
-
-def _to_deployments(deployments_path: str) -> dict[str, Deployment]:
-    """TODO"""
-
-    path = v1.utils.resolve_path(deployments_path)
-
-    if not os.path.exists(path):
-        return {}
-
-    with open(path, encoding="utf8") as file:
-        deployments = yaml.safe_load(file)
-
-    deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
-
-    if deployments["version"] != "torquetech.dev/v1":
-        raise RuntimeError(f"{deployments['version']}: invalid deployments version")
-
-    return {
-        name: Deployment(name,
-                         deployment["profile"],
-                         deployment["labels"],
-                         deployment["components"])
-        for name, deployment in deployments["deployments"].items()
-    }
-
-
-def _from_profiles(profiles: dict[str, Profile]) -> dict[str, object]:
-    """TODO"""
-
-    return {
-        profile.name: profile.uris for profile in profiles.values()
-    }
+            f"Deployment({self.name}" \
+            f", context_type={self.context_type}" \
+            f", providers={self.providers}" \
+            f", labels={self.labels} " \
+            f", components={self.components})"
 
 
 def _from_components(components: dict[str, model.Component]) -> dict[str, object]:
@@ -160,7 +121,12 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
         "version": "torquetech.dev/v1",
         "deployments": {
             deployment.name: {
-                "profile": deployment.profile,
+                "context": {
+                    "type": deployment.context_type,
+                    "configuration": deployment.context_config
+                },
+                "providers": deployment.providers,
+                "extra_configuration": deployment.extra_configs or [],
                 "labels": deployment.labels,
                 "components": deployment.components
             } for deployment in deployments.values()
@@ -198,7 +164,6 @@ class Workspace:
     def __init__(self,
                  workspace_path: str,
                  deployments_path: str,
-                 profiles: dict[str, Profile],
                  deployments: dict[str, Deployment],
                  dag: model.DAG,
                  repo: repository.Repository):
@@ -207,7 +172,6 @@ class Workspace:
         self.dag = dag
         self.repo = repo
         self.deployments = deployments
-        self.profiles = profiles
 
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
@@ -257,8 +221,13 @@ class Workspace:
                     source.name,
                     destination.name)
 
-    def _collect_components(self, labels: [str], components: [str]) -> [str]:
+    def _collect_components_for(self, name: str) -> [str]:
         """TODO"""
+
+        deployment = self.deployments[name]
+
+        labels = deployment.labels
+        components = deployment.components
 
         if labels is None and components is None:
             return None
@@ -276,61 +245,6 @@ class Workspace:
                 collected_components.add(component.name)
 
         return list(collected_components)
-
-    def _load_deployment(self,
-                         name: str,
-                         components: [str],
-                         profile: profile.Profile) -> deployment.Deployment:
-        """TODO"""
-
-        return deployment.load(name,
-                               components,
-                               profile,
-                               self.dag,
-                               self.repo)
-
-    def create_profile(self, name: str, uris: [str]) -> Profile:
-        """TODO"""
-
-        if not re.match(_NAME, name):
-            raise exceptions.InvalidName(name)
-
-        if name in self.profiles:
-            raise exceptions.ProfileExists(name)
-
-        _uris = []
-
-        for uri in uris:
-            if not re.match(_PROTO, uri):
-                uri = v1.utils.torque_path(uri)
-
-            _uris.append(uri)
-
-        profile = Profile(name, _uris)
-
-        self.profiles[name] = profile
-        return profile
-
-    def remove_profile(self, name: str) -> Profile:
-        """TODO"""
-
-        if name not in self.profiles:
-            raise exceptions.ProfileNotFound(name)
-
-        return self.profiles.pop(name)
-
-    def load_profile(self, name: str) -> profile.Profile:
-        """TODO"""
-
-        if name not in self.profiles:
-            raise exceptions.ProfileNotFound(name)
-
-        return profile.load(name, self.profiles[name].uris, self.repo)
-
-    def profile_defaults(self, provider: str) -> dict[str, object]:
-        """TODO"""
-
-        return profile.defaults(provider, self.dag, self.repo)
 
     def _process_names(self, names: list) -> dict[str, [str]]:
         """TODO"""
@@ -397,7 +311,9 @@ class Workspace:
 
     def create_deployment(self,
                           name: str,
-                          profile: str,
+                          context_type: str,
+                          providers: [str],
+                          extra_configs: [str],
                           labels: [str],
                           components: [str]) -> Deployment:
         """TODO"""
@@ -406,18 +322,28 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         name = f"{name}.{secrets.token_hex(4)}"
+        context = self.repo.context(context_type)
 
         if name in self.deployments:
             raise exceptions.DeploymentExists(name)
 
-        if profile not in self.profiles:
-            raise exceptions.ProfileNotFound(profile)
+        try:
+            context_config = context.on_configuration({})
+
+        except v1.schema.SchemaError as exc:
+            raise RuntimeError(f"component parameters: {name}: {exc}") from exc
 
         for component in components or []:
             if component not in self.dag.components:
                 raise exceptions.ComponentNotFound(component)
 
-        deployment = Deployment(name, profile, labels, components)
+        deployment = Deployment(name,
+                                context_type,
+                                context_config,
+                                providers,
+                                extra_configs,
+                                labels,
+                                components)
 
         self.deployments[name] = deployment
         return deployment
@@ -432,7 +358,9 @@ class Workspace:
 
         return self.deployments.pop(name)
 
-    def load_deployment(self, name: str) -> deployment.Deployment:
+    def load_deployment(self,
+                        name: str,
+                        load_extra_configs: bool = True) -> deployment.Deployment:
         """TODO"""
 
         name = self._get_full_deployment_name(name)
@@ -440,11 +368,17 @@ class Workspace:
         if name not in self.deployments:
             raise exceptions.DeploymentNotFound(name)
 
-        deployment = self.deployments[name]
-        components = self._collect_components(deployment.labels, deployment.components)
-        profile = self.load_profile(deployment.profile)
+        components = self._collect_components_for(name)
+        d = self.deployments[name]
 
-        return self._load_deployment(name, components, profile)
+        return deployment.load(d.name,
+                               components,
+                               d.context_type,
+                               d.context_config,
+                               d.providers,
+                               d.extra_configs if load_extra_configs else [],
+                               self.dag,
+                               self.repo)
 
     def create_component(self,
                          name: str,
@@ -549,7 +483,6 @@ class Workspace:
 
         workspace = {
             "version": "torquetech.dev/v1",
-            "profiles": _from_profiles(self.profiles),
             "dag": {
                 "revision": self.dag.revision,
                 "components": _from_components(self.dag.components),
@@ -586,6 +519,37 @@ class Workspace:
         self._store_deployments()
 
 
+def _load_deployments(path: str) -> dict[str, Deployment]:
+    """TODO"""
+
+    if not path:
+        return {}
+
+    path = v1.utils.resolve_path(path)
+
+    if not os.path.exists(path):
+        return {}
+
+    with open(path, encoding="utf8") as file:
+        deployments = yaml.safe_load(file)
+
+    deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
+
+    if deployments["version"] != "torquetech.dev/v1":
+        raise RuntimeError(f"{deployments['version']}: invalid deployments version")
+
+    return {
+        name: Deployment(name,
+                         deployment["context"]["type"],
+                         deployment["context"]["configuration"],
+                         deployment["providers"],
+                         deployment["extra_configuration"],
+                         deployment["labels"],
+                         deployment["components"])
+        for name, deployment in deployments["deployments"].items()
+    }
+
+
 def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     """TODO"""
 
@@ -603,7 +567,6 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     else:
         workspace = {
             "version": "torquetech.dev/v1",
-            "profiles": {},
             "dag": {
                 "revision": 0,
                 "components": {},
@@ -616,14 +579,11 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     if workspace["version"] != "torquetech.dev/v1":
         raise RuntimeError(f"{workspace['version']}: invalid workspace version")
 
+    deployments = _load_deployments(deployments_path)
     repo = repository.load()
-
-    profiles = _to_profiles(workspace)
-    deployments = _to_deployments(deployment_path)
-
     dag = _generate_dag(workspace)
 
-    return Workspace(workspace_path, deployments_path, profiles, deployments, dag, repo)
+    return Workspace(workspace_path, deployments_path, deployments, dag, repo)
 
 
 def _load_params(path: str) -> object:

@@ -129,12 +129,12 @@ class Component:
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_remove: not implemented")
 
-    def on_build(self, deployment: deployment.Deployment):
+    def on_build(self, context: deployment.Context):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_build: not implemented")
 
-    def on_apply(self, deployment: deployment.Deployment):
+    def on_apply(self, context: deployment.Context):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")

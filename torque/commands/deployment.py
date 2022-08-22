@@ -8,6 +8,7 @@
 import argparse
 import sys
 
+from torque import v1
 from torque import workspace
 
 
@@ -16,10 +17,17 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
-    ws.create_deployment(arguments.name,
-                         arguments.profile,
-                         arguments.labels,
-                         arguments.components)
+    d = ws.create_deployment(arguments.name,
+                             arguments.context,
+                             arguments.provider,
+                             arguments.extra_configs,
+                             arguments.labels,
+                             arguments.components)
+    deployment = ws.load_deployment(d.name, False)
+
+    deployment.update()
+    deployment.store()
+
     ws.store()
 
 
@@ -30,6 +38,16 @@ def _remove(arguments: argparse.Namespace):
 
     ws.remove_deployment(arguments.name)
     ws.store()
+
+
+def _update(arguments: argparse.Namespace):
+    """TODO"""
+
+    ws = workspace.load(arguments.workspace, arguments.deployments)
+    deployment = ws.load_deployment(arguments.name, False)
+
+    deployment.update()
+    deployment.store()
 
 
 def _show(arguments: argparse.Namespace):
@@ -57,7 +75,9 @@ def _build(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
+
     deployment.build(arguments.workers)
+    deployment.store()
 
 
 def _apply(arguments: argparse.Namespace):
@@ -65,7 +85,9 @@ def _apply(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
+
     deployment.apply(arguments.workers, arguments.dry_run)
+    deployment.store()
 
 
 def _delete(arguments: argparse.Namespace):
@@ -73,7 +95,9 @@ def _delete(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
+
     deployment.delete(arguments.dry_run)
+    deployment.store()
 
 
 def _dot(arguments: argparse.Namespace):
@@ -91,7 +115,9 @@ def _command(arguments: argparse.Namespace, argv: [str]):
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
     deployment = ws.load_deployment(arguments.name)
+
     deployment.command(arguments.provider, arguments.dry_run, argv)
+    deployment.store()
 
 
 def add_arguments(subparsers):
@@ -108,6 +134,14 @@ def add_arguments(subparsers):
                                        metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create deployment")
+    create_parser.add_argument("--context",
+                               default="torquetech.dev/local",
+                               help="deployment context")
+    create_parser.add_argument("--extra-config",
+                               action="append",
+                               metavar="CONFIG",
+                               dest="extra_configs",
+                               help="extra deployment configuration")
     create_parser.add_argument("--label",
                                action="append",
                                metavar="LABEL",
@@ -119,10 +153,13 @@ def add_arguments(subparsers):
                                dest="components",
                                help="component")
     create_parser.add_argument("name", help="deployment name")
-    create_parser.add_argument("profile", help="profile to use")
+    create_parser.add_argument("provider", nargs="+", help="provider name")
 
     remove_parser = subparsers.add_parser("remove", help="remove deployment")
     remove_parser.add_argument("name", help="deployment name")
+
+    update_parser = subparsers.add_parser("update", help="update deployment")
+    update_parser.add_argument("name", help="deployment name")
 
     show_parser = subparsers.add_parser("show", help="show deployment")
     show_parser.add_argument("name", help="deployment name")
@@ -173,6 +210,7 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
         cmds = {
             "create": _create,
             "remove": _remove,
+            "update": _update,
             "show": _show,
             "list": _list,
             "build": _build,

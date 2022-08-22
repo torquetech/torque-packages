@@ -8,9 +8,8 @@ import importlib
 import traceback
 import sys
 
+from torque import defaults
 from torque import exceptions
-from torque import links
-from torque import protocols
 from torque import v1
 
 
@@ -32,15 +31,6 @@ def _is_link(obj: type) -> bool:
     return issubclass(obj, v1.link.Link)
 
 
-def _is_protocol(obj: type) -> bool:
-    """TODO"""
-
-    if not isinstance(obj, type):
-        return False
-
-    return issubclass(obj, v1.protocol.Protocol)
-
-
 def _is_provider(obj: type) -> bool:
     """TODO"""
 
@@ -59,16 +49,25 @@ def _is_interface(obj: type) -> bool:
     return issubclass(obj, v1.provider.Interface)
 
 
+def _is_context(obj: type) -> bool:
+    """TODO"""
+
+    if not isinstance(obj, type):
+        return False
+
+    return issubclass(obj, v1.deployment.Context)
+
+
 _REPOSITORY_SCHEMA = v1.schema.Schema({
     v1.schema.Optional("v1"): v1.schema.Schema({
+        v1.schema.Optional("contexts"): {
+            v1.schema.Optional(str): _is_context
+        },
         v1.schema.Optional("components"): {
             v1.schema.Optional(str): _is_component
         },
         v1.schema.Optional("links"): {
             v1.schema.Optional(str): _is_link
-        },
-        v1.schema.Optional("protocols"): {
-            v1.schema.Optional(str): _is_protocol
         },
         v1.schema.Optional("providers"): {
             v1.schema.Optional(str): _is_provider
@@ -86,13 +85,13 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
 
 _DEFAULT_REPOSITORY = {
     "v1": {
+        "contexts": {
+            "torquetech.dev/local": defaults.LocalContext
+        },
         "components": {
         },
         "links": {
-            "torquetech.dev/dependency": links.DependencyLink
-        },
-        "protocols": {
-            "file": protocols.FileProtocol
+            "torquetech.dev/dependency": defaults.DependencyLink
         },
         "providers": {
         },
@@ -129,6 +128,11 @@ class Repository:
         self._repo["v1"]["binds"] = binds
         self._repo["v1"]["bind_maps"] = bind_maps
 
+    def contexts(self) -> dict[str, object]:
+        """TODO"""
+
+        return self._repo["v1"]["contexts"]
+
     def components(self) -> dict[str, object]:
         """TODO"""
 
@@ -138,11 +142,6 @@ class Repository:
         """TODO"""
 
         return self._repo["v1"]["links"]
-
-    def protocols(self) -> dict:
-        """TODO"""
-
-        return self._repo["v1"]["protocols"]
 
     def providers(self) -> dict[str, object]:
         """TODO"""
@@ -164,6 +163,16 @@ class Repository:
 
         return self._repo["v1"]["bind_maps"]
 
+    def context(self, name: str) -> v1.deployment.Context:
+        """TODO"""
+
+        contexts = self.contexts()
+
+        if name not in contexts:
+            raise exceptions.ContextNotFound(name)
+
+        return contexts[name]
+
     def component(self, name: str) -> v1.component.Component:
         """TODO"""
 
@@ -183,16 +192,6 @@ class Repository:
             raise exceptions.LinkTypeNotFound(name)
 
         return links[name]
-
-    def protocol(self, name: str) -> v1.protocol.Protocol:
-        """TODO"""
-
-        protocols = self.protocols()
-
-        if name not in protocols:
-            raise exceptions.ProtocolNotFound(name)
-
-        return protocols[name]
 
     def provider(self, name: str) -> v1.provider.Provider:
         """TODO"""

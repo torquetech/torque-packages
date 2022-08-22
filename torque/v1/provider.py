@@ -29,17 +29,17 @@ class Provider:
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
-    def on_apply(self, deployment: deployment.Deployment):
+    def on_apply(self, context: deployment.Context):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
 
-    def on_delete(self, deployment: deployment.Deployment):
+    def on_delete(self, context: deployment.Context):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
 
-    def on_command(self, deployment: deployment.Deployment, argv: [str]):
+    def on_command(self, context: deployment.Context, argv: [str]):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")
@@ -53,12 +53,12 @@ class Interface:
                  provider: Provider,
                  labels: [str],
                  binds: object,
-                 deployment: deployment.Deployment):
+                 context: deployment.Context):
         self.configuration = configuration
         self.provider = provider
         self.labels = labels
         self.binds = binds
-        self.deployment = deployment
+        self.context = context
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

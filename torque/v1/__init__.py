@@ -11,6 +11,5 @@ import schema
 from . import component
 from . import deployment
 from . import link
-from . import protocol
 from . import provider
 from . import utils

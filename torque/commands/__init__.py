@@ -6,7 +6,6 @@
 
 from . import init
 from . import package
-from . import profile
 from . import component
 from . import link
 from . import deployment

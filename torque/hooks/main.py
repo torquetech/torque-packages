@@ -55,7 +55,6 @@ def main() -> int:
         cmds = {
             "init": commands.init,
             "package": commands.package,
-            "profile": commands.profile,
             "component": commands.component,
             "link": commands.link,
             "deployment": commands.deployment

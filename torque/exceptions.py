@@ -79,27 +79,6 @@ class PackageNotFound(TorqueException):
         return f"{self.args[0]}: package not found"
 
 
-class ProtocolNotFound(TorqueException):
-    """TODO"""
-
-    def __str__(self) -> str:
-        return f"{self.args[0]}: protocol not found"
-
-
-class ProfileExists(TorqueException):
-    """TODO"""
-
-    def __str__(self) -> str:
-        return f"{self.args[0]}: profile already exists"
-
-
-class ProfileNotFound(TorqueException):
-    """TODO"""
-
-    def __str__(self) -> str:
-        return f"{self.args[0]}: profile not found"
-
-
 class ProviderNotFound(TorqueException):
     """TODO"""
 
@@ -154,6 +133,13 @@ class DeploymentNotFound(TorqueException):
 
     def __str__(self) -> str:
         return f"{self.args[0]}: deployment not found"
+
+
+class ContextNotFound(TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: context not found"
 
 
 class NoComponentsSelected(TorqueException):
