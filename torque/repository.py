@@ -86,12 +86,12 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
 _DEFAULT_REPOSITORY = {
     "v1": {
         "contexts": {
-            "torquetech.dev/local": defaults.LocalContext
+            "torquetech.io/local": defaults.LocalContext
         },
         "components": {
         },
         "links": {
-            "torquetech.dev/dependency": defaults.DependencyLink
+            "torquetech.io/dependency": defaults.DependencyLink
         },
         "providers": {
         },

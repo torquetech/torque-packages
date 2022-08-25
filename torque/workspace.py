@@ -118,7 +118,7 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
     """TODO"""
 
     return {
-        "version": "torquetech.dev/v1",
+        "version": "torquetech.io/v1",
         "deployments": {
             deployment.name: {
                 "context": {
@@ -482,7 +482,7 @@ class Workspace:
         """TODO"""
 
         workspace = {
-            "version": "torquetech.dev/v1",
+            "version": "torquetech.io/v1",
             "dag": {
                 "revision": self.dag.revision,
                 "components": _from_components(self.dag.components),
@@ -535,7 +535,7 @@ def _load_deployments(path: str) -> dict[str, Deployment]:
 
     deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
 
-    if deployments["version"] != "torquetech.dev/v1":
+    if deployments["version"] != "torquetech.io/v1":
         raise RuntimeError(f"{deployments['version']}: invalid deployments version")
 
     return {
@@ -566,7 +566,7 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
 
     else:
         workspace = {
-            "version": "torquetech.dev/v1",
+            "version": "torquetech.io/v1",
             "dag": {
                 "revision": 0,
                 "components": {},
@@ -576,7 +576,7 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
 
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
 
-    if workspace["version"] != "torquetech.dev/v1":
+    if workspace["version"] != "torquetech.io/v1":
         raise RuntimeError(f"{workspace['version']}: invalid workspace version")
 
     deployments = _load_deployments(deployments_path)

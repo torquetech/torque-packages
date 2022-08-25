@@ -6,17 +6,17 @@ Torque gives you a turn-key custom DevOps Setup designed by you to match your ne
 
 Torque professionals help you design the system, pick components, links, and providers you need, and then guide you step-by-step to set it all up with accounts, credentials, passwords, tokens, and permissions. And finally, Torque provides ongoing code upgrades with bug fixes, security patches, and new functionality, so you do not need to worry about it.
 
-To get your own custom-built Torque's package with DevOps Setup, visit [Torque's website](https://torquetech.dev).
+To get your own custom-built Torque's package with DevOps Setup, visit [Torque's website](https://torquetech.io).
 
 ## Torque's workspace tool
 
-**Note:** This README file represents a high-level overview of what Torque is when you need it, and what to expect from Torque. All the details of how to install and use Torque are in the [documentation](https://docs.torquetech.dev).
+**Note:** This README file represents a high-level overview of what Torque is when you need it, and what to expect from Torque. All the details of how to install and use Torque are in the [documentation](https://docs.torquetech.io).
 
 End-to-end automated components for all your development and deployment tools. From local development environment to production resources. Customizable, any way you like.
 
 For the first time, cloud systems exhibit a feature they had never before: plasticity.
 
-[Torque documentation](https://docs.torquetech.dev/) provides step-by-step guides on how Torque converts lengthy complex initiatives to build and maintain software systems into single-command-line executions.
+[Torque documentation](https://docs.torquetech.io/) provides step-by-step guides on how Torque converts lengthy complex initiatives to build and maintain software systems into single-command-line executions.
 
 ## How to manage your software systems with Torque?
 
@@ -47,7 +47,7 @@ adds Postgres as a system component. And
 $ torque component create events_service demo/python-service -p path=events-service
 ```
 
-adds a Python service system component. 
+adds a Python service system component.
 
 Finally, we simply create a link between these two components. Links take care of providing code and configuration.
 
@@ -79,9 +79,9 @@ This is what the example from the documentation looks like when you run
 $ torque deployment dot docker-compose | dot -Tpng -o docker-compose.png
 ```
 
-and open the generated `docker-compose.png` file. 
+and open the generated `docker-compose.png` file.
 
-<img src="https://docs.torquetech.dev/_images/dag.png" alt="System design diagram" width="70%"/>
+<img src="https://docs.torquetech.io/_images/dag.png" alt="System design diagram" width="70%"/>
 
 ## Torque packages are extensible and customizable
 
@@ -94,17 +94,17 @@ You can automate all your tools, any way you like.
 There is much more fun stuff to learn about Torque.
 Use the following resources to learn how to use the Torque tool and connect with the Torque community.
 
-- [Installation instructions](https://docs.torquetech.dev/1-installation/index.html)
-- [Torque Documentation](https://docs.torquetech.dev)
+- [Installation instructions](https://docs.torquetech.io/1-installation/index.html)
+- [Torque Documentation](https://docs.torquetech.io)
 - [Discussions](/discussions)
 - [Issues](/issues)
 
 You can also:
 
 - ⭐ Star this repo to show your interest/support.
-- 📫 Stay updated by subscribing to our [email list](https://torquetech.dev/#comp-l3afcozr).
+- 📫 Stay updated by subscribing to our [email list](https://torquetech.io/#comp-l3afcozr).
 
-If you would like to start using Torque for your project(s), we would love to hear how you plan to use it. Email us at team@torquetech.dev
+If you would like to start using Torque for your project(s), we would love to hear how you plan to use it. Email us at team@torquetech.io
 
 ## LICENSE note
 

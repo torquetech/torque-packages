@@ -606,7 +606,7 @@ def _load_defaults(providers: [str],
             }
 
     return {
-        "version": "torquetech.dev/v1",
+        "version": "torquetech.io/v1",
         "providers": {
             name: {
                 "labels": [],
@@ -673,7 +673,7 @@ def load(name: str,
 
     config = _validate_deployment_config(name, config)
 
-    if config["version"] != "torquetech.dev/v1":
+    if config["version"] != "torquetech.io/v1":
         raise RuntimeError(f"{config['version']}: invalid configuration version")
 
     config = Configuration(config)
