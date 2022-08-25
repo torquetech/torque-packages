@@ -21,7 +21,7 @@ setup(
     name="torque-workspace-cli",
     version="0.1",
     author="Torque Team",
-    author_email="team@torquetech.dev",
+    author_email="team@torquetech.io",
     description="",
     long_description=load_file("README.md"),
     long_description_content_type="text/markdown",
