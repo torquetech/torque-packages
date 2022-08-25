@@ -4,7 +4,7 @@ The primary purpose of this package is to demonstrate the capabilities of Torque
 
 ## Additional resources
 
-- [Torque documentation](docs.torquetech.dev)
+- [Torque documentation](docs.torquetech.io)
 - [Torque CLI Discussion tab](https://github.com/torquetech/torque-workspace/discussions)
 - [Demo Package Discussion tab](https://github.com/torquetech/torque-workspace/discussions)
 
