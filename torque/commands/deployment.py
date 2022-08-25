@@ -136,7 +136,7 @@ def add_arguments(subparsers):
     create_parser = subparsers.add_parser("create", help="create deployment")
     create_parser.add_argument("--context",
                                default="torquetech.io/local",
-                               help="deployment context")
+                               help="deployment context, default: %(default)s")
     create_parser.add_argument("--extra-config",
                                action="append",
                                metavar="CONFIG",
