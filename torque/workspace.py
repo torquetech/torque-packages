@@ -321,7 +321,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        name = f"{name}.{secrets.token_hex(4)}"
+        name = f"{name}.{secrets.token_hex(2)[:3]}"
         context = self.repo.context(context_type)
 
         if name in self.deployments:
@@ -392,7 +392,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        name = f"{name}.{secrets.token_hex(4)}"
+        name = f"{name}.{secrets.token_hex(2)[:3]}"
         component_type = self.repo.component(type)
 
         try:
@@ -442,7 +442,7 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        name = f"{name}.{secrets.token_hex(4)}"
+        name = f"{name}.{secrets.token_hex(2)[:3]}"
         link_type = self.repo.link(type)
 
         try:
