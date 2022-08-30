@@ -6,7 +6,8 @@
 
 import os
 
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
 
 CURDIR = os.path.abspath(os.path.dirname(__file__))
@@ -17,29 +18,28 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-setup(
-    name="torque-workspace-cli",
-    version="0.1",
-    author="Torque Team",
-    author_email="team@torquetech.io",
-    description="",
-    long_description=load_file("README.md"),
-    long_description_content_type="text/markdown",
-    url="https://github.com/torquetech/workspace",
-    license="MPL v2.0",
-    classifiers=[
-        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
-    ],
-    packages=find_packages(),
-    python_requires=">=3.9",
-    install_requires=[
-        "pyyaml",
-        "wheel",
-        "setuptools"
-    ],
-    entry_points={
-        "console_scripts": [
-            "torque=torque.__main__:main"
-        ],
-    }
+setup(name="torque-workspace-cli",
+      version="0.1",
+      author="Torque Team",
+      author_email="team@torquetech.io",
+      description="",
+      long_description=load_file("README.md"),
+      long_description_content_type="text/markdown",
+      url="https://github.com/torquetech/workspace",
+      license="MPL v2.0",
+      classifiers=[
+          "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      packages=find_packages(),
+      python_requires=">=3.9",
+      install_requires=[
+          "pyyaml",
+          "wheel",
+          "setuptools"
+      ],
+      entry_points={
+          "console_scripts": [
+              "torque=torque.__main__:main"
+          ],
+      }
 )
