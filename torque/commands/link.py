@@ -42,11 +42,9 @@ def _show(arguments: argparse.Namespace):
     """TODO"""
 
     ws = workspace.load(arguments.workspace)
+    link = ws.get_link(arguments.name)
 
-    if arguments.name not in ws.dag.links:
-        raise RuntimeError(f"{arguments.name}: link not found")
-
-    print(f"{ws.dag.links[arguments.name]}", file=sys.stdout)
+    print(f"{link}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):

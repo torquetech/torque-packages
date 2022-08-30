@@ -423,6 +423,12 @@ class Workspace:
 
         return component
 
+    def get_component(self, name: str) -> model.Component:
+        """TODO"""
+
+        name = self._get_full_component_name(name)
+        return self.dag.get_component(name)
+
     def create_link(self,
                     name: str,
                     type: str,
@@ -477,6 +483,12 @@ class Workspace:
         self.dag.revision += 1
 
         return link
+
+    def get_link(self, name: str) -> model.Component:
+        """TODO"""
+
+        name = self._get_full_link_name(name)
+        return self.dag.get_link(name)
 
     def _store_workspace(self):
         """TODO"""

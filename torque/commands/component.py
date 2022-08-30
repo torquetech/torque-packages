@@ -37,11 +37,9 @@ def _show(arguments: argparse.Namespace):
     """TODO"""
 
     ws = workspace.load(arguments.workspace)
+    component = ws.get_component(arguments.name)
 
-    if arguments.name not in ws.dag.components:
-        raise RuntimeError(f"{arguments.name}: component not found")
-
-    print(f"{ws.dag.components[arguments.name]}", file=sys.stdout)
+    print(f"{component}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):

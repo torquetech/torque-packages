@@ -54,11 +54,9 @@ def _show(arguments: argparse.Namespace):
     """TODO"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
+    deployment = ws.load_deployment(arguments.name, False)
 
-    if arguments.name not in ws.deployments:
-        raise RuntimeError(f"{arguments.name}: deployment not found")
-
-    print(f"{ws.deployments[arguments.name]}", file=sys.stdout)
+    print(f"{deployment}", file=sys.stdout)
 
 
 def _list(arguments: argparse.Namespace):

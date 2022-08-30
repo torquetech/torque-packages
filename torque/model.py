@@ -137,13 +137,18 @@ class DAG:
         self.components[name] = component
         return component
 
-    def remove_component(self, name: str) -> Component:
+    def get_component(self, name: str) -> Component:
         """TODO"""
 
         if name not in self.components:
             raise exceptions.ComponentNotFound(name)
 
-        component = self.components[name]
+        return self.components[name]
+
+    def remove_component(self, name: str) -> Component:
+        """TODO"""
+
+        component = self.get_component(name)
 
         if component.inbound_links:
             raise exceptions.ComponentStillConnected(name)
@@ -183,13 +188,18 @@ class DAG:
         self.links[name] = link
         return link
 
-    def remove_link(self, name: str) -> Link:
+    def get_link(self, name: str) -> Component:
         """TODO"""
 
         if name not in self.links:
             raise exceptions.LinkNotFound(name)
 
-        link = self.links[name]
+        return self.links[name]
+
+    def remove_link(self, name: str) -> Link:
+        """TODO"""
+
+        link = self.get_link(name)
 
         self.components[link.destination].remove_inbound_link(link.source, name)
         self.components[link.source].remove_outbound_link(link.destination, name)
