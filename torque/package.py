@@ -229,7 +229,7 @@ def remove_package(name: str):
 def list_packages():
     """TODO"""
 
-    for name, metadata in installed_packages().items():
+    for name, metadata in sorted(installed_packages().items()):
         print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}", file=sys.stdout)
 
 
