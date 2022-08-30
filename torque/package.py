@@ -8,8 +8,11 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import zipfile
 
 from importlib import metadata
 
@@ -141,26 +144,53 @@ def install_package(uri: str):
             uri = os.path.join(torque_cwd(), uri)
             uri = os.path.normpath(uri)
 
+    tmp = tempfile.mkdtemp()
+
     env = os.environ | {
         "VIRTUAL_ENV": ".torque/local/venv"
     }
 
     cmd = [
         ".torque/local/venv/bin/python",
-        "-m", "pip",
-        "install"
-    ]
-
-    cmd += [
-        "-t", ".torque/system",
-        "--platform", "torque",
-        "--implementation", "py3",
+        "-m", "pip", "wheel",
+        "--wheel-dir", tmp,
         "--no-deps",
         "--no-index",
         uri
     ]
 
-    subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
+    try:
+        subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
+
+        files = os.listdir(tmp)
+
+        for file in files:
+            if not file.endswith("-py3-none-torque.whl"):
+                continue
+
+            with zipfile.ZipFile(f"{tmp}/{file}") as whl:
+                for item in whl.infolist():
+                    path = whl.extract(item, f"{torque_dir()}/system")
+
+                    if item.create_system == 3:
+                        attrs = item.external_attr >> 16
+                        os.chmod(path, attrs)
+
+            package = file.replace("-py3-none-torque.whl", ".dist-info")
+
+            direct_url = f"{torque_dir()}/system/{package}/direct_url.json"
+            with open(direct_url, "w", encoding="utf-8") as file:
+                file.write(json.dumps({
+                    "dir_info": {},
+                    "url": uri
+                }))
+
+            record = f"{torque_dir()}/system/{package}/RECORD"
+            with open(record, "a", encoding="utf-8") as file:
+                file.write(f"{package}/direct_url.json,,\n")
+
+    finally:
+        shutil.rmtree(tmp)
 
 
 def remove_package(name: str):
