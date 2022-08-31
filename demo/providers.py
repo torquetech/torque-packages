@@ -9,7 +9,7 @@ from torque import v1
 from demo import types
 
 
-class Images(v1.provider.Interface):
+class Images(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -20,7 +20,7 @@ class Images(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: push: not implemented")
 
 
-class Secrets(v1.provider.Interface):
+class Secrets(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -31,7 +31,7 @@ class Secrets(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Services(v1.provider.Interface):
+class Services(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -42,7 +42,7 @@ class Services(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Deployments(v1.provider.Interface):
+class Deployments(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -63,7 +63,7 @@ class Deployments(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Development(v1.provider.Interface):
+class Development(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -85,7 +85,7 @@ class Development(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create_deployment: not implemented")
 
 
-class PersistentVolumes(v1.provider.Interface):
+class PersistentVolumes(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -96,7 +96,7 @@ class PersistentVolumes(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpLoadBalancers(v1.provider.Interface):
+class HttpLoadBalancers(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -107,7 +107,7 @@ class HttpLoadBalancers(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class PersistentVolumesProvider(v1.provider.Interface):
+class PersistentVolumesProvider(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -118,7 +118,7 @@ class PersistentVolumesProvider(v1.provider.Interface):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpIngressLinks(v1.provider.Interface):
+class HttpIngressLinks(v1.provider.Bind):
     # pylint: disable=E0211,E0213
 
     """TODO"""
