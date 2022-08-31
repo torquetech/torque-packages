@@ -94,6 +94,7 @@ _DEFAULT_REPOSITORY = {
             "torquetech.io/dependency": defaults.DependencyLink
         },
         "providers": {
+            "torquetech.io/null-provider": defaults.NullProvider
         },
         "binds": {
         }
