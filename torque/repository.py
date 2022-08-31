@@ -46,7 +46,7 @@ def _is_bind(obj: type) -> bool:
     if not isinstance(obj, type):
         return False
 
-    return issubclass(obj, v1.provider.Bind)
+    return issubclass(obj, v1.bind.Bind)
 
 
 def _is_context(obj: type) -> bool:
@@ -204,7 +204,7 @@ class Repository:
 
         return providers[name]
 
-    def interface(self, name: str) -> v1.provider.Bind:
+    def interface(self, name: str) -> v1.bind.Bind:
         """TODO"""
 
         interfaces = self.interfaces()
@@ -214,7 +214,7 @@ class Repository:
 
         return interfaces[name]
 
-    def bind(self, name: str) -> v1.provider.Bind:
+    def bind(self, name: str) -> v1.bind.Bind:
         """TODO"""
 
         binds = self.binds()

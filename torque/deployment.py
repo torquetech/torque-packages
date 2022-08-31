@@ -85,7 +85,7 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         elif issubclass(type, v1.link.Link):
             type = "link"
 
-        elif issubclass(type, v1.provider.Bind):
+        elif issubclass(type, v1.bind.Bind):
             type = "bind"
 
         exc_str = str(exc)
@@ -332,7 +332,7 @@ class Deployment:
                           interface: type,
                           required: bool,
                           provider_name: str,
-                          provider_labels: [str]) -> v1.provider.Bind:
+                          provider_labels: [str]) -> v1.bind.Bind:
         # pylint: disable=R0914
 
         """TODO"""
@@ -409,7 +409,7 @@ class Deployment:
                            interface: type,
                            required: bool,
                            component_name: str,
-                           component_labels: [str]) -> v1.provider.Bind:
+                           component_labels: [str]) -> v1.bind.Bind:
         # pylint: disable=R0914
 
         """TODO"""

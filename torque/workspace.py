@@ -180,7 +180,7 @@ class Workspace:
                         interface: object,
                         required: bool,
                         component_name: str,
-                        component_labels: [str]) -> v1.provider.Bind:
+                        component_labels: [str]) -> v1.bind.Bind:
         # pylint: disable=W0613
 
         """TODO"""

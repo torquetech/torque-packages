@@ -5,17 +5,24 @@
 """TODO"""
 
 from . import deployment
+from . import provider
 from . import utils
 
 
-class Provider:
+class Bind:
     """TODO"""
 
     def __init__(self,
                  configuration: object,
-                 binds: object):
+                 provider: Provider,
+                 labels: [str],
+                 binds: object,
+                 context: deployment.Context):
         self.configuration = configuration
+        self.provider = provider
+        self.labels = labels
         self.binds = binds
+        self.context = context
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
@@ -28,18 +35,3 @@ class Provider:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
-
-    def on_apply(self, context: deployment.Context, dry_run: bool):
-        """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
-
-    def on_delete(self, context: deployment.Context, dry_run: bool):
-        """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
-
-    def on_command(self, context: deployment.Context, argv: [str]):
-        """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")
