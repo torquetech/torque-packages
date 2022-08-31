@@ -35,32 +35,31 @@ def package_data(module: str, patterns: [str]) -> [str]:
     return files
 
 
-setup(
-    name="demo-package",
-    version="0.1",
-    author="Torque Team",
-    author_email="team@torquetech.io",
-    description="",
-    long_description=load_file("README.md"),
-    long_description_content_type="text/markdown",
-    url="https://github.com/torquetech/demo-package",
-    license="MPL v2.0",
-    classifiers=[
-        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
-    ],
-    packages=find_packages(),
-    package_data={
-        "demo": package_data("demo", ["templates/**"])
-    },
-    include_package_data=True,
-    python_requires=">=3.9",
-    install_requires=[
-        "jinja2",
-        "pyyaml",
-    ],
-    entry_points={
-        "torque": [
-            "demo=demo.demo:repository"
-        ]
-    },
+setup(name="demo-package",
+      version="0.1",
+      author="Torque Team",
+      author_email="team@torquetech.io",
+      description="",
+      long_description=load_file("README.md"),
+      long_description_content_type="text/markdown",
+      url="https://github.com/torquetech/demo-package",
+      license="MPL v2.0",
+      classifiers=[
+          "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      packages=find_packages(),
+      package_data={
+          "demo": package_data("demo", ["templates/**"])
+      },
+      include_package_data=True,
+      python_requires=">=3.9",
+      install_requires=[
+          "jinja2",
+          "pyyaml",
+      ],
+      entry_points={
+          "torque": [
+              "demo=demo.demo:repository"
+          ]
+      }
 )
