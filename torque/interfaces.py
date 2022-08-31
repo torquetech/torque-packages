@@ -39,7 +39,7 @@ def _bind_to(type: object,
         if "bind_to" in r and r["bind_to"] != "provider":
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        if not issubclass(r["interface"], v1.provider.Interface):
+        if not issubclass(r["interface"], v1.provider.Bind):
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
         bind = get_bind(r["interface"],
@@ -104,7 +104,7 @@ def bind_to_link(type: object,
                 bind = destination._torque_interface(r["interface"],
                                                      r["required"])
 
-        elif issubclass(r["interface"], v1.provider.Interface):
+        elif issubclass(r["interface"], v1.provider.Bind):
             if r["bind_to"] == "source":
                 bind = get_bind(r["interface"],
                                 r["required"],

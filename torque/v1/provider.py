@@ -45,7 +45,7 @@ class Provider:
         raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")
 
 
-class Interface:
+class Bind:
     """TODO"""
 
     def __init__(self,

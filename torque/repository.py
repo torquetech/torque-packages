@@ -40,13 +40,13 @@ def _is_provider(obj: type) -> bool:
     return issubclass(obj, v1.provider.Provider)
 
 
-def _is_interface(obj: type) -> bool:
+def _is_bind(obj: type) -> bool:
     """TODO"""
 
     if not isinstance(obj, type):
         return False
 
-    return issubclass(obj, v1.provider.Interface)
+    return issubclass(obj, v1.provider.Bind)
 
 
 def _is_context(obj: type) -> bool:
@@ -73,11 +73,11 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
             v1.schema.Optional(str): _is_provider
         },
         v1.schema.Optional("interfaces"): [
-            _is_interface
+            _is_bind
         ],
         v1.schema.Optional("binds"): {
             v1.schema.Optional(str): [
-                _is_interface
+                _is_bind
             ]
         }
     })
@@ -203,7 +203,7 @@ class Repository:
 
         return providers[name]
 
-    def interface(self, name: str) -> v1.provider.Interface:
+    def interface(self, name: str) -> v1.provider.Bind:
         """TODO"""
 
         interfaces = self.interfaces()
@@ -213,7 +213,7 @@ class Repository:
 
         return interfaces[name]
 
-    def bind(self, name: str) -> v1.provider.Interface:
+    def bind(self, name: str) -> v1.provider.Bind:
         """TODO"""
 
         binds = self.binds()
