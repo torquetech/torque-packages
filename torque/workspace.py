@@ -176,11 +176,11 @@ class Workspace:
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
 
-    def _bind_interface(self,
-                        interface: object,
-                        required: bool,
-                        component_name: str,
-                        component_labels: [str]) -> v1.bond.Bond:
+    def _bind_to_component(self,
+                           interface: object,
+                           required: bool,
+                           component_name: str,
+                           component_labels: [str]) -> v1.bond.Bond:
         # pylint: disable=W0613
 
         """TODO"""
@@ -194,13 +194,25 @@ class Workspace:
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         component.labels,
-                                                        self._bind_interface)
+                                                        self._bind_to_component)
 
         return type(component.name,
                     component.labels,
                     component.parameters,
                     None,
                     bound_interfaces)
+
+    def _bind_to_link(self,
+                      interface: object,
+                      required: bool,
+                      link_name: str,
+                      source: model.Component,
+                      destination: model.Component) -> v1.bond.Bond:
+        # pylint: disable=W0613
+
+        """TODO"""
+
+        return None
 
     def _link(self,
               link: model.Link,
@@ -210,9 +222,10 @@ class Workspace:
 
         type = self.repo.link(link.type)
         bound_interfaces = interfaces.bind_to_link(type,
+                                                   link.name,
                                                    source,
                                                    destination,
-                                                   self._bind_interface)
+                                                   self._bind_to_link)
 
         return type(link.name,
                     link.parameters,

@@ -55,7 +55,17 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         },
         "links": {
             v1.schema.Optional(str): {
-                "configuration": dict
+                "configuration": dict,
+                "bonds": {
+                    v1.schema.Optional(str): {
+                        "configuration": dict
+                    }
+                },
+                "interfaces": {
+                    v1.schema.Optional(str): {
+                        "bond": str
+                    }
+                }
             }
         }
     },
@@ -279,9 +289,10 @@ class Deployment:
         destination = self._component(link.destination)
 
         bound_interfaces = interfaces.bind_to_link(link_type,
+                                                   link.name,
                                                    source,
                                                    destination,
-                                                   self._bind_to_component)
+                                                   self._bind_to_link)
 
         link = link_type(link.name,
                          link.parameters,
@@ -444,6 +455,85 @@ class Deployment:
         return bond_type(bond_config,
                          bond_provider,
                          component_labels,
+                         bound_interfaces,
+                         self._context)
+
+    def _get_link_bond(self,
+                       interface: type,
+                       required: bool,
+                       link_name: str) -> (str, dict[str, object]):
+        """TODO"""
+
+        interface_class = v1.utils.fqcn(interface)
+        link_profile = self._configuration.link(link_name)
+
+        local_interfaces = link_profile["interfaces"]
+        local_bonds = link_profile["bonds"]
+
+        if interface_class in local_interfaces:
+            bond_name = local_interfaces[interface_class]["bond"]
+
+        else:
+            if interface_class not in self._interfaces:
+                if required:
+                    raise RuntimeError(f"{interface_class}: interface not bound")
+
+                return None, None
+
+            bond_name = self._interfaces[interface_class]
+
+        if bond_name not in self._bonds:
+            raise RuntimeError(f"{bond_name}: bond not configured")
+
+        bond_config = self._bonds[bond_name]["configuration"]
+
+        if bond_name in local_bonds:
+            local_bond_config = local_bonds[bond_name]["configuration"]
+            bond_config = v1.utils.merge_dicts(bond_config, local_bond_config)
+
+        return bond_name, bond_config
+
+    def _bind_to_link(self,
+                      interface: type,
+                      required: bool,
+                      link_name: str,
+                      source: model.Component,
+                      destination: model.Component) -> v1.bond.Bond:
+        # pylint: disable=R0914
+
+        """TODO"""
+
+        if self._providers is None:
+            return None
+
+        bond_name, bond_config = self._get_link_bond(interface,
+                                                     required,
+                                                     link_name)
+
+        if not bond_name:
+            return None
+
+        bond_type = self._repo.bond(bond_name)
+
+        if not issubclass(bond_type, interface):
+            raise exceptions.InvalidBond(bond_name, v1.utils.fqcn(interface))
+
+        bond_config = _validate_type_config(bond_name,
+                                            bond_type,
+                                            bond_config)
+
+        bond_provider_name = self._repo.provider_for(bond_name)
+        bond_provider = self._providers[bond_provider_name]
+
+        bound_interfaces = interfaces.bind_to_link(bond_type,
+                                                   link_name,
+                                                   source,
+                                                   destination,
+                                                   self._bind_to_link)
+
+        return bond_type(bond_config,
+                         bond_provider,
+                         [],
                          bound_interfaces,
                          self._context)
 
@@ -636,7 +726,9 @@ def _load_defaults(providers: [str],
             },
             "links": {
                 link.name: {
-                    "configuration": repo.link(link.type).on_configuration({}) or {}
+                    "configuration": repo.link(link.type).on_configuration({}) or {},
+                    "bonds": {},
+                    "interfaces": {}
                 } for link in dag.links.values()
             }
         }

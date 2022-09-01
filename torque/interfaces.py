@@ -71,6 +71,7 @@ def bind_to_component(type: object,
 
 
 def bind_to_link(type: object,
+                 name: str,
                  source: model.Component,
                  destination: model.Component,
                  get_bond: typing.Callable) -> object:
@@ -88,9 +89,6 @@ def bind_to_link(type: object,
         if "bind_to" not in r:
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        if r["bind_to"] == "provider":
-            raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
-
         bond = None
 
         if issubclass(r["interface"], v1.component.Interface):
@@ -105,17 +103,14 @@ def bind_to_link(type: object,
                                                      r["required"])
 
         elif issubclass(r["interface"], v1.bond.Bond):
-            if r["bind_to"] == "source":
-                bond = get_bond(r["interface"],
-                                r["required"],
-                                source.name,
-                                source.labels)
+            if r["bind_to"] != "provider":
+                raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-            elif r["bind_to"] == "destination":
-                bond = get_bond(r["interface"],
-                                r["required"],
-                                destination.name,
-                                destination.labels)
+            bond = get_bond(r["interface"],
+                            r["required"],
+                            name,
+                            source,
+                            destination)
 
         else:
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
