@@ -121,7 +121,7 @@ class Link(v1.link.Link):
             },
             "ingress": {
                 "interface": providers.HttpIngressLinks,
-                "bind_to": "source",
+                "bind_to": "provider",
                 "required": True
             }
         }
