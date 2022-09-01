@@ -27,14 +27,8 @@ class Context:
     def _get_object(self, type: str, name: str) -> bytes:
         """TODO"""
 
-        name = f"{type}-{name}"
-
         # pylint: disable=E1135
-        if name not in self._objects:
-            return {}
-
-        # pylint: disable=E1136
-        return self._objects[name]
+        return self._objects.get(f"{type}-{name}")
 
     def _set_object(self, type: str, name: str, data: bytes):
         """TODO"""
