@@ -9,19 +9,19 @@ from . import provider
 from . import utils
 
 
-class Bind:
+class Bond:
     """TODO"""
 
     def __init__(self,
                  configuration: object,
-                 provider: Provider,
+                 provider: provider.Provider,
                  labels: [str],
-                 binds: object,
+                 bonds: object,
                  context: deployment.Context):
         self.configuration = configuration
         self.provider = provider
         self.labels = labels
-        self.binds = binds
+        self.bonds = bonds
         self.context = context
 
     @classmethod

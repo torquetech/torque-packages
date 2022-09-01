@@ -40,13 +40,13 @@ def _is_provider(obj: type) -> bool:
     return issubclass(obj, v1.provider.Provider)
 
 
-def _is_bind(obj: type) -> bool:
+def _is_bond(obj: type) -> bool:
     """TODO"""
 
     if not isinstance(obj, type):
         return False
 
-    return issubclass(obj, v1.bind.Bind)
+    return issubclass(obj, v1.bond.Bond)
 
 
 def _is_context(obj: type) -> bool:
@@ -73,11 +73,11 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
             v1.schema.Optional(str): _is_provider
         },
         v1.schema.Optional("interfaces"): [
-            _is_bind
+            _is_bond
         ],
-        v1.schema.Optional("binds"): {
+        v1.schema.Optional("bonds"): {
             v1.schema.Optional(str): [
-                _is_bind
+                _is_bond
             ]
         }
     })
@@ -96,7 +96,7 @@ _DEFAULT_REPOSITORY = {
         "providers": {
             "torquetech.io/null-provider": defaults.NullProvider
         },
-        "binds": {
+        "bonds": {
         }
     }
 }
@@ -114,20 +114,20 @@ class Repository:
         """TODO"""
 
         providers = {}
-        binds = {}
-        bind_maps = {}
+        bonds = {}
+        bond_maps = {}
 
         for provider_name, provider_class in self._repo["v1"]["providers"].items():
             providers[provider_name] = provider_class
 
-        for provider_name, provider_binds in self._repo["v1"]["binds"].items():
-            for bind_name, bind_class in provider_binds.items():
-                binds[bind_name] = bind_class
-                bind_maps[bind_name] = provider_name
+        for provider_name, provider_bonds in self._repo["v1"]["bonds"].items():
+            for bond_name, bond_class in provider_bonds.items():
+                bonds[bond_name] = bond_class
+                bond_maps[bond_name] = provider_name
 
         self._repo["v1"]["providers"] = providers
-        self._repo["v1"]["binds"] = binds
-        self._repo["v1"]["bind_maps"] = bind_maps
+        self._repo["v1"]["bonds"] = bonds
+        self._repo["v1"]["bond_maps"] = bond_maps
 
     def contexts(self) -> dict[str, object]:
         """TODO"""
@@ -154,15 +154,15 @@ class Repository:
 
         return self._repo["v1"]["interfaces"]
 
-    def binds(self) -> dict[str, object]:
+    def bonds(self) -> dict[str, object]:
         """TODO"""
 
-        return self._repo["v1"]["binds"]
+        return self._repo["v1"]["bonds"]
 
-    def bind_maps(self) -> dict[str, str]:
+    def bond_maps(self) -> dict[str, str]:
         """TODO"""
 
-        return self._repo["v1"]["bind_maps"]
+        return self._repo["v1"]["bond_maps"]
 
     def context(self, name: str) -> v1.deployment.Context:
         """TODO"""
@@ -204,7 +204,7 @@ class Repository:
 
         return providers[name]
 
-    def interface(self, name: str) -> v1.bind.Bind:
+    def interface(self, name: str) -> v1.bond.Bond:
         """TODO"""
 
         interfaces = self.interfaces()
@@ -214,25 +214,25 @@ class Repository:
 
         return interfaces[name]
 
-    def bind(self, name: str) -> v1.bind.Bind:
+    def bond(self, name: str) -> v1.bond.Bond:
         """TODO"""
 
-        binds = self.binds()
+        bonds = self.bonds()
 
-        if name not in binds:
-            raise exceptions.BindNotFound(name)
+        if name not in bonds:
+            raise exceptions.BondNotFound(name)
 
-        return binds[name]
+        return bonds[name]
 
     def provider_for(self, name: str) -> str:
         """TODO"""
 
-        bind_maps = self.bind_maps()
+        bond_maps = self.bond_maps()
 
-        if name not in bind_maps:
-            raise exceptions.BindNotFound(name)
+        if name not in bond_maps:
+            raise exceptions.BondNotFound(name)
 
-        return bind_maps[name]
+        return bond_maps[name]
 
 
 def _system_repository() -> list:
@@ -276,15 +276,15 @@ def _process_interfaces(_repository: dict[str, object]) -> dict[str, object]:
     return _repository
 
 
-def _process_binds(_repository: dict[str, object]) -> dict[str, object]:
+def _process_bonds(_repository: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
-    if "binds" not in _repository["v1"]:
+    if "bonds" not in _repository["v1"]:
         return _repository
 
-    for provider_name, provider_binds in _repository["v1"]["binds"].items():
-        _repository["v1"]["binds"][provider_name] = {
-            v1.utils.fqcn(bind): bind for bind in provider_binds
+    for provider_name, provider_bonds in _repository["v1"]["bonds"].items():
+        _repository["v1"]["bonds"][provider_name] = {
+            v1.utils.fqcn(bond): bond for bond in provider_bonds
         }
 
     return _repository
@@ -306,7 +306,7 @@ def load() -> Repository:
             _repository = _REPOSITORY_SCHEMA.validate(_repository)
 
             _repository = _process_interfaces(_repository)
-            _repository = _process_binds(_repository)
+            _repository = _process_bonds(_repository)
 
             repository = v1.utils.merge_dicts(repository, _repository, False)
 

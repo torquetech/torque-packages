@@ -24,14 +24,14 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 def _bind_to(type: object,
              name: str,
              labels: [str],
-             get_bind: typing.Callable) -> object:
+             get_bond: typing.Callable) -> object:
     """TODO"""
 
-    binds = types.SimpleNamespace()
+    bonds = types.SimpleNamespace()
     requirements = type.on_requirements()
 
     if not requirements:
-        return binds
+        return bonds
 
     requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
 
@@ -39,48 +39,48 @@ def _bind_to(type: object,
         if "bind_to" in r and r["bind_to"] != "provider":
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        if not issubclass(r["interface"], v1.bind.Bind):
+        if not issubclass(r["interface"], v1.bond.Bond):
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        bind = get_bind(r["interface"],
+        bond = get_bond(r["interface"],
                         r["required"],
                         name,
                         labels)
 
-        setattr(binds, r_name, bind)
+        setattr(bonds, r_name, bond)
 
-    return binds
+    return bonds
 
 
 def bind_to_provider(type: object,
                      name: str,
                      labels: [str],
-                     get_bind: typing.Callable) -> object:
+                     get_bond: typing.Callable) -> object:
     """TODO"""
 
-    return _bind_to(type, name, labels, get_bind)
+    return _bind_to(type, name, labels, get_bond)
 
 
 def bind_to_component(type: object,
                       name: str,
                       labels: [str],
-                      get_bind: typing.Callable) -> object:
+                      get_bond: typing.Callable) -> object:
     """TODO"""
 
-    return _bind_to(type, name, labels, get_bind)
+    return _bind_to(type, name, labels, get_bond)
 
 
 def bind_to_link(type: object,
                  source: model.Component,
                  destination: model.Component,
-                 get_bind: typing.Callable) -> object:
+                 get_bond: typing.Callable) -> object:
     """TODO"""
 
-    binds = types.SimpleNamespace()
+    bonds = types.SimpleNamespace()
     requirements = type.on_requirements()
 
     if not requirements:
-        return binds
+        return bonds
 
     requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
 
@@ -91,28 +91,28 @@ def bind_to_link(type: object,
         if r["bind_to"] == "provider":
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        bind = None
+        bond = None
 
         if issubclass(r["interface"], v1.component.Interface):
             if r["bind_to"] == "source":
                 # pylint: disable=W0212
-                bind = source._torque_interface(r["interface"],
+                bond = source._torque_interface(r["interface"],
                                                 r["required"])
 
             elif r["bind_to"] == "destination":
                 # pylint: disable=W0212
-                bind = destination._torque_interface(r["interface"],
+                bond = destination._torque_interface(r["interface"],
                                                      r["required"])
 
-        elif issubclass(r["interface"], v1.bind.Bind):
+        elif issubclass(r["interface"], v1.bond.Bond):
             if r["bind_to"] == "source":
-                bind = get_bind(r["interface"],
+                bond = get_bond(r["interface"],
                                 r["required"],
                                 source.name,
                                 source.labels)
 
             elif r["bind_to"] == "destination":
-                bind = get_bind(r["interface"],
+                bond = get_bond(r["interface"],
                                 r["required"],
                                 destination.name,
                                 destination.labels)
@@ -120,6 +120,6 @@ def bind_to_link(type: object,
         else:
             raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
 
-        setattr(binds, r_name, bind)
+        setattr(bonds, r_name, bond)
 
-    return binds
+    return bonds

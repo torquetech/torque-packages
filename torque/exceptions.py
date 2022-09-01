@@ -93,18 +93,18 @@ class InterfaceNotFound(TorqueException):
         return f"{self.args[0]}: interface not found"
 
 
-class BindNotFound(TorqueException):
+class BondNotFound(TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
-        return f"{self.args[0]}: bind not found"
+        return f"{self.args[0]}: bond not found"
 
 
-class InvalidBind(TorqueException):
+class InvalidBond(TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
-        return f"{self.args[0]}: invalid bind"
+        return f"{self.args[0]}: invalid bond"
 
 
 class InvalidRequirement(TorqueException):

@@ -13,9 +13,9 @@ class Provider:
 
     def __init__(self,
                  configuration: object,
-                 binds: object):
+                 bonds: object):
         self.configuration = configuration
-        self.binds = binds
+        self.bonds = bonds
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

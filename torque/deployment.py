@@ -24,14 +24,14 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         v1.schema.Optional(str): {
             "labels": [str],
             "configuration": dict,
-            "binds": {
+            "bonds": {
                 v1.schema.Optional(str): {
                     "configuration": dict
                 }
             },
             "interfaces": {
                 v1.schema.Optional(str): {
-                    "bind": str
+                    "bond": str
                 }
             }
         }
@@ -41,14 +41,14 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         "components": {
             v1.schema.Optional(str): {
                 "configuration": dict,
-                "binds": {
+                "bonds": {
                     v1.schema.Optional(str): {
                         "configuration": dict
                     }
                 },
                 "interfaces": {
                     v1.schema.Optional(str): {
-                        "bind": str
+                        "bond": str
                     }
                 }
             }
@@ -59,14 +59,14 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
             }
         }
     },
-    "binds": {
+    "bonds": {
         v1.schema.Optional(str): {
             "configuration": dict
         }
     },
     "interfaces": {
         v1.schema.Optional(str): {
-            "bind": str
+            "bond": str
         }
     }
 })
@@ -85,8 +85,8 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         elif issubclass(type, v1.link.Link):
             type = "link"
 
-        elif issubclass(type, v1.bind.Bind):
-            type = "bind"
+        elif issubclass(type, v1.bond.Bond):
+            type = "bond"
 
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
@@ -128,10 +128,10 @@ class Configuration:
 
         return self._config["providers"].keys()
 
-    def binds(self) -> [str]:
+    def bonds(self) -> [str]:
         """TODO"""
 
-        return self._config["binds"].keys()
+        return self._config["bonds"].keys()
 
     def interfaces(self) -> [str]:
         """TODO"""
@@ -143,10 +143,10 @@ class Configuration:
 
         return self._config["providers"][name]
 
-    def bind(self, name: str) -> dict[str, object]:
+    def bond(self, name: str) -> dict[str, object]:
         """TODO"""
 
-        return self._config["binds"][name]
+        return self._config["bonds"][name]
 
     def interface(self, name: str) -> dict[str, object]:
         """TODO"""
@@ -195,7 +195,7 @@ class Deployment:
         self._providers: dict[str, v1.provider.Provider] = None
 
         self._interfaces = None
-        self._binds = None
+        self._bonds = None
 
         self._lock = threading.Lock()
 
@@ -203,13 +203,13 @@ class Deployment:
         """TODO"""
 
         self._interfaces = {
-            name: self._configuration.interface(name)["bind"]
+            name: self._configuration.interface(name)["bond"]
             for name in self._configuration.interfaces()
         }
 
-        self._binds = {
-            name: self._configuration.bind(name)
-            for name in self._configuration.binds()
+        self._bonds = {
+            name: self._configuration.bond(name)
+            for name in self._configuration.bonds()
         }
 
         self._providers = {}
@@ -293,7 +293,7 @@ class Deployment:
         self._links[link.name] = link
         return link
 
-    def _get_provider_bind(self,
+    def _get_provider_bond(self,
                            interface: type,
                            required: bool,
                            provider_name: str) -> (str, dict[str, object]):
@@ -303,10 +303,10 @@ class Deployment:
         provider_profile = self._configuration.provider(provider_name)
 
         local_interfaces = provider_profile["interfaces"]
-        local_binds = provider_profile["binds"]
+        local_bonds = provider_profile["bonds"]
 
         if interface_class in local_interfaces:
-            bind_name = local_interfaces[interface_class]["bind"]
+            bond_name = local_interfaces[interface_class]["bond"]
 
         else:
             if interface_class not in self._interfaces:
@@ -315,24 +315,24 @@ class Deployment:
 
                 return None, None
 
-            bind_name = self._interfaces[interface_class]
+            bond_name = self._interfaces[interface_class]
 
-        if bind_name not in self._binds:
-            raise RuntimeError(f"{bind_name}: bind not configured")
+        if bond_name not in self._bonds:
+            raise RuntimeError(f"{bond_name}: bond not configured")
 
-        bind_config = self._binds[bind_name]["configuration"]
+        bond_config = self._bonds[bond_name]["configuration"]
 
-        if bind_name in local_binds:
-            local_bind_config = local_binds[bind_name]["configuration"]
-            bind_config = v1.utils.merge_dicts(bind_config, local_bind_config)
+        if bond_name in local_bonds:
+            local_bond_config = local_bonds[bond_name]["configuration"]
+            bond_config = v1.utils.merge_dicts(bond_config, local_bond_config)
 
-        return bind_name, bind_config
+        return bond_name, bond_config
 
     def _bind_to_provider(self,
                           interface: type,
                           required: bool,
                           provider_name: str,
-                          provider_labels: [str]) -> v1.bind.Bind:
+                          provider_labels: [str]) -> v1.bond.Bond:
         # pylint: disable=R0914
 
         """TODO"""
@@ -340,37 +340,37 @@ class Deployment:
         if self._providers is None:
             return None
 
-        bind_name, bind_config = self._get_provider_bind(interface,
+        bond_name, bond_config = self._get_provider_bond(interface,
                                                          required,
                                                          provider_name)
 
-        if not bind_name:
+        if not bond_name:
             return None
 
-        bind_type = self._repo.bind(bind_name)
+        bond_type = self._repo.bond(bond_name)
 
-        if not issubclass(bind_type, interface):
-            raise exceptions.InvalidBind(bind_name, v1.utils.fqcn(interface))
+        if not issubclass(bond_type, interface):
+            raise exceptions.InvalidBond(bond_name, v1.utils.fqcn(interface))
 
-        bind_config = _validate_type_config(bind_name,
-                                            bind_type,
-                                            bind_config)
+        bond_config = _validate_type_config(bond_name,
+                                            bond_type,
+                                            bond_config)
 
-        bind_provider_name = self._repo.provider_for(bind_name)
-        bind_provider = self._providers[bind_provider_name]
+        bond_provider_name = self._repo.provider_for(bond_name)
+        bond_provider = self._providers[bond_provider_name]
 
-        bound_interfaces = interfaces.bind_to_provider(bind_type,
+        bound_interfaces = interfaces.bind_to_provider(bond_type,
                                                        provider_name,
                                                        provider_labels,
                                                        self._bind_to_provider)
 
-        return bind_type(bind_config,
-                         bind_provider,
+        return bond_type(bond_config,
+                         bond_provider,
                          provider_labels,
                          bound_interfaces,
                          self._context)
 
-    def _get_component_bind(self,
+    def _get_component_bond(self,
                             interface: type,
                             required: bool,
                             component_name: str) -> (str, dict[str, object]):
@@ -380,10 +380,10 @@ class Deployment:
         component_profile = self._configuration.component(component_name)
 
         local_interfaces = component_profile["interfaces"]
-        local_binds = component_profile["binds"]
+        local_bonds = component_profile["bonds"]
 
         if interface_class in local_interfaces:
-            bind_name = local_interfaces[interface_class]["bind"]
+            bond_name = local_interfaces[interface_class]["bond"]
 
         else:
             if interface_class not in self._interfaces:
@@ -392,24 +392,24 @@ class Deployment:
 
                 return None, None
 
-            bind_name = self._interfaces[interface_class]
+            bond_name = self._interfaces[interface_class]
 
-        if bind_name not in self._binds:
-            raise RuntimeError(f"{bind_name}: bind not configured")
+        if bond_name not in self._bonds:
+            raise RuntimeError(f"{bond_name}: bond not configured")
 
-        bind_config = self._binds[bind_name]["configuration"]
+        bond_config = self._bonds[bond_name]["configuration"]
 
-        if bind_name in local_binds:
-            local_bind_config = local_binds[bind_name]["configuration"]
-            bind_config = v1.utils.merge_dicts(bind_config, local_bind_config)
+        if bond_name in local_bonds:
+            local_bond_config = local_bonds[bond_name]["configuration"]
+            bond_config = v1.utils.merge_dicts(bond_config, local_bond_config)
 
-        return bind_name, bind_config
+        return bond_name, bond_config
 
     def _bind_to_component(self,
                            interface: type,
                            required: bool,
                            component_name: str,
-                           component_labels: [str]) -> v1.bind.Bind:
+                           component_labels: [str]) -> v1.bond.Bond:
         # pylint: disable=R0914
 
         """TODO"""
@@ -417,32 +417,32 @@ class Deployment:
         if self._providers is None:
             return None
 
-        bind_name, bind_config = self._get_component_bind(interface,
+        bond_name, bond_config = self._get_component_bond(interface,
                                                           required,
                                                           component_name)
 
-        if not bind_name:
+        if not bond_name:
             return None
 
-        bind_type = self._repo.bind(bind_name)
+        bond_type = self._repo.bond(bond_name)
 
-        if not issubclass(bind_type, interface):
-            raise exceptions.InvalidBind(bind_name, v1.utils.fqcn(interface))
+        if not issubclass(bond_type, interface):
+            raise exceptions.InvalidBond(bond_name, v1.utils.fqcn(interface))
 
-        bind_config = _validate_type_config(bind_name,
-                                            bind_type,
-                                            bind_config)
+        bond_config = _validate_type_config(bond_name,
+                                            bond_type,
+                                            bond_config)
 
-        bind_provider_name = self._repo.provider_for(bind_name)
-        bind_provider = self._providers[bind_provider_name]
+        bond_provider_name = self._repo.provider_for(bond_name)
+        bond_provider = self._providers[bond_provider_name]
 
-        bound_interfaces = interfaces.bind_to_component(bind_type,
+        bound_interfaces = interfaces.bind_to_component(bond_type,
                                                         component_name,
                                                         component_labels,
                                                         self._bind_to_component)
 
-        return bind_type(bind_config,
-                         bind_provider,
+        return bond_type(bond_config,
+                         bond_provider,
                          component_labels,
                          bound_interfaces,
                          self._context)
@@ -586,31 +586,31 @@ def _load_defaults(providers: [str],
 
     providers.insert(0, "torquetech.io/null-provider")
 
-    provider_binds = []
+    provider_bonds = []
 
     for provider_name in providers:
-        for bind_name, mapped_provider_name in repo.bind_maps().items():
+        for bond_name, mapped_provider_name in repo.bond_maps().items():
             if provider_name == mapped_provider_name:
-                provider_binds.append(bind_name)
+                provider_bonds.append(bond_name)
 
     interfaces = {}
-    binds = {}
+    bonds = {}
 
     for interface_name, interface_class in repo.interfaces().items():
-        bind = None
+        bond = None
 
-        for bind_name in provider_binds:
-            if issubclass(repo.bind(bind_name), interface_class):
-                if not bind:
-                    bind = bind_name
+        for bond_name in provider_bonds:
+            if issubclass(repo.bond(bond_name), interface_class):
+                if not bond:
+                    bond = bond_name
 
-                binds[bind_name] = {
-                    "configuration": repo.bind(bind_name).on_configuration({})
+                bonds[bond_name] = {
+                    "configuration": repo.bond(bond_name).on_configuration({})
                 }
 
-        if bind:
+        if bond:
             interfaces[interface_name] = {
-                "bind": bind
+                "bond": bond
             }
 
     return {
@@ -619,18 +619,18 @@ def _load_defaults(providers: [str],
             name: {
                 "labels": [],
                 "configuration": repo.provider(name).on_configuration({}),
-                "binds": {},
+                "bonds": {},
                 "interfaces": {}
             } for name in providers
         },
-        "binds": binds,
+        "bonds": bonds,
         "interfaces": interfaces,
         "dag": {
             "revision": dag.revision,
             "components": {
                 component.name: {
                     "configuration": repo.component(component.type).on_configuration({}) or {},
-                    "binds": {},
+                    "bonds": {},
                     "interfaces": {}
                 } for component in dag.components.values()
             },

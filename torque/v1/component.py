@@ -51,14 +51,14 @@ class Component:
                  labels: [str],
                  parameters: dict[str, object],
                  configuration: dict[str, object],
-                 binds: object):
+                 bonds: object):
         # pylint: disable=R0913
 
         self.name = name
         self.labels = labels
         self.parameters = parameters
         self.configuration = configuration
-        self.binds = binds
+        self.bonds = bonds
 
         self._torque_lock = threading.Lock()
         self._torque_interfaces = {}
