@@ -67,4 +67,4 @@ class Link(v1.link.Link):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.dst.add(self.source, self.binds.src.link())
+        self.bonds.dst.add(self.source, self.bonds.src.link())

@@ -70,7 +70,7 @@ class Component(v1.component.Component):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.lb.create()
+        self.bonds.lb.create()
 
 
 class Link(v1.link.Link):
@@ -138,7 +138,7 @@ class Link(v1.link.Link):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.ingress.create(self.source,
+        self.bonds.ingress.create(self.source,
                                   self.parameters["path"],
                                   types.NetworkLink(self.source,
-                                                    self.binds.service.link()))
+                                                    self.bonds.service.link()))

@@ -112,7 +112,7 @@ class Component(v1.component.Component):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self._service_link = self.binds.services.create(self.name, "tcp", 9092, 9092)
+        self._service_link = self.bonds.services.create(self.name, "tcp", 9092, 9092)
 
         zk_link = self._zookeeper_link.get()
 
@@ -121,7 +121,7 @@ class Component(v1.component.Component):
             types.KeyValue("ALLOW_PLAINTEXT_LISTENER", "yes")
         ]
 
-        self.binds.deployments.create(self.name,
+        self.bonds.deployments.create(self.name,
                                       "bitnami/kafka:latest",
                                       None,
                                       None,
@@ -156,9 +156,9 @@ class DataLink(volume.Link):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.dst.add(self.source,
-                           self.binds.kafka.data_path(),
-                           self.binds.src.link())
+        self.bonds.dst.add(self.source,
+                           self.bonds.kafka.data_path(),
+                           self.bonds.src.link())
 
 
 class ZookeeperLink(v1.link.Link):
@@ -219,4 +219,4 @@ class ZookeeperLink(v1.link.Link):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.kafka.zookeeper(self.binds.zk.link())
+        self.bonds.kafka.zookeeper(self.bonds.zk.link())

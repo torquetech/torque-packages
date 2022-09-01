@@ -150,12 +150,12 @@ class Component(v1.component.Component):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self._service_link = self.binds.services.create(self.name, "tcp", 80, 80)
+        self._service_link = self.bonds.services.create(self.name, "tcp", 80, 80)
 
-        image = self.binds.images.push(self._image(context))
+        image = self.bonds.images.push(self._image(context))
 
         if not self.configuration["development_mode"]:
-            self.binds.deployments.create(self.name,
+            self.bonds.deployments.create(self.name,
                                           image,
                                           None,
                                           None,
@@ -167,14 +167,14 @@ class Component(v1.component.Component):
                                           None)
 
         else:
-            if not self.binds.development:
+            if not self.bonds.development:
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
                 types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
             ]
 
-            self.binds.development.create_deployment(self.name,
+            self.bonds.development.create_deployment(self.name,
                                                      image,
                                                      None,
                                                      None,

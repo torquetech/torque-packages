@@ -61,7 +61,7 @@ repository = {
             providers.PersistentVolumesProvider,
             providers.HttpIngressLinks
         ],
-        "binds": {
+        "bonds": {
             "demo/k8s": [
                 k8s.Images,
                 k8s.Secrets,

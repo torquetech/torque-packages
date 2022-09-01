@@ -9,7 +9,7 @@ from torque import v1
 from demo import types
 
 
-class Images(v1.bind.Bind):
+class Images(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -20,7 +20,7 @@ class Images(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: push: not implemented")
 
 
-class Secrets(v1.bind.Bind):
+class Secrets(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -31,7 +31,7 @@ class Secrets(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Services(v1.bind.Bind):
+class Services(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -42,7 +42,7 @@ class Services(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Deployments(v1.bind.Bind):
+class Deployments(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -63,7 +63,7 @@ class Deployments(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Development(v1.bind.Bind):
+class Development(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -85,7 +85,7 @@ class Development(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create_deployment: not implemented")
 
 
-class PersistentVolumes(v1.bind.Bind):
+class PersistentVolumes(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -96,7 +96,7 @@ class PersistentVolumes(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpLoadBalancers(v1.bind.Bind):
+class HttpLoadBalancers(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -107,7 +107,7 @@ class HttpLoadBalancers(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class PersistentVolumesProvider(v1.bind.Bind):
+class PersistentVolumesProvider(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -118,7 +118,7 @@ class PersistentVolumesProvider(v1.bind.Bind):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpIngressLinks(v1.bind.Bind):
+class HttpIngressLinks(v1.bond.Bond):
     # pylint: disable=E0211,E0213
 
     """TODO"""

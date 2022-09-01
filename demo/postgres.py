@@ -122,12 +122,12 @@ class Component(v1.component.Component):
 
         password = context.secret(f"{self.name}.postgres-password")
 
-        self._secret_link = self.binds.secrets.create(f"{self.name}_admin", [
+        self._secret_link = self.bonds.secrets.create(f"{self.name}_admin", [
             types.KeyValue("user", "postgres"),
             types.KeyValue("password", password)
         ])
 
-        self._service_link = self.binds.services.create(self.name, "tcp", 5432, 5432)
+        self._service_link = self.bonds.services.create(self.name, "tcp", 5432, 5432)
 
         env = [
             types.KeyValue("PGDATA", f"/data/{self.configuration['version']}")
@@ -137,7 +137,7 @@ class Component(v1.component.Component):
             types.SecretLink("POSTGRES_PASSWORD", "password", self._secret_link)
         ]
 
-        self.binds.deployments.create(self.name,
+        self.bonds.deployments.create(self.name,
                                       self._image(),
                                       None,
                                       None,
@@ -172,6 +172,6 @@ class DataLink(volume.Link):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        self.binds.dst.add(self.source,
-                           self.binds.pg.data_path(),
-                           self.binds.src.link())
+        self.bonds.dst.add(self.source,
+                           self.bonds.pg.data_path(),
+                           self.bonds.src.link())
