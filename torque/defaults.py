@@ -76,28 +76,30 @@ class LocalContext(v1.deployment.Context):
         super().__init__(*args, **kwargs)
 
         self._path = _create_path(self.deployment_name)
-        self._state_path = f"{self._path}/state.yaml"
 
-    def load(self):
+    def load_bucket(self, name: str) -> dict[str, object]:
         """TODO"""
 
-        if not os.path.exists(self._state_path):
-            self._objects = {}
+        bucket_path = f"{self._path}/{name}.yaml"
 
-        else:
-            with open(self._state_path, "r", encoding="utf-8") as file:
-                self._objects = yaml.safe_load(file)
+        if not os.path.exists(bucket_path):
+            return {}
 
-    def store(self):
+        with open(bucket_path, "r", encoding="utf-8") as file:
+            return yaml.safe_load(file)
+
+    def store_bucket(self, name: str, data: dict[str, object]):
         """TODO"""
 
-        with open(f"{self._state_path}.tmp", "w", encoding="utf-8") as file:
-            yaml.safe_dump(self._objects,
+        bucket_path = f"{self._path}/{name}.yaml"
+
+        with open(f"{bucket_path}.tmp", "w", encoding="utf-8") as file:
+            yaml.safe_dump(data,
                            stream=file,
                            default_flow_style=False,
                            sort_keys=False)
 
-        os.replace(f"{self._state_path}.tmp", self._state_path)
+        os.replace(f"{bucket_path}.tmp", bucket_path)
 
     def path(self) -> str:
         """TODO"""

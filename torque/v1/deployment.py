@@ -21,49 +21,66 @@ class Context:
         self.deployment_name = deployment_name
         self.configuration = configuration
 
-        self._objects: dict[str, object] = None
-        self._objects_lock = threading.Lock()
+        self._lock = threading.Lock()
+        self._buckets = {}
 
-    def _get_object(self, type: str, name: str) -> bytes:
+    def _set_data(self, bucket: str, cls: type, name: str, data: object):
         """TODO"""
 
-        # pylint: disable=E1135
-        return self._objects.get(f"{type}-{name}")
+        if bucket not in self._buckets:
+            self._buckets[bucket] = {}
 
-    def _set_object(self, type: str, name: str, data: bytes):
+        bucket = self._buckets[bucket]
+        cls = utils.fqcn(cls)
+
+        if cls not in bucket:
+            bucket[cls] = {}
+
+        bucket[cls][name] = data
+
+    def _get_data(self, bucket: str, cls: type, name: str) -> object:
         """TODO"""
 
-        name = f"{type}-{name}"
+        if bucket not in self._buckets:
+            self._buckets[bucket] = self.load_bucket(bucket)
 
-        # pylint: disable=E1137
-        self._objects[name] = data
+        bucket = self._buckets[bucket]
+        cls = utils.fqcn(cls)
 
-    def get_object(self, type: str, name: str) -> bytes:
+        if cls not in bucket:
+            return None
+
+        return bucket[cls].get(name)
+
+    def get_data(self, bucket: str, cls: type, name: str) -> object:
         """TODO"""
 
-        with self._objects_lock:
-            return self._get_object(type, name)
+        with self._lock:
+            return self._get_data(bucket, cls, name)
 
-    def set_object(self, type: str, name: str, data: bytes):
+    def set_data(self, bucket: str, cls: type, name: str, data: object):
         """TODO"""
 
-        with self._objects_lock:
-            self._set_object(type, name, data)
+        with self._lock:
+            self._set_data(bucket, cls, name, data)
 
-    def secret(self, name: str, length: int = 16) -> str:
+    def secret(self, cls: type, name: str, length: int = 16) -> str:
         """TODO"""
 
-        with self._objects_lock:
-            s = self._get_object("secret", name)
+        with self._lock:
+            s = self._get_data("secrets", cls, name)
 
             if not s:
                 s = secrets.token_urlsafe(length)
-                self._set_object("secret", name, s.encode("utf-8"))
-
-            else:
-                s = s.decode("utf-8")
+                self._set_data("secrets", cls, name, s)
 
             return s
+
+    def store(self):
+        """TODO"""
+
+        for name, data in self._buckets.items():
+            self.store_bucket(name, data)
 
     @classmethod
     def on_configuration(cls, parameters: dict[str, object]) -> dict[str, object]:
@@ -71,12 +88,12 @@ class Context:
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
 
-    def load(self):
+    def load_bucket(self, name: str) -> dict[str, object]:
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: load: not implemented")
 
-    def store(self):
+    def store_bucket(self, name: str, data: dict[str, object]):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: store: not implemented")

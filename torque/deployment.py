@@ -563,10 +563,10 @@ class Deployment:
         """TODO"""
 
         self._configuration.set_revision(self._dag.revision)
-
-        self._context.set_object("configuration",
-                                 "torque-workspace",
-                                 self._configuration.get())
+        self._context.set_data("state",
+                               Deployment,
+                               "configuration",
+                               self._configuration.get())
 
     def store(self):
         """TODO"""
@@ -581,11 +581,7 @@ def _create_context(name: str,
     """TODO"""
 
     context_type = repo.context(type)
-
-    context = context_type(name, config)
-    context.load()
-
-    return context
+    return context_type(name, config)
 
 
 def _load_defaults(providers: [str],
@@ -666,7 +662,7 @@ def _load_configuration(context: v1.deployment.Context,
                         repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
-    config = context.get_object("configuration", "torque-workspace")
+    config = context.get_data("state", Deployment, "configuration")
     defaults = _load_defaults(providers, dag, repo)
 
     if not config:
