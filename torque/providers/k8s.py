@@ -36,9 +36,11 @@ class Provider(v1.provider.Provider):
 
     _CONFIGURATION = {
         "defaults": {
+            "namespace": "default",
             "quiet": True
         },
         "schema": {
+            "namespace": str,
             "quiet": bool
         }
     }
@@ -134,3 +136,8 @@ class Provider(v1.provider.Provider):
                 raise RuntimeError(f"{name}: k8s object already exists")
 
             self._objects[name] = obj
+
+    def namespace(self) -> str:
+        """TODO"""
+
+        return self.configuration["namespace"]
