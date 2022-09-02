@@ -120,7 +120,8 @@ class Component(v1.component.Component):
     def on_apply(self, context: v1.deployment.Context):
         """TODO"""
 
-        password = context.secret(self, f"{self.name}-postgres")
+        with context as ctx:
+            password = ctx.secret(self, f"{self.name}-postgres")
 
         self._secret_link = self.bonds.secrets.create(f"{self.name}_admin", [
             types.KeyValue("user", "postgres"),
