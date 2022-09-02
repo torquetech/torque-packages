@@ -74,8 +74,11 @@ def _build(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
 
-    deployment.build(arguments.workers)
-    deployment.store()
+    try:
+        deployment.build(arguments.workers)
+
+    finally:
+        deployment.store()
 
 
 def _apply(arguments: argparse.Namespace):
@@ -84,8 +87,11 @@ def _apply(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
 
-    deployment.apply(arguments.workers, arguments.dry_run)
-    deployment.store()
+    try:
+        deployment.apply(arguments.workers, arguments.dry_run)
+
+    finally:
+        deployment.store()
 
 
 def _delete(arguments: argparse.Namespace):
@@ -94,8 +100,11 @@ def _delete(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
 
-    deployment.delete(arguments.dry_run)
-    deployment.store()
+    try:
+        deployment.delete(arguments.dry_run)
+
+    finally:
+        deployment.store()
 
 
 def _dot(arguments: argparse.Namespace):
@@ -114,8 +123,11 @@ def _command(arguments: argparse.Namespace, argv: [str]):
 
     deployment = ws.load_deployment(arguments.name)
 
-    deployment.command(arguments.provider, argv)
-    deployment.store()
+    try:
+        deployment.command(arguments.provider, argv)
+
+    finally:
+        deployment.store()
 
 
 def add_arguments(subparsers):
