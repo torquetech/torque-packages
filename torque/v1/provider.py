@@ -5,6 +5,7 @@
 """TODO"""
 
 import threading
+import typing
 
 from . import deployment
 from . import utils
@@ -21,6 +22,8 @@ class Provider:
 
         self._lock = threading.Lock()
         self._data = {}
+        self._pre_apply_hooks = []
+        self._post_apply_hooks = []
 
     def set_data(self, cls: type, name: str, data: object):
         """TODO"""
@@ -44,10 +47,28 @@ class Provider:
 
             return self._data[cls].get(name)
 
+    def add_pre_apply_hook(self, hook: typing.Callable):
+        """TODO"""
+
+        with self._lock:
+            self._pre_apply_hooks.append(hook)
+
+    def add_post_apply_hook(self, hook: typing.Callable):
+        """TODO"""
+
+        with self._lock:
+            self._post_apply_hooks.append(hook)
+
     def apply(self, context: deployment.Context, dry_run: bool):
         """TODO"""
 
+        for hook in self._pre_apply_hooks:
+            hook(context, dry_run)
+
         self.on_apply(context, dry_run)
+
+        for hook in self._pre_apply_hooks:
+            hook(context, dry_run)
 
     def delete(self, context: deployment.Context, dry_run: bool):
         """TODO"""
