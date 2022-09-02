@@ -4,6 +4,8 @@
 
 """TODO"""
 
+import threading
+
 from . import deployment
 from . import utils
 
@@ -16,6 +18,31 @@ class Provider:
                  bonds: object):
         self.configuration = configuration
         self.bonds = bonds
+
+        self._lock = threading.Lock()
+        self._data = {}
+
+    def set_data(self, cls: type, name: str, data: object):
+        """TODO"""
+
+        with self._lock:
+            cls = utils.fqcn(cls)
+
+            if cls not in self._data:
+                self._data[cls] = {}
+
+            self._data[cls][name] = data
+
+    def get_data(self, cls: type, name: str) -> object:
+        """TODO"""
+
+        with self._lock:
+            cls = utils.fqcn(cls)
+
+            if cls not in self._data:
+                return None
+
+            return self._data[cls].get(name)
 
     def apply(self, context: deployment.Context, dry_run: bool):
         """TODO"""
