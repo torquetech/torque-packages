@@ -537,7 +537,7 @@ class Deployment:
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
-            provider.on_apply(self._context, dry_run)
+            provider.apply(self._context, dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""
@@ -545,14 +545,14 @@ class Deployment:
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
-            provider.on_delete(self._context, dry_run)
+            provider.delete(self._context, dry_run)
 
     def command(self, provider: str, argv: [str]):
         """TODO"""
 
         self._setup_providers()
 
-        self._providers[provider].on_command(self._context, argv)
+        self._providers[provider].command(self._context, argv)
 
     def dot(self) -> str:
         """TODO"""

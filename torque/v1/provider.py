@@ -17,6 +17,21 @@ class Provider:
         self.configuration = configuration
         self.bonds = bonds
 
+    def apply(self, context: deployment.Context, dry_run: bool):
+        """TODO"""
+
+        self.on_apply(context, dry_run)
+
+    def delete(self, context: deployment.Context, dry_run: bool):
+        """TODO"""
+
+        self.on_delete(context, dry_run)
+
+    def command(self, context: deployment.Context, argv: [str]):
+        """TODO"""
+
+        self.on_command(context, argv)
+
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
