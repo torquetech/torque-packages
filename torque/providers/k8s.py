@@ -70,7 +70,8 @@ class Provider(v1.provider.Provider):
     def _load_objects(self, context: v1.deployment.Context) -> dict[str, object]:
         """TODO"""
 
-        objects = context.get_data("state", self, "objects")
+        with context as ctx:
+            objects = ctx.get_data("state", self, "objects")
 
         if not objects:
             return {}
@@ -82,7 +83,8 @@ class Provider(v1.provider.Provider):
                        objects: dict[str, object]):
         """TODO"""
 
-        context.set_data("state", self, "objects", objects)
+        with context as ctx:
+            ctx.set_data("state", self, "objects", objects)
 
     def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
