@@ -11,6 +11,44 @@ from . import deployment
 from . import utils
 
 
+class _Provider:
+    """TODO"""
+    def __init__(self, data, pre_apply_hooks, post_apply_hooks):
+        self._data = data
+        self._pre_apply_hooks = pre_apply_hooks
+        self._post_apply_hooks = post_apply_hooks
+
+    def set_data(self, cls: type, name: str, data: object):
+        """TODO"""
+
+        cls = utils.fqcn(cls)
+
+        if cls not in self._data:
+            self._data[cls] = {}
+
+        self._data[cls][name] = data
+
+    def get_data(self, cls: type, name: str) -> object:
+        """TODO"""
+
+        cls = utils.fqcn(cls)
+
+        if cls not in self._data:
+            return None
+
+        return self._data[cls].get(name)
+
+    def add_pre_apply_hook(self, hook: typing.Callable):
+        """TODO"""
+
+        self._pre_apply_hooks.append(hook)
+
+    def add_post_apply_hook(self, hook: typing.Callable):
+        """TODO"""
+
+        self._post_apply_hooks.append(hook)
+
+
 class Provider:
     """TODO"""
 
@@ -25,39 +63,13 @@ class Provider:
         self._pre_apply_hooks = []
         self._post_apply_hooks = []
 
-    def set_data(self, cls: type, name: str, data: object):
-        """TODO"""
+    def __enter__(self):
+        self._lock.acquire()
 
-        with self._lock:
-            cls = utils.fqcn(cls)
+        return _Provider(self._data, self._pre_apply_hooks, self._post_apply_hooks)
 
-            if cls not in self._data:
-                self._data[cls] = {}
-
-            self._data[cls][name] = data
-
-    def get_data(self, cls: type, name: str) -> object:
-        """TODO"""
-
-        with self._lock:
-            cls = utils.fqcn(cls)
-
-            if cls not in self._data:
-                return None
-
-            return self._data[cls].get(name)
-
-    def add_pre_apply_hook(self, hook: typing.Callable):
-        """TODO"""
-
-        with self._lock:
-            self._pre_apply_hooks.append(hook)
-
-    def add_post_apply_hook(self, hook: typing.Callable):
-        """TODO"""
-
-        with self._lock:
-            self._post_apply_hooks.append(hook)
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._lock.release()
 
     def apply(self, context: deployment.Context, dry_run: bool):
         """TODO"""

@@ -563,10 +563,12 @@ class Deployment:
         """TODO"""
 
         self._configuration.set_revision(self._dag.revision)
-        self._context.set_data("state",
-                               Deployment,
-                               "configuration",
-                               self._configuration.get())
+
+        with self._context as ctx:
+            ctx.set_data("state",
+                         Deployment,
+                         "configuration",
+                         self._configuration.get())
 
     def store(self):
         """TODO"""
@@ -662,7 +664,9 @@ def _load_configuration(context: v1.deployment.Context,
                         repo: repository.Repository) -> dict[str, object]:
     """TODO"""
 
-    config = context.get_data("state", Deployment, "configuration")
+    with context as ctx:
+        config = ctx.get_data("state", Deployment, "configuration")
+
     defaults = _load_defaults(providers, dag, repo)
 
     if not config:

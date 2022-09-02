@@ -10,6 +10,53 @@ import threading
 from . import utils
 
 
+class _Context:
+    """TODO"""
+
+    def __init__(self, buckets, load_bucket):
+        self._load_bucket = load_bucket
+        self._buckets = buckets
+
+    def set_data(self, bucket: str, cls: type, name: str, data: object):
+        """TODO"""
+
+        if bucket not in self._buckets:
+            self._buckets[bucket] = {}
+
+        bucket = self._buckets[bucket]
+        cls = utils.fqcn(cls)
+
+        if cls not in bucket:
+            bucket[cls] = {}
+
+        bucket[cls][name] = data
+
+    def get_data(self, bucket: str, cls: type, name: str) -> object:
+        """TODO"""
+
+        if bucket not in self._buckets:
+            self._buckets[bucket] = self._load_bucket(bucket)
+
+        bucket = self._buckets[bucket]
+        cls = utils.fqcn(cls)
+
+        if cls not in bucket:
+            return None
+
+        return bucket[cls].get(name)
+
+    def secret(self, cls: type, name: str, length: int = 16) -> str:
+        """TODO"""
+
+        s = self.get_data("secrets", cls, name)
+
+        if not s:
+            s = secrets.token_urlsafe(length)
+            self.set_data("secrets", cls, name, s)
+
+        return s
+
+
 class Context:
     # pylint: disable=R0902
 
@@ -24,57 +71,13 @@ class Context:
         self._lock = threading.Lock()
         self._buckets = {}
 
-    def _set_data(self, bucket: str, cls: type, name: str, data: object):
-        """TODO"""
+    def __enter__(self):
+        self._lock.acquire()
 
-        if bucket not in self._buckets:
-            self._buckets[bucket] = {}
+        return _Context(self._buckets, self.load_bucket)
 
-        bucket = self._buckets[bucket]
-        cls = utils.fqcn(cls)
-
-        if cls not in bucket:
-            bucket[cls] = {}
-
-        bucket[cls][name] = data
-
-    def _get_data(self, bucket: str, cls: type, name: str) -> object:
-        """TODO"""
-
-        if bucket not in self._buckets:
-            self._buckets[bucket] = self.load_bucket(bucket)
-
-        bucket = self._buckets[bucket]
-        cls = utils.fqcn(cls)
-
-        if cls not in bucket:
-            return None
-
-        return bucket[cls].get(name)
-
-    def get_data(self, bucket: str, cls: type, name: str) -> object:
-        """TODO"""
-
-        with self._lock:
-            return self._get_data(bucket, cls, name)
-
-    def set_data(self, bucket: str, cls: type, name: str, data: object):
-        """TODO"""
-
-        with self._lock:
-            self._set_data(bucket, cls, name, data)
-
-    def secret(self, cls: type, name: str, length: int = 16) -> str:
-        """TODO"""
-
-        with self._lock:
-            s = self._get_data("secrets", cls, name)
-
-            if not s:
-                s = secrets.token_urlsafe(length)
-                self._set_data("secrets", cls, name, s)
-
-            return s
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._lock.release()
 
     def store(self):
         """TODO"""
