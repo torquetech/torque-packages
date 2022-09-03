@@ -5,22 +5,16 @@
 """TODO"""
 
 from torque.bonds.interfaces import k8s as interfaces
-from torque.bonds import k8s as bonds
-from torque.providers import k8s as providers
+from torque.providers import k8s
 
 
 repository = {
     "v1": {
         "providers": {
-            "torquetech.io/k8s": providers.Provider
+            "torquetech.io/k8s": k8s.Provider
         },
         "interfaces": [
             interfaces.KubernetesClient
-        ],
-        "bonds": {
-            "torquetech.io/null-provider": [
-                bonds.SimpleKubernetesClient
-            ]
-        }
+        ]
     }
 }
