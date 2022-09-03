@@ -231,6 +231,10 @@ class Deployment:
             provider_labels = provider_profile["labels"]
             provider_type = self._repo.provider(name)
 
+            provider_config = _validate_type_config(name,
+                                                    provider_type,
+                                                    provider_config)
+
             bound_interfaces = interfaces.bind_to_provider(provider_type,
                                                            name,
                                                            provider_labels,
