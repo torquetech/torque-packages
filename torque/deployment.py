@@ -673,6 +673,7 @@ def load(name: str,
          components: [str],
          context_type: str,
          context_config: dict,
+         strict: bool,
          providers: [str],
          extra_configs: [str],
          dag: model.DAG,
@@ -698,7 +699,10 @@ def load(name: str,
     config = Configuration(config)
 
     if dag.revision != config.revision():
-        print("WARNING: deployment out of date", file=sys.stderr)
+        if strict:
+            raise RuntimeError(f"ERROR: {name}: deployment out of date")
+
+        print(f"WARNING: {name}: deployment out of date", file=sys.stderr)
 
     if components is not None and len(components) == 0:
         raise exceptions.NoComponentsSelected()

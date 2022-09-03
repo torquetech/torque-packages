@@ -52,6 +52,7 @@ _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
                 "type": str,
                 "configuration": dict
             },
+            "strict": bool,
             "providers": [str],
             "extra_configuration": [str],
             "labels": v1.schema.Or([str], None),
@@ -68,6 +69,7 @@ class Deployment:
                  name: str,
                  context_type: str,
                  context_config: dict[str, object],
+                 strict: bool,
                  providers: str,
                  extra_configs: [str],
                  labels: [str],
@@ -75,6 +77,7 @@ class Deployment:
         self.name = name
         self.context_type = context_type
         self.context_config = context_config
+        self.strict = strict
         self.providers = providers
         self.extra_configs = extra_configs
         self.labels = labels
@@ -125,6 +128,7 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
                     "type": deployment.context_type,
                     "configuration": deployment.context_config
                 },
+                "strict": deployment.strict,
                 "providers": deployment.providers,
                 "extra_configuration": deployment.extra_configs or [],
                 "labels": deployment.labels,
@@ -353,6 +357,7 @@ class Workspace:
         deployment = Deployment(name,
                                 context_type,
                                 context_config,
+                                False,
                                 providers,
                                 extra_configs,
                                 labels,
@@ -373,7 +378,8 @@ class Workspace:
 
     def load_deployment(self,
                         name: str,
-                        load_extra_configs: bool = True) -> deployment.Deployment:
+                        load_extra_configs: bool = True,
+                        strict: bool = None) -> deployment.Deployment:
         """TODO"""
 
         name = self._get_full_deployment_name(name)
@@ -388,6 +394,7 @@ class Workspace:
                                components,
                                d.context_type,
                                d.context_config,
+                               strict if strict is not None else d.strict,
                                d.providers,
                                d.extra_configs if load_extra_configs else [],
                                self.dag,
@@ -567,6 +574,7 @@ def _load_deployments(path: str) -> dict[str, Deployment]:
         name: Deployment(name,
                          deployment["context"]["type"],
                          deployment["context"]["configuration"],
+                         deployment["strict"],
                          deployment["providers"],
                          deployment["extra_configuration"],
                          deployment["labels"],
