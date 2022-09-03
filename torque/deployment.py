@@ -594,11 +594,6 @@ def _load_defaults(providers: [str],
     if len(set(providers)) != len(providers):
         raise RuntimeError("provider specified more than once")
 
-    providers = list(filter(lambda x: x != "torquetech.io/null-provider",
-                            providers))
-
-    providers.insert(0, "torquetech.io/null-provider")
-
     provider_bonds = []
 
     for provider_name in providers:

@@ -105,35 +105,3 @@ class LocalContext(v1.deployment.Context):
         """TODO"""
 
         return self._path
-
-
-class NullProvider(v1.provider.Provider):
-    """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
-    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
-        """TODO"""
-
-    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
-        """TODO"""
-
-    def on_command(self, context: v1.deployment.Context, argv: [str]):
-        """TODO"""
