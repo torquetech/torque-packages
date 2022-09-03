@@ -4,9 +4,10 @@
 
 """TODO"""
 
+import kubernetes
+
 from torque import v1
-from torque.bonds.interfaces import k8s
-from torque.providers import k8slib
+from torque import k8slib
 
 
 def _resolve_futures(obj: object) -> object:
@@ -29,6 +30,13 @@ def _resolve_futures(obj: object) -> object:
         return _resolve_futures(obj())
 
     return obj
+
+
+class KubernetesClientInterface(v1.bond.Bond):
+    """TODO"""
+
+    def connect(self) -> kubernetes.client.ApiClient:
+        """TODO"""
 
 
 class Provider(v1.provider.Provider):
@@ -59,7 +67,7 @@ class Provider(v1.provider.Provider):
 
         return {
             "client": {
-                "interface": k8s.KubernetesClient,
+                "interface": KubernetesClientInterface,
                 "required": True
             }
         }
@@ -141,3 +149,15 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         return self.configuration["namespace"]
+
+
+repository = {
+    "v1": {
+        "interfaces": [
+            KubernetesClientInterface
+        ],
+        "providers": {
+            "torquetech.io/k8s": Provider
+        }
+    }
+}
