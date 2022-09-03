@@ -225,23 +225,20 @@ class Deployment:
         self._providers = {}
 
         for name in self._configuration.providers():
-            provider_profile = self._configuration.provider(name)
+            profile = self._configuration.provider(name)
 
-            provider_config = provider_profile["configuration"]
-            provider_labels = provider_profile["labels"]
-            provider_type = self._repo.provider(name)
+            config = profile["configuration"]
+            labels = profile["labels"]
+            type = self._repo.provider(name)
 
-            provider_config = _validate_type_config(name,
-                                                    provider_type,
-                                                    provider_config)
+            config = _validate_type_config(name, type, config)
 
-            bound_interfaces = interfaces.bind_to_provider(provider_type,
-                                                           name,
-                                                           provider_labels,
-                                                           self._bind_to_provider)
+            bonds = interfaces.bind_to_provider(type,
+                                                name,
+                                                labels,
+                                                self._bind_to_provider)
 
-            self._providers[name] = provider_type(provider_config,
-                                                  bound_interfaces)
+            self._providers[name] = type(config, bonds)
 
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -250,27 +247,26 @@ class Deployment:
             return self._components[name]
 
         component = self._dag.components[name]
-        component_profile = self._configuration.component(name)
+        profile = self._configuration.component(name)
 
-        component_config = component_profile["configuration"]
-        component_type = self._repo.component(component.type)
+        config = profile["configuration"]
+        type = self._repo.component(component.type)
 
-        component_config = _validate_type_config(component.name,
-                                                 component_type,
-                                                 component_config)
+        config = _validate_type_config(component.name, type, config)
 
-        bound_interfaces = interfaces.bind_to_component(component_type,
-                                                        component.name,
-                                                        component.labels,
-                                                        self._bind_to_component)
+        bonds = interfaces.bind_to_component(type,
+                                             component.name,
+                                             component.labels,
+                                             self._bind_to_component)
 
-        component = component_type(component.name,
-                                   component.labels,
-                                   component.parameters,
-                                   component_config,
-                                   bound_interfaces)
+        component = type(component.name,
+                         component.labels,
+                         component.parameters,
+                         config,
+                         bonds)
 
         self._components[component.name] = component
+
         return component
 
     def _link(self, name: str) -> v1.link.Link:
@@ -280,32 +276,31 @@ class Deployment:
             return self._links[name]
 
         link = self._dag.links[name]
-        link_profile = self._configuration.link(name)
+        profile = self._configuration.link(name)
 
-        link_config = link_profile["configuration"]
-        link_type = self._repo.link(link.type)
+        config = profile["configuration"]
+        type = self._repo.link(link.type)
 
-        link_config = _validate_type_config(link.name,
-                                            link_type,
-                                            link_config)
+        config = _validate_type_config(link.name, type, config)
 
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        bound_interfaces = interfaces.bind_to_link(link_type,
-                                                   link.name,
-                                                   source,
-                                                   destination,
-                                                   self._bind_to_link)
+        bonds = interfaces.bind_to_link(type,
+                                        link.name,
+                                        source,
+                                        destination,
+                                        self._bind_to_link)
 
-        link = link_type(link.name,
-                         link.parameters,
-                         link_config,
-                         bound_interfaces,
-                         source.name,
-                         destination.name)
+        link = type(link.name,
+                    link.parameters,
+                    config,
+                    bonds,
+                    source.name,
+                    destination.name)
 
         self._links[link.name] = link
+
         return link
 
     def _get_bond_for(self,
