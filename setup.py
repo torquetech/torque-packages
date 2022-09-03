@@ -30,8 +30,6 @@ setup(name="torque-k8s-config-provider",
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
       ],
       packages=[
-          "torque/bonds",
-          "torque/providers",
           "torque"
       ],
       python_requires=">=3.9",
@@ -40,7 +38,7 @@ setup(name="torque-k8s-config-provider",
       ],
       entry_points={
           "torque": [
-              "torque-k8s-config-provider=torque.k8s_config_provider:repository"
+              "torque-k8s-config-provider=torque.k8s_config:repository"
           ]
       }
 )
