@@ -114,7 +114,7 @@ class Provider(v1.provider.Provider):
             if "namespace" in obj["metadata"]:
                 name = f"{obj['metadata']['namespace']}/"
 
-            name += f"{obj['metadata']['name']}"
+            name += f"{obj['kind']}/{obj['metadata']['name']}"
 
             if name in self._objects:
                 raise RuntimeError(f"{name}: k8s object already exists")
