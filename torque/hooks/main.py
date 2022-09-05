@@ -8,9 +8,28 @@ import argparse
 import os
 import sys
 
+import yaml
+
 from torque import commands
 from torque import exceptions
 from torque import v1
+
+
+def fix_pyyaml():
+    """TODO"""
+
+    # Credits for the code in this function:
+    # https://stackoverflow.com/a/33300001
+
+    def str_presenter(dumper, data):
+        """TODO"""
+
+        if len(data.splitlines()) > 1:
+            return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+    yaml.representer.SafeRepresenter.add_representer(str, str_presenter)
 
 
 def fix_paths():
@@ -29,6 +48,10 @@ def main() -> int:
     # name as some torque and/or system module. Fix it here until it's
     # fixed upstream.
     fix_paths()
+
+    # Make all yaml.safe_dump() calls check if a string literal
+    # is multi-line or not and use '|' style if it is.
+    fix_pyyaml()
 
     argv = sys.argv[1:]
     unparsed_argv = []
