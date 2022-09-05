@@ -69,7 +69,8 @@ def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
     return obj1 != obj2, diff
 
 
-def _update_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
+def _update_object(client: kubernetes.client.ApiClient,
+                   obj: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
     api = _get_api_for(client, obj)
@@ -103,6 +104,8 @@ def _update_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
 
         else:
             create(obj)
+
+    return obj
 
 
 def _delete_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
@@ -147,8 +150,7 @@ def apply_objects(client: kubernetes.client.ApiClient,
         if not quiet:
             print(diff, file=sys.stdout)
 
-        _update_object(client, new_obj)
-        objects[name] = new_obj
+        objects[name] = _update_object(client, new_obj)
 
     for name, obj in list(objects.items()):
         if name in new_objects:
