@@ -11,6 +11,8 @@ import sys
 import kubernetes
 import yaml
 
+from torque import v1
+
 
 UPPER_FOLLOWED_BY_LOWER_RE = re.compile('(.)([A-Z][a-z]+)')
 LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE = re.compile('([a-z0-9])([A-Z])')
@@ -129,7 +131,9 @@ def apply_objects(client: kubernetes.client.ApiClient,
 
     for name, obj in new_objects.items():
         old_obj = objects.get(name, None)
-        changed, diff = _diff(name, old_obj, obj)
+        new_obj = v1.utils.resolve_futures(obj)
+
+        changed, diff = _diff(name, old_obj, new_obj)
 
         if not changed:
             if not quiet:
@@ -143,8 +147,8 @@ def apply_objects(client: kubernetes.client.ApiClient,
         if not quiet:
             print(diff, file=sys.stdout)
 
-        _update_object(client, obj)
-        objects[name] = obj
+        _update_object(client, new_obj)
+        objects[name] = new_obj
 
     for name, obj in list(objects.items()):
         if name in new_objects:

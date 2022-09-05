@@ -10,28 +10,6 @@ from torque import v1
 from torque import k8slib
 
 
-def _resolve_futures(obj: object) -> object:
-    """TODO"""
-
-    if isinstance(obj, dict):
-        return {
-            k: _resolve_futures(v) for k, v in obj.items()
-        }
-
-    if isinstance(obj, list):
-        return [
-            _resolve_futures(v) for v in obj
-        ]
-
-    if isinstance(obj, v1.utils.Future):
-        return _resolve_futures(obj.get())
-
-    if callable(obj):
-        return _resolve_futures(obj())
-
-    return obj
-
-
 class KubernetesClientInterface(v1.bond.Bond):
     """TODO"""
 
@@ -101,8 +79,6 @@ class Provider(v1.provider.Provider):
 
         client = self.bonds.client.connect()
         objects = self._load_objects(context)
-
-        self._objects = _resolve_futures(self._objects)
 
         try:
             k8slib.apply_objects(client,
