@@ -150,6 +150,9 @@ class Future(typing.Generic[T]):
             while self._value is None:
                 self._condition.wait()
 
+            while callable(self._value):
+                self._value = self._value()
+
             return self._value
 
     def set(self, value: object):
@@ -177,8 +180,5 @@ def resolve_futures(obj: object) -> object:
 
     if isinstance(obj, Future):
         return resolve_futures(obj.get())
-
-    if callable(obj):
-        return resolve_futures(obj())
 
     return obj
