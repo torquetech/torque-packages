@@ -8,28 +8,6 @@ from torque import v1
 from torque import dolib
 
 
-def _resolve_futures(obj: object) -> object:
-    """TODO"""
-
-    if isinstance(obj, dict):
-        return {
-            k: _resolve_futures(v) for k, v in obj.items()
-        }
-
-    if isinstance(obj, list):
-        return [
-            _resolve_futures(v) for v in obj
-        ]
-
-    if isinstance(obj, v1.utils.Future):
-        return _resolve_futures(obj.get())
-
-    if callable(obj):
-        return _resolve_futures(obj())
-
-    return obj
-
-
 class Provider(v1.provider.Provider):
     """TODO"""
 
