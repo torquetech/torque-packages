@@ -160,3 +160,25 @@ class Future(typing.Generic[T]):
 
             self._value = value
             self._condition.notify_all()
+
+
+def resolve_futures(obj: object) -> object:
+    """TODO"""
+
+    if isinstance(obj, dict):
+        return {
+            k: resolve_futures(v) for k, v in obj.items()
+        }
+
+    if isinstance(obj, list):
+        return [
+            resolve_futures(v) for v in obj
+        ]
+
+    if isinstance(obj, Future):
+        return resolve_futures(obj.get())
+
+    if callable(obj):
+        return resolve_futures(obj())
+
+    return obj
