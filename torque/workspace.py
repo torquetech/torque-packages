@@ -22,6 +22,10 @@ from torque import v1
 _PROTO = r"^([^:]+)://"
 _NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
+_MAX_DEPLOYMENT_NAME_LENGTH = 16
+_MAX_COMPONENT_NAME_LENGTH = 16
+_MAX_LINK_NAME_LENGTH = 33
+
 _WORKSPACE_SCHEMA = v1.schema.Schema({
     "version": str,
     "dag": {
@@ -338,6 +342,9 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
+        if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
+            raise RuntimeError("{name}: deployment name too long")
+
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         context = self.repo.context(context_type)
 
@@ -412,6 +419,9 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
+        if len(name) > _MAX_COMPONENT_NAME_LENGTH:
+            raise RuntimeError("{name}: component name too long")
+
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         component_type = self.repo.component(type)
 
@@ -458,6 +468,9 @@ class Workspace:
         # pylint: disable=W0622,R0913
 
         """TODO"""
+
+        if len(name) > _MAX_LINK_NAME_LENGTH:
+            raise RuntimeError("{name}: link name too long")
 
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
