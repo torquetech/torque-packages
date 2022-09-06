@@ -193,7 +193,6 @@ class Provider(v1.provider.Provider):
 
 repository = {
     "v1": {
-        "interfaces": [],
         "providers": {
             "torquetech.io/do": Provider
         }
