@@ -23,26 +23,27 @@ class Client:
             "Authorization": f"Bearer {token}"
         }
 
-    def post(self, path: str, json: object) -> object:
+    def post(self, path: str, params: object) -> object:
         """TODO"""
 
         return self._session.post(f"{self._endpoint}/{path}",
                                   headers=self._headers,
-                                  json=json)
+                                  json=params)
 
 
-    def put(self, path: str, json: object) -> object:
+    def put(self, path: str, params: object) -> object:
         """TODO"""
 
         return self._session.put(f"{self._endpoint}/{path}",
                                  headers=self._headers,
-                                 json=json)
+                                 json=params)
 
-    def get(self, path: str) -> object:
+    def get(self, path: str, params=None) -> object:
         """TODO"""
 
         return self._session.get(f"{self._endpoint}/{path}",
-                                 headers=self._headers)
+                                 headers=self._headers,
+                                 params=params)
 
     def delete(self, path: str) -> object:
         """TODO"""
