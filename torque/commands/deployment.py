@@ -137,7 +137,7 @@ def add_arguments(subparsers):
     parser.add_argument("--deployments",
                         default=f"{v1.utils.torque_root()}/.torque/deployments.yaml",
                         metavar="PATH",
-                        help="deployments path")
+                        help="deployments path, default: %(default)s")
 
     subparsers = parser.add_subparsers(required=True,
                                        dest="deployment_cmd",
