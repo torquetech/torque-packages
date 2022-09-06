@@ -126,17 +126,17 @@ def _delete_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
             raise
 
 
-def apply_objects(client: kubernetes.client.ApiClient,
-                  objects: dict[str, object],
-                  new_objects: dict[str, object],
-                  quiet: bool):
+def apply(client: kubernetes.client.ApiClient,
+          current_state: dict[str, object],
+          new_state: dict[str, object],
+          quiet: bool):
     """TODO"""
 
-    for name, obj in new_objects.items():
-        old_obj = objects.get(name, None)
-        new_obj = v1.utils.resolve_futures(obj)
+    for name, new_obj in new_state.items():
+        current_obj = current_state.get(name, None)
+        new_obj = v1.utils.resolve_futures(new_obj)
 
-        changed, diff = _diff(name, old_obj, new_obj)
+        changed, diff = _diff(name, current_obj, new_obj)
 
         if not changed:
             if not quiet:
@@ -150,19 +150,19 @@ def apply_objects(client: kubernetes.client.ApiClient,
         if not quiet:
             print(diff, file=sys.stdout)
 
-        objects[name] = _update_object(client, new_obj)
+        current_state[name] = _update_object(client, new_obj)
 
-    for name, obj in list(objects.items()):
-        if name in new_objects:
+    for name, current_obj in list(current_state.items()):
+        if name in new_state:
             continue
 
         if not quiet:
             print(f"{name}: deleting...", file=sys.stdout)
 
-        _, diff = _diff(name, obj, None)
+        _, diff = _diff(name, current_obj, None)
 
         if not quiet:
             print(diff, file=sys.stdout)
 
-        _delete_object(client, obj)
-        objects.pop(name)
+        _delete_object(client, current_obj)
+        current_state.pop(name)

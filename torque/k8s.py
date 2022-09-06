@@ -53,56 +53,50 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._objects = {}
+        self._current_state = {}
+        self._new_state = {}
 
-    def _load_objects(self, context: v1.deployment.Context) -> dict[str, object]:
+    def _load_state(self, context: v1.deployment.Context) -> dict[str, object]:
         """TODO"""
 
         with context as ctx:
-            objects = ctx.get_data("state", self, "objects")
+            self._current_state = ctx.get_data("state", self, "state") or {}
 
-        if not objects:
-            return {}
-
-        return objects
-
-    def _store_objects(self,
-                       context: v1.deployment.Context,
-                       objects: dict[str, object]):
+    def _store_state(self, context: v1.deployment.Context):
         """TODO"""
 
         with context as ctx:
-            ctx.set_data("state", self, "objects", objects)
+            ctx.set_data("state", self, "state", self._current_state)
 
     def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
         client = self.bonds.client.connect()
-        objects = self._load_objects(context)
+        self._load_state(context)
 
         try:
-            k8slib.apply_objects(client,
-                                 objects,
-                                 self._objects,
-                                 self.configuration["quiet"])
+            k8slib.apply(client,
+                         self._current_state,
+                         self._new_state,
+                         self.configuration["quiet"])
 
         finally:
-            self._store_objects(context, objects)
+            self._store_state(context)
 
     def on_delete(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
 
         client = self.bonds.client.connect()
-        objects = self._load_objects(context)
+        self._load_state(context)
 
         try:
-            k8slib.apply_objects(client,
-                                 objects,
-                                 {},
-                                 self.configuration["quiet"])
+            k8slib.apply(client,
+                         self._current_state,
+                         self._new_state,
+                         self.configuration["quiet"])
 
         finally:
-            self._store_objects(context, objects)
+            self._store_state(context)
 
     def on_command(self, context: v1.deployment.Context, argv: [str]):
         """TODO"""
@@ -116,10 +110,10 @@ class Provider(v1.provider.Provider):
 
             name += f"{obj['kind']}/{obj['metadata']['name']}"
 
-            if name in self._objects:
+            if name in self._new_state:
                 raise RuntimeError(f"{name}: k8s object already exists")
 
-            self._objects[name] = obj
+            self._new_state[name] = obj
 
     def namespace(self) -> str:
         """TODO"""
