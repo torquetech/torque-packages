@@ -7,7 +7,6 @@
 import inspect
 import os
 import pathlib
-import threading
 import typing
 
 from . import schema as schema_v1
@@ -135,34 +134,19 @@ def validate_schema(schema: object, defaults: object, instance: object) -> objec
 
 T = typing.TypeVar("T")
 
-
 class Future(typing.Generic[T]):
     """TODO"""
 
-    def __init__(self, value=None):
-        self._condition = threading.Condition()
-        self._value = value
+    def __init__(self, callback: typing.Callable):
+        self._callback = callback
+        self._cached_value = None
 
-    def get(self):
-        """TODO"""
+    def __call__(self):
+        if self._callback:
+            self._cached_value = self._callback()
+            self._callback = None
 
-        with self._condition:
-            while self._value is None:
-                self._condition.wait()
-
-            while callable(self._value):
-                self._value = self._value()
-
-            return self._value
-
-    def set(self, value: object):
-        """TODO"""
-
-        with self._condition:
-            assert self._value is None
-
-            self._value = value
-            self._condition.notify_all()
+        return self._cached_value
 
 
 def resolve_futures(obj: object) -> object:
@@ -179,6 +163,6 @@ def resolve_futures(obj: object) -> object:
         ]
 
     if isinstance(obj, Future):
-        return resolve_futures(obj.get())
+        return resolve_futures(obj())
 
     return obj
