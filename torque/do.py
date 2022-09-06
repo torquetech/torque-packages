@@ -44,8 +44,8 @@ class Provider(v1.provider.Provider):
 
         self._params = None
 
-        self._project_id = None
-        self._vpc_id = None
+        self._project = None
+        self._vpc = None
 
         self._current_state = {}
         self._new_state = {}
@@ -85,8 +85,8 @@ class Provider(v1.provider.Provider):
 
         client = self._connect()
 
-        self._project_id = dolib.setup_project(client, self._params["project_name"])
-        self._vpc_id = dolib.setup_vpc(client, self._params["vpc_name"], self._params["region"])
+        self._project = dolib.setup_project(client, self._params["project_name"])
+        self._vpc = dolib.setup_vpc(client, self._params["vpc_name"], self._params["region"])
 
         self._load_state(context)
 
@@ -144,15 +144,27 @@ class Provider(v1.provider.Provider):
 
             ctx.set_data("state", self, "parameters", params)
 
-    def project_id(self) -> str:
+    def _resolve_project_id(self):
+        if not self._project:
+            return "<project_id>"
+
+        return self._project["id"]
+
+    def _resolve_vpc_id(self):
+        if not self._vpc:
+            return "<vpc_id>"
+
+        return self._vpc["id"]
+
+    def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._project_id
+        return v1.utils.Future(self._resolve_project_id)
 
     def vpc_id(self) -> str:
         """TODO"""
 
-        return self._vpc_id
+        return v1.utils.Future(self._resolve_vpc_id)
 
     def region(self) -> str:
         """TODO"""

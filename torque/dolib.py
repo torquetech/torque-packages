@@ -94,7 +94,7 @@ def connect(endpoint: str, token: str) -> Client:
     return Client(endpoint, token)
 
 
-def setup_project(client: Client, name: str) -> str:
+def setup_project(client: Client, name: str) -> dict[str, object]:
     """TODO"""
 
     res = client.get("v2/projects")
@@ -105,7 +105,7 @@ def setup_project(client: Client, name: str) -> str:
 
     for project in data["projects"]:
         if name == project["name"]:
-            return project["id"]
+            return project
 
     params = {
         "name": name,
@@ -119,10 +119,10 @@ def setup_project(client: Client, name: str) -> str:
     if res.status_code != 201:
         raise RuntimeError(f"{name}: {data['message']}")
 
-    return data["project"]["id"]
+    return data["project"]
 
 
-def setup_vpc(client: Client, name: str, region: str) -> (str, str):
+def setup_vpc(client: Client, name: str, region: str) -> dict[str, object]:
     """TODO"""
 
     page = 0
@@ -143,7 +143,7 @@ def setup_vpc(client: Client, name: str, region: str) -> (str, str):
 
         for vpc in data["vpcs"]:
             if name == vpc["name"]:
-                return vpc["id"]
+                return vpc
 
         if len(data["vpcs"]) != 20:
             break
@@ -159,7 +159,7 @@ def setup_vpc(client: Client, name: str, region: str) -> (str, str):
     if res.status_code != 201:
         raise RuntimeError(f"{name}: {data['message']}")
 
-    return data["vpc"]["id"]
+    return data["vpc"]
 
 
 def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
