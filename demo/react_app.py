@@ -108,7 +108,7 @@ class Component(v1.component.Component):
 
         return f"{context.deployment_name}-component-{self.name}:{self._get_version()}"
 
-    def _link(self) -> v1.utils.Future[object]:
+    def _link(self) -> utils.Future[object]:
         """TODO"""
 
         return self._service_link
@@ -171,7 +171,7 @@ class Component(v1.component.Component):
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
-                types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
+                types.VolumeLink("app", "/app", utils.Future(self.parameters["path"]))
             ]
 
             self.bonds.development.create_deployment(self.name,

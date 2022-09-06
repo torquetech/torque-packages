@@ -5,6 +5,8 @@
 """TODO"""
 
 import os
+import threading
+import typing
 
 
 def load_file(name: str) -> str:
@@ -27,3 +29,34 @@ def normalize(name: str) -> str:
     name = name.replace(".", "-")
 
     return name
+
+
+T = typing.TypeVar("T")
+
+class Future(typing.Generic[T]):
+    """TODO"""
+
+    def __init__(self, value=None):
+        self._condition = threading.Condition()
+        self._value = value
+
+    def get(self):
+        """TODO"""
+
+        with self._condition:
+            while self._value is None:
+                self._condition.wait()
+
+            while callable(self._value):
+                self._value = self._value()
+
+            return self._value
+
+    def set(self, value: object):
+        """TODO"""
+
+        with self._condition:
+            assert self._value is None
+
+            self._value = value
+            self._condition.notify_all()

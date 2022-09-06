@@ -14,6 +14,7 @@ import typing
 from torque import v1
 
 from demo import providers
+from demo import utils
 
 
 class _Block:
@@ -142,7 +143,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
 
         return {}
 
-    def create(self, name: str, size: int) -> v1.utils.Future[str]:
+    def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
 
         name = f"{self.context.deployment_name}.{name}"
@@ -154,7 +155,7 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
             _Key("size"): _Int(size)
         })
 
-        def resolve_future(future: v1.utils.Future[object], state: dict):
+        def resolve_future(future: utils.Future[object], state: dict):
             if state is None:
                 future.set(f"<{name}_id>")
                 return
@@ -314,10 +315,10 @@ class Provider(v1.provider.Provider):
         with self._lock:
             self._targets[key] = value
 
-    def add_future(self, resolve_future: typing.Callable) -> v1.utils.Future[object]:
+    def add_future(self, resolve_future: typing.Callable) -> utils.Future[object]:
         """TODO"""
 
-        future = v1.utils.Future()
+        future = utils.Future()
 
         with self._lock:
             self._futures.append(functools.partial(resolve_future, future))

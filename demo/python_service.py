@@ -9,6 +9,7 @@ from torque import v1
 from demo import components
 from demo import providers
 from demo import python_app
+from demo import utils
 
 
 class Component(python_app.Component):
@@ -40,7 +41,7 @@ class Component(python_app.Component):
 
         self._service_link = None
 
-    def _link(self) -> v1.utils.Future[object]:
+    def _link(self) -> utils.Future[object]:
         """TODO"""
 
         return self._service_link

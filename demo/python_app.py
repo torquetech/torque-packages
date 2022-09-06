@@ -106,19 +106,19 @@ class Component(v1.component.Component):
 
         return f"{context.deployment_name}-component-{self.name}:{self._get_version()}"
 
-    def _add_network_link(self, name: str, link: v1.utils.Future[object]):
+    def _add_network_link(self, name: str, link: utils.Future[object]):
         """TODO"""
 
         link = types.NetworkLink(name, link)
         self._network_links.append(link)
 
-    def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
+    def _add_volume_link(self, name: str, mount_path: str, link: utils.Future[object]):
         """TODO"""
 
         link = types.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
-    def _add_secret_link(self, name: str, key: str, link: v1.utils.Future[object]):
+    def _add_secret_link(self, name: str, key: str, link: utils.Future[object]):
         """TODO"""
 
         link = types.SecretLink(name, key, link)
@@ -211,7 +211,7 @@ class Component(v1.component.Component):
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
-                types.VolumeLink("app", "/app", v1.utils.Future(self.parameters["path"]))
+                types.VolumeLink("app", "/app", utils.Future(self.parameters["path"]))
             ]
 
             self.bonds.development.create_deployment(self.name,

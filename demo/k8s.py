@@ -108,14 +108,14 @@ class Secrets(providers.Secrets):
             "type": "Opaque"
         }
 
-    def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
+    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
 
         self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name, entries)
         ])
 
-        return v1.utils.Future(name)
+        return utils.Future(name)
 
 
 class Services(providers.Services):
@@ -163,14 +163,14 @@ class Services(providers.Services):
             }
         }
 
-    def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
+    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
         self.provider.add_to_target(f"component_{name}", [
             self._k8s_create(name, type, port, target_port),
         ])
 
-        return v1.utils.Future((type.lower(), name, port))
+        return utils.Future((type.lower(), name, port))
 
 
 class Deployments(providers.Deployments):
@@ -401,10 +401,10 @@ class PersistentVolumes(providers.PersistentVolumes):
             }
         }
 
-    def create(self, name: str, size: int) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
-        return v1.utils.Future({
+        return utils.Future({
             "name": utils.normalize(name),
             "awsElasticBlockStore": {
                 "volumeID": self.bonds.vol.create(name, size),
@@ -533,7 +533,7 @@ def _process_futures(obj: object) -> object:
             _process_futures(v) for v in obj
         ]
 
-    if isinstance(obj, v1.utils.Future):
+    if isinstance(obj, utils.Future):
         return _process_futures(obj.get())
 
     if callable(obj):

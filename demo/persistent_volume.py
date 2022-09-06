@@ -8,6 +8,7 @@ from torque import v1
 
 from demo import components
 from demo import providers
+from demo import utils
 
 
 def _validate_size(size: object) -> int:
@@ -71,7 +72,7 @@ class Component(v1.component.Component):
 
         self._volume_link = None
 
-    def _link(self) -> v1.utils.Future[object]:
+    def _link(self) -> utils.Future[object]:
         """TODO"""
 
         return self._volume_link

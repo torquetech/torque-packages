@@ -7,6 +7,7 @@
 from torque import v1
 
 from demo import types
+from demo import utils
 
 
 class Images(v1.bond.Bond):
@@ -25,7 +26,7 @@ class Secrets(v1.bond.Bond):
 
     """TODO"""
 
-    def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
+    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
@@ -36,7 +37,7 @@ class Services(v1.bond.Bond):
 
     """TODO"""
 
-    def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
+    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
@@ -90,7 +91,7 @@ class PersistentVolumes(v1.bond.Bond):
 
     """TODO"""
 
-    def create(self, name: str, size: int) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
@@ -112,7 +113,7 @@ class PersistentVolumesProvider(v1.bond.Bond):
 
     """TODO"""
 
-    def create(self, name: str, size: int) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")

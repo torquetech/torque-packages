@@ -17,6 +17,7 @@ from torque import v1
 
 from demo import providers
 from demo import types
+from demo import utils
 
 
 LoadBalancerLink = collections.namedtuple("LoadBalancerLink", [
@@ -89,10 +90,10 @@ class Secrets(providers.Secrets):
 
         return {}
 
-    def create(self, name: str, entries: [types.KeyValue]) -> v1.utils.Future[object]:
+    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
 
-        return v1.utils.Future(entries)
+        return utils.Future(entries)
 
 
 class Services(providers.Services):
@@ -117,10 +118,10 @@ class Services(providers.Services):
 
         return {}
 
-    def create(self, name: str, type: str, port: int, target_port: int) -> v1.utils.Future[object]:
+    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
-        return v1.utils.Future((type.lower(), name, port))
+        return utils.Future((type.lower(), name, port))
 
 
 class Deployments(providers.Deployments):
@@ -252,12 +253,12 @@ class PersistentVolumes(providers.PersistentVolumes):
 
         return {}
 
-    def create(self, name: str, size: int) -> v1.utils.Future[object]:
+    def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
         self.provider.add_volume(name)
 
-        return v1.utils.Future(name)
+        return utils.Future(name)
 
 
 class PersistentVolumesProvider(providers.PersistentVolumesProvider):
@@ -282,10 +283,10 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
 
         return {}
 
-    def create(self, name: str, size: int) -> v1.utils.Future[str]:
+    def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
 
-        return v1.utils.Future("<ignored_value>")
+        return utils.Future("<ignored_value>")
 
 
 class HttpLoadBalancers(providers.HttpLoadBalancers):

@@ -10,6 +10,7 @@ from demo import components
 from demo import providers
 from demo import types
 from demo import volume
+from demo import utils
 
 
 class Component(v1.component.Component):
@@ -66,13 +67,13 @@ class Component(v1.component.Component):
     def _image(self) -> str:
         return f"postgres:{self.configuration['version']}"
 
-    def _add_volume_link(self, name: str, mount_path: str, link: v1.utils.Future[object]):
+    def _add_volume_link(self, name: str, mount_path: str, link: utils.Future[object]):
         """TODO"""
 
         link = types.VolumeLink(name, mount_path, link)
         self._volume_links.append(link)
 
-    def _link(self) -> v1.utils.Future[object]:
+    def _link(self) -> utils.Future[object]:
         """TODO"""
 
         return self._service_link
@@ -82,7 +83,7 @@ class Component(v1.component.Component):
 
         return "/bitnami/kafka"
 
-    def _zookeeper(self, link: v1.utils.Future[object]):
+    def _zookeeper(self, link: utils.Future[object]):
         """TODO"""
 
         if self._zookeeper_link:
