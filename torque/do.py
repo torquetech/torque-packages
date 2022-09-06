@@ -182,7 +182,7 @@ class Provider(v1.provider.Provider):
 
             self._new_state[name] = obj
 
-    def future(self, name: str, func: typing.Callable) -> v1.utils.Future:
+    def future(self, name: str, func: typing.Callable) -> v1.utils.Future[object]:
         """TODO"""
 
         def resolve_future():
