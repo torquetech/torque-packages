@@ -44,6 +44,9 @@ class Provider(v1.provider.Provider):
 
         self._params = None
 
+        self._project_id = None
+        self._vpc_id = None
+
         self._current_state = {}
         self._new_state = {}
 
@@ -81,6 +84,10 @@ class Provider(v1.provider.Provider):
         self._load_params(context)
 
         client = self._connect()
+
+        self._project_id = dolib.setup_project(client, self._params["project_name"])
+        self._vpc_id = dolib.setup_vpc(client, self._params["vpc_name"], self._params["region"])
+
         self._load_state(context)
 
         try:
@@ -131,9 +138,21 @@ class Provider(v1.provider.Provider):
             params = {
                 "endpoint": args.endpoint,
                 "region": args.region,
+                "project_name": context.deployment_name,
+                "vpc_name": f"{context.deployment_name}-{args.region}"
             }
 
             ctx.set_data("state", self, "parameters", params)
+
+    def project_id(self) -> str:
+        """TODO"""
+
+        return self._project_id
+
+    def vpc_id(self) -> str:
+        """TODO"""
+
+        return self._vpc_id
 
     def region(self) -> str:
         """TODO"""

@@ -94,6 +94,74 @@ def connect(endpoint: str, token: str) -> Client:
     return Client(endpoint, token)
 
 
+def setup_project(client: Client, name: str) -> str:
+    """TODO"""
+
+    res = client.get("v2/projects")
+    data = res.json()
+
+    if res.status_code != 200:
+        raise RuntimeError(f"setup_project(): {data['message']}")
+
+    for project in data["projects"]:
+        if name == project["name"]:
+            return project["id"]
+
+    params = {
+        "name": name,
+        "purpose": "torquetech.io deployment",
+        "environment": "Production"
+    }
+
+    res = client.post("v2/projects", params)
+    data = res.json()
+
+    if res.status_code != 201:
+        raise RuntimeError(f"{name}: {data['message']}")
+
+    return data["project"]["id"]
+
+
+def setup_vpc(client: Client, name: str, region: str) -> (str, str):
+    """TODO"""
+
+    page = 0
+
+    while True:
+        page += 1
+
+        params = {
+            "per_page": 20,
+            "page": page
+        }
+
+        res = client.get("v2/vpcs", params)
+        data = res.json()
+
+        if res.status_code != 200:
+            raise RuntimeError(f"setup_project(): {data['message']}")
+
+        for vpc in data["vpcs"]:
+            if name == vpc["name"]:
+                return vpc["id"]
+
+        if len(data["vpcs"]) != 20:
+            break
+
+    params = {
+        "name": name,
+        "region": region
+    }
+
+    res = client.post("v2/vpcs", params)
+    data = res.json()
+
+    if res.status_code != 201:
+        raise RuntimeError(f"{name}: {data['message']}")
+
+    return data["vpc"]["id"]
+
+
 def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
     """TODO"""
 
