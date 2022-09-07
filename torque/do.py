@@ -16,11 +16,11 @@ class Provider(v1.provider.Provider):
 
     _CONFIGURATION = {
         "defaults": {
-            "token": "invalid_token",
+            "token": None,
             "quiet": True
         },
         "schema": {
-            "token": str,
+            "token": v1.schema.Or(str, None),
             "quiet": bool
         }
     }
@@ -53,8 +53,12 @@ class Provider(v1.provider.Provider):
     def _connect(self) -> dolib.Client:
         """TODO"""
 
-        return dolib.connect(self._params["endpoint"],
-                             self.configuration["token"])
+        do_token = self.configuration["token"]
+
+        if not do_token:
+            do_token = os.getenv("DO_TOKEN")
+
+        return dolib.connect(self._params["endpoint"], do_token)
 
     def _load_params(self, context: v1.deployment.Context):
         """TODO"""
