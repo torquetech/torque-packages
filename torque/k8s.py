@@ -60,13 +60,13 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         with context as ctx:
-            self._current_state = ctx.get_data("state", self, "state") or {}
+            self._current_state = ctx.get_data("state", self) or {}
 
     def _store_state(self, context: v1.deployment.Context):
         """TODO"""
 
         with context as ctx:
-            ctx.set_data("state", self, "state", self._current_state)
+            ctx.set_data("state", self, self._current_state)
 
     def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
