@@ -64,7 +64,7 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         with context as ctx:
-            self._params = ctx.get_data("state", self, "parameters")
+            self._params = ctx.get_data("parameters", self)
 
             if not self._params:
                 raise RuntimeError(f"digital ocean provider not initialized")
@@ -73,14 +73,14 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         with context as ctx:
-            self._current_state = ctx.get_data("state", self, "state") or {}
+            self._current_state = ctx.get_data("state", self) or {}
 
 
     def _store_state(self, context: v1.deployment.Context):
         """TODO"""
 
         with context as ctx:
-            ctx.set_data("state", self, "state", self._current_state)
+            ctx.set_data("state", self, self._current_state)
 
     def on_apply(self, context: v1.deployment.Context, dry_run: bool):
         """TODO"""
@@ -136,7 +136,7 @@ class Provider(v1.provider.Provider):
         args = parser.parse_args(argv)
 
         with context as ctx:
-            if ctx.get_data("state", self, "parameters"):
+            if ctx.get_data("parameters", self):
                 raise RuntimeError(f"parameters cannot be changed")
 
             params = {
@@ -146,7 +146,7 @@ class Provider(v1.provider.Provider):
                 "vpc_name": f"{context.deployment_name}-{args.region}"
             }
 
-            ctx.set_data("state", self, "parameters", params)
+            ctx.set_data("parameters", self, params)
 
     def _resolve_project_id(self):
         if not self._project:
