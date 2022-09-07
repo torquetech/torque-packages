@@ -564,10 +564,7 @@ class Deployment:
         self._configuration.set_revision(self._dag.revision)
 
         with self._context as ctx:
-            ctx.set_data("state",
-                         Deployment,
-                         "configuration",
-                         self._configuration.get())
+            ctx.set_data("configuration", Deployment, self._configuration.get())
 
     def store(self):
         """TODO"""
@@ -659,7 +656,7 @@ def _load_configuration(context: v1.deployment.Context,
     """TODO"""
 
     with context as ctx:
-        config = ctx.get_data("state", Deployment, "configuration")
+        config = ctx.get_data("configuration", Deployment)
 
     defaults = _load_defaults(providers, dag, repo)
 

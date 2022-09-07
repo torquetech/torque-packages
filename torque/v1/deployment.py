@@ -17,42 +17,43 @@ class _Context:
         self._load_bucket = load_bucket
         self._buckets = buckets
 
-    def set_data(self, bucket: str, cls: type, name: str, data: object):
+    def _set_data(self, bucket: str, name: type, data: object):
         """TODO"""
 
         if bucket not in self._buckets:
             self._buckets[bucket] = {}
 
         bucket = self._buckets[bucket]
-        cls = utils.fqcn(cls)
+        bucket[name] = data
 
-        if cls not in bucket:
-            bucket[cls] = {}
-
-        bucket[cls][name] = data
-
-    def get_data(self, bucket: str, cls: type, name: str) -> object:
+    def _get_data(self, bucket: str, name: str) -> object:
         """TODO"""
 
         if bucket not in self._buckets:
             self._buckets[bucket] = self._load_bucket(bucket)
 
         bucket = self._buckets[bucket]
-        cls = utils.fqcn(cls)
+        return bucket.get(name)
 
-        if cls not in bucket:
-            return None
+    def set_data(self, bucket: str, cls: type, data: object):
+        """TODO"""
 
-        return bucket[cls].get(name)
+        self._set_data(bucket, utils.fqcn(cls), data)
+
+    def get_data(self, bucket: str, cls: type) -> object:
+        """TODO"""
+
+        return self._get_data(bucket, utils.fqcn(cls))
 
     def secret(self, cls: type, name: str, length: int = 16) -> str:
         """TODO"""
 
-        s = self.get_data("secrets", cls, name)
+        name = f"{utils.fqcn(cls)}-{name}"
+        s = self._get_data("secrets", name)
 
         if not s:
             s = secrets.token_urlsafe(length)
-            self.set_data("secrets", cls, name, s)
+            self._set_data("secrets", name, s)
 
         return s
 
