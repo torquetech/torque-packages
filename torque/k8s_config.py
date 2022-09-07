@@ -14,8 +14,14 @@ class KubernetesClient(k8s.KubernetesClientInterface):
     """TODO"""
 
     _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
+        "defaults": {
+            "config_file": None,
+            "context": None
+        },
+        "schema": {
+            "config_file": v1.schema.Or(str, None),
+            "context": v1.schema.Or(str, None)
+        }
     }
 
     @classmethod
@@ -35,7 +41,8 @@ class KubernetesClient(k8s.KubernetesClientInterface):
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
 
-        return kubernetes.config.new_client_from_config()
+        return kubernetes.config.new_client_from_config(self.configuration["config_file"],
+                                                        self.configuration["context"])
 
 
 class Provider(v1.provider.Provider):
