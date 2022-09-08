@@ -33,7 +33,6 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
         "components": {
             v1.schema.Optional(str): {
                 "type": str,
-                "labels": [str],
                 "parameters": dict
             }
         },
@@ -59,7 +58,6 @@ _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
             "strict": bool,
             "providers": [str],
             "extra_configuration": [str],
-            "labels": v1.schema.Or([str], None),
             "components": v1.schema.Or([str], None)
         }
     }
@@ -76,7 +74,6 @@ class Deployment:
                  strict: bool,
                  providers: str,
                  extra_configs: [str],
-                 labels: [str],
                  components: [str]):
         self.name = name
         self.context_type = context_type
@@ -84,7 +81,6 @@ class Deployment:
         self.strict = strict
         self.providers = providers
         self.extra_configs = extra_configs
-        self.labels = labels
         self.components = components
 
     def __repr__(self) -> str:
@@ -92,7 +88,6 @@ class Deployment:
             f"Deployment({self.name}" \
             f", context_type={self.context_type}" \
             f", providers={self.providers}" \
-            f", labels={self.labels} " \
             f", components={self.components})"
 
 
@@ -102,7 +97,6 @@ def _from_components(components: dict[str, model.Component]) -> dict[str, object
     return {
         component.name: {
             "type": component.type,
-            "labels": component.labels,
             "parameters": component.parameters
         } for component in components.values()
     }
@@ -135,7 +129,6 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
                 "strict": deployment.strict,
                 "providers": deployment.providers,
                 "extra_configuration": deployment.extra_configs or [],
-                "labels": deployment.labels,
                 "components": deployment.components
             } for deployment in deployments.values()
         }
@@ -151,7 +144,6 @@ def _generate_dag(workspace: dict[str, object]):
     for name, component in workspace_dag["components"].items():
         dag.create_component(name,
                              component["type"],
-                             component["labels"],
                              component["parameters"])
 
     for name, link in workspace_dag["links"].items():
@@ -187,8 +179,7 @@ class Workspace:
     def _bind_to_component(self,
                            interface: object,
                            required: bool,
-                           component_name: str,
-                           component_labels: [str]) -> v1.bond.Bond:
+                           component_name: str) -> v1.bond.Bond:
         # pylint: disable=W0613
 
         """TODO"""
@@ -201,11 +192,9 @@ class Workspace:
         type = self.repo.component(component.type)
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
-                                                        component.labels,
                                                         self._bind_to_component)
 
         return type(component.name,
-                    component.labels,
                     component.parameters,
                     None,
                     bound_interfaces)
@@ -247,21 +236,13 @@ class Workspace:
 
         deployment = self.deployments[name]
 
-        labels = deployment.labels
-        components = deployment.components
-
-        if labels is None and components is None:
+        if deployment.components is None:
             return None
 
-        labels = set(labels or [])
-        components = set(components or [])
-
+        components = set(deployment.components or [])
         collected_components = set()
 
         for component in self.dag.components.values():
-            if labels.intersection(component.labels):
-                collected_components.add(component.name)
-
             if component.name in components:
                 collected_components.add(component.name)
 
@@ -335,7 +316,6 @@ class Workspace:
                           context_type: str,
                           providers: [str],
                           extra_configs: [str],
-                          labels: [str],
                           components: [str]) -> Deployment:
         """TODO"""
 
@@ -367,7 +347,6 @@ class Workspace:
                                 False,
                                 providers,
                                 extra_configs,
-                                labels,
                                 components)
 
         self.deployments[name] = deployment
@@ -410,7 +389,6 @@ class Workspace:
     def create_component(self,
                          name: str,
                          type: str,
-                         labels: [str],
                          params: object) -> model.Component:
         # pylint: disable=W0622
 
@@ -431,7 +409,7 @@ class Workspace:
         except v1.schema.SchemaError as exc:
             raise RuntimeError(f"component parameters: {name}: {exc}") from exc
 
-        component = self.dag.create_component(name, type, labels, params)
+        component = self.dag.create_component(name, type, params)
 
         instance = self._component(component)
         instance.on_create()
@@ -590,7 +568,6 @@ def _load_deployments(path: str) -> dict[str, Deployment]:
                          deployment["strict"],
                          deployment["providers"],
                          deployment["extra_configuration"],
-                         deployment["labels"],
                          deployment["components"])
         for name, deployment in deployments["deployments"].items()
     }

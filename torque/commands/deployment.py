@@ -21,7 +21,6 @@ def _create(arguments: argparse.Namespace):
                              arguments.context,
                              arguments.provider,
                              arguments.extra_configs,
-                             arguments.labels,
                              arguments.components)
     deployment = ws.load_deployment(d.name, False)
 
@@ -152,11 +151,6 @@ def add_arguments(subparsers):
                                metavar="CONFIG",
                                dest="extra_configs",
                                help="extra deployment configuration")
-    create_parser.add_argument("--label",
-                               action="append",
-                               metavar="LABEL",
-                               dest="labels",
-                               help="label")
     create_parser.add_argument("--component",
                                action="append",
                                metavar="COMPONENT",

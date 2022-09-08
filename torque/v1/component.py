@@ -48,14 +48,12 @@ class Component:
 
     def __init__(self,
                  name: str,
-                 labels: [str],
                  parameters: dict[str, object],
                  configuration: dict[str, object],
                  bonds: object):
         # pylint: disable=R0913
 
         self.name = name
-        self.labels = labels
         self.parameters = parameters
         self.configuration = configuration
         self.bonds = bonds

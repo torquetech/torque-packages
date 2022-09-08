@@ -15,12 +15,10 @@ class Bond:
     def __init__(self,
                  configuration: object,
                  provider: provider.Provider,
-                 labels: [str],
                  bonds: object,
                  context: deployment.Context):
         self.configuration = configuration
         self.provider = provider
-        self.labels = labels
         self.bonds = bonds
         self.context = context
 

@@ -22,7 +22,6 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
     "providers": {
         v1.schema.Optional(str): {
-            "labels": [str],
             "configuration": dict,
             "bonds": {
                 v1.schema.Optional(str): {
@@ -228,14 +227,12 @@ class Deployment:
             profile = self._configuration.provider(name)
 
             config = profile["configuration"]
-            labels = profile["labels"]
             type = self._repo.provider(name)
 
             config = _validate_type_config(name, type, config)
 
             bonds = interfaces.bind_to_provider(type,
                                                 name,
-                                                labels,
                                                 self._bind_to_provider)
 
             self._providers[name] = type(config, bonds)
@@ -256,11 +253,9 @@ class Deployment:
 
         bonds = interfaces.bind_to_component(type,
                                              component.name,
-                                             component.labels,
                                              self._bind_to_component)
 
         component = type(component.name,
-                         component.labels,
                          component.parameters,
                          config,
                          bonds)
@@ -369,8 +364,7 @@ class Deployment:
     def _bind_to_provider(self,
                           interface: type,
                           required: bool,
-                          provider_name: str,
-                          provider_labels: [str]) -> v1.bond.Bond:
+                          provider_name: str) -> v1.bond.Bond:
         # pylint: disable=R0914
 
         """TODO"""
@@ -388,20 +382,17 @@ class Deployment:
 
         bonds = interfaces.bind_to_provider(type,
                                             provider_name,
-                                            provider_labels,
                                             self._bind_to_provider)
 
         return type(config,
                     provider,
-                    provider_labels,
                     bonds,
                     self._context)
 
     def _bind_to_component(self,
                            interface: type,
                            required: bool,
-                           component_name: str,
-                           component_labels: [str]) -> v1.bond.Bond:
+                           component_name: str) -> v1.bond.Bond:
         # pylint: disable=R0914
 
         """TODO"""
@@ -419,12 +410,10 @@ class Deployment:
 
         bonds = interfaces.bind_to_component(type,
                                              component_name,
-                                             component_labels,
                                              self._bind_to_component)
 
         return type(config,
                     provider,
-                    component_labels,
                     bonds,
                     self._context)
 
@@ -457,7 +446,6 @@ class Deployment:
 
         return type(config,
                     provider,
-                    [],
                     bonds,
                     self._context)
 
@@ -621,7 +609,6 @@ def _load_defaults(providers: [str],
         "version": "torquetech.io/v1",
         "providers": {
             name: {
-                "labels": [],
                 "configuration": repo.provider(name).on_configuration({}),
                 "bonds": {},
                 "interfaces": {}

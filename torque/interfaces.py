@@ -23,7 +23,6 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 
 def _bind_to(type: object,
              name: str,
-             labels: [str],
              get_bond: typing.Callable) -> object:
     """TODO"""
 
@@ -44,8 +43,7 @@ def _bind_to(type: object,
 
         bond = get_bond(r["interface"],
                         r["required"],
-                        name,
-                        labels)
+                        name)
 
         setattr(bonds, r_name, bond)
 
@@ -54,20 +52,18 @@ def _bind_to(type: object,
 
 def bind_to_provider(type: object,
                      name: str,
-                     labels: [str],
                      get_bond: typing.Callable) -> object:
     """TODO"""
 
-    return _bind_to(type, name, labels, get_bond)
+    return _bind_to(type, name, get_bond)
 
 
 def bind_to_component(type: object,
                       name: str,
-                      labels: [str],
                       get_bond: typing.Callable) -> object:
     """TODO"""
 
-    return _bind_to(type, name, labels, get_bond)
+    return _bind_to(type, name, get_bond)
 
 
 def bind_to_link(type: object,

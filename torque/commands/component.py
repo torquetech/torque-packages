@@ -13,14 +13,10 @@ from torque import workspace
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
+    params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
-    params = workspace.process_parameters(arguments.params_file, arguments.params)
-
-    ws.create_component(arguments.name,
-                        arguments.type,
-                        arguments.labels or [],
-                        params)
+    ws.create_component(arguments.name, arguments.type, params)
     ws.store()
 
 
@@ -87,11 +83,6 @@ def add_arguments(subparsers):
                                metavar="NAME=VALUE",
                                dest="params",
                                help="component parameter")
-    create_parser.add_argument("--label",
-                               action="append",
-                               metavar="LABEL",
-                               dest="labels",
-                               help="component label")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 
