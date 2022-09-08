@@ -160,6 +160,12 @@ class Provider(v1.provider.Provider):
 
         return self._vpc["id"]
 
+    def _resolve_region(self):
+        if not self._params:
+            return "<region>"
+
+        return self._params["region"]
+
     def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
@@ -173,7 +179,7 @@ class Provider(v1.provider.Provider):
     def region(self) -> str:
         """TODO"""
 
-        return self._params["region"]
+        return v1.utils.Future(self._resolve_region)
 
     def add_object(self, obj: dict[str, object]):
         """TODO"""
