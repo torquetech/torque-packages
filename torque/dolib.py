@@ -3,9 +3,11 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import difflib
+import functools
 import re
 import sys
 import time
+import typing
 
 import requests
 import yaml
@@ -230,7 +232,7 @@ class V2KubernetesClusters:
             if done:
                 break
 
-            print(f"waiting for cluster to become ready...")
+            print(f"waiting for cluster {cluster_name} to become ready...")
 
             time.sleep(10)
 
@@ -388,8 +390,10 @@ def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
 def apply(client: Client,
           current_state: dict[str, object],
           new_state: dict[str, object],
-          quiet: bool):
+          quiet: bool) -> [typing.Callable]:
     """TODO"""
+
+    wait_hooks = []
 
     for name, new_obj in new_state.items():
         current_obj = current_state.get(name, None)
@@ -425,7 +429,8 @@ def apply(client: Client,
             new_obj = handler.update(client, current_obj, new_obj)
 
         current_state[name] = new_obj
-        handler.wait(client, new_obj)
+
+        wait_hooks.append(functools.partial(handler.wait, client, new_obj))
 
     for name, current_obj in list(current_state.items()):
         if name in new_state:
@@ -443,3 +448,5 @@ def apply(client: Client,
         handler.delete(client, current_obj)
 
         current_state.pop(name)
+
+    return wait_hooks

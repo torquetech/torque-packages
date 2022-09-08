@@ -97,10 +97,13 @@ class Provider(v1.provider.Provider):
         self._vpc = dolib.setup_vpc(self._client, self._params["vpc_name"], self._params["region"])
 
         try:
-            dolib.apply(self._client,
-                        self._current_state,
-                        self._new_state,
-                        self.configuration["quiet"])
+            wait_hooks = dolib.apply(self._client,
+                                     self._current_state,
+                                     self._new_state,
+                                     self.configuration["quiet"])
+
+
+            self._post_apply_hooks.extend(wait_hooks)
 
         finally:
             self._store_state()
