@@ -155,18 +155,24 @@ class Provider(v1.provider.Provider):
         return self._client
 
     def _resolve_project_id(self):
+        """TODO"""
+
         if not self._project:
             return "<project_id>"
 
         return self._project["id"]
 
     def _resolve_vpc_id(self):
+        """TODO"""
+
         if not self._vpc:
             return "<vpc_id>"
 
         return self._vpc["id"]
 
     def _resolve_region(self):
+        """TODO"""
+
         if not self._params:
             return "<region>"
 
