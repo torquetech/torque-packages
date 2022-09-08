@@ -92,7 +92,7 @@ class Provider(v1.provider.Provider):
         try:
             k8slib.apply(client,
                          self._current_state,
-                         self._new_state,
+                         {},
                          self.configuration["quiet"])
 
         finally:
