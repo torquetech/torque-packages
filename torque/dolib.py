@@ -68,7 +68,9 @@ class V2Certificates:
         return {
             "kind": obj["kind"],
             "name": obj["name"],
-            "metadata": data["certificate"],
+            "metadata": {
+                "id": data["certificate"]["id"]
+            },
             "params": obj["params"]
         }
 
