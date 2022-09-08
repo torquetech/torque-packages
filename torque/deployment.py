@@ -526,6 +526,7 @@ class Deployment:
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
+            print(f"applying {v1.utils.fqcn(provider)}...")
             provider.apply(dry_run)
 
     def delete(self, dry_run: bool):
@@ -534,6 +535,7 @@ class Deployment:
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
+            print(f"deleting {v1.utils.fqcn(provider)}...")
             provider.delete(dry_run)
 
     def command(self, provider: str, argv: [str]):
