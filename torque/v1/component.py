@@ -50,12 +50,14 @@ class Component:
                  name: str,
                  parameters: dict[str, object],
                  configuration: dict[str, object],
+                 context: deployment.Context,
                  bonds: object):
         # pylint: disable=R0913
 
         self.name = name
         self.parameters = parameters
         self.configuration = configuration
+        self.context = context
         self.bonds = bonds
 
         self._torque_lock = threading.Lock()
@@ -127,12 +129,12 @@ class Component:
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_remove: not implemented")
 
-    def on_build(self, context: deployment.Context):
+    def on_build(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_build: not implemented")
 
-    def on_apply(self, context: deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")

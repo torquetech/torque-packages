@@ -54,8 +54,10 @@ class Provider:
 
     def __init__(self,
                  configuration: object,
+                 context: deployment.Context,
                  bonds: object):
         self.configuration = configuration
+        self.context = context
         self.bonds = bonds
 
         self._lock = threading.Lock()
@@ -71,26 +73,26 @@ class Provider:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
 
-    def apply(self, context: deployment.Context, dry_run: bool):
+    def apply(self, dry_run: bool):
         """TODO"""
 
         for hook in self._pre_apply_hooks:
-            hook(context, dry_run)
+            hook(dry_run)
 
-        self.on_apply(context, dry_run)
+        self.on_apply(dry_run)
 
         for hook in self._pre_apply_hooks:
-            hook(context, dry_run)
+            hook(dry_run)
 
-    def delete(self, context: deployment.Context, dry_run: bool):
+    def delete(self, dry_run: bool):
         """TODO"""
 
-        self.on_delete(context, dry_run)
+        self.on_delete(dry_run)
 
-    def command(self, context: deployment.Context, argv: [str]):
+    def command(self, argv: [str]):
         """TODO"""
 
-        self.on_command(context, argv)
+        self.on_command(argv)
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
@@ -104,17 +106,17 @@ class Provider:
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
-    def on_apply(self, context: deployment.Context, dry_run: bool):
+    def on_apply(self, dry_run: bool):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
 
-    def on_delete(self, context: deployment.Context, dry_run: bool):
+    def on_delete(self, dry_run: bool):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
 
-    def on_command(self, context: deployment.Context, argv: [str]):
+    def on_command(self, argv: [str]):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")

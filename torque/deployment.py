@@ -235,7 +235,7 @@ class Deployment:
                                                 name,
                                                 self._bind_to_provider)
 
-            self._providers[name] = type(config, bonds)
+            self._providers[name] = type(config, self._context, bonds)
 
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -258,6 +258,7 @@ class Deployment:
         component = type(component.name,
                          component.parameters,
                          config,
+                         self._context,
                          bonds)
 
         self._components[component.name] = component
@@ -290,6 +291,7 @@ class Deployment:
         link = type(link.name,
                     link.parameters,
                     config,
+                    self._context,
                     bonds,
                     source.name,
                     destination.name)
@@ -384,10 +386,10 @@ class Deployment:
                                             provider_name,
                                             self._bind_to_provider)
 
-        return type(config,
-                    provider,
-                    bonds,
-                    self._context)
+        return type(provider,
+                    config,
+                    self._context,
+                    bonds)
 
     def _bind_to_component(self,
                            interface: type,
@@ -412,10 +414,10 @@ class Deployment:
                                              component_name,
                                              self._bind_to_component)
 
-        return type(config,
-                    provider,
-                    bonds,
-                    self._context)
+        return type(provider,
+                    config,
+                    self._context,
+                    bonds)
 
     def _bind_to_link(self,
                       interface: type,
@@ -444,10 +446,10 @@ class Deployment:
                                         destination,
                                         self._bind_to_link)
 
-        return type(config,
-                    provider,
-                    bonds,
-                    self._context)
+        return type(provider,
+                    config,
+                    self._context,
+                    bonds)
 
     def _execute(self, workers: int, callback: typing.Callable):
         """TODO"""
@@ -495,7 +497,7 @@ class Deployment:
                 else:
                     assert False
 
-            instance.on_build(self._context)
+            instance.on_build()
 
         self._execute(workers, _on_build)
 
@@ -519,12 +521,12 @@ class Deployment:
                 else:
                     assert False
 
-            instance.on_apply(self._context)
+            instance.on_apply()
 
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
-            provider.apply(self._context, dry_run)
+            provider.apply(dry_run)
 
     def delete(self, dry_run: bool):
         """TODO"""
@@ -532,14 +534,14 @@ class Deployment:
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
-            provider.delete(self._context, dry_run)
+            provider.delete(dry_run)
 
     def command(self, provider: str, argv: [str]):
         """TODO"""
 
         self._setup_providers()
 
-        self._providers[provider].command(self._context, argv)
+        self._providers[provider].command(argv)
 
     def dot(self) -> str:
         """TODO"""

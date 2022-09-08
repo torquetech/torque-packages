@@ -13,14 +13,14 @@ class Bond:
     """TODO"""
 
     def __init__(self,
-                 configuration: object,
                  provider: provider.Provider,
-                 bonds: object,
-                 context: deployment.Context):
-        self.configuration = configuration
+                 configuration: object,
+                 context: deployment.Context,
+                 bonds: object):
         self.provider = provider
-        self.bonds = bonds
+        self.configuration = configuration
         self.context = context
+        self.bonds = bonds
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

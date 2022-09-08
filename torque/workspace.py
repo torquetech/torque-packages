@@ -197,6 +197,7 @@ class Workspace:
         return type(component.name,
                     component.parameters,
                     None,
+                    None,
                     bound_interfaces)
 
     def _bind_to_link(self,
@@ -226,6 +227,7 @@ class Workspace:
 
         return type(link.name,
                     link.parameters,
+                    None,
                     None,
                     bound_interfaces,
                     source.name,
