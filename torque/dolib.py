@@ -53,8 +53,8 @@ class Client:
 
 
 class V2Certificates:
-    @staticmethod
-    def create(client: Client, obj: dict[str, object]) -> dict[str, object]:
+    @classmethod
+    def create(cls, client: Client, obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
         res = client.post("v2/certificates", obj["params"])
@@ -70,16 +70,17 @@ class V2Certificates:
             "params": obj["params"]
         }
 
-    @staticmethod
-    def update(client: Client,
+    @classmethod
+    def update(cls,
+               client: Client,
                old_obj: dict[str, object],
                new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
         raise RuntimeError(f"{old_obj['name']}: cannot update certificates")
 
-    @staticmethod
-    def delete(client: Client, obj: dict[str, object]):
+    @classmethod
+    def delete(cls, client: Client, obj: dict[str, object]):
         """TODO"""
 
         client.delete(f"v2/certificates/{obj['metadata']['id']}")
