@@ -54,27 +54,29 @@ class Client:
 
 class V2Certificates:
     @staticmethod
+    def create(client: Client, obj: dict[str, object]) -> dict[str, object]:
+        """TODO"""
+
+        res = client.post("v2/certificates", obj["params"])
+        data = res.json()
+
+        if res.status_code != 201:
+            raise RuntimeError(f"{obj['name']}: {data['message']}")
+
+        return {
+            "kind": obj["kind"],
+            "name": obj["name"],
+            "metadata": data["certificate"],
+            "params": obj["params"]
+        }
+
+    @staticmethod
     def update(client: Client,
                old_obj: dict[str, object],
                new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        if old_obj:
-            raise RuntimeError(f"{old_obj['name']}: cannot update certificates")
-
-        res = client.post("v2/certificates", new_obj["params"])
-        data = res.json()
-
-        if res.status_code != 201:
-            raise RuntimeError(f"{new_obj['name']}: {data['message']}")
-
-        return {
-            "kind": new_obj["kind"],
-            "name": new_obj["name"],
-            "metadata": data["certificate"],
-            "params": new_obj["params"]
-        }
-
+        raise RuntimeError(f"{old_obj['name']}: cannot update certificates")
 
     @staticmethod
     def delete(client: Client, obj: dict[str, object]):
@@ -211,7 +213,14 @@ def apply(client: Client,
             print(diff, file=sys.stdout)
 
         handler = HANDLERS[new_obj["kind"]]
-        current_state[name] = handler.update(client, current_obj, new_obj)
+
+        if not current_obj:
+            new_obj = handler.create(client, new_obj)
+
+        else:
+            new_obj = handler.update(client, current_obj, new_obj)
+
+        current_state[name] = new_obj
 
     for name, current_obj in list(current_state.items()):
         if name in new_state:
