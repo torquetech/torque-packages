@@ -354,7 +354,7 @@ class Deployment:
         if not issubclass(type, interface):
             raise exceptions.InvalidBond(name, v1.utils.fqcn(interface))
 
-        bond_config = _validate_type_config(name, type, config)
+        config = _validate_type_config(name, type, config)
 
         provider_name = self._repo.provider_for(name)
         provider = self._providers[provider_name]
