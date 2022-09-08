@@ -181,6 +181,19 @@ class Provider(v1.provider.Provider):
 
         return v1.utils.Future(self._resolve_vpc_id)
 
+    def object_id(self, name: str) -> v1.utils.Future[str]:
+        """TODO"""
+
+        def resolve_object_id():
+            """TODO"""
+
+            if name not in self._current_state:
+                return f"<{name}_id>"
+
+            return self._current_state[name]["metadata"]["id"]
+
+        return v1.utils.Future(resolve_object_id)
+
     def region(self) -> str:
         """TODO"""
 
