@@ -5,7 +5,7 @@
 """TODO"""
 
 import argparse
-import typing
+import functools
 
 from torque import v1
 from torque import dolib
@@ -209,14 +209,6 @@ class Provider(v1.provider.Provider):
                 raise RuntimeError(f"{name}: digital ocean object already exists")
 
             self._new_state[name] = obj
-
-    def future(self, name: str, func: typing.Callable) -> v1.utils.Future[object]:
-        """TODO"""
-
-        def resolve_future():
-            return func(self._current_state[name])
-
-        return v1.utils.Future(resolve_future)
 
 
 repository = {
