@@ -176,7 +176,7 @@ class Provider(v1.provider.Provider):
 
         return v1.utils.Future(self._resolve_project_id)
 
-    def vpc_id(self) -> str:
+    def vpc_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
         return v1.utils.Future(self._resolve_vpc_id)
