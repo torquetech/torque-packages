@@ -13,19 +13,17 @@ from torque import workspace
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    ws = workspace.load(arguments.workspace)
-
     if not arguments.name:
         name = f"{arguments.source}_{arguments.destination}"
 
     params = workspace.process_parameters(arguments.params_file, arguments.params)
+    ws = workspace.load(arguments.workspace)
 
     ws.create_link(name,
                    arguments.type,
                    params,
                    arguments.source,
                    arguments.destination)
-
     ws.store()
 
 
