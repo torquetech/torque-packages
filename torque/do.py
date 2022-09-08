@@ -43,6 +43,7 @@ class Provider(v1.provider.Provider):
         super().__init__(*args, **kwargs)
 
         self._params = None
+        self._client = None
 
         self._project = None
         self._vpc = None
@@ -58,7 +59,7 @@ class Provider(v1.provider.Provider):
         if not do_token:
             do_token = os.getenv("DO_TOKEN")
 
-        return dolib.connect(self._params["endpoint"], do_token)
+        self._client = dolib.connect(self._params["endpoint"], do_token)
 
     def _load_params(self):
         """TODO"""
@@ -86,16 +87,15 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         self._load_params()
-
-        client = self._connect()
-
-        self._project = dolib.setup_project(client, self._params["project_name"])
-        self._vpc = dolib.setup_vpc(client, self._params["vpc_name"], self._params["region"])
+        self._connect()
 
         self._load_state()
 
+        self._project = dolib.setup_project(self._client, self._params["project_name"])
+        self._vpc = dolib.setup_vpc(self._client, self._params["vpc_name"], self._params["region"])
+
         try:
-            dolib.apply(client,
+            dolib.apply(self._client,
                         self._current_state,
                         self._new_state,
                         self.configuration["quiet"])
@@ -107,12 +107,12 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         self._load_params()
+        self._connect()
 
-        client = self._connect()
         self._load_state()
 
         try:
-            dolib.apply(client,
+            dolib.apply(self._client,
                         self._current_state,
                         {},
                         self.configuration["quiet"])
@@ -147,6 +147,11 @@ class Provider(v1.provider.Provider):
             }
 
             ctx.set_data("parameters", self, params)
+
+    def client(self) -> dolib.Client:
+        """TODO"""
+
+        return self._client
 
     def _resolve_project_id(self):
         if not self._project:
