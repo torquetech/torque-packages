@@ -42,24 +42,14 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._params = None
         self._client = None
+        self._params = None
 
         self._project = None
         self._vpc = None
 
         self._current_state = {}
         self._new_state = {}
-
-    def _connect(self) -> dolib.Client:
-        """TODO"""
-
-        do_token = self.configuration["token"]
-
-        if not do_token:
-            do_token = os.getenv("DO_TOKEN")
-
-        self._client = dolib.connect(self._params["endpoint"], do_token)
 
     def _load_params(self):
         """TODO"""
@@ -76,20 +66,32 @@ class Provider(v1.provider.Provider):
         with self.context as ctx:
             self._current_state = ctx.get_data("state", self) or {}
 
-
     def _store_state(self):
         """TODO"""
 
         with self.context as ctx:
             ctx.set_data("state", self, self._current_state)
 
+    def _connect(self) -> dolib.Client:
+        """TODO"""
+
+        if self._client:
+            return
+
+        self._load_params()
+        self._load_state()
+
+        do_token = self.configuration["token"]
+
+        if not do_token:
+            do_token = os.getenv("DO_TOKEN")
+
+        self._client = dolib.connect(self._params["endpoint"], do_token)
+
     def on_apply(self, dry_run: bool):
         """TODO"""
 
-        self._load_params()
         self._connect()
-
-        self._load_state()
 
         self._project = dolib.setup_project(self._client, self._params["project_name"])
         self._vpc = dolib.setup_vpc(self._client, self._params["vpc_name"], self._params["region"])
@@ -106,10 +108,7 @@ class Provider(v1.provider.Provider):
     def on_delete(self, dry_run: bool):
         """TODO"""
 
-        self._load_params()
         self._connect()
-
-        self._load_state()
 
         try:
             dolib.apply(self._client,
@@ -151,6 +150,8 @@ class Provider(v1.provider.Provider):
     def client(self) -> dolib.Client:
         """TODO"""
 
+        self._connect()
+
         return self._client
 
     def _resolve_project_id(self):
@@ -171,6 +172,14 @@ class Provider(v1.provider.Provider):
 
         return self._params["region"]
 
+    def _resolve_object_id(self, name: str) -> str:
+        """TODO"""
+
+        if name not in self._current_state:
+            return f"<{name}_id>"
+
+        return self._current_state[name]["metadata"]["id"]
+
     def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
@@ -184,15 +193,7 @@ class Provider(v1.provider.Provider):
     def object_id(self, name: str) -> v1.utils.Future[str]:
         """TODO"""
 
-        def resolve_object_id():
-            """TODO"""
-
-            if name not in self._current_state:
-                return f"<{name}_id>"
-
-            return self._current_state[name]["metadata"]["id"]
-
-        return v1.utils.Future(resolve_object_id)
+        return v1.utils.Future(functools.partial(self._resolve_object_id, name))
 
     def region(self) -> str:
         """TODO"""
