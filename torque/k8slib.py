@@ -139,13 +139,14 @@ def apply(client: kubernetes.client.ApiClient,
         changed, diff = _diff(name, current_obj, new_obj)
 
         if not changed:
-            if not quiet:
-                print(f"{name}: no change", file=sys.stdout)
-
             continue
 
         if not quiet:
-            print(f"{name}: updating...", file=sys.stdout)
+            if not current_obj:
+                print(f"creating {name}...", file=sys.stdout)
+
+            else:
+                print(f"updating {name}...", file=sys.stdout)
 
         if not quiet:
             print(diff, file=sys.stdout)
@@ -157,7 +158,7 @@ def apply(client: kubernetes.client.ApiClient,
             continue
 
         if not quiet:
-            print(f"{name}: deleting...", file=sys.stdout)
+            print(f"deleting {name}...", file=sys.stdout)
 
         _, diff = _diff(name, current_obj, None)
 
