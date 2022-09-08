@@ -165,8 +165,8 @@ def setup_vpc(client: Client, name: str, region: str) -> dict[str, object]:
 def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
     """TODO"""
 
-    obj1 = yaml.safe_dump(obj1) if obj1 else ""
-    obj2 = yaml.safe_dump(obj2) if obj2 else ""
+    obj1 = yaml.safe_dump(obj1, sort_keys=False) if obj1 else ""
+    obj2 = yaml.safe_dump(obj2, sort_keys=False) if obj2 else ""
 
     diff = difflib.unified_diff(obj1.split("\n"),
                                 obj2.split("\n"),
