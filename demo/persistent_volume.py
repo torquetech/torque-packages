@@ -90,10 +90,10 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, context: v1.deployment.Context):
+    def on_build(self):
         """TODO"""
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self._volume_link = self.bonds.vol.create(self.name,

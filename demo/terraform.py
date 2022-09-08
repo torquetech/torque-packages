@@ -242,10 +242,10 @@ class Provider(v1.provider.Provider):
             _Key("region"): _Str(config["region"])
         }
 
-    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
+    def on_apply(self, dry_run: bool):
         """TODO"""
 
-        with open(f"{context.path()}/main.tf", "w", encoding="utf8") as file:
+        with open(f"{self.context.path()}/main.tf", "w", encoding="utf8") as file:
             file.write(_to_tf(self._targets, 0))
 
         if dry_run:
@@ -261,7 +261,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=context.path(),
+                       cwd=self.context.path(),
                        check=True)
 
         cmd = [
@@ -272,7 +272,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=context.path(),
+                       cwd=self.context.path(),
                        check=True)
 
         cmd = [
@@ -283,7 +283,7 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(cmd)}")
         p = subprocess.run(cmd,
                            env=os.environ,
-                           cwd=context.path(),
+                           cwd=self.context.path(),
                            check=True,
                            capture_output=True)
 
@@ -292,7 +292,7 @@ class Provider(v1.provider.Provider):
         for future in self._futures:
             future(state)
 
-    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
+    def on_delete(self, dry_run: bool):
         """TODO"""
 
         if dry_run:
@@ -304,9 +304,9 @@ class Provider(v1.provider.Provider):
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=False)
+        subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=False)
 
-    def on_command(self, context: v1.deployment.Context, argv: [str]):
+    def on_command(self, argv: [str]):
         """TODO"""
 
     def add_target(self, key: object, value: object):

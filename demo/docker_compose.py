@@ -515,7 +515,7 @@ class Provider(v1.provider.Provider):
 
         return service
 
-    def _print_info(self, context: v1.deployment.Context):
+    def _print_info(self):
         """TODO"""
 
         print("\nComponent ip addresses:\n")
@@ -528,7 +528,7 @@ class Provider(v1.provider.Provider):
 
         p = subprocess.run(cmd,
                            env=os.environ,
-                           cwd=context.path(),
+                           cwd=self.context.path(),
                            check=True,
                            capture_output=True)
 
@@ -539,13 +539,13 @@ class Provider(v1.provider.Provider):
 
             cmd = [
                 "docker", "inspect",
-                f"--format={{{{.NetworkSettings.Networks.{context.deployment_name}_default.IPAddress}}}}",
+                f"--format={{{{.NetworkSettings.Networks.{self.context.deployment_name}_default.IPAddress}}}}",
                 name
             ]
 
             p = subprocess.run(cmd,
                                env=os.environ,
-                               cwd=context.path(),
+                               cwd=self.context.path(),
                                check=True,
                                capture_output=True)
 
@@ -564,18 +564,18 @@ class Provider(v1.provider.Provider):
         if self._load_balancer:
             print("\n" f"Load balancer: http://localhost:{self._load_balancer}")
 
-    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
+    def on_apply(selfdry_run: bool):
         """TODO"""
 
         deployments = self._deployments | \
-            self._generate_load_balancer(context.path())
+            self._generate_load_balancer(self.context.path())
 
         compose = {
             "services": deployments,
             "volumes": self._volumes
         }
 
-        with open(f"{context.path()}/docker-compose.yaml", "w", encoding="utf8") as file:
+        with open(f"{self.context.path()}/docker-compose.yaml", "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(compose, sort_keys=False))
 
         if dry_run:
@@ -587,11 +587,11 @@ class Provider(v1.provider.Provider):
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=True)
+        subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=True)
 
-        self._print_info(context)
+        self._print_info()
 
-    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
+    def on_delete(self, dry_run: bool):
         """TODO"""
 
         if dry_run:
@@ -603,9 +603,9 @@ class Provider(v1.provider.Provider):
         ]
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=context.path(), check=False)
+        subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=False)
 
-    def on_command(self, context: v1.deployment.Context, argv: [str]):
+    def on_command(self, argv: [str]):
         """TODO"""
 
     def add_volume(self, name: str):

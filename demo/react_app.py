@@ -103,10 +103,10 @@ class Component(v1.component.Component):
         self._version = package["version"]
         return self._version
 
-    def _image(self, context: v1.deployment.Context) -> str:
+    def _image(self) -> str:
         """TODO"""
 
-        return f"{context.deployment_name}-component-{self.name}:{self._get_version()}"
+        return f"{self.context.deployment_name}-component-{self.name}:{self._get_version()}"
 
     def _link(self) -> utils.Future[object]:
         """TODO"""
@@ -134,12 +134,12 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, context: v1.deployment.Context):
+    def on_build(self):
         """TODO"""
 
         cmd = [
             "docker", "build", ".",
-            "-t", self._image(context)
+            "-t", self._image()
         ]
 
         if self.configuration["development_mode"]:
@@ -147,12 +147,12 @@ class Component(v1.component.Component):
 
         subprocess.run(cmd, env=os.environ, cwd=self._path(), check=True)
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self._service_link = self.bonds.services.create(self.name, "tcp", 80, 80)
 
-        image = self.bonds.images.push(self._image(context))
+        image = self.bonds.images.push(self._image())
 
         if not self.configuration["development_mode"]:
             self.bonds.deployments.create(self.name,

@@ -112,15 +112,13 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, context: v1.deployment.Context):
-        # pylint: disable=W0237
-
+    def on_build(self):
         """TODO"""
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             password = ctx.secret(self, f"{self.name}-postgres")
 
         self._secret_link = self.bonds.secrets.create(f"{self.name}_admin", [
@@ -170,7 +168,7 @@ class DataLink(volume.Link):
             },
         }
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self.bonds.dst.add(self.source,

@@ -53,7 +53,7 @@ class Component(python_app.Component):
             components.HttpService(link=self._link)
         ]
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self._service_link = self.bonds.services.create(self.name,
@@ -61,4 +61,4 @@ class Component(python_app.Component):
                                                         self.configuration["port"],
                                                         self.configuration["port"])
 
-        super().on_apply(context)
+        super().on_apply()

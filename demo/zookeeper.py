@@ -94,10 +94,10 @@ class Component(v1.component.Component):
     def on_remove(self):
         """TODO"""
 
-    def on_build(self, context: v1.deployment.Context):
+    def on_build(self):
         """TODO"""
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self._service_link = self.bonds.services.create(self.name, "tcp", 2181, 2181)
@@ -138,7 +138,7 @@ class DataLink(volume.Link):
             },
         }
 
-    def on_apply(self, context: v1.deployment.Context):
+    def on_apply(self):
         """TODO"""
 
         self.bonds.dst.add(self.source,
