@@ -71,7 +71,7 @@ class V2Certificates:
         return {
             "kind": new_obj["kind"],
             "name": new_obj["name"],
-            "id": data["certificate"]["id"],
+            "metadata": data["certificate"],
             "params": new_obj["params"]
         }
 
@@ -80,7 +80,7 @@ class V2Certificates:
     def delete(client: Client, obj: dict[str, object]):
         """TODO"""
 
-        client.delete(f"v2/certificates/{obj['id']}")
+        client.delete(f"v2/certificates/{obj['metadata']['id']}")
 
 
 HANDLERS = {
