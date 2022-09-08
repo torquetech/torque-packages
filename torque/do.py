@@ -60,39 +60,39 @@ class Provider(v1.provider.Provider):
 
         return dolib.connect(self._params["endpoint"], do_token)
 
-    def _load_params(self, context: v1.deployment.Context):
+    def _load_params(self):
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             self._params = ctx.get_data("parameters", self)
 
             if not self._params:
                 raise RuntimeError(f"digital ocean provider not initialized")
 
-    def _load_state(self, context: v1.deployment.Context) -> dict[str, object]:
+    def _load_state(self) -> dict[str, object]:
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             self._current_state = ctx.get_data("state", self) or {}
 
 
-    def _store_state(self, context: v1.deployment.Context):
+    def _store_state(self):
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             ctx.set_data("state", self, self._current_state)
 
-    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
+    def on_apply(self, dry_run: bool):
         """TODO"""
 
-        self._load_params(context)
+        self._load_params()
 
         client = self._connect()
 
         self._project = dolib.setup_project(client, self._params["project_name"])
         self._vpc = dolib.setup_vpc(client, self._params["vpc_name"], self._params["region"])
 
-        self._load_state(context)
+        self._load_state()
 
         try:
             dolib.apply(client,
@@ -101,15 +101,15 @@ class Provider(v1.provider.Provider):
                         self.configuration["quiet"])
 
         finally:
-            self._store_state(context)
+            self._store_state()
 
-    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
+    def on_delete(self, dry_run: bool):
         """TODO"""
 
-        self._load_params(context)
+        self._load_params()
 
         client = self._connect()
-        self._load_state(context)
+        self._load_state()
 
         try:
             dolib.apply(client,
@@ -118,9 +118,9 @@ class Provider(v1.provider.Provider):
                         self.configuration["quiet"])
 
         finally:
-            self._store_state(context)
+            self._store_state()
 
-    def on_command(self, context: v1.deployment.Context, argv: [str]):
+    def on_command(self, argv: [str]):
         """TODO"""
 
         parser = argparse.ArgumentParser(prog="", description="digital ocean command line interface.")
@@ -135,15 +135,15 @@ class Provider(v1.provider.Provider):
 
         args = parser.parse_args(argv)
 
-        with context as ctx:
+        with self.context as ctx:
             if ctx.get_data("parameters", self):
                 raise RuntimeError(f"parameters cannot be changed")
 
             params = {
                 "endpoint": args.endpoint,
                 "region": args.region,
-                "project_name": context.deployment_name,
-                "vpc_name": f"{context.deployment_name}-{args.region}"
+                "project_name": self.context.deployment_name,
+                "vpc_name": f"{self.context.deployment_name}-{args.region}"
             }
 
             ctx.set_data("parameters", self, params)
