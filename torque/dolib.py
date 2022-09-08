@@ -53,6 +53,8 @@ class Client:
 
 
 class V2Certificates:
+    """TODO"""
+
     @classmethod
     def create(cls, client: Client, obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
