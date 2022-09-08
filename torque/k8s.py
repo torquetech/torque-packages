@@ -56,23 +56,23 @@ class Provider(v1.provider.Provider):
         self._current_state = {}
         self._new_state = {}
 
-    def _load_state(self, context: v1.deployment.Context) -> dict[str, object]:
+    def _load_state(self) -> dict[str, object]:
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             self._current_state = ctx.get_data("state", self) or {}
 
-    def _store_state(self, context: v1.deployment.Context):
+    def _store_state(self):
         """TODO"""
 
-        with context as ctx:
+        with self.context as ctx:
             ctx.set_data("state", self, self._current_state)
 
-    def on_apply(self, context: v1.deployment.Context, dry_run: bool):
+    def on_apply(self, dry_run: bool):
         """TODO"""
 
         client = self.bonds.client.connect()
-        self._load_state(context)
+        self._load_state()
 
         try:
             k8slib.apply(client,
@@ -81,13 +81,13 @@ class Provider(v1.provider.Provider):
                          self.configuration["quiet"])
 
         finally:
-            self._store_state(context)
+            self._store_state()
 
-    def on_delete(self, context: v1.deployment.Context, dry_run: bool):
+    def on_delete(self, dry_run: bool):
         """TODO"""
 
         client = self.bonds.client.connect()
-        self._load_state(context)
+        self._load_state()
 
         try:
             k8slib.apply(client,
@@ -96,9 +96,9 @@ class Provider(v1.provider.Provider):
                          self.configuration["quiet"])
 
         finally:
-            self._store_state(context)
+            self._store_state()
 
-    def on_command(self, context: v1.deployment.Context, argv: [str]):
+    def on_command(self, argv: [str]):
         """TODO"""
 
     def add_object(self, obj: dict[str, object]):
