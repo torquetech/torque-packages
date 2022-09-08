@@ -81,7 +81,7 @@ class Provider:
 
         self.on_apply(dry_run)
 
-        for hook in self._pre_apply_hooks:
+        for hook in self._post_apply_hooks:
             hook(dry_run)
 
     def delete(self, dry_run: bool):
