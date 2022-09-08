@@ -541,6 +541,9 @@ class Deployment:
 
         self._setup_providers()
 
+        if provider not in self._providers:
+            raise exceptions.ProviderNotFound(provider)
+
         self._providers[provider].command(argv)
 
     def dot(self) -> str:
