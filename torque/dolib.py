@@ -89,6 +89,10 @@ class V2Certificates:
 
         client.delete(f"v2/certificates/{obj['metadata']['id']}")
 
+    @classmethod
+    def wait(cls, client: Client, obj: dict[str, object]):
+        """TODO"""
+
 
 HANDLERS = {
     "v2/certificates": V2Certificates
@@ -226,6 +230,7 @@ def apply(client: Client,
             new_obj = handler.update(client, current_obj, new_obj)
 
         current_state[name] = new_obj
+        handler.wait(client, new_obj)
 
     for name, current_obj in list(current_state.items()):
         if name in new_state:
