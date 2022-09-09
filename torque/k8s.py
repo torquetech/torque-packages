@@ -53,8 +53,13 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._client = None
+
         self._current_state = {}
         self._new_state = {}
+
+        self._load_state()
+        self._connect()
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -68,14 +73,15 @@ class Provider(v1.provider.Provider):
         with self.context as ctx:
             ctx.set_data("state", self, self._current_state)
 
+    def _connect(self):
+        """TODO"""
+        self._client = self.bonds.client.connect()
+
     def on_apply(self, dry_run: bool):
         """TODO"""
 
-        client = self.bonds.client.connect()
-        self._load_state()
-
         try:
-            k8slib.apply(client,
+            k8slib.apply(self._client,
                          self._current_state,
                          self._new_state,
                          self.configuration["quiet"])
@@ -86,11 +92,8 @@ class Provider(v1.provider.Provider):
     def on_delete(self, dry_run: bool):
         """TODO"""
 
-        client = self.bonds.client.connect()
-        self._load_state()
-
         try:
-            k8slib.apply(client,
+            k8slib.apply(self._client,
                          self._current_state,
                          {},
                          self.configuration["quiet"])
