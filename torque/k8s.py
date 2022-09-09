@@ -77,7 +77,7 @@ class Provider(v1.provider.Provider):
         """TODO"""
         self._client = self.bonds.client.connect()
 
-    def on_apply(self, dry_run: bool):
+    def on_apply(self):
         """TODO"""
 
         try:
@@ -89,7 +89,7 @@ class Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
 
         try:
