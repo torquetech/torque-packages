@@ -153,7 +153,7 @@ def apply(client: kubernetes.client.ApiClient,
 
         current_state[name] = _update_object(client, new_obj)
 
-    for name, current_obj in list(current_state.items()):
+    for name, current_obj in list(reversed(current_state.items())):
         if name in new_state:
             continue
 
