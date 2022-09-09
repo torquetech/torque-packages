@@ -501,7 +501,7 @@ class Deployment:
 
         self._execute(workers, _on_build)
 
-    def apply(self, workers: int, dry_run: bool):
+    def apply(self, workers: int):
         """TODO"""
 
         self._setup_providers()
@@ -527,16 +527,16 @@ class Deployment:
 
         for provider in self._providers.values():
             print(f"applying {v1.utils.fqcn(provider)}...")
-            provider.apply(dry_run)
+            provider.apply()
 
-    def delete(self, dry_run: bool):
+    def delete(self):
         """TODO"""
 
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
             print(f"deleting {v1.utils.fqcn(provider)}...")
-            provider.delete(dry_run)
+            provider.delete()
 
     def command(self, provider: str, argv: [str]):
         """TODO"""

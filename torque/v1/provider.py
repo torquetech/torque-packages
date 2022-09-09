@@ -73,21 +73,21 @@ class Provider:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
 
-    def apply(self, dry_run: bool):
+    def apply(self):
         """TODO"""
 
         for hook in self._pre_apply_hooks:
             hook()
 
-        self.on_apply(dry_run)
+        self.on_apply()
 
         for hook in self._post_apply_hooks:
             hook()
 
-    def delete(self, dry_run: bool):
+    def delete(self):
         """TODO"""
 
-        self.on_delete(dry_run)
+        self.on_delete()
 
     def command(self, argv: [str]):
         """TODO"""
@@ -106,12 +106,12 @@ class Provider:
 
         raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
 
-    def on_apply(self, dry_run: bool):
+    def on_apply(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
 
         raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
