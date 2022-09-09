@@ -51,7 +51,8 @@ class Client:
         """TODO"""
 
         return self._session.delete(f"{self._endpoint}/{path}",
-                                    headers=self._headers)
+                                    headers=self._headers,
+                                    json={})
 
 
 class V2Certificates:
