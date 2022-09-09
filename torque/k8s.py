@@ -74,6 +74,7 @@ class Provider(v1.provider.Provider):
 
     def _connect(self):
         """TODO"""
+
         self._client = self.bonds.client.connect()
 
     def on_apply(self):
