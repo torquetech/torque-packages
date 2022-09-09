@@ -706,14 +706,10 @@ class Provider(v1.provider.Provider):
 
         print("\n" f"Load balancer: http://{lb_host}")
 
-    def on_apply(self, dry_run: bool):
+    def on_apply(self):
         """TODO"""
 
         self._apply_targets()
-
-        if dry_run:
-            return
-
         self._push_images()
 
         cmd = [
@@ -728,11 +724,8 @@ class Provider(v1.provider.Provider):
 
         self._print_info()
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
-
-        if dry_run:
-            return
 
         cmd = [
             "helm", "uninstall",

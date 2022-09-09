@@ -564,7 +564,7 @@ class Provider(v1.provider.Provider):
         if self._load_balancer:
             print("\n" f"Load balancer: http://localhost:{self._load_balancer}")
 
-    def on_apply(selfdry_run: bool):
+    def on_apply(self):
         """TODO"""
 
         deployments = self._deployments | \
@@ -578,9 +578,6 @@ class Provider(v1.provider.Provider):
         with open(f"{self.context.path()}/docker-compose.yaml", "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(compose, sort_keys=False))
 
-        if dry_run:
-            return
-
         cmd = [
             "docker", "compose", "up",
             "-d", "--remove-orphans"
@@ -591,11 +588,8 @@ class Provider(v1.provider.Provider):
 
         self._print_info()
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
-
-        if dry_run:
-            return
 
         cmd = [
             "docker", "compose", "down",

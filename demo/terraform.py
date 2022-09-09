@@ -242,17 +242,11 @@ class Provider(v1.provider.Provider):
             _Key("region"): _Str(config["region"])
         }
 
-    def on_apply(self, dry_run: bool):
+    def on_apply(self):
         """TODO"""
 
         with open(f"{self.context.path()}/main.tf", "w", encoding="utf8") as file:
             file.write(_to_tf(self._targets, 0))
-
-        if dry_run:
-            for future in self._futures:
-                future(None)
-
-            return
 
         cmd = [
             "terraform", "init"
@@ -292,11 +286,8 @@ class Provider(v1.provider.Provider):
         for future in self._futures:
             future(state)
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
-
-        if dry_run:
-            return
 
         cmd = [
             "terraform", "apply",
