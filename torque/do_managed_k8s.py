@@ -308,7 +308,9 @@ class KubernetesClient(k8s.KubernetesClientInterface):
         return kubernetes.config.load_kube_config_from_dict(config)
 
 
-dolib.HANDLERS["v2/kubernetes"] = _V2KubernetesClusters
+dolib.HANDLERS.update({
+    "v2/kubernetes": _V2KubernetesClusters
+})
 
 repository = {
     "v1": {
