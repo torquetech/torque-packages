@@ -6,7 +6,6 @@ import difflib
 import functools
 import re
 import sys
-import time
 import typing
 
 import requests
@@ -55,188 +54,6 @@ class Client:
                                     headers=self._headers)
 
 
-class V2KubernetesClusters:
-    """TODO"""
-
-    @classmethod
-    def _create_pool(cls, client: Client, cluster_id: str, pool_name: str, params: dict[str, object]):
-        """TODO"""
-
-        print(f"{pool_name} creating...")
-
-        res = client.post(f"v2/kubernetes/clusters/{cluster_id}/node_pools", params)
-        data = res.json()
-
-        if res.status_code != 201:
-            raise RuntimeError(f"{pool_name}: {data['message']}")
-
-    @classmethod
-    def _update_pool(cls,
-                    client: Client,
-                    cluster_id: str,
-                    pool_id: str,
-                    pool_name: str,
-                    params: dict[str, object]):
-        """TODO"""
-
-        print(f"{pool_name} updating...")
-
-        res = client.put(f"v2/kubernetes/clusters/{cluster_id}/node_pools/{pool_id}", params)
-        data = res.json()
-
-        if res.status_code != 202:
-            raise RuntimeError(f"{pool_name}: {data['message']}")
-
-    @classmethod
-    def _delete_pool(cls,
-                    client: Client,
-                    cluster_id: str,
-                    pool_id: str,
-                    pool_name: str):
-        """TODO"""
-
-        print(f"{pool_name} deleting...")
-
-        res = client.delete(f"v2/kubernetes/clusters/{cluster_id}/node_pools/{pool_id}")
-
-    @classmethod
-    def _update_pools(cls,
-                      client: Client,
-                      old_obj: dict[str, object],
-                      new_obj: dict[str, object]):
-        """TODO"""
-
-        cluster_id = old_obj["metadata"]["id"]
-
-        current_pools = {
-            name: id for name, id in old_obj["metadata"]["node_pools"].items()
-        }
-
-        new_pools = {
-            pool["name"]: pool for pool in new_obj["params"]["node_pools"]
-        }
-
-        if not new_pools:
-            raise RuntimeError(f"{new_obj['name']}: at least one node pool is required")
-
-        for name, new_pool in new_pools.items():
-            if name not in current_pools:
-                cls._create_pool(client, cluster_id, name, new_pool)
-
-            else:
-                pool_id = current_pools[name]
-
-                cls._update_pool(client, cluster_id, pool_id, name, new_pool)
-
-        for name, pool_id in current_pools.items():
-            if name in new_pools:
-                continue
-
-            cls._delete_pool(client, cluster_id, pool_id, name)
-
-    @classmethod
-    def create(cls, client: Client, obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        res = client.post("v2/kubernetes/clusters", obj["params"])
-        data = res.json()
-
-        if res.status_code != 201:
-            raise RuntimeError(f"{obj['name']}: {data['message']}")
-
-        data = data["kubernetes_cluster"]
-
-        attached_pools = {
-            pool["name"]: pool["id"] for pool in data["node_pools"]
-        }
-
-        return {
-            "kind": obj["kind"],
-            "name": obj["name"],
-            "metadata": {
-                "id": data["id"],
-                "node_pools": {
-                    pool["name"]: attached_pools[pool["name"]]
-                    for pool in obj["params"]["node_pools"]
-                }
-            },
-            "params": obj["params"]
-        }
-
-    @classmethod
-    def update(cls,
-               client: Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        cls._update_pools(client, old_obj, new_obj)
-
-        params = {} | new_obj["params"]
-
-        params.pop("node_pools")
-        params.pop("ha")
-
-        res = client.put(f"v2/kubernetes/clusters/{old_obj['metadata']['id']}", params)
-        data = res.json()
-
-        if res.status_code != 202:
-            raise RuntimeError(f"{new_obj['name']}: {data['message']}")
-
-        data = data["kubernetes_cluster"]
-
-        attached_pools = {
-            pool["name"]: pool["id"] for pool in data["node_pools"]
-        }
-
-        return {
-            "kind": new_obj["kind"],
-            "name": new_obj["name"],
-            "metadata": {
-                "id": data["id"],
-                "node_pools": {
-                    pool["name"]: attached_pools[pool["name"]]
-                    for pool in new_obj["params"]["node_pools"]
-                }
-            },
-            "params": new_obj["params"]
-        }
-
-    @classmethod
-    def delete(cls, client: Client, obj: dict[str, object]):
-        """TODO"""
-
-        client.delete(f"v2/kubernetes/clusters/{obj['metadata']['id']}")
-
-    @classmethod
-    def wait(cls, client: Client, obj: dict[str, object]):
-        """TODO"""
-
-        cluster_name = obj["name"]
-        cluster_id = obj["metadata"]["id"]
-
-        while True:
-            res = client.get(f"v2/kubernetes/clusters/{cluster_id}")
-            data = res.json()
-
-            if res.status_code != 200:
-                raise RuntimeError(f"{cluster_name}: {data['message']}")
-
-            data = data["kubernetes_cluster"]
-            done = data["status"]["state"] == "running"
-
-            for pool in data["node_pools"]:
-                for node in pool["nodes"]:
-                    done &= node["status"]["state"] == "running"
-
-            if done:
-                break
-
-            print(f"waiting for cluster {cluster_name} to become ready...")
-
-            time.sleep(10)
-
-
 class V2Certificates:
     """TODO"""
 
@@ -280,7 +97,6 @@ class V2Certificates:
 
 
 HANDLERS = {
-    "v2/kubernetes": V2KubernetesClusters,
     "v2/certificates": V2Certificates
 }
 
@@ -357,17 +173,6 @@ def setup_vpc(client: Client, name: str, region: str) -> dict[str, object]:
         raise RuntimeError(f"{name}: {data['message']}")
 
     return data["vpc"]
-
-
-def kubeconfig(client: Client, cluster_id: str) -> dict[str, object]:
-    """TODO"""
-
-    res = client.get(f"v2/kubernetes/clusters/{cluster_id}/kubeconfig")
-
-    if res.status_code != 200:
-        raise RuntimeError(f"{cluster_id}: unable to get kubeconfig")
-
-    return yaml.safe_load(res.text)
 
 
 def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
