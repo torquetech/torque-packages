@@ -67,10 +67,10 @@ class Provider(v1.provider.Provider):
 
         return {}
 
-    def on_apply(self, dry_run: bool):
+    def on_apply(self):
         """TODO"""
 
-    def on_delete(self, dry_run: bool):
+    def on_delete(self):
         """TODO"""
 
     def on_command(self, argv: [str]):
