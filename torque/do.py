@@ -42,8 +42,8 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._client = None
         self._params = None
+        self._client = None
 
         self._project = None
         self._vpc = None
@@ -51,14 +51,20 @@ class Provider(v1.provider.Provider):
         self._current_state = {}
         self._new_state = {}
 
+        self._load_params()
+        self._load_state()
+
+        self._connect()
+
+    def _check_params(self):
+        if not self._params:
+            raise RuntimeError(f"digital ocean provider not initialized")
+
     def _load_params(self):
         """TODO"""
 
         with self.context as ctx:
             self._params = ctx.get_data("parameters", self)
-
-            if not self._params:
-                raise RuntimeError(f"digital ocean provider not initialized")
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -75,12 +81,6 @@ class Provider(v1.provider.Provider):
     def _connect(self) -> dolib.Client:
         """TODO"""
 
-        if self._client:
-            return
-
-        self._load_params()
-        self._load_state()
-
         do_token = self.configuration["token"]
 
         if not do_token:
@@ -91,7 +91,7 @@ class Provider(v1.provider.Provider):
     def on_apply(self, dry_run: bool):
         """TODO"""
 
-        self._connect()
+        self._check_params()
 
         self._project = dolib.setup_project(self._client, self._params["project_name"])
         self._vpc = dolib.setup_vpc(self._client, self._params["vpc_name"], self._params["region"])
@@ -111,7 +111,7 @@ class Provider(v1.provider.Provider):
     def on_delete(self, dry_run: bool):
         """TODO"""
 
-        self._connect()
+        self._check_params()
 
         try:
             dolib.apply(self._client,
@@ -152,8 +152,6 @@ class Provider(v1.provider.Provider):
 
     def client(self) -> dolib.Client:
         """TODO"""
-
-        self._connect()
 
         return self._client
 
