@@ -302,7 +302,12 @@ class KubernetesClient(k8s.KubernetesClientInterface):
 
         client = self.provider.client()
 
-        cluster_id = v1.utils.resolve_futures(self._cluster_id)
+        try:
+            cluster_id = v1.utils.resolve_futures(self._cluster_id)
+
+        except RuntimeError as e:
+            raise RuntimeError(f"digital ocean k8s cluster not initialized") from e
+
         config = _kubeconfig(client, cluster_id)
 
         return kubernetes.config.load_kube_config_from_dict(config)
