@@ -170,7 +170,7 @@ def apply(client: Client,
 
         wait_hooks.append(functools.partial(handler.wait, client, new_obj))
 
-    for name, current_obj in list(current_state.items()):
+    for name, current_obj in list(reversed(current_state.items())):
         if name in new_state:
             continue
 
