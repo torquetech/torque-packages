@@ -59,7 +59,6 @@ class Provider(v1.provider.Provider):
         self._new_state = {}
 
         self._load_state()
-        self._connect()
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -80,6 +79,8 @@ class Provider(v1.provider.Provider):
     def on_apply(self):
         """TODO"""
 
+        self._connect()
+
         try:
             k8slib.apply(self._client,
                          self._current_state,
@@ -91,6 +92,8 @@ class Provider(v1.provider.Provider):
 
     def on_delete(self):
         """TODO"""
+
+        self._connect()
 
         try:
             k8slib.apply(self._client,
