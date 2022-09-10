@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import argparse
 import functools
 
 from torque import v1
@@ -151,8 +150,14 @@ class Provider(v1.provider.Provider):
     """TODO"""
 
     _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
+        "defaults": {
+            "endpoint": "https://api.digitalocean.com",
+            "region": "nyc3"
+        },
+        "schema": {
+            "endpoint": str,
+            "region": str
+        }
     }
 
     _CONFIGURATION = {
@@ -220,15 +225,24 @@ class Provider(v1.provider.Provider):
             }
         })
 
-    def _check_params(self):
-        if not self._params:
-            raise RuntimeError(f"digitalocean provider not initialized")
-
     def _load_params(self):
         """TODO"""
 
         with self.context as ctx:
             self._params = ctx.get_data("parameters", self)
+
+            if not self._params:
+                project_name = self.context.deployment_name
+                vpc_name = f"{project_name}-{self.parameters['region']}"
+
+                self._params = {
+                    "endpoint": self.parameters["endpoint"],
+                    "region": self.parameters["region"],
+                    "project_name": project_name,
+                    "vpc_name": vpc_name
+                }
+
+                ctx.set_data("parameters", self, self._params)
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -256,8 +270,6 @@ class Provider(v1.provider.Provider):
     def on_apply(self):
         """TODO"""
 
-        self._check_params()
-
         try:
             wait_hooks = dolib.apply(self._client,
                                      self._current_state,
@@ -272,8 +284,6 @@ class Provider(v1.provider.Provider):
     def on_delete(self):
         """TODO"""
 
-        self._check_params()
-
         try:
             dolib.apply(self._client,
                         self._current_state,
@@ -285,31 +295,6 @@ class Provider(v1.provider.Provider):
 
     def on_command(self, argv: [str]):
         """TODO"""
-
-        parser = argparse.ArgumentParser(prog="", description="digitalocean command line interface.")
-
-        parser.add_argument("--endpoint",
-                            default="https://api.digitalocean.com",
-                            help="digitalocean api endpoint to use, default: %(default)s")
-
-        parser.add_argument("region",
-                            metavar="REGION",
-                            help="digitalocean region to use")
-
-        args = parser.parse_args(argv)
-
-        with self.context as ctx:
-            if ctx.get_data("parameters", self):
-                raise RuntimeError(f"parameters cannot be changed")
-
-            params = {
-                "endpoint": args.endpoint,
-                "region": args.region,
-                "project_name": self.context.deployment_name,
-                "vpc_name": f"{self.context.deployment_name}-{args.region}"
-            }
-
-            ctx.set_data("parameters", self, params)
 
     def client(self) -> dolib.Client:
         """TODO"""
