@@ -45,47 +45,15 @@ class KubernetesClient(k8s.KubernetesClientInterface):
                                                         self.configuration["context"])
 
 
-class Provider(v1.provider.Provider):
-    """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
-    def on_apply(self):
-        """TODO"""
-
-    def on_delete(self):
-        """TODO"""
-
-    def on_command(self, argv: [str]):
-        """TODO"""
-
-
 repository = {
     "v1": {
+        "providers": {
+            "torquetech.io/k8s-config": None
+        },
         "bonds": {
             "torquetech.io/k8s-config": [
                 KubernetesClient
             ]
-        },
-        "providers": {
-            "torquetech.io/k8s-config": Provider
         }
     }
 }
