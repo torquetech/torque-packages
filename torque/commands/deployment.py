@@ -21,7 +21,8 @@ def _create(arguments: argparse.Namespace):
                              arguments.context,
                              arguments.provider,
                              arguments.extra_configs,
-                             arguments.components)
+                             arguments.components,
+                             arguments.strict)
     deployment = ws.load_deployment(d.name, False)
 
     deployment.update()
@@ -143,6 +144,9 @@ def add_arguments(subparsers):
                                        metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create deployment")
+    create_parser.add_argument("--strict",
+                               action="store_true",
+                               help="create strict deployment")
     create_parser.add_argument("--context",
                                default="torquetech.io/local",
                                help="deployment context, default: %(default)s")

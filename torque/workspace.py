@@ -318,7 +318,8 @@ class Workspace:
                           context_type: str,
                           providers: [str],
                           extra_configs: [str],
-                          components: [str]) -> Deployment:
+                          components: [str],
+                          strict: bool) -> Deployment:
         """TODO"""
 
         if not re.match(_NAME, name):
@@ -346,7 +347,7 @@ class Workspace:
         deployment = Deployment(name,
                                 context_type,
                                 context_config,
-                                False,
+                                strict,
                                 providers,
                                 extra_configs,
                                 components)
