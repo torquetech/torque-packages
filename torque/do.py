@@ -152,11 +152,10 @@ class Provider(v1.provider.Provider):
 
     _CONFIGURATION = {
         "defaults": {
-            "token": None,
             "quiet": True
         },
         "schema": {
-            "token": v1.schema.Or(str, None),
+            v1.schema.Optional("token"): str,
             "quiet": bool
         }
     }
@@ -233,9 +232,10 @@ class Provider(v1.provider.Provider):
     def _connect(self) -> dolib.Client:
         """TODO"""
 
-        do_token = self.configuration["token"]
+        if "token" in self.configuration:
+            do_token = self.configuration["token"]
 
-        if not do_token:
+        else:
             do_token = os.getenv("DO_TOKEN")
 
         self._client = dolib.connect(self._params["endpoint"], do_token)
