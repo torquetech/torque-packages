@@ -217,6 +217,11 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
 class KubernetesClient(k8s.KubernetesClientInterface):
     """TODO"""
 
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
+
     _CONFIGURATION = {
         "defaults": {
             "version": "latest",
@@ -257,6 +262,14 @@ class KubernetesClient(k8s.KubernetesClientInterface):
             v1.schema.Optional("ha"): bool
         }
     }
+
+    @classmethod
+    def on_parameters(cls, parameters: dict) -> dict:
+        """TODO"""
+
+        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
+                                        cls._PARAMETERS["defaults"],
+                                        parameters)
 
     @classmethod
     def on_configuration(cls, configuration: dict) -> dict:
