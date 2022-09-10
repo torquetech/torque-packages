@@ -22,9 +22,11 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
     "providers": {
         v1.schema.Optional(str): {
+            "parameters": dict,
             "configuration": dict,
             "bonds": {
                 v1.schema.Optional(str): {
+                    "parameters": dict,
                     "configuration": dict
                 }
             },
@@ -42,6 +44,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
+                        "parameters": dict,
                         "configuration": dict
                     }
                 },
@@ -57,6 +60,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
+                        "parameters": dict,
                         "configuration": dict
                     }
                 },
@@ -70,6 +74,7 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
     },
     "bonds": {
         v1.schema.Optional(str): {
+            "parameters": dict,
             "configuration": dict
         }
     },
@@ -79,6 +84,25 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
         }
     }
 })
+
+
+def _validate_type_params(name: str, type: object, config: dict[str, object]):
+    """TODO"""
+
+    try:
+        return type.on_parameters(config or {})
+
+    except v1.schema.SchemaError as exc:
+        if issubclass(type, v1.provider.Provider):
+            type = "provider"
+
+        elif issubclass(type, v1.bond.Bond):
+            type = "bond"
+
+        exc_str = str(exc)
+        exc_str = " " + exc_str.replace("\n", "\n ")
+
+        raise RuntimeError(f"{type} parameters: {name}: {exc_str}") from exc
 
 
 def _validate_type_config(name: str, type: object, config: dict[str, object]):
@@ -226,19 +250,22 @@ class Deployment:
         for name in self._configuration.providers():
             profile = self._configuration.provider(name)
 
+            params = profile["parameters"]
             config = profile["configuration"]
+
             type = self._repo.provider(name)
 
             provider = None
 
             if type is not None:
+                params = _validate_type_params(name, type, params)
                 config = _validate_type_config(name, type, config)
 
                 bonds = interfaces.bind_to_provider(type,
                                                     name,
                                                     self._bind_to_provider)
 
-                provider = type(config, self._context, bonds)
+                provider = type(params, config, self._context, bonds)
 
             self._providers[name] = provider
 
@@ -331,13 +358,17 @@ class Deployment:
         if name not in self._bonds:
             raise RuntimeError(f"{name}: bond not configured")
 
+        params = self._bonds[name]["parameters"]
         config = self._bonds[name]["configuration"]
 
         if name in local_bonds:
+            local_params = local_bonds[name]["parameters"]
+            params = v1.utils.merge_dicts(params, local_params)
+
             local_config = local_bonds[name]["configuration"]
             config = v1.utils.merge_dicts(config, local_config)
 
-        return name, config
+        return name, params, config
 
     def _bond_info(self,
                    interface: type,
@@ -354,19 +385,20 @@ class Deployment:
         if not info:
             return None
 
-        name, config = info
+        name, params, config = info
 
         type = self._repo.bond(name)
 
         if not issubclass(type, interface):
             raise exceptions.InvalidBond(name, v1.utils.fqcn(interface))
 
+        params = _validate_type_params(name, type, params)
         config = _validate_type_config(name, type, config)
 
         provider_name = self._repo.provider_for(name)
         provider = self._providers[provider_name]
 
-        return type, config, provider
+        return type, params, config, provider
 
     def _bind_to_provider(self,
                           interface: type,
@@ -385,13 +417,14 @@ class Deployment:
         if not info:
             return None
 
-        type, config, provider = info
+        type, params, config, provider = info
 
         bonds = interfaces.bind_to_provider(type,
                                             provider_name,
                                             self._bind_to_provider)
 
         return type(provider,
+                    params,
                     config,
                     self._context,
                     bonds)
@@ -413,13 +446,14 @@ class Deployment:
         if not info:
             return None
 
-        type, config, provider = info
+        type, params, config, provider = info
 
         bonds = interfaces.bind_to_component(type,
                                              component_name,
                                              self._bind_to_component)
 
         return type(provider,
+                    params,
                     config,
                     self._context,
                     bonds)
@@ -443,7 +477,7 @@ class Deployment:
         if not info:
             return None
 
-        type, config, provider = info
+        type, params, config, provider = info
 
         bonds = interfaces.bind_to_link(type,
                                         link_name,
@@ -452,6 +486,7 @@ class Deployment:
                                         self._bind_to_link)
 
         return type(provider,
+                    params,
                     config,
                     self._context,
                     bonds)
@@ -598,7 +633,8 @@ def _bond_defaults(name: str,
     type = repo.bond(name)
 
     return {
-        "configuration": repo.bond(name).on_configuration({})
+        "parameters": type.on_parameters({}),
+        "configuration": type.on_configuration({})
     }
 
 
@@ -609,12 +645,15 @@ def _provider_defaults(name: str,
     type = repo.provider(name)
 
     if type is None:
+        params = {}
         config = {}
 
     else:
+        params = type.on_parameters({})
         config = type.on_configuration({})
 
     return {
+        "parameters": params,
         "configuration": config,
         "bonds": {},
         "interfaces": {}

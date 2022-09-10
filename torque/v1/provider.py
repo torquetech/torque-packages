@@ -53,9 +53,11 @@ class Provider:
     """TODO"""
 
     def __init__(self,
-                 configuration: object,
+                 parameters: dict,
+                 configuration: dict,
                  context: deployment.Context,
                  bonds: object):
+        self.parameters = parameters
         self.configuration = configuration
         self.context = context
         self.bonds = bonds

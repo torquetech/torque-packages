@@ -14,13 +14,21 @@ class Bond:
 
     def __init__(self,
                  provider: provider.Provider,
-                 configuration: object,
+                 parameters: dict,
+                 configuration: dict,
                  context: deployment.Context,
                  bonds: object):
         self.provider = provider
+        self.parameters = parameters
         self.configuration = configuration
         self.context = context
         self.bonds = bonds
+
+    @classmethod
+    def on_parameters(cls, parameters: object) -> object:
+        """TODO"""
+
+        raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
