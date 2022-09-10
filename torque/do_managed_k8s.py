@@ -275,6 +275,9 @@ class KubernetesClient(k8s.KubernetesClientInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if not self.provider.is_initialized():
+            return
+
         self._cluster_id = self.provider.object_id(f"v2/kubernetes/{self.context.deployment_name}.k8s")
 
         name = f"{self.context.deployment_name}.k8s"
