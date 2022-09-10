@@ -229,13 +229,18 @@ class Deployment:
             config = profile["configuration"]
             type = self._repo.provider(name)
 
-            config = _validate_type_config(name, type, config)
+            provider = None
 
-            bonds = interfaces.bind_to_provider(type,
-                                                name,
-                                                self._bind_to_provider)
+            if type is not None:
+                config = _validate_type_config(name, type, config)
 
-            self._providers[name] = type(config, self._context, bonds)
+                bonds = interfaces.bind_to_provider(type,
+                                                    name,
+                                                    self._bind_to_provider)
+
+                provider = type(config, self._context, bonds)
+
+            self._providers[name] = provider
 
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -526,6 +531,9 @@ class Deployment:
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
+            if provider is None:
+                continue
+
             print(f"applying {v1.utils.fqcn(provider)}...")
             provider.apply()
 
@@ -535,6 +543,9 @@ class Deployment:
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
+            if provider is None:
+                continue
+
             print(f"deleting {v1.utils.fqcn(provider)}...")
             provider.delete()
 
@@ -546,7 +557,10 @@ class Deployment:
         if provider not in self._providers:
             raise exceptions.ProviderNotFound(provider)
 
-        self._providers[provider].command(argv)
+        provider = self._providers[provider]
+
+        if provider is not None:
+            provider.command(argv)
 
     def dot(self) -> str:
         """TODO"""
@@ -577,6 +591,64 @@ def _create_context(name: str,
     return context_type(name, config)
 
 
+def _bond_defaults(name: str,
+                   repo: repository.Repository) -> dict[str, object]:
+    """TODO"""
+
+    type = repo.bond(name)
+
+    return {
+        "configuration": repo.bond(name).on_configuration({})
+    }
+
+
+def _provider_defaults(name: str,
+                       repo: repository.Repository) -> dict[str, object]:
+    """TODO"""
+
+    type = repo.provider(name)
+
+    if type is None:
+        config = {}
+
+    else:
+        config = type.on_configuration({})
+
+    return {
+        "configuration": config,
+        "bonds": {},
+        "interfaces": {}
+    }
+
+
+def _component_defaults(component: model.Component,
+                        repo: repository.Repository) -> dict[str, object]:
+    """TODO"""
+
+    type = repo.component(component.type)
+    config = type.on_configuration({})
+
+    return {
+        "configuration": config,
+        "bonds": {},
+        "interfaces": {}
+    }
+
+
+def _link_defaults(link: model.Link,
+                   repo: repository.Repository) -> dict[str, object]:
+    """TODO"""
+
+    type = repo.link(link.type)
+    config = type.on_configuration({})
+
+    return {
+        "configuration": config,
+        "bonds": {},
+        "interfaces": {}
+    }
+
+
 def _load_defaults(providers: [str],
                    dag: model.DAG,
                    repo: repository.Repository) -> dict[str, object]:
@@ -603,9 +675,7 @@ def _load_defaults(providers: [str],
                 if not bond:
                     bond = bond_name
 
-                bonds[bond_name] = {
-                    "configuration": repo.bond(bond_name).on_configuration({})
-                }
+                bonds[bond_name] = _bond_defaults(bond_name, repo)
 
         if bond:
             interfaces[interface_name] = {
@@ -615,29 +685,20 @@ def _load_defaults(providers: [str],
     return {
         "version": "torquetech.io/v1",
         "providers": {
-            name: {
-                "configuration": repo.provider(name).on_configuration({}),
-                "bonds": {},
-                "interfaces": {}
-            } for name in providers
+            name: _provider_defaults(name, repo)
+            for name in providers
         },
         "bonds": bonds,
         "interfaces": interfaces,
         "dag": {
             "revision": dag.revision,
             "components": {
-                component.name: {
-                    "configuration": repo.component(component.type).on_configuration({}) or {},
-                    "bonds": {},
-                    "interfaces": {}
-                } for component in dag.components.values()
+                component.name: _component_defaults(component, repo)
+                for component in dag.components.values()
             },
             "links": {
-                link.name: {
-                    "configuration": repo.link(link.type).on_configuration({}) or {},
-                    "bonds": {},
-                    "interfaces": {}
-                } for link in dag.links.values()
+                link.name: _link_defaults(link, repo)
+                for link in dag.links.values()
             }
         }
     }
