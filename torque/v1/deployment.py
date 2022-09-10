@@ -13,15 +13,18 @@ from . import utils
 class _Context:
     """TODO"""
 
-    def __init__(self, buckets, load_bucket):
-        self._load_bucket = load_bucket
+    def __init__(self, buckets, modified_buckets, load_bucket):
         self._buckets = buckets
+        self._modified_buckets = modified_buckets
+        self._load_bucket = load_bucket
 
     def _set_data(self, bucket: str, name: type, data: object):
         """TODO"""
 
         if bucket not in self._buckets:
             self._buckets[bucket] = {}
+
+        self._modified_buckets.add(bucket)
 
         bucket = self._buckets[bucket]
         bucket[name] = data
@@ -71,11 +74,12 @@ class Context:
 
         self._lock = threading.Lock()
         self._buckets = {}
+        self._modified_buckets = set()
 
     def __enter__(self):
         self._lock.acquire()
 
-        return _Context(self._buckets, self.load_bucket)
+        return _Context(self._buckets, self._modified_buckets, self.load_bucket)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
@@ -84,7 +88,8 @@ class Context:
         """TODO"""
 
         for name, data in self._buckets.items():
-            self.store_bucket(name, data)
+            if name in self._modified_buckets:
+                self.store_bucket(name, data)
 
     @classmethod
     def on_configuration(cls, parameters: dict[str, object]) -> dict[str, object]:
