@@ -210,7 +210,7 @@ class Provider(v1.provider.Provider):
 
     def _check_params(self):
         if not self._params:
-            raise RuntimeError(f"digital ocean provider not initialized")
+            raise RuntimeError(f"digitalocean provider not initialized")
 
     def _load_params(self):
         """TODO"""
@@ -273,15 +273,15 @@ class Provider(v1.provider.Provider):
     def on_command(self, argv: [str]):
         """TODO"""
 
-        parser = argparse.ArgumentParser(prog="", description="digital ocean command line interface.")
+        parser = argparse.ArgumentParser(prog="", description="digitalocean command line interface.")
 
         parser.add_argument("--endpoint",
                             default="https://api.digitalocean.com",
-                            help="digital ocean api endpoint to use, default: %(default)s")
+                            help="digitalocean api endpoint to use, default: %(default)s")
 
         parser.add_argument("region",
                             metavar="REGION",
-                            help="digital ocean region to use")
+                            help="digitalocean region to use")
 
         args = parser.parse_args(argv)
 
@@ -338,7 +338,7 @@ class Provider(v1.provider.Provider):
             name = f"{obj['kind']}/{obj['name']}"
 
             if name in self._new_state:
-                raise RuntimeError(f"{name}: digital ocean object already exists")
+                raise RuntimeError(f"{name}: digitalocean object already exists")
 
             self._new_state[name] = obj
 
