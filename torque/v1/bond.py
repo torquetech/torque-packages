@@ -12,6 +12,16 @@ from . import utils
 class Bond:
     """TODO"""
 
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
     def __init__(self,
                  provider: provider.Provider,
                  parameters: dict,
@@ -28,16 +38,20 @@ class Bond:
     def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_parameters: not implemented")
+        return utils.validate_schema(cls._PARAMETERS["schema"],
+                                     cls._PARAMETERS["defaults"],
+                                     parameters)
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
+        return utils.validate_schema(cls._CONFIGURATION["schema"],
+                                     cls._CONFIGURATION["defaults"],
+                                     configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict[str, object]:
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
+        return {}

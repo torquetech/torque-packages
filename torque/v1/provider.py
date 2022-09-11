@@ -52,6 +52,16 @@ class _Provider:
 class Provider:
     """TODO"""
 
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
     def __init__(self,
                  parameters: dict,
                  configuration: dict,
@@ -97,28 +107,32 @@ class Provider:
         self.on_command(argv)
 
     @classmethod
+    def on_parameters(cls, parameters: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema(cls._PARAMETERS["schema"],
+                                     cls._PARAMETERS["defaults"],
+                                     parameters)
+
+    @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
+        return utils.validate_schema(cls._CONFIGURATION["schema"],
+                                     cls._CONFIGURATION["defaults"],
+                                     configuration)
 
     @classmethod
-    def on_requirements(cls) -> object:
+    def on_requirements(cls) -> dict[str, object]:
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_requirements: not implemented")
+        return {}
 
     def on_apply(self):
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(self)}: on_apply: not implemented")
-
     def on_delete(self):
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(self)}: on_delete: not implemented")
-
     def on_command(self, argv: [str]):
         """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: on_command: not implemented")

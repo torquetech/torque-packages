@@ -25,52 +25,9 @@ def _create_path(name: str) -> str:
 class DependencyLink(v1.link.Link):
     """TODO"""
 
-    @classmethod
-    def on_parameters(cls, parameters: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        return {}
-
-    @classmethod
-    def on_configuration(cls, configuration: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        return {}
-
-    @classmethod
-    def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
-
-        return {}
-
-    def on_create(self):
-        """TODO"""
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self):
-        """TODO"""
-
-    def on_apply(self):
-        """TODO"""
-
 
 class LocalContext(v1.deployment.Context):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, parameters: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        parameters)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -62,9 +62,25 @@ class _Context:
 
 
 class Context:
-    # pylint: disable=R0902
-
     """TODO"""
+
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    _CONFIGURATION = {
+        "defaults": {},
+        "schema": {}
+    }
+
+    @classmethod
+    def on_configuration(cls, configuration: object) -> object:
+        """TODO"""
+
+        return utils.validate_schema(cls._CONFIGURATION["schema"],
+                                     cls._CONFIGURATION["defaults"],
+                                     configuration)
 
     def __init__(self, deployment_name: str, configuration: dict[str, object]):
         # pylint: disable=R0913
@@ -91,23 +107,11 @@ class Context:
             if name in self._modified_buckets:
                 self.store_bucket(name, data)
 
-    @classmethod
-    def on_configuration(cls, parameters: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(cls)}: on_configuration: not implemented")
-
     def load_bucket(self, name: str) -> dict[str, object]:
         """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: load: not implemented")
 
     def store_bucket(self, name: str, data: dict[str, object]):
         """TODO"""
 
-        raise RuntimeError(f"{utils.fqcn(self)}: store: not implemented")
-
     def path(self) -> str:
         """TODO"""
-
-        raise RuntimeError(f"{utils.fqcn(self)}: path: not implemented")
