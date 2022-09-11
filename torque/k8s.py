@@ -20,11 +20,6 @@ class KubernetesClientInterface(v1.bond.Bond):
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     _CONFIGURATION = {
         "defaults": {
             "namespace": "default",
@@ -35,22 +30,6 @@ class Provider(v1.provider.Provider):
             "quiet": bool
         }
     }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
 
     @classmethod
     def on_requirements(cls) -> dict:
@@ -117,9 +96,6 @@ class Provider(v1.provider.Provider):
 
         finally:
             self._store_state()
-
-    def on_command(self, argv: [str]):
-        """TODO"""
 
     def add_object(self, obj: dict[str, object]):
         """TODO"""
