@@ -16,7 +16,9 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
     v1.schema.Optional(str): {
         "interface": type,
         "required": bool,
-        v1.schema.Optional("bind_to"): v1.schema.Or("source", "destination", "provider")
+        v1.schema.Optional("bind_to"): v1.schema.Or("source",
+                                                    "destination",
+                                                    "provider")
     }
 })
 
