@@ -357,9 +357,12 @@ class Provider(v1.provider.Provider):
         for container in containers:
             name = container["Name"]
 
+            deployment = self.context.deployment_name
+            deployment = deployment.replace(".", "")
+
             cmd = [
                 "docker", "inspect",
-                f"--format={{{{.NetworkSettings.Networks.{self.context.deployment_name}_default.IPAddress}}}}",
+                f"--format={{{{.NetworkSettings.Networks.{deployment}_default.IPAddress}}}}",
                 name
             ]
 
