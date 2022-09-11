@@ -170,28 +170,6 @@ class Provider(v1.provider.Provider):
         }
     }
 
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -292,9 +270,6 @@ class Provider(v1.provider.Provider):
 
         finally:
             self._store_state()
-
-    def on_command(self, argv: [str]):
-        """TODO"""
 
     def client(self) -> dolib.Client:
         """TODO"""
