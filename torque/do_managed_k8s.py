@@ -288,7 +288,8 @@ class KubernetesClient(k8s.KubernetesClientInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._cluster_id = None
+        k8s_object_name = f"v2/kubernetes/{self.context.deployment_name}.k8s"
+        self._cluster_id = self.provider.object_id(k8s_object_name)
 
         with self.provider as p:
             p.add_pre_apply_hook(self._create_k8s_cluster)
@@ -315,8 +316,6 @@ class KubernetesClient(k8s.KubernetesClientInterface):
             pool["name"] = f"{name}-{pool['name']}"
 
         self.provider.add_object(obj)
-
-        self._cluster_id = self.provider.object_id(f"v2/kubernetes/{self.context.deployment_name}.k8s")
 
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
