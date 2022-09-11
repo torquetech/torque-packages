@@ -137,6 +137,8 @@ def apply(client: Client,
         current_obj = current_state.get(name, None)
         new_obj = v1.utils.resolve_futures(new_obj)
 
+        handler = HANDLERS[new_obj["kind"]]
+
         current_params = None
         new_params = new_obj["params"]
 
@@ -146,6 +148,8 @@ def apply(client: Client,
         changed, diff = _diff(name, current_params, new_params)
 
         if not changed:
+            wait_hooks.append(functools.partial(handler.wait, client, current_obj))
+
             continue
 
         if not quiet:
@@ -157,8 +161,6 @@ def apply(client: Client,
 
         if not quiet:
             print(diff, file=sys.stdout)
-
-        handler = HANDLERS[new_obj["kind"]]
 
         if not current_obj:
             new_obj = handler.create(client, new_obj)
