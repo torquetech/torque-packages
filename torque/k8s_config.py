@@ -13,11 +13,6 @@ from torque import k8s
 class KubernetesClient(k8s.KubernetesClientInterface):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     _CONFIGURATION = {
         "defaults": {
             "config_file": None,
@@ -28,28 +23,6 @@ class KubernetesClient(k8s.KubernetesClientInterface):
             "context": v1.schema.Or(str, None)
         }
     }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
