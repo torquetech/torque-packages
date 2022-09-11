@@ -265,7 +265,9 @@ class KubernetesClient(k8s.KubernetesClientInterface):
         self._cluster_id = self.provider.object_id(k8s_object_name)
 
         with self.provider as p:
-            p.add_pre_apply_hook(self._create_k8s_cluster)
+            if not p.get_data(self, "initialized"):
+                p.set_data(self, "initialized", True)
+                p.add_pre_apply_hook(self._create_k8s_cluster)
 
     def _create_k8s_cluster(self):
         """TODO"""
