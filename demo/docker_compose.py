@@ -43,25 +43,6 @@ _LOAD_BALANCER_TEMPLATE = """server {
 class Images(providers.Images):
     """TODO"""
 
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def push(self, image: str) -> str:
         """TODO"""
 
@@ -70,25 +51,6 @@ class Images(providers.Images):
 
 class Secrets(providers.Secrets):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
@@ -99,25 +61,6 @@ class Secrets(providers.Secrets):
 class Services(providers.Services):
     """TODO"""
 
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
@@ -126,25 +69,6 @@ class Services(providers.Services):
 
 class Deployments(providers.Deployments):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def create(self,
                name: str,
@@ -179,25 +103,6 @@ class Deployments(providers.Deployments):
 
 class Development(providers.Development):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def create_deployment(self,
                           name: str,
@@ -234,25 +139,6 @@ class Development(providers.Development):
 class PersistentVolumes(providers.PersistentVolumes):
     """TODO"""
 
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
@@ -263,25 +149,6 @@ class PersistentVolumes(providers.PersistentVolumes):
 
 class PersistentVolumesProvider(providers.PersistentVolumesProvider):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
@@ -301,20 +168,6 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
         }
     }
 
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def create(self):
         """TODO"""
 
@@ -323,25 +176,6 @@ class HttpLoadBalancers(providers.HttpLoadBalancers):
 
 class HttpIngressLinks(providers.HttpIngressLinks):
     """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
@@ -358,20 +192,6 @@ class Provider(v1.provider.Provider):
             v1.schema.Optional("workspace_path"): str
         }
     }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -598,9 +418,6 @@ class Provider(v1.provider.Provider):
 
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=False)
-
-    def on_command(self, argv: [str]):
-        """TODO"""
 
     def add_volume(self, name: str):
         """TODO"""

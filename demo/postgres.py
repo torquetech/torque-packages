@@ -16,11 +16,6 @@ from demo import volume
 class Component(v1.component.Component):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     _CONFIGURATION = {
         "defaults": {
             "version": "14.2"
@@ -29,22 +24,6 @@ class Component(v1.component.Component):
             "version": str
         }
     }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
 
     @classmethod
     def on_requirements(cls) -> dict:
@@ -105,15 +84,6 @@ class Component(v1.component.Component):
                                        admin=self._admin,
                                        data_path=self._data_path)
         ]
-
-    def on_create(self):
-        """TODO"""
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self):
-        """TODO"""
 
     def on_apply(self):
         """TODO"""

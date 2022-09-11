@@ -16,32 +16,6 @@ from demo import utils
 class Component(v1.component.Component):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
     @classmethod
     def on_requirements(cls) -> dict:
         """TODO"""
@@ -101,15 +75,6 @@ class Component(v1.component.Component):
                                     zookeeper=self._zookeeper)
         ]
 
-    def on_create(self):
-        """TODO"""
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self):
-        """TODO"""
-
     def on_apply(self):
         """TODO"""
 
@@ -165,32 +130,6 @@ class DataLink(volume.Link):
 class ZookeeperLink(v1.link.Link):
     """TODO"""
 
-    _PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
     @classmethod
     def on_requirements(cls) -> dict:
         """TODO"""
@@ -207,15 +146,6 @@ class ZookeeperLink(v1.link.Link):
                 "required": True
             }
         }
-
-    def on_create(self):
-        """TODO"""
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self):
-        """TODO"""
 
     def on_apply(self):
         """TODO"""

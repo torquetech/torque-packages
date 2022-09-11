@@ -35,27 +35,6 @@ class Component(v1.component.Component):
         }
     }
 
-    _CONFIGURATION = {
-        "defaults": {},
-        "schema": {}
-    }
-
-    @classmethod
-    def on_parameters(cls, parameters: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._PARAMETERS["schema"],
-                                        cls._PARAMETERS["defaults"],
-                                        parameters)
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
     @classmethod
     def on_requirements(cls) -> dict:
         """TODO"""
@@ -83,15 +62,6 @@ class Component(v1.component.Component):
         return [
             components.Volume(link=self._link)
         ]
-
-    def on_create(self):
-        """TODO"""
-
-    def on_remove(self):
-        """TODO"""
-
-    def on_build(self):
-        """TODO"""
 
     def on_apply(self):
         """TODO"""

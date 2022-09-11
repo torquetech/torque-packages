@@ -129,20 +129,6 @@ class PersistentVolumesProvider(providers.PersistentVolumesProvider):
         }
     }
 
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
-
     def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
 
@@ -195,20 +181,6 @@ class Provider(v1.provider.Provider):
             }
         }
     }
-
-    @classmethod
-    def on_configuration(cls, configuration: dict) -> dict:
-        """TODO"""
-
-        return v1.utils.validate_schema(cls._CONFIGURATION["schema"],
-                                        cls._CONFIGURATION["defaults"],
-                                        configuration)
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -296,9 +268,6 @@ class Provider(v1.provider.Provider):
 
         print(f"+ {' '.join(cmd)}")
         subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=False)
-
-    def on_command(self, argv: [str]):
-        """TODO"""
 
     def add_target(self, key: object, value: object):
         """TODO"""
