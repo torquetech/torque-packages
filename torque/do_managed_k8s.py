@@ -206,7 +206,7 @@ class _V2KubernetesClusters:
 def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     """TODO"""
 
-    res = client.get(f"v2/kubernetes/clusters/{cluster_id}/kubeconfig")
+    res = client.get(f"v2/kubernetes/clusters/{cluster_id}/kubeconfig?expiry_seconds=3600")
 
     if res.status_code != 200:
         raise RuntimeError(f"{cluster_id}: unable to get kubeconfig")
