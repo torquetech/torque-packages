@@ -36,10 +36,10 @@ def _bind_to(type: object,
 
     for r_name, r in requirements.items():
         if "bind_to" in r and r["bind_to"] != "provider":
-            raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
+            raise exceptions.InvalidRequirement(name)
 
         if not issubclass(r["interface"], v1.bond.Bond):
-            raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
+            raise exceptions.InvalidRequirement(name)
 
         bond = get_bond(r["interface"],
                         r["required"],
@@ -83,7 +83,7 @@ def bind_to_link(type: object,
 
     for r_name, r in requirements.items():
         if "bind_to" not in r:
-            raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
+            raise exceptions.InvalidRequirement(name)
 
         bond = None
 
@@ -100,7 +100,7 @@ def bind_to_link(type: object,
 
         elif issubclass(r["interface"], v1.bond.Bond):
             if r["bind_to"] != "provider":
-                raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
+                raise exceptions.InvalidRequirement(name)
 
             bond = get_bond(r["interface"],
                             r["required"],
@@ -109,7 +109,7 @@ def bind_to_link(type: object,
                             destination)
 
         else:
-            raise exceptions.InvalidRequirement(v1.utils.fqcn(type))
+            raise exceptions.InvalidRequirement(name)
 
         setattr(bonds, r_name, bond)
 
