@@ -305,7 +305,7 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         if name not in self._current_state:
-            return f"<{name}_id>"
+            raise RuntimeError(f"{name}: object not found")
 
         return self._current_state[name]["metadata"]["id"]
 
