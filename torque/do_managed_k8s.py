@@ -271,13 +271,13 @@ class KubernetesClient(k8s.KubernetesClientInterface):
         """TODO"""
 
         name = f"{self.context.deployment_name}.k8s"
-        name = name.replace(".", "-")
+        sanitized_name = name.replace(".", "-")
 
         obj = {
             "kind": "v2/kubernetes",
-            "name": f"{self.context.deployment_name}.k8s",
+            "name": name,
             "params": {
-                "name": name,
+                "name": sanitized_name,
                 "region": self.provider.region(),
                 "vpc_uuid": self.provider.vpc_id()
             }
@@ -286,7 +286,7 @@ class KubernetesClient(k8s.KubernetesClientInterface):
         obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
         for pool in obj["params"]["node_pools"]:
-            pool["name"] = f"{name}-{pool['name']}"
+            pool["name"] = f"{sanitized_name}-{pool['name']}"
 
         self.provider.add_object(obj)
 
