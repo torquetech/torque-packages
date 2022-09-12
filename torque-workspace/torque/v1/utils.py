@@ -9,6 +9,7 @@ import os
 import pathlib
 import typing
 
+from . import exceptions
 from . import schema as schema_v1
 
 
@@ -48,7 +49,7 @@ def torque_root() -> str:
             break
 
         if cwd.parent == cwd:
-            raise RuntimeError("workspace root not found!")
+            raise exceptions.RuntimeError("workspace root not found!")
 
         cwd = cwd.parent
 
@@ -119,7 +120,7 @@ def merge_dicts(dict1: dict[str, object],
         else:
             if not allow_overwrites:
                 if key in new_dict:
-                    raise RuntimeError(f"{key}: duplicate entry")
+                    raise exceptions.RuntimeError(f"{key}: duplicate entry")
 
             new_dict[key] = dict2[key]
 

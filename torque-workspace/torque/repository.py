@@ -313,9 +313,6 @@ def load() -> Repository:
 
             repository = v1.utils.merge_dicts(repository, package_repository)
 
-        except RuntimeError as exc:
-            print(f"WARNING: {entry_point.name}: {exc}", file=sys.stderr)
-
         except Exception as exc:
             traceback.print_exc()
 

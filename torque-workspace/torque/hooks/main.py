@@ -95,10 +95,10 @@ def main() -> int:
     except exceptions.OperationAborted:
         pass
 
-    except exceptions.TorqueException as exc:
-        print(exc, file=sys.stderr)
+    except exceptions.InternalError as exc:
+        print(f"[CRITICAL]: {exc}", file=sys.stderr)
 
-    except RuntimeError as exc:
+    except v1.exceptions.TorqueException as exc:
         print(exc, file=sys.stderr)
 
     return 1

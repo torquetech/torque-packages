@@ -277,7 +277,7 @@ class Workspace:
             raise exceptions.ComponentNotFound(name)
 
         if len(processed[name]) != 1:
-            raise RuntimeError(f"{name}: ambigous component name")
+            raise v1.exceptions.RuntimeError(f"{name}: ambigous component name")
 
         return f"{name}.{processed[name][0]}"
 
@@ -293,7 +293,7 @@ class Workspace:
             raise exceptions.LinkNotFound(name)
 
         if len(processed[name]) != 1:
-            raise RuntimeError(f"{name}: ambigous link name")
+            raise v1.exceptions.RuntimeError(f"{name}: ambigous link name")
 
         return f"{name}.{processed[name][0]}"
 
@@ -309,7 +309,7 @@ class Workspace:
             raise exceptions.DeploymentNotFound(name)
 
         if len(processed[name]) != 1:
-            raise RuntimeError(f"{name}: ambigous deployment name")
+            raise v1.exceptions.RuntimeError(f"{name}: ambigous deployment name")
 
         return f"{name}.{processed[name][0]}"
 
@@ -326,7 +326,7 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
-            raise RuntimeError("{name}: deployment name too long")
+            raise v1.exceptions.RuntimeError("{name}: deployment name too long")
 
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         context = self.repo.context(context_type)
@@ -338,7 +338,7 @@ class Workspace:
             context_config = context.on_configuration({})
 
         except v1.schema.SchemaError as exc:
-            raise RuntimeError(f"component parameters: {name}: {exc}") from exc
+            raise v1.exceptions.RuntimeError(f"component parameters: {name}: {exc}") from exc
 
         for component in components or []:
             if component not in self.dag.components:
@@ -401,7 +401,7 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_COMPONENT_NAME_LENGTH:
-            raise RuntimeError("{name}: component name too long")
+            raise v1.exceptions.RuntimeError("{name}: component name too long")
 
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         component_type = self.repo.component(type)
@@ -410,7 +410,7 @@ class Workspace:
             params = component_type.on_parameters(params)
 
         except v1.schema.SchemaError as exc:
-            raise RuntimeError(f"component parameters: {name}: {exc}") from exc
+            raise v1.exceptions.RuntimeError(f"component parameters: {name}: {exc}") from exc
 
         component = self.dag.create_component(name, type, params)
 
@@ -451,7 +451,7 @@ class Workspace:
         """TODO"""
 
         if len(name) > _MAX_LINK_NAME_LENGTH:
-            raise RuntimeError("{name}: link name too long")
+            raise v1.exceptions.RuntimeError("{name}: link name too long")
 
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
@@ -463,7 +463,7 @@ class Workspace:
             params = link_type.on_parameters(params)
 
         except v1.schema.SchemaError as exc:
-            raise RuntimeError(f"link parameters: {name}: {exc}") from exc
+            raise v1.exceptions.RuntimeError(f"link parameters: {name}: {exc}") from exc
 
         source = self._get_full_component_name(source)
         destination = self._get_full_component_name(destination)
@@ -562,7 +562,7 @@ def _load_deployments(path: str) -> dict[str, Deployment]:
     deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
 
     if deployments["version"] != "torquetech.io/v1":
-        raise RuntimeError(f"{deployments['version']}: invalid deployments version")
+        raise v1.exceptions.RuntimeError(f"{deployments['version']}: invalid deployments version")
 
     return {
         name: Deployment(name,
@@ -603,7 +603,7 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     workspace = _WORKSPACE_SCHEMA.validate(workspace)
 
     if workspace["version"] != "torquetech.io/v1":
-        raise RuntimeError(f"{workspace['version']}: invalid workspace version")
+        raise v1.exceptions.RuntimeError(f"{workspace['version']}: invalid workspace version")
 
     deployments = _load_deployments(deployments_path)
     repo = repository.load()

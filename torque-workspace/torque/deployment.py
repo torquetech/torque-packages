@@ -102,7 +102,7 @@ def _validate_type_params(name: str, type: object, config: dict[str, object]):
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
 
-        raise RuntimeError(f"{type} parameters: {name}: {exc_str}") from exc
+        raise v1.exceptions.RuntimeError(f"{type} parameters: {name}: {exc_str}") from exc
 
 
 def _validate_type_config(name: str, type: object, config: dict[str, object]):
@@ -124,7 +124,7 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
 
-        raise RuntimeError(f"{type} configuration: {name}: {exc_str}") from exc
+        raise v1.exceptions.RuntimeError(f"{type} configuration: {name}: {exc_str}") from exc
 
 
 def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[str, object]:
@@ -137,7 +137,7 @@ def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[st
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
 
-        raise RuntimeError(f"deployment: {name}:\n{exc_str}") from exc
+        raise v1.exceptions.RuntimeError(f"deployment: {name}:\n{exc_str}") from exc
 
 
 class Configuration:
@@ -349,14 +349,14 @@ class Deployment:
         else:
             if interface_class not in self._interfaces:
                 if required:
-                    raise RuntimeError(f"{interface_class}: interface not bound")
+                    raise v1.exceptions.RuntimeError(f"{interface_class}: interface not bound")
 
                 return None
 
             name = self._interfaces[interface_class]
 
         if name not in self._bonds:
-            raise RuntimeError(f"{name}: bond not configured")
+            raise v1.exceptions.RuntimeError(f"{name}: bond not configured")
 
         params = self._bonds[name]["parameters"]
         config = self._bonds[name]["configuration"]
@@ -694,7 +694,7 @@ def _load_defaults(providers: [str],
     """TODO"""
 
     if len(set(providers)) != len(providers):
-        raise RuntimeError("provider specified more than once")
+        raise v1.exceptions.RuntimeError("provider specified more than once")
 
     provider_bonds = []
 
@@ -785,13 +785,13 @@ def load(name: str,
     config = _validate_deployment_config(name, config)
 
     if config["version"] != "torquetech.io/v1":
-        raise RuntimeError(f"{config['version']}: invalid configuration version")
+        raise v1.exceptions.RuntimeError(f"{config['version']}: invalid configuration version")
 
     config = Configuration(config)
 
     if dag.revision != config.revision():
         if strict:
-            raise RuntimeError(f"ERROR: {name}: deployment out of date")
+            raise v1.exceptions.RuntimeError(f"ERROR: {name}: deployment out of date")
 
         print(f"WARNING: {name}: deployment out of date", file=sys.stderr)
 

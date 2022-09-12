@@ -107,7 +107,7 @@ class Provider(v1.provider.Provider):
             name += f"{obj['kind']}/{obj['metadata']['name']}"
 
             if name in self._new_state:
-                raise RuntimeError(f"{name}: k8s object already exists")
+                raise v1.exceptions.RuntimeError(f"{name}: k8s object already exists")
 
             self._new_state[name] = obj
 

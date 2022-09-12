@@ -9,6 +9,7 @@ import inspect
 import threading
 import warnings
 
+from . import exceptions
 from . import deployment
 from . import utils
 
@@ -73,7 +74,7 @@ class Component:
 
         for interface in self.on_interfaces():
             if not issubclass(interface.__class__, Interface):
-                raise RuntimeError(f"{utils.fqcn(interface)}: invalid interface")
+                raise exceptions.RuntimeError(f"{utils.fqcn(interface)}: invalid interface")
 
             # pylint: disable=W0212
             interface._torque_lock = self._torque_lock
@@ -81,7 +82,7 @@ class Component:
 
             while cls is not Interface:
                 if len(cls.__bases__) != 1:
-                    raise RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
+                    raise exceptions.RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
 
                 fqcn = utils.fqcn(cls)
 
@@ -98,7 +99,7 @@ class Component:
 
         if name not in self._torque_interfaces:
             if required:
-                raise RuntimeError(f"{self.name}: {name}: component interface not found")
+                raise exceptions.RuntimeError(f"{self.name}: {name}: component interface not found")
 
             return None
 

@@ -23,13 +23,13 @@ class _V2Projects:
         data = res.json()
 
         if res.status_code != 200:
-            raise RuntimeError(f"{name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
 
         for project in data["projects"]:
             if name == project["name"]:
                 return project
 
-        raise RuntimeError(f"unexpected error while looking for {name}")
+        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
 
     @classmethod
     def create(cls,
@@ -42,7 +42,7 @@ class _V2Projects:
 
         if res.status_code != 201:
             if res.status_code != 409:
-                raise RuntimeError(f"{obj['name']}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
 
             data = cls._get_project(client, obj["name"])
 
@@ -65,7 +65,7 @@ class _V2Projects:
                new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        raise RuntimeError(f"{old_obj['name']}: cannot update projects")
+        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update projects")
 
     @classmethod
     def delete(cls, client: dolib.Client, obj: dict[str, object]):
@@ -91,13 +91,13 @@ class _V2Vpcs:
         data = res.json()
 
         if res.status_code != 200:
-            raise RuntimeError(f"{name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
 
         for vpc in data["vpcs"]:
             if name == vpc["name"]:
                 return vpc
 
-        raise RuntimeError(f"unexpected error while looking for {name}")
+        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
 
     @classmethod
     def create(cls,
@@ -110,7 +110,7 @@ class _V2Vpcs:
 
         if res.status_code != 201:
             if res.status_code != 422:
-                raise RuntimeError(f"{obj['name']}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
 
             data = cls._get_vpc(client, obj["name"])
 
@@ -133,7 +133,7 @@ class _V2Vpcs:
                new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        raise RuntimeError(f"{old_obj['name']}: cannot update vpcs")
+        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update vpcs")
 
     @classmethod
     def delete(cls, client: dolib.Client, obj: dict[str, object]):
@@ -280,7 +280,7 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         if name not in self._current_state:
-            raise RuntimeError(f"{name}: object not found")
+            raise v1.exceptions.RuntimeError(f"{name}: object not found")
 
         return self._current_state[name]["metadata"]["id"]
 
@@ -311,7 +311,7 @@ class Provider(v1.provider.Provider):
             name = f"{obj['kind']}/{obj['name']}"
 
             if name in self._new_state:
-                raise RuntimeError(f"{name}: digitalocean object already exists")
+                raise v1.exceptions.RuntimeError(f"{name}: digitalocean object already exists")
 
             self._new_state[name] = obj
 

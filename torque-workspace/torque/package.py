@@ -17,6 +17,7 @@ import zipfile
 from importlib import metadata
 
 from torque import exceptions
+from torque import v1
 
 
 _URI = r"^[^:]+://"
@@ -56,7 +57,7 @@ def torque_root() -> str:
             break
 
         if cwd.parent == cwd:
-            raise RuntimeError("workspace root not found!")
+            raise v1.exceptions.RuntimeError("workspace root not found!")
 
         cwd = cwd.parent
 

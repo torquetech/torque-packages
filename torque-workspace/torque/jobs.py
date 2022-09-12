@@ -10,6 +10,7 @@ import typing
 import sys
 
 from torque import exceptions
+from torque import v1
 
 
 class Job:
@@ -118,19 +119,13 @@ class Runner:
                     if len(self._jobs) == 0:
                         self._quit()
 
-            except exceptions.TorqueException as exc:
+            except v1.exceptions.TorqueException as exc:
                 print(exc, file=sys.stderr)
 
                 self._exception = True
                 self._abort()
 
-            except RuntimeError as exc:
-                print(exc, file=sys.stderr)
-
-                self._exception = True
-                self._abort()
-
-            except BaseException as exc:
+            except BaseException:
                 traceback.print_exc()
 
                 self._exception = True
@@ -157,7 +152,7 @@ class Runner:
                     self._push(job)
 
             if len(self._jobs) == len(jobs):
-                raise RuntimeError("internal error: no roots found")
+                raise exceptions.InternalError("no roots found")
 
             for _ in range(self._worker_count):
                 thr = threading.Thread(target=self._worker)

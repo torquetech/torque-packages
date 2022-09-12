@@ -66,7 +66,7 @@ class V2Certificates:
         data = res.json()
 
         if res.status_code != 201:
-            raise RuntimeError(f"{obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
 
         return {
             "kind": obj["kind"],
@@ -84,7 +84,7 @@ class V2Certificates:
                new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        raise RuntimeError(f"{old_obj['name']}: cannot update certificates")
+        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update certificates")
 
     @classmethod
     def delete(cls, client: Client, obj: dict[str, object]):

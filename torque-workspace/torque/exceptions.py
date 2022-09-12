@@ -4,150 +4,152 @@
 
 """TODO"""
 
+from torque import v1
 
-class TorqueException(Exception):
+
+class InternalError(v1.exceptions.TorqueException):
     """TODO"""
 
 
-class ComponentNotFound(TorqueException):
+class ComponentNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: component not found"
 
 
-class ComponentExists(TorqueException):
+class ComponentExists(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: component already exists"
 
 
-class ComponentStillConnected(TorqueException):
+class ComponentStillConnected(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: component still connected"
 
 
-class LinkNotFound(TorqueException):
+class LinkNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: link not found"
 
 
-class LinkExists(TorqueException):
+class LinkExists(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: link already exists"
 
 
-class CycleDetected(TorqueException):
+class CycleDetected(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return "cycle detected, can't continue"
 
 
-class ComponentsNotConnected(TorqueException):
+class ComponentsNotConnected(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]},{self.args[1]}: components not connected"
 
 
-class ComponentTypeNotFound(TorqueException):
+class ComponentTypeNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: component type not found"
 
 
-class LinkTypeNotFound(TorqueException):
+class LinkTypeNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: link type not found"
 
 
-class PackageNotFound(TorqueException):
+class PackageNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: package not found"
 
 
-class ProviderNotFound(TorqueException):
+class ProviderNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: provider not found"
 
 
-class InterfaceNotFound(TorqueException):
+class InterfaceNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: interface not found"
 
 
-class BondNotFound(TorqueException):
+class BondNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: bond not found"
 
 
-class InvalidBond(TorqueException):
+class InvalidBond(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: invalid bond"
 
 
-class InvalidRequirement(TorqueException):
+class InvalidRequirement(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: invalid requirements"
 
 
-class InvalidName(TorqueException):
+class InvalidName(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: invalid name"
 
 
-class DeploymentExists(TorqueException):
+class DeploymentExists(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: deployment already exists"
 
 
-class DeploymentNotFound(TorqueException):
+class DeploymentNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: deployment not found"
 
 
-class ContextNotFound(TorqueException):
+class ContextNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: context not found"
 
 
-class NoComponentsSelected(TorqueException):
+class NoComponentsSelected(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: no components selected"
 
 
-class OperationAborted(TorqueException):
+class OperationAborted(v1.exceptions.TorqueException):
     """TODO"""

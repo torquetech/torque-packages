@@ -33,7 +33,7 @@ class _V2KubernetesClusters:
         data = res.json()
 
         if res.status_code != 201:
-            raise RuntimeError(f"{pool_name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{pool_name}: {data['message']}")
 
     @classmethod
     def _update_pool(cls,
@@ -50,7 +50,7 @@ class _V2KubernetesClusters:
         data = res.json()
 
         if res.status_code != 202:
-            raise RuntimeError(f"{pool_name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{pool_name}: {data['message']}")
 
     @classmethod
     def _delete_pool(cls,
@@ -82,7 +82,7 @@ class _V2KubernetesClusters:
         }
 
         if not new_pools:
-            raise RuntimeError(f"{new_obj['name']}: at least one node pool is required")
+            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: at least one node pool is required")
 
         for name, new_pool in new_pools.items():
             if name not in current_pools:
@@ -109,7 +109,7 @@ class _V2KubernetesClusters:
         data = res.json()
 
         if res.status_code != 201:
-            raise RuntimeError(f"{obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
 
         data = data["kubernetes_cluster"]
 
@@ -148,7 +148,7 @@ class _V2KubernetesClusters:
         data = res.json()
 
         if res.status_code != 202:
-            raise RuntimeError(f"{new_obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
         data = data["kubernetes_cluster"]
 
@@ -187,7 +187,7 @@ class _V2KubernetesClusters:
             data = res.json()
 
             if res.status_code != 200:
-                raise RuntimeError(f"{cluster_name}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{cluster_name}: {data['message']}")
 
             data = data["kubernetes_cluster"]
             done = data["status"]["state"] == "running"
@@ -210,7 +210,7 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     res = client.get(f"v2/kubernetes/clusters/{cluster_id}/kubeconfig?expiry_seconds=3600")
 
     if res.status_code != 200:
-        raise RuntimeError(f"{cluster_id}: unable to get kubeconfig")
+        raise v1.exceptions.RuntimeError(f"{cluster_id}: unable to get kubeconfig")
 
     return yaml.safe_load(res.text)
 
@@ -301,8 +301,8 @@ class KubernetesClient(k8s.KubernetesClientInterface):
         try:
             cluster_id = v1.utils.resolve_futures(self._cluster_id)
 
-        except RuntimeError as e:
-            raise RuntimeError(f"digitalocean k8s cluster not initialized") from e
+        except v1.exceptions.RuntimeError as e:
+            raise v1.exceptions.RuntimeError("digitalocean k8s cluster not initialized") from e
 
         config = _kubeconfig(client, cluster_id)
 
