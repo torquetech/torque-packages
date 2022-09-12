@@ -1,6 +1,0 @@
-.pytest_cache
-build
-dist
-*.egg-info
-*.dist-info
-**/__pycache__
