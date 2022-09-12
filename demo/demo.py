@@ -24,32 +24,32 @@ from demo import zookeeper
 
 repository = {
     "v1": {
-        "components": {
-            "demo/python-app": python_app.Component,
-            "demo/python-service": python_service.Component,
-            "demo/postgres": postgres.Component,
-            "demo/zookeeper": zookeeper.Component,
-            "demo/kafka": kafka.Component,
-            "demo/persistent-volume": persistent_volume.Component,
-            "demo/load-balancer": load_balancer.Component,
-            "demo/react-app": react_app.Component
-        },
-        "links": {
-            "demo/network": network.Link,
-            "demo/psycopg": psycopg.Link,
-            "demo/volume": volume.Link,
-            "demo/postgres-data": postgres.DataLink,
-            "demo/zookeeper-data": zookeeper.DataLink,
-            "demo/kafka-data": kafka.DataLink,
-            "demo/zookeeper-kafka": kafka.ZookeeperLink,
-            "demo/kafka-python": kafka_python.Link,
-            "demo/ingress": load_balancer.Link
-        },
-        "providers": {
-            "demo/k8s": k8s.Provider,
-            "demo/terraform": terraform.Provider,
-            "demo/docker-compose": docker_compose.Provider
-        },
+        "components": [
+            python_app.Component,
+            python_service.Component,
+            postgres.Component,
+            zookeeper.Component,
+            kafka.Component,
+            persistent_volume.Component,
+            load_balancer.Component,
+            react_app.Component
+        ],
+        "links": [
+            network.Link,
+            psycopg.Link,
+            volume.Link,
+            postgres.DataLink,
+            zookeeper.DataLink,
+            kafka.DataLink,
+            kafka.ZookeeperLink,
+            kafka_python.Link,
+            load_balancer.Link
+        ],
+        "providers": [
+            k8s.Provider,
+            terraform.Provider,
+            docker_compose.Provider
+        ],
         "interfaces": [
             providers.Images,
             providers.Secrets,
@@ -62,7 +62,7 @@ repository = {
             providers.HttpIngressLinks
         ],
         "bonds": {
-            "demo/k8s": [
+            k8s.Provider: [
                 k8s.Images,
                 k8s.Secrets,
                 k8s.Services,
@@ -71,10 +71,10 @@ repository = {
                 k8s.HttpLoadBalancers,
                 k8s.HttpIngressLinks
             ],
-            "demo/terraform": [
+            terraform.Provider: [
                 terraform.PersistentVolumesProvider
             ],
-            "demo/docker-compose": [
+            docker_compose.Provider: [
                 docker_compose.Images,
                 docker_compose.Secrets,
                 docker_compose.Services,
