@@ -21,22 +21,22 @@ class _Provider:
     def set_data(self, cls: type, name: str, data: object):
         """TODO"""
 
-        cls = utils.fqcn(cls)
+        cls_type = utils.fqcn(cls)
 
-        if cls not in self._data:
-            self._data[cls] = {}
+        if cls_type not in self._data:
+            self._data[cls_type] = {}
 
-        self._data[cls][name] = data
+        self._data[cls_type][name] = data
 
     def get_data(self, cls: type, name: str) -> object:
         """TODO"""
 
-        cls = utils.fqcn(cls)
+        cls_type = utils.fqcn(cls)
 
-        if cls not in self._data:
+        if cls_type not in self._data:
             return None
 
-        return self._data[cls].get(name)
+        return self._data[cls_type].get(name)
 
     def add_pre_apply_hook(self, hook: typing.Callable):
         """TODO"""
@@ -50,6 +50,8 @@ class _Provider:
 
 
 class Provider:
+    # pylint: disable=R0902
+
     """TODO"""
 
     _PARAMETERS = {

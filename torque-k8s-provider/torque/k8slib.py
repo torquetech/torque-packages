@@ -4,6 +4,8 @@
 # 2.0, this file is an exception and is released under Apache 2.0 license. Apache 2.0
 # license text can be found at https://www.apache.org/licenses/LICENSE-2.0.html
 
+"""TODO"""
+
 import difflib
 import re
 import sys
@@ -19,6 +21,8 @@ LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE = re.compile('([a-z0-9])([A-Z])')
 
 
 def _get_api_for(client: kubernetes.client.ApiClient, obj: dict[str, object]):
+    # pylint: disable=C0209
+
     group, _, version = obj["apiVersion"].partition("/")
     if version == "":
         version = group

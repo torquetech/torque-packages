@@ -40,5 +40,4 @@ setup(name="torque-k8s-config-provider",
           "torque": [
               "torque-k8s-config-provider=torque.k8s_config:repository"
           ]
-      }
-)
+      })

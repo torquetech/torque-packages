@@ -41,5 +41,4 @@ setup(name="torque-workspace-cli",
           "console_scripts": [
               "torque=torque.__main__:main"
           ],
-      }
-)
+      })

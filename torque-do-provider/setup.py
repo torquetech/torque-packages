@@ -40,5 +40,4 @@ setup(name="torque-do-provider",
           "torque": [
               "torque-do-provider=torque.do:repository"
           ]
-      }
-)
+      })

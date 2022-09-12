@@ -40,5 +40,4 @@ setup(name="torque-do-managed-k8s",
           "torque": [
               "torque-do-managed-k8s=torque.do_managed_k8s:repository"
           ]
-      }
-)
+      })

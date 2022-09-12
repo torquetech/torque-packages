@@ -2,9 +2,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+"""TODO"""
+
 import difflib
 import functools
-import re
 import sys
 import typing
 
@@ -31,7 +32,6 @@ class Client:
         return self._session.post(f"{self._endpoint}/{path}",
                                   headers=self._headers,
                                   json=params)
-
 
     def put(self, path: str, params: object) -> object:
         """TODO"""

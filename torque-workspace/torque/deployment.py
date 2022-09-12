@@ -338,22 +338,22 @@ class Deployment:
                       profile: dict[str, object]) -> (str, dict[str, object]):
         """TODO"""
 
-        interface_class = v1.utils.fqcn(interface)
+        interface_type = v1.utils.fqcn(interface)
 
         local_interfaces = profile["interfaces"]
         local_bonds = profile["bonds"]
 
-        if interface_class in local_interfaces:
-            name = local_interfaces[interface_class]["bond"]
+        if interface_type in local_interfaces:
+            name = local_interfaces[interface_type]["bond"]
 
         else:
-            if interface_class not in self._interfaces:
+            if interface_type not in self._interfaces:
                 if required:
-                    raise v1.exceptions.RuntimeError(f"{interface_class}: interface not bound")
+                    raise v1.exceptions.RuntimeError(f"{interface_type}: interface not bound")
 
                 return None
 
-            name = self._interfaces[interface_class]
+            name = self._interfaces[interface_type]
 
         if name not in self._bonds:
             raise v1.exceptions.RuntimeError(f"{name}: bond not configured")
@@ -706,11 +706,11 @@ def _load_defaults(providers: [str],
     interfaces = {}
     bonds = {}
 
-    for interface_name, interface_class in repo.interfaces().items():
+    for interface_name, interface_type in repo.interfaces().items():
         bond = None
 
         for bond_name in provider_bonds:
-            if issubclass(repo.bond(bond_name), interface_class):
+            if issubclass(repo.bond(bond_name), interface_type):
                 if not bond:
                     bond = bond_name
 

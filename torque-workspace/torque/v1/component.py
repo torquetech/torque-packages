@@ -81,29 +81,29 @@ class Component:
             cls = interface.__class__
 
             while cls is not Interface:
+                cls_type = utils.fqcn(cls)
+
                 if len(cls.__bases__) != 1:
-                    raise exceptions.RuntimeError(f"{utils.fqcn(cls)}: multiple inheritance not supported")
+                    raise exceptions.RuntimeError(f"{cls_type}: multiple inheritance not supported")
 
-                fqcn = utils.fqcn(cls)
+                if cls_type in self._torque_interfaces:
+                    print(f"WARNING: {utils.fqcn(self)}: duplicate interface: {cls_type}")
 
-                if fqcn in self._torque_interfaces:
-                    print(f"WARNING: {utils.fqcn(self)}: duplicate interface: {fqcn}")
-
-                self._torque_interfaces[fqcn] = interface
+                self._torque_interfaces[cls_type] = interface
                 cls = cls.__bases__[0]
 
     def _torque_interface(self, cls: type, required: bool) -> Interface:
         """TODO"""
 
-        name = utils.fqcn(cls)
+        cls_type = utils.fqcn(cls)
 
-        if name not in self._torque_interfaces:
+        if cls_type not in self._torque_interfaces:
             if required:
-                raise exceptions.RuntimeError(f"{self.name}: {name}: component interface not found")
+                raise exceptions.RuntimeError(f"{self.name}: {cls_type}: component interface not found")
 
             return None
 
-        return self._torque_interfaces[name]
+        return self._torque_interfaces[cls_type]
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

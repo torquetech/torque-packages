@@ -37,11 +37,11 @@ class _V2KubernetesClusters:
 
     @classmethod
     def _update_pool(cls,
-                    client: dolib.Client,
-                    cluster_id: str,
-                    pool_id: str,
-                    pool_name: str,
-                    params: dict[str, object]):
+                     client: dolib.Client,
+                     cluster_id: str,
+                     pool_id: str,
+                     pool_name: str,
+                     params: dict[str, object]):
         """TODO"""
 
         print(f"{pool_name} updating...", file=sys.stdout)
@@ -54,15 +54,15 @@ class _V2KubernetesClusters:
 
     @classmethod
     def _delete_pool(cls,
-                    client: dolib.Client,
-                    cluster_id: str,
-                    pool_id: str,
-                    pool_name: str):
+                     client: dolib.Client,
+                     cluster_id: str,
+                     pool_id: str,
+                     pool_name: str):
         """TODO"""
 
         print(f"{pool_name} deleting...", file=sys.stdout)
 
-        res = client.delete(f"v2/kubernetes/clusters/{cluster_id}/node_pools/{pool_id}")
+        client.delete(f"v2/kubernetes/clusters/{cluster_id}/node_pools/{pool_id}")
 
     @classmethod
     def _update_pools(cls,
@@ -73,10 +73,7 @@ class _V2KubernetesClusters:
 
         cluster_id = old_obj["metadata"]["id"]
 
-        current_pools = {
-            name: id for name, id in old_obj["metadata"]["node_pools"].items()
-        }
-
+        current_pools = dict(old_obj["metadata"]["node_pools"].items())
         new_pools = {
             pool["name"]: pool for pool in new_obj["params"]["node_pools"]
         }
@@ -203,6 +200,7 @@ class _V2KubernetesClusters:
                   file=sys.stdout)
 
             time.sleep(10)
+
 
 def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     """TODO"""

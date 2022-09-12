@@ -36,5 +36,4 @@ setup(name="torque-workspace",
           "pyyaml",
           "pydot",
           "schema"
-      ]
-)
+      ])
