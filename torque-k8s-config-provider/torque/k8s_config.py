@@ -31,13 +31,17 @@ class KubernetesClient(k8s.KubernetesClientInterface):
                                                         self.configuration["context"])
 
 
+class Provider(v1.provider.Provider):
+    """TODO"""
+
+
 repository = {
     "v1": {
-        "providers": {
-            "torquetech.io/k8s-config": None
-        },
+        "providers": [
+            Provider
+        ],
         "bonds": {
-            "torquetech.io/k8s-config": [
+            Provider: [
                 KubernetesClient
             ]
         }

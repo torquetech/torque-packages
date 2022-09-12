@@ -122,8 +122,8 @@ repository = {
         "interfaces": [
             KubernetesClientInterface
         ],
-        "providers": {
-            "torquetech.io/k8s": Provider
-        }
+        "providers": [
+            Provider
+        ]
     }
 }

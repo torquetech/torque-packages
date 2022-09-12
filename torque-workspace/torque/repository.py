@@ -63,25 +63,23 @@ def _is_context(obj: type) -> bool:
 
 _REPOSITORY_SCHEMA = v1.schema.Schema({
     v1.schema.Optional("v1"): v1.schema.Schema({
-        v1.schema.Optional("contexts"): {
-            v1.schema.Optional(str): _is_context
-        },
-        v1.schema.Optional("components"): {
-            v1.schema.Optional(str): _is_component
-        },
-        v1.schema.Optional("links"): {
-            v1.schema.Optional(str): _is_link
-        },
-        v1.schema.Optional("providers"): {
-            v1.schema.Optional(str): _is_provider
-        },
+        v1.schema.Optional("contexts"): [
+            _is_context
+        ],
+        v1.schema.Optional("components"): [
+            _is_component
+        ],
+        v1.schema.Optional("links"): [
+            _is_link
+        ],
+        v1.schema.Optional("providers"): [
+            _is_provider
+        ],
         v1.schema.Optional("interfaces"): [
             _is_bond
         ],
         v1.schema.Optional("bonds"): {
-            v1.schema.Optional(str): [
-                _is_bond
-            ]
+            _is_provider: [_is_bond]
         }
     })
 }, ignore_extra_keys=True)
@@ -89,17 +87,15 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
 _DEFAULT_REPOSITORY = {
     "v1": {
         "contexts": {
-            "torquetech.io/local": defaults.LocalContext
+            v1.utils.fqcn(defaults.LocalContext): defaults.LocalContext
         },
-        "components": {
-        },
+        "components": {},
         "links": {
-            "torquetech.io/dependency": defaults.DependencyLink
+            v1.utils.fqcn(defaults.DependencyLink): defaults.DependencyLink
         },
-        "providers": {
-        },
-        "bonds": {
-        }
+        "providers": {},
+        "interfaces": {},
+        "bonds": {}
     }
 }
 
@@ -110,24 +106,19 @@ class Repository:
     def __init__(self, repo: dict[str, object]):
         self._repo = repo
 
-        self._process_providers()
+        self._process_bonds()
 
-    def _process_providers(self):
+    def _process_bonds(self):
         """TODO"""
 
-        providers = {}
         bonds = {}
         bond_maps = {}
 
-        for provider_name, provider_class in self._repo["v1"]["providers"].items():
-            providers[provider_name] = provider_class
-
         for provider_name, provider_bonds in self._repo["v1"]["bonds"].items():
-            for bond_name, bond_class in provider_bonds.items():
-                bonds[bond_name] = bond_class
+            for bond_name, bond_type in provider_bonds.items():
+                bonds[bond_name] = bond_type
                 bond_maps[bond_name] = provider_name
 
-        self._repo["v1"]["providers"] = providers
         self._repo["v1"]["bonds"] = bonds
         self._repo["v1"]["bond_maps"] = bond_maps
 
@@ -264,38 +255,44 @@ def _local_repository() -> list:
         return []
 
 
-def _process_interfaces(_repository: dict[str, object]) -> dict[str, object]:
+def _process_items(repository: dict[str, object], name: str) -> dict[str, object]:
     """TODO"""
 
-    if "interfaces" not in _repository["v1"]:
-        return _repository
+    if name not in repository["v1"]:
+        return repository
 
-    _repository["v1"]["interfaces"] = {
-        v1.utils.fqcn(interface): interface
-        for interface in _repository["v1"]["interfaces"]
+    repository["v1"][name] = {
+        v1.utils.fqcn(item): item
+        for item in repository["v1"][name]
     }
 
-    return _repository
+    return repository
 
 
-def _process_bonds(_repository: dict[str, object]) -> dict[str, object]:
+def _process_bonds(repository: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
-    if "bonds" not in _repository["v1"]:
-        return _repository
+    if "bonds" not in repository["v1"]:
+        return repository
 
-    for provider_name, provider_bonds in _repository["v1"]["bonds"].items():
-        _repository["v1"]["bonds"][provider_name] = {
+    bonds = {}
+
+    for provider_type, provider_bonds in repository["v1"]["bonds"].items():
+        provider_name = v1.utils.fqcn(provider_type)
+
+        bonds[provider_name] = {
             v1.utils.fqcn(bond): bond for bond in provider_bonds
         }
 
-    return _repository
+    repository["v1"]["bonds"] = bonds
+
+    return repository
 
 
 def load() -> Repository:
     """TODO"""
 
-    repository = _DEFAULT_REPOSITORY
+    repository = {} | _DEFAULT_REPOSITORY
 
     entry_points = _system_repository()
     entry_points += _local_repository()
@@ -304,13 +301,17 @@ def load() -> Repository:
         # pylint: disable=W0703
 
         try:
-            _repository = entry_point.load()
-            _repository = _REPOSITORY_SCHEMA.validate(_repository)
+            package_repository = entry_point.load()
+            package_repository = _REPOSITORY_SCHEMA.validate(package_repository)
 
-            _repository = _process_interfaces(_repository)
-            _repository = _process_bonds(_repository)
+            package_repository = _process_items(package_repository, "contexts")
+            package_repository = _process_items(package_repository, "components")
+            package_repository = _process_items(package_repository, "links")
+            package_repository = _process_items(package_repository, "providers")
+            package_repository = _process_items(package_repository, "interfaces")
+            package_repository = _process_bonds(package_repository)
 
-            repository = v1.utils.merge_dicts(repository, _repository, False)
+            repository = v1.utils.merge_dicts(repository, package_repository)
 
         except RuntimeError as exc:
             print(f"WARNING: {entry_point.name}: {exc}", file=sys.stderr)

@@ -12,6 +12,7 @@ import yaml
 
 from torque import v1
 from torque import k8s
+from torque import do
 from torque import dolib
 
 
@@ -315,7 +316,7 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "bonds": {
-            "torquetech.io/do": [
+            do.Provider: [
                 KubernetesClient
             ]
         }

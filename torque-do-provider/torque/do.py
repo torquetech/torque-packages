@@ -323,8 +323,8 @@ dolib.HANDLERS.update({
 
 repository = {
     "v1": {
-        "providers": {
-            "torquetech.io/do": Provider
-        }
+        "providers": [
+            Provider
+        ]
     }
 }
