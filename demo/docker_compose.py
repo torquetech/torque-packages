@@ -40,149 +40,6 @@ _LOAD_BALANCER_TEMPLATE = """server {
 """
 
 
-class Images(providers.Images):
-    """TODO"""
-
-    def push(self, image: str) -> str:
-        """TODO"""
-
-        return image
-
-
-class Secrets(providers.Secrets):
-    """TODO"""
-
-    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
-        """TODO"""
-
-        return utils.Future(entries)
-
-
-class Services(providers.Services):
-    """TODO"""
-
-    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
-        """TODO"""
-
-        return utils.Future((type.lower(), name, port))
-
-
-class Deployments(providers.Deployments):
-    """TODO"""
-
-    def create(self,
-               name: str,
-               image: str,
-               cmd: [str],
-               args: [str],
-               cwd: str,
-               env: [types.KeyValue],
-               ports: [types.Port],
-               network_links: [types.NetworkLink],
-               volume_links: [types.VolumeLink],
-               secret_links: [types.SecretLink]):
-        """TODO"""
-
-        if args:
-            if cmd:
-                cmd += args
-
-            else:
-                cmd = args
-
-        self.provider.add_deployment(name,
-                                     image,
-                                     cmd,
-                                     cwd,
-                                     env,
-                                     network_links,
-                                     volume_links,
-                                     secret_links,
-                                     [])
-
-
-class Development(providers.Development):
-    """TODO"""
-
-    def create_deployment(self,
-                          name: str,
-                          image: str,
-                          cmd: [str],
-                          args: [str],
-                          cwd: str,
-                          env: [types.KeyValue],
-                          ports: [types.Port],
-                          network_links: [types.NetworkLink],
-                          volume_links: [types.VolumeLink],
-                          secret_links: [types.SecretLink],
-                          local_volume_links: [types.VolumeLink]):
-        """TODO"""
-
-        if args:
-            if cmd:
-                cmd += args
-
-            else:
-                cmd = args
-
-        self.provider.add_deployment(name,
-                                     image,
-                                     cmd,
-                                     cwd,
-                                     env,
-                                     network_links,
-                                     volume_links,
-                                     secret_links,
-                                     local_volume_links)
-
-
-class PersistentVolumes(providers.PersistentVolumes):
-    """TODO"""
-
-    def create(self, name: str, size: int) -> utils.Future[object]:
-        """TODO"""
-
-        self.provider.add_volume(name)
-
-        return utils.Future(name)
-
-
-class PersistentVolumesProvider(providers.PersistentVolumesProvider):
-    """TODO"""
-
-    def create(self, name: str, size: int) -> utils.Future[str]:
-        """TODO"""
-
-        return utils.Future("<ignored_value>")
-
-
-class HttpLoadBalancers(providers.HttpLoadBalancers):
-    """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {
-            "port": 8080
-        },
-        "schema": {
-            "port": int
-        }
-    }
-
-    def create(self):
-        """TODO"""
-
-        self.provider.add_load_balancer(self.configuration["port"])
-
-
-class HttpIngressLinks(providers.HttpIngressLinks):
-    """TODO"""
-
-    def create(self, name: str, path: str, network_link: types.NetworkLink):
-        """TODO"""
-
-        self.provider.add_load_balancer_link(path, network_link)
-
-
 class Provider(v1.provider.Provider):
     """TODO"""
 
@@ -482,3 +339,173 @@ class Provider(v1.provider.Provider):
 
         with self._lock:
             self._load_balancer_links.append(LoadBalancerLink(service, path, port))
+
+
+class Images(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Images
+
+    def push(self, image: str) -> str:
+        """TODO"""
+
+        return image
+
+
+class Secrets(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Secrets
+
+    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
+        """TODO"""
+
+        return utils.Future(entries)
+
+
+class Services(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Services
+
+    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
+        """TODO"""
+
+        return utils.Future((type.lower(), name, port))
+
+
+class Deployments(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Deployments
+
+    def create(self,
+               name: str,
+               image: str,
+               cmd: [str],
+               args: [str],
+               cwd: str,
+               env: [types.KeyValue],
+               ports: [types.Port],
+               network_links: [types.NetworkLink],
+               volume_links: [types.VolumeLink],
+               secret_links: [types.SecretLink]):
+        """TODO"""
+
+        if args:
+            if cmd:
+                cmd += args
+
+            else:
+                cmd = args
+
+        self.provider.add_deployment(name,
+                                     image,
+                                     cmd,
+                                     cwd,
+                                     env,
+                                     network_links,
+                                     volume_links,
+                                     secret_links,
+                                     [])
+
+
+class Development(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Development
+
+    def create_deployment(self,
+                          name: str,
+                          image: str,
+                          cmd: [str],
+                          args: [str],
+                          cwd: str,
+                          env: [types.KeyValue],
+                          ports: [types.Port],
+                          network_links: [types.NetworkLink],
+                          volume_links: [types.VolumeLink],
+                          secret_links: [types.SecretLink],
+                          local_volume_links: [types.VolumeLink]):
+        """TODO"""
+
+        if args:
+            if cmd:
+                cmd += args
+
+            else:
+                cmd = args
+
+        self.provider.add_deployment(name,
+                                     image,
+                                     cmd,
+                                     cwd,
+                                     env,
+                                     network_links,
+                                     volume_links,
+                                     secret_links,
+                                     local_volume_links)
+
+
+class PersistentVolumes(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.PersistentVolumes
+
+    def create(self, name: str, size: int) -> utils.Future[object]:
+        """TODO"""
+
+        self.provider.add_volume(name)
+
+        return utils.Future(name)
+
+
+class PersistentVolumesProvider(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.PersistentVolumesProvider
+
+    def create(self, name: str, size: int) -> utils.Future[str]:
+        """TODO"""
+
+        return utils.Future("<ignored_value>")
+
+
+class HttpLoadBalancers(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.HttpLoadBalancers
+
+    _CONFIGURATION = {
+        "defaults": {
+            "port": 8080
+        },
+        "schema": {
+            "port": int
+        }
+    }
+
+    def create(self):
+        """TODO"""
+
+        self.provider.add_load_balancer(self.configuration["port"])
+
+
+class HttpIngressLinks(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.HttpIngressLinks
+
+    def create(self, name: str, path: str, network_link: types.NetworkLink):
+        """TODO"""
+
+        self.provider.add_load_balancer_link(path, network_link)

@@ -50,41 +50,24 @@ repository = {
             terraform.Provider,
             docker_compose.Provider
         ],
-        "interfaces": [
-            providers.Images,
-            providers.Secrets,
-            providers.Services,
-            providers.Deployments,
-            providers.Development,
-            providers.PersistentVolumes,
-            providers.HttpLoadBalancers,
-            providers.PersistentVolumesProvider,
-            providers.HttpIngressLinks
-        ],
-        "bonds": {
-            k8s.Provider: [
-                k8s.Images,
-                k8s.Secrets,
-                k8s.Services,
-                k8s.Deployments,
-                k8s.PersistentVolumes,
-                k8s.HttpLoadBalancers,
-                k8s.HttpIngressLinks
-            ],
-            terraform.Provider: [
-                terraform.PersistentVolumesProvider
-            ],
-            docker_compose.Provider: [
-                docker_compose.Images,
-                docker_compose.Secrets,
-                docker_compose.Services,
-                docker_compose.Deployments,
-                docker_compose.PersistentVolumes,
-                docker_compose.PersistentVolumesProvider,
-                docker_compose.HttpLoadBalancers,
-                docker_compose.HttpIngressLinks,
-                docker_compose.Development
-            ]
-        }
+        "bonds": [
+            k8s.Images,
+            k8s.Secrets,
+            k8s.Services,
+            k8s.Deployments,
+            k8s.PersistentVolumes,
+            k8s.HttpLoadBalancers,
+            k8s.HttpIngressLinks,
+            terraform.PersistentVolumesProvider,
+            docker_compose.Images,
+            docker_compose.Secrets,
+            docker_compose.Services,
+            docker_compose.Deployments,
+            docker_compose.PersistentVolumes,
+            docker_compose.PersistentVolumesProvider,
+            docker_compose.HttpLoadBalancers,
+            docker_compose.HttpIngressLinks,
+            docker_compose.Development
+        ]
     }
 }

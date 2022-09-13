@@ -10,7 +10,7 @@ from demo import types
 from demo import utils
 
 
-class Images(v1.bond.Bond):
+class Images(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -21,7 +21,7 @@ class Images(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: push: not implemented")
 
 
-class Secrets(v1.bond.Bond):
+class Secrets(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -32,7 +32,7 @@ class Secrets(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Services(v1.bond.Bond):
+class Services(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -43,7 +43,7 @@ class Services(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Deployments(v1.bond.Bond):
+class Deployments(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -64,7 +64,7 @@ class Deployments(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class Development(v1.bond.Bond):
+class Development(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -86,7 +86,7 @@ class Development(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create_deployment: not implemented")
 
 
-class PersistentVolumes(v1.bond.Bond):
+class PersistentVolumes(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -97,7 +97,7 @@ class PersistentVolumes(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpLoadBalancers(v1.bond.Bond):
+class HttpLoadBalancers(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -108,7 +108,7 @@ class HttpLoadBalancers(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class PersistentVolumesProvider(v1.bond.Bond):
+class PersistentVolumesProvider(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""
@@ -119,7 +119,7 @@ class PersistentVolumesProvider(v1.bond.Bond):
         raise RuntimeError(f"{v1.utils.fqcn(self)}: create: not implemented")
 
 
-class HttpIngressLinks(v1.bond.Bond):
+class HttpIngressLinks(v1.bond.Interface):
     # pylint: disable=E0211,E0213
 
     """TODO"""

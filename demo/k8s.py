@@ -23,376 +23,6 @@ from demo import types
 from demo import utils
 
 
-class Images(providers.Images):
-    """TODO"""
-
-    def push(self, image: str) -> str:
-        """TODO"""
-
-        self.provider.add_image(image)
-
-        ns = self.provider.namespace()
-
-        if ns:
-            return f"{self.provider.namespace()}/{image}"
-
-        return image
-
-
-class Secrets(providers.Secrets):
-    """TODO"""
-
-    @staticmethod
-    def encode_b64(string: str) -> str:
-        """TODO"""
-
-        string = bytes(string, encoding="utf8")
-        string = codecs.encode(string, "base64")
-        string = str(string, encoding="utf8")
-
-        return string.strip()
-
-    def _k8s_create(self, name: str, entries: [types.KeyValue]) -> dict:
-        """TODO"""
-
-        name = utils.normalize(name)
-
-        return {
-            "apiVersion": "v1",
-            "kind": "Secret",
-            "metadata": {
-                "name": name
-            },
-            "data": {
-                entry.key: self.encode_b64(entry.value)
-                for entry in entries
-            },
-            "type": "Opaque"
-        }
-
-    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
-        """TODO"""
-
-        self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name, entries)
-        ])
-
-        return utils.Future(name)
-
-
-class Services(providers.Services):
-    """TODO"""
-
-    def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> dict:
-        """TODO"""
-
-        name = utils.normalize(name)
-
-        return {
-            "apiVersion": "v1",
-            "kind": "Service",
-            "metadata": {
-                "name": name
-            },
-            "spec": {
-                "selector": {
-                    "app": name
-                },
-                "ports": [{
-                    "protocol": type.upper(),
-                    "port": port,
-                    "targetPort": target_port
-                }]
-            }
-        }
-
-    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
-        """TODO"""
-
-        self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name, type, port, target_port),
-        ])
-
-        return utils.Future((type.lower(), name, port))
-
-
-class Deployments(providers.Deployments):
-    """TODO"""
-
-    def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
-        """TODO"""
-
-        if not env:
-            return []
-
-        return [{
-            "name": entry.key,
-            "value": entry.value
-        } for entry in env]
-
-    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [dict]:
-        """TODO"""
-
-        if not network_links:
-            return []
-
-        def resolve_future(link: types.NetworkLink) -> dict:
-            name = link.name.upper()
-            link = link.object.get()
-
-            return {
-                "name": f"{name}_LINK",
-                "value": f"{link[0]}://{link[1]}:{link[2]}"
-            }
-
-        return [
-            functools.partial(resolve_future, link) for link in network_links
-        ]
-
-    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [dict]:
-        """TODO"""
-
-        if not secret_links:
-            return []
-
-        def resolve_future(link: types.SecretLink) -> dict:
-            return {
-                "name": link.name,
-                "valueFrom": {
-                    "secretKeyRef": {
-                        "name": utils.normalize(link.object.get()),
-                        "key": link.key
-                    }
-                }
-            }
-
-        return [
-            functools.partial(resolve_future, link) for link in secret_links
-        ]
-
-    def _convert_ports(self, ports: [types.Port]) -> [dict]:
-        """TODO"""
-
-        if not ports:
-            return []
-
-        return [{
-            "name": port.name,
-            "protocol": port.protocol.upper(),
-            "containerPort": port.port
-        } for port in ports]
-
-    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([dict], [dict]):
-        """TODO"""
-
-        if not volume_links:
-            return None, None
-
-        mounts = [{
-            "name": utils.normalize(link.name),
-            "mountPath": link.mount_path
-        } for link in volume_links]
-
-        def resolve_future(link: types.VolumeLink) -> dict:
-            return {
-                "name": utils.normalize(link.name),
-                **link.object.get(),
-            }
-
-        volumes = [
-            functools.partial(resolve_future, link) for link in volume_links
-        ]
-
-        return mounts, volumes
-
-    def _k8s_create(self,
-                    name: str,
-                    image: str,
-                    cmd: [str],
-                    args: [str],
-                    cwd: str,
-                    env: [types.KeyValue],
-                    ports: [types.Port],
-                    network_links: [types.NetworkLink],
-                    volume_links: [types.VolumeLink],
-                    secret_links: [types.SecretLink]) -> dict:
-        """TODO"""
-
-        env = self._convert_environment(env)
-        env += self._convert_network_links(network_links)
-        env += self._convert_secret_links(secret_links)
-
-        ports = self._convert_ports(ports)
-
-        mounts, volumes = self._convert_volume_links(volume_links)
-
-        name = utils.normalize(name)
-
-        return {
-            "apiVersion": "apps/v1",
-            "kind": "Deployment",
-            "metadata": {
-                "name": name,
-                "labels": {
-                    "app": name
-                }
-            },
-            "spec": {
-                "replicas": 1,
-                "selector": {
-                    "matchLabels": {
-                        "app": name
-                    }
-                },
-                "template": {
-                    "metadata": {
-                        "labels": {
-                            "app": name
-                        }
-                    },
-                    "spec": {
-                        "restartPolicy": "Always",
-                        "containers": [{
-                            "name": f"{name}-container",
-                            "image": image,
-                            "command": cmd,
-                            "args": args,
-                            "workingDir": cwd,
-                            "env": env,
-                            "ports": ports,
-                            "volumeMounts": mounts
-                        }],
-                        "volumes": volumes,
-                        "securityContext": {
-                            "runAsUser": 0
-                        }
-                    }
-                }
-            }
-        }
-
-    def create(self,
-               name: str,
-               image: str,
-               cmd: [str],
-               args: [str],
-               cwd: str,
-               env: [types.KeyValue],
-               ports: [types.Port],
-               network_links: [types.NetworkLink],
-               volume_links: [types.VolumeLink],
-               secret_links: [types.SecretLink]):
-        """TODO"""
-
-        self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name,
-                             image,
-                             cmd,
-                             args,
-                             cwd,
-                             env,
-                             ports,
-                             network_links,
-                             volume_links,
-                             secret_links)
-        ])
-
-
-class PersistentVolumes(providers.PersistentVolumes):
-    """TODO"""
-
-    @classmethod
-    def on_requirements(cls) -> dict:
-        """TODO"""
-
-        return {
-            "vol": {
-                "interface": providers.PersistentVolumesProvider,
-                "required": True
-            }
-        }
-
-    def create(self, name: str, size: int) -> utils.Future[object]:
-        """TODO"""
-
-        return utils.Future({
-            "name": utils.normalize(name),
-            "awsElasticBlockStore": {
-                "volumeID": self.bonds.vol.create(name, size),
-                "fsType": "ext4"
-            }
-        })
-
-
-class HttpLoadBalancers(providers.HttpLoadBalancers):
-    """TODO"""
-
-    def create(self):
-        """TODO"""
-
-        self.provider.add_load_balancer()
-
-        templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
-        templates = templates.split("---")
-
-        templates = map(jinja2.Template, templates)
-
-        for template in templates:
-            self.provider.add_to_target("k8s_http_load_balancer",
-                                        [yaml.safe_load(template.render())])
-
-
-class HttpIngressLinks(providers.HttpIngressLinks):
-    """TODO"""
-
-    def _convert_network_link(self, path: str, network_link: types.NetworkLink) -> dict:
-        """TODO"""
-
-        def resolve_future() -> list:
-            link = network_link.object.get()
-
-            return [{
-                "http": {
-                    "paths": [{
-                        "pathType": "Prefix",
-                        "path": path,
-                        "backend": {
-                            "service": {
-                                "name": utils.normalize(link[1]),
-                                "port": {
-                                    "number": link[2]
-                                }
-                            }
-                        }
-                    }]
-                }
-            }]
-
-        return resolve_future
-
-    def _k8s_create(self, name: str, path: str, network_link: types.NetworkLink):
-        """TODO"""
-
-        return {
-            "apiVersion": "networking.k8s.io/v1",
-            "kind": "Ingress",
-            "metadata": {
-                "name": f"{utils.normalize(name)}",
-            },
-            "spec": {
-                "ingressClassName": "nginx",
-                "rules": self._convert_network_link(path, network_link)
-            }
-        }
-
-    def create(self, name: str, path: str, network_link: types.NetworkLink):
-        """TODO"""
-
-        self.provider.add_to_target(f"component_{name}", [
-            self._k8s_create(name, path, network_link)
-        ])
-
-
 def _process_futures(obj: object) -> object:
     """TODO"""
 
@@ -623,3 +253,394 @@ class Provider(v1.provider.Provider):
                 self._targets[name] = []
 
             self._targets[name] += objs
+
+
+class Images(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Images
+
+    def push(self, image: str) -> str:
+        """TODO"""
+
+        self.provider.add_image(image)
+
+        ns = self.provider.namespace()
+
+        if ns:
+            return f"{self.provider.namespace()}/{image}"
+
+        return image
+
+
+class Secrets(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Secrets
+
+    @staticmethod
+    def encode_b64(string: str) -> str:
+        """TODO"""
+
+        string = bytes(string, encoding="utf8")
+        string = codecs.encode(string, "base64")
+        string = str(string, encoding="utf8")
+
+        return string.strip()
+
+    def _k8s_create(self, name: str, entries: [types.KeyValue]) -> dict:
+        """TODO"""
+
+        name = utils.normalize(name)
+
+        return {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": name
+            },
+            "data": {
+                entry.key: self.encode_b64(entry.value)
+                for entry in entries
+            },
+            "type": "Opaque"
+        }
+
+    def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
+        """TODO"""
+
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name, entries)
+        ])
+
+        return utils.Future(name)
+
+
+class Services(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Services
+
+    def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> dict:
+        """TODO"""
+
+        name = utils.normalize(name)
+
+        return {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "name": name
+            },
+            "spec": {
+                "selector": {
+                    "app": name
+                },
+                "ports": [{
+                    "protocol": type.upper(),
+                    "port": port,
+                    "targetPort": target_port
+                }]
+            }
+        }
+
+    def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
+        """TODO"""
+
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name, type, port, target_port),
+        ])
+
+        return utils.Future((type.lower(), name, port))
+
+
+class Deployments(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.Deployments
+
+    def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
+        """TODO"""
+
+        if not env:
+            return []
+
+        return [{
+            "name": entry.key,
+            "value": entry.value
+        } for entry in env]
+
+    def _convert_network_links(self, network_links: [types.NetworkLink]) -> [dict]:
+        """TODO"""
+
+        if not network_links:
+            return []
+
+        def resolve_future(link: types.NetworkLink) -> dict:
+            name = link.name.upper()
+            link = link.object.get()
+
+            return {
+                "name": f"{name}_LINK",
+                "value": f"{link[0]}://{link[1]}:{link[2]}"
+            }
+
+        return [
+            functools.partial(resolve_future, link) for link in network_links
+        ]
+
+    def _convert_secret_links(self, secret_links: [types.SecretLink]) -> [dict]:
+        """TODO"""
+
+        if not secret_links:
+            return []
+
+        def resolve_future(link: types.SecretLink) -> dict:
+            return {
+                "name": link.name,
+                "valueFrom": {
+                    "secretKeyRef": {
+                        "name": utils.normalize(link.object.get()),
+                        "key": link.key
+                    }
+                }
+            }
+
+        return [
+            functools.partial(resolve_future, link) for link in secret_links
+        ]
+
+    def _convert_ports(self, ports: [types.Port]) -> [dict]:
+        """TODO"""
+
+        if not ports:
+            return []
+
+        return [{
+            "name": port.name,
+            "protocol": port.protocol.upper(),
+            "containerPort": port.port
+        } for port in ports]
+
+    def _convert_volume_links(self, volume_links: [types.VolumeLink]) -> ([dict], [dict]):
+        """TODO"""
+
+        if not volume_links:
+            return None, None
+
+        mounts = [{
+            "name": utils.normalize(link.name),
+            "mountPath": link.mount_path
+        } for link in volume_links]
+
+        def resolve_future(link: types.VolumeLink) -> dict:
+            return {
+                "name": utils.normalize(link.name),
+                **link.object.get(),
+            }
+
+        volumes = [
+            functools.partial(resolve_future, link) for link in volume_links
+        ]
+
+        return mounts, volumes
+
+    def _k8s_create(self,
+                    name: str,
+                    image: str,
+                    cmd: [str],
+                    args: [str],
+                    cwd: str,
+                    env: [types.KeyValue],
+                    ports: [types.Port],
+                    network_links: [types.NetworkLink],
+                    volume_links: [types.VolumeLink],
+                    secret_links: [types.SecretLink]) -> dict:
+        """TODO"""
+
+        env = self._convert_environment(env)
+        env += self._convert_network_links(network_links)
+        env += self._convert_secret_links(secret_links)
+
+        ports = self._convert_ports(ports)
+
+        mounts, volumes = self._convert_volume_links(volume_links)
+
+        name = utils.normalize(name)
+
+        return {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "name": name,
+                "labels": {
+                    "app": name
+                }
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "matchLabels": {
+                        "app": name
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": name
+                        }
+                    },
+                    "spec": {
+                        "restartPolicy": "Always",
+                        "containers": [{
+                            "name": f"{name}-container",
+                            "image": image,
+                            "command": cmd,
+                            "args": args,
+                            "workingDir": cwd,
+                            "env": env,
+                            "ports": ports,
+                            "volumeMounts": mounts
+                        }],
+                        "volumes": volumes,
+                        "securityContext": {
+                            "runAsUser": 0
+                        }
+                    }
+                }
+            }
+        }
+
+    def create(self,
+               name: str,
+               image: str,
+               cmd: [str],
+               args: [str],
+               cwd: str,
+               env: [types.KeyValue],
+               ports: [types.Port],
+               network_links: [types.NetworkLink],
+               volume_links: [types.VolumeLink],
+               secret_links: [types.SecretLink]):
+        """TODO"""
+
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name,
+                             image,
+                             cmd,
+                             args,
+                             cwd,
+                             env,
+                             ports,
+                             network_links,
+                             volume_links,
+                             secret_links)
+        ])
+
+
+class PersistentVolumes(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.PersistentVolumes
+
+    @classmethod
+    def on_requirements(cls) -> dict:
+        """TODO"""
+
+        return {
+            "vol": {
+                "interface": providers.PersistentVolumesProvider,
+                "required": True
+            }
+        }
+
+    def create(self, name: str, size: int) -> utils.Future[object]:
+        """TODO"""
+
+        return utils.Future({
+            "name": utils.normalize(name),
+            "awsElasticBlockStore": {
+                "volumeID": self.bonds.vol.create(name, size),
+                "fsType": "ext4"
+            }
+        })
+
+
+class HttpLoadBalancers(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.HttpLoadBalancers
+
+    def create(self):
+        """TODO"""
+
+        self.provider.add_load_balancer()
+
+        templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
+        templates = templates.split("---")
+
+        templates = map(jinja2.Template, templates)
+
+        for template in templates:
+            self.provider.add_to_target("k8s_http_load_balancer",
+                                        [yaml.safe_load(template.render())])
+
+
+class HttpIngressLinks(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.HttpIngressLinks
+
+    def _convert_network_link(self, path: str, network_link: types.NetworkLink) -> dict:
+        """TODO"""
+
+        def resolve_future() -> list:
+            link = network_link.object.get()
+
+            return [{
+                "http": {
+                    "paths": [{
+                        "pathType": "Prefix",
+                        "path": path,
+                        "backend": {
+                            "service": {
+                                "name": utils.normalize(link[1]),
+                                "port": {
+                                    "number": link[2]
+                                }
+                            }
+                        }
+                    }]
+                }
+            }]
+
+        return resolve_future
+
+    def _k8s_create(self, name: str, path: str, network_link: types.NetworkLink):
+        """TODO"""
+
+        return {
+            "apiVersion": "networking.k8s.io/v1",
+            "kind": "Ingress",
+            "metadata": {
+                "name": f"{utils.normalize(name)}",
+            },
+            "spec": {
+                "ingressClassName": "nginx",
+                "rules": self._convert_network_link(path, network_link)
+            }
+        }
+
+    def create(self, name: str, path: str, network_link: types.NetworkLink):
+        """TODO"""
+
+        self.provider.add_to_target(f"component_{name}", [
+            self._k8s_create(name, path, network_link)
+        ])

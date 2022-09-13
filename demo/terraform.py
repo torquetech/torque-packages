@@ -115,49 +115,6 @@ def _to_tf(obj: dict, level: int) -> str:
     return string
 
 
-class PersistentVolumesProvider(providers.PersistentVolumesProvider):
-    """TODO"""
-
-    _CONFIGURATION = {
-        "defaults": {
-            "zone": "us-east-1a",
-            "type": "gp2"
-        },
-        "schema": {
-            "zone": str,
-            "type": str
-        }
-    }
-
-    def create(self, name: str, size: int) -> utils.Future[str]:
-        """TODO"""
-
-        name = f"{self.context.deployment_name}.{name}"
-        name = name.replace(".", "-")
-
-        self.provider.add_target(_Block("resource", "aws_ebs_volume", name), {
-            _Key("availability_zone"): _Str(self.configuration["zone"]),
-            _Key("type"): _Str(self.configuration["type"]),
-            _Key("size"): _Int(size)
-        })
-
-        def resolve_future(future: utils.Future[object], state: dict):
-            if state is None:
-                future.set(f"<{name}_id>")
-                return
-
-            resources = state["values"]["root_module"]["resources"]
-
-            for resource in resources:
-                if resource["name"] == name:
-                    future.set(resource["values"]["id"])
-                    return
-
-            raise RuntimeError("{name}: terraform resource not found")
-
-        return self.provider.add_future(resolve_future)
-
-
 class Provider(v1.provider.Provider):
     """TODO"""
 
@@ -284,3 +241,49 @@ class Provider(v1.provider.Provider):
             self._futures.append(functools.partial(resolve_future, future))
 
         return future
+
+
+class PersistentVolumesProvider(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = providers.PersistentVolumesProvider
+
+    _CONFIGURATION = {
+        "defaults": {
+            "zone": "us-east-1a",
+            "type": "gp2"
+        },
+        "schema": {
+            "zone": str,
+            "type": str
+        }
+    }
+
+    def create(self, name: str, size: int) -> utils.Future[str]:
+        """TODO"""
+
+        name = f"{self.context.deployment_name}.{name}"
+        name = name.replace(".", "-")
+
+        self.provider.add_target(_Block("resource", "aws_ebs_volume", name), {
+            _Key("availability_zone"): _Str(self.configuration["zone"]),
+            _Key("type"): _Str(self.configuration["type"]),
+            _Key("size"): _Int(size)
+        })
+
+        def resolve_future(future: utils.Future[object], state: dict):
+            if state is None:
+                future.set(f"<{name}_id>")
+                return
+
+            resources = state["values"]["root_module"]["resources"]
+
+            for resource in resources:
+                if resource["name"] == name:
+                    future.set(resource["values"]["id"])
+                    return
+
+            raise RuntimeError("{name}: terraform resource not found")
+
+        return self.provider.add_future(resolve_future)
