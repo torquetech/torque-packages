@@ -384,13 +384,10 @@ class Deployment:
 
         type = self._repo.bond(name)
 
-        if not issubclass(type, interface):
-            raise exceptions.InvalidBond(name, v1.utils.fqcn(interface))
-
         params = _validate_type_params(name, type, params)
         config = _validate_type_config(name, type, config)
 
-        provider_name = self._repo.provider_for(name)
+        provider_name = v1.utils.fqcn(type.PROVIDER)
         provider = self._providers[provider_name]
 
         return type, params, config, provider
@@ -615,11 +612,8 @@ def _create_context(name: str,
     return context_type(name, config)
 
 
-def _bond_defaults(name: str,
-                   repo: repository.Repository) -> dict[str, object]:
+def _bond_defaults(name: str, type: v1.bond.Bond) -> dict[str, object]:
     """TODO"""
-
-    type = repo.bond(name)
 
     return {
         "parameters": type.on_parameters({}),
@@ -680,30 +674,29 @@ def _load_defaults(providers: [str],
     if len(set(providers)) != len(providers):
         raise v1.exceptions.RuntimeError("provider specified more than once")
 
-    provider_bonds = []
-
-    for provider_name in providers:
-        for bond_name, mapped_provider_name in repo.bond_maps().items():
-            if provider_name == mapped_provider_name:
-                provider_bonds.append(bond_name)
-
     interfaces = {}
     bonds = {}
 
-    for interface_name, interface_type in repo.interfaces().items():
-        bond = None
+    provider_bonds = {}
 
-        for bond_name in provider_bonds:
-            if issubclass(repo.bond(bond_name), interface_type):
-                if not bond:
-                    bond = bond_name
+    for bond_name, bond in repo.bonds().items():
+        provider_name = v1.utils.fqcn(bond.PROVIDER)
 
-                bonds[bond_name] = _bond_defaults(bond_name, repo)
+        if provider_name not in provider_bonds:
+            provider_bonds[provider_name] = []
 
-        if bond:
-            interfaces[interface_name] = {
-                "bond": bond
-            }
+        provider_bonds[provider_name].append((bond_name, bond))
+
+    for provider in providers:
+        for bond_name, bond in provider_bonds[provider]:
+            bonds[bond_name] = _bond_defaults(bond_name, bond)
+
+            interface = v1.utils.fqcn(bond.IMPLEMENTS)
+
+            if interface not in interfaces:
+                interfaces[interface] = {
+                    "bond": bond_name
+                }
 
     return {
         "version": "torquetech.io/v1",

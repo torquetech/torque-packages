@@ -34,7 +34,7 @@ def _bind_to(type: object,
     requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
 
     for r_name, r in requirements.items():
-        if not issubclass(r["interface"], v1.bond.Bond):
+        if not issubclass(r["interface"], v1.bond.Interface):
             raise exceptions.InvalidRequirement(name)
 
         bond = get_bond(r["interface"],
@@ -90,7 +90,7 @@ def bind_to_link(type: object,
             bond = destination._torque_interface(r["interface"],
                                                  r["required"])
 
-        elif issubclass(r["interface"], v1.bond.Bond):
+        elif issubclass(r["interface"], v1.bond.Interface):
             bond = get_bond(r["interface"],
                             r["required"],
                             name,

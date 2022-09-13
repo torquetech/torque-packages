@@ -109,6 +109,20 @@ class InvalidBond(v1.exceptions.TorqueException):
         return f"{self.args[0]}: invalid bond"
 
 
+class InvalidBondProvider(v1.exceptions.TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: invalid bond provider"
+
+
+class InvalidBondInterface(v1.exceptions.TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: invalid bond interface"
+
+
 class InvalidRequirement(v1.exceptions.TorqueException):
     """TODO"""
 

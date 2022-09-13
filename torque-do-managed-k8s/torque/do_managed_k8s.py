@@ -213,8 +213,11 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     return yaml.safe_load(res.text)
 
 
-class KubernetesClient(k8s.KubernetesClientInterface):
+class KubernetesClient(v1.bond.Bond):
     """TODO"""
+
+    PROVIDER = do.Provider
+    IMPLEMENTS = k8s.KubernetesClientInterface
 
     _CONFIGURATION = {
         "defaults": {
@@ -313,10 +316,8 @@ dolib.HANDLERS.update({
 
 repository = {
     "v1": {
-        "bonds": {
-            do.Provider: [
-                KubernetesClient
-            ]
-        }
+        "bonds": [
+            KubernetesClient
+        ]
     }
 }

@@ -10,8 +10,15 @@ from torque import v1
 from torque import k8s
 
 
-class KubernetesClient(k8s.KubernetesClientInterface):
+class Provider(v1.provider.Provider):
     """TODO"""
+
+
+class KubernetesClient(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = k8s.KubernetesClientInterface
 
     _CONFIGURATION = {
         "defaults": {
@@ -31,19 +38,13 @@ class KubernetesClient(k8s.KubernetesClientInterface):
                                                         self.configuration["context"])
 
 
-class Provider(v1.provider.Provider):
-    """TODO"""
-
-
 repository = {
     "v1": {
         "providers": [
             Provider
         ],
-        "bonds": {
-            Provider: [
-                KubernetesClient
-            ]
-        }
+        "bonds": [
+            KubernetesClient
+        ]
     }
 }

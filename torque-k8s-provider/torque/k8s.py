@@ -10,7 +10,7 @@ from torque import v1
 from torque import k8slib
 
 
-class KubernetesClientInterface(v1.bond.Bond):
+class KubernetesClientInterface(v1.bond.Interface):
     """TODO"""
 
     def connect(self) -> kubernetes.client.ApiClient:
@@ -119,9 +119,6 @@ class Provider(v1.provider.Provider):
 
 repository = {
     "v1": {
-        "interfaces": [
-            KubernetesClientInterface
-        ],
         "providers": [
             Provider
         ]

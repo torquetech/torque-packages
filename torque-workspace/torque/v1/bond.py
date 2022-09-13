@@ -9,8 +9,15 @@ from . import provider
 from . import utils
 
 
+class Interface:
+    """TODO"""
+
+
 class Bond:
     """TODO"""
+
+    PROVIDER = None
+    IMPLEMENTS = None
 
     _PARAMETERS = {
         "defaults": {},

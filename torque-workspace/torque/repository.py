@@ -72,12 +72,9 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
         v1.schema.Optional("providers"): [
             _is_provider
         ],
-        v1.schema.Optional("interfaces"): [
+        v1.schema.Optional("bonds"): [
             _is_bond
-        ],
-        v1.schema.Optional("bonds"): {
-            _is_provider: [_is_bond]
-        }
+        ]
     })
 }, ignore_extra_keys=True)
 
@@ -91,7 +88,6 @@ _DEFAULT_REPOSITORY = {
             v1.utils.fqcn(defaults.DependencyLink): defaults.DependencyLink
         },
         "providers": {},
-        "interfaces": {},
         "bonds": {}
     }
 }
@@ -102,22 +98,6 @@ class Repository:
 
     def __init__(self, repo: dict[str, object]):
         self._repo = repo
-
-        self._process_bonds()
-
-    def _process_bonds(self):
-        """TODO"""
-
-        bonds = {}
-        bond_maps = {}
-
-        for provider_name, provider_bonds in self._repo["v1"]["bonds"].items():
-            for bond_name, bond_type in provider_bonds.items():
-                bonds[bond_name] = bond_type
-                bond_maps[bond_name] = provider_name
-
-        self._repo["v1"]["bonds"] = bonds
-        self._repo["v1"]["bond_maps"] = bond_maps
 
     def contexts(self) -> dict[str, object]:
         """TODO"""
@@ -139,20 +119,10 @@ class Repository:
 
         return self._repo["v1"]["providers"]
 
-    def interfaces(self) -> dict[str, object]:
-        """TODO"""
-
-        return self._repo["v1"]["interfaces"]
-
     def bonds(self) -> dict[str, object]:
         """TODO"""
 
         return self._repo["v1"]["bonds"]
-
-    def bond_maps(self) -> dict[str, str]:
-        """TODO"""
-
-        return self._repo["v1"]["bond_maps"]
 
     def context(self, name: str) -> v1.deployment.Context:
         """TODO"""
@@ -194,16 +164,6 @@ class Repository:
 
         return providers[name]
 
-    def interface(self, name: str) -> v1.bond.Bond:
-        """TODO"""
-
-        interfaces = self.interfaces()
-
-        if name not in interfaces:
-            raise exceptions.InterfaceNotFound(name)
-
-        return interfaces[name]
-
     def bond(self, name: str) -> v1.bond.Bond:
         """TODO"""
 
@@ -213,16 +173,6 @@ class Repository:
             raise exceptions.BondNotFound(name)
 
         return bonds[name]
-
-    def provider_for(self, name: str) -> str:
-        """TODO"""
-
-        bond_maps = self.bond_maps()
-
-        if name not in bond_maps:
-            raise exceptions.BondNotFound(name)
-
-        return bond_maps[name]
 
 
 def _system_repository() -> list:
@@ -265,25 +215,18 @@ def _process_items(repository: dict[str, object], name: str) -> dict[str, object
 
     return repository
 
-
-def _process_bonds(repository: dict[str, object]) -> dict[str, object]:
+def _check_bonds(repository: dict[str, object]):
     """TODO"""
 
     if "bonds" not in repository["v1"]:
-        return repository
+        return
 
-    bonds = {}
+    for bond_name, bond in repository["v1"]["bonds"].items():
+        if not issubclass(bond.PROVIDER, v1.provider.Provider):
+            raise exceptions.InvalidBondProvider(bond_name)
 
-    for provider_type, provider_bonds in repository["v1"]["bonds"].items():
-        provider_name = v1.utils.fqcn(provider_type)
-
-        bonds[provider_name] = {
-            v1.utils.fqcn(bond): bond for bond in provider_bonds
-        }
-
-    repository["v1"]["bonds"] = bonds
-
-    return repository
+        if not issubclass(bond.IMPLEMENTS, v1.bond.Interface):
+            raise exceptions.InvalidBondInterface(bond_name)
 
 
 def load() -> Repository:
@@ -305,8 +248,9 @@ def load() -> Repository:
             package_repository = _process_items(package_repository, "components")
             package_repository = _process_items(package_repository, "links")
             package_repository = _process_items(package_repository, "providers")
-            package_repository = _process_items(package_repository, "interfaces")
-            package_repository = _process_bonds(package_repository)
+            package_repository = _process_items(package_repository, "bonds")
+
+            _check_bonds(package_repository)
 
             repository = v1.utils.merge_dicts(repository, package_repository)
 
