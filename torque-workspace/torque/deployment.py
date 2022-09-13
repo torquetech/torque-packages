@@ -258,11 +258,12 @@ class Deployment:
             params = _validate_type_params(name, type, params)
             config = _validate_type_config(name, type, config)
 
-            bonds = interfaces.bind_to_provider(type,
-                                                name,
-                                                self._bind_to_provider)
+            provider = type(params, config, self._context)
+            self._providers[name] = provider
 
-            self._providers[name] = type(params, config, self._context, bonds)
+            provider.interfaces = interfaces.bind_to_provider(type,
+                                                              name,
+                                                              self._bind_to_provider)
 
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -278,15 +279,14 @@ class Deployment:
 
         config = _validate_type_config(component.name, type, config)
 
-        bonds = interfaces.bind_to_component(type,
-                                             component.name,
-                                             self._bind_to_component)
-
         component = type(component.name,
                          component.parameters,
                          config,
-                         self._context,
-                         bonds)
+                         self._context)
+
+        component.interfaces = interfaces.bind_to_component(type,
+                                                            component.name,
+                                                            self._bind_to_component)
 
         self._components[component.name] = component
 
@@ -309,19 +309,18 @@ class Deployment:
         source = self._component(link.source)
         destination = self._component(link.destination)
 
-        bonds = interfaces.bind_to_link(type,
-                                        link.name,
-                                        source,
-                                        destination,
-                                        self._bind_to_link)
-
         link = type(link.name,
                     link.parameters,
                     config,
                     self._context,
-                    bonds,
                     source.name,
                     destination.name)
+
+        link.interfaces = interfaces.bind_to_link(type,
+                                                  link.name,
+                                                  source,
+                                                  destination,
+                                                  self._bind_to_link)
 
         self._links[link.name] = link
 
@@ -395,7 +394,7 @@ class Deployment:
     def _bind_to_provider(self,
                           interface: type,
                           required: bool,
-                          provider_name: str) -> v1.bond.Bond:
+                          provider_name: str) -> object:
         # pylint: disable=R0914
 
         """TODO"""
@@ -411,20 +410,21 @@ class Deployment:
 
         type, params, config, provider = info
 
-        bonds = interfaces.bind_to_provider(type,
-                                            provider_name,
-                                            self._bind_to_provider)
-
-        return type(provider,
+        bond = type(provider,
                     params,
                     config,
-                    self._context,
-                    bonds)
+                    self._context)
+
+        bond.interfaces = interfaces.bind_to_provider(type,
+                                                      provider_name,
+                                                      self._bind_to_provider)
+
+        return bond
 
     def _bind_to_component(self,
                            interface: type,
                            required: bool,
-                           component_name: str) -> v1.bond.Bond:
+                           component_name: str) -> object:
         # pylint: disable=R0914
 
         """TODO"""
@@ -440,22 +440,23 @@ class Deployment:
 
         type, params, config, provider = info
 
-        bonds = interfaces.bind_to_component(type,
-                                             component_name,
-                                             self._bind_to_component)
-
-        return type(provider,
+        bond = type(provider,
                     params,
                     config,
-                    self._context,
-                    bonds)
+                    self._context)
+
+        bond.interfaces = interfaces.bind_to_component(type,
+                                                       component_name,
+                                                       self._bind_to_component)
+
+        return bond
 
     def _bind_to_link(self,
                       interface: type,
                       required: bool,
                       link_name: str,
                       source: model.Component,
-                      destination: model.Component) -> v1.bond.Bond:
+                      destination: model.Component) -> object:
         # pylint: disable=R0914
 
         """TODO"""
@@ -471,17 +472,18 @@ class Deployment:
 
         type, params, config, provider = info
 
-        bonds = interfaces.bind_to_link(type,
-                                        link_name,
-                                        source,
-                                        destination,
-                                        self._bind_to_link)
-
-        return type(provider,
+        bond = type(provider,
                     params,
                     config,
-                    self._context,
-                    bonds)
+                    self._context)
+
+        bond.interfaces = interfaces.bind_to_link(type,
+                                                  link_name,
+                                                  source,
+                                                  destination,
+                                                  self._bind_to_link)
+
+        return bond
 
     def _execute(self, workers: int, callback: typing.Callable):
         """TODO"""

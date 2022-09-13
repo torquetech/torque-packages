@@ -67,15 +67,15 @@ class Component:
                  name: str,
                  parameters: dict[str, object],
                  configuration: dict[str, object],
-                 context: deployment.Context,
-                 bonds: object):
+                 context: deployment.Context):
         # pylint: disable=R0913
 
         self.name = name
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-        self.bonds = bonds
+
+        self.interfaces = None
 
         self._torque_lock = threading.Lock()
         self._torque_interfaces = {}

@@ -26,7 +26,6 @@ class Link:
                  parameters: dict[str, object],
                  configuration: dict[str, object],
                  context: deployment.Context,
-                 bonds: object,
                  source: str,
                  destination: str):
         # pylint: disable=R0913
@@ -35,9 +34,10 @@ class Link:
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-        self.bonds = bonds
         self.source = source
         self.destination = destination
+
+        self.interfaces = None
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

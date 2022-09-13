@@ -33,13 +33,13 @@ class Bond:
                  provider: provider.Provider,
                  parameters: dict,
                  configuration: dict,
-                 context: deployment.Context,
-                 bonds: object):
+                 context: deployment.Context):
         self.provider = provider
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-        self.bonds = bonds
+
+        self.interfaces = None
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

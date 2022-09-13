@@ -68,12 +68,12 @@ class Provider:
     def __init__(self,
                  parameters: dict,
                  configuration: dict,
-                 context: deployment.Context,
-                 bonds: object):
+                 context: deployment.Context):
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-        self.bonds = bonds
+
+        self.interfaces = None
 
         self._lock = threading.Lock()
         self._data = {}
