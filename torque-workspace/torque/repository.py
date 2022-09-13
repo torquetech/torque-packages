@@ -34,9 +34,6 @@ def _is_link(obj: type) -> bool:
 def _is_provider(obj: type) -> bool:
     """TODO"""
 
-    if obj is None:
-        return True
-
     if not isinstance(obj, type):
         return False
 

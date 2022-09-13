@@ -255,19 +255,14 @@ class Deployment:
 
             type = self._repo.provider(name)
 
-            provider = None
+            params = _validate_type_params(name, type, params)
+            config = _validate_type_config(name, type, config)
 
-            if type is not None:
-                params = _validate_type_params(name, type, params)
-                config = _validate_type_config(name, type, config)
+            bonds = interfaces.bind_to_provider(type,
+                                                name,
+                                                self._bind_to_provider)
 
-                bonds = interfaces.bind_to_provider(type,
-                                                    name,
-                                                    self._bind_to_provider)
-
-                provider = type(params, config, self._context, bonds)
-
-            self._providers[name] = provider
+            self._providers[name] = type(params, config, self._context, bonds)
 
     def _component(self, name: str) -> v1.component.Component:
         """TODO"""
@@ -566,9 +561,6 @@ class Deployment:
         self._execute(workers, _on_apply)
 
         for provider in self._providers.values():
-            if provider is None:
-                continue
-
             print(f"applying {v1.utils.fqcn(provider)}...")
             provider.apply()
 
@@ -578,9 +570,6 @@ class Deployment:
         self._setup_providers()
 
         for provider in reversed(self._providers.values()):
-            if provider is None:
-                continue
-
             print(f"deleting {v1.utils.fqcn(provider)}...")
             provider.delete()
 
@@ -644,13 +633,8 @@ def _provider_defaults(name: str,
 
     type = repo.provider(name)
 
-    if type is None:
-        params = {}
-        config = {}
-
-    else:
-        params = type.on_parameters({})
-        config = type.on_configuration({})
+    params = type.on_parameters({})
+    config = type.on_configuration({})
 
     return {
         "parameters": params,
