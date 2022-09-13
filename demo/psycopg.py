@@ -34,22 +34,18 @@ class Link(network.Link):
         return super().on_requirements() | {
             "pg": {
                 "interface": components.PostgresService,
-                "bind_to": "source",
                 "required": True
             },
             "mod": {
                 "interface": components.PythonModules,
-                "bind_to": "destination",
                 "required": True
             },
             "sec": {
                 "interface": components.SecretLink,
-                "bind_to": "destination",
                 "required": True
             },
             "env": {
                 "interface": components.Environment,
-                "bind_to": "destination",
                 "required": True
             }
         }

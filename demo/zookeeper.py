@@ -58,8 +58,9 @@ class Component(v1.component.Component):
 
         return [
             components.VolumeLink(add=self._add_volume_link),
-            components.ZookeeperService(link=self._link,
-                                        data_path=self._data_path)
+            components.Service(link=self._link),
+            components.ZookeeperService(link=self._link),
+            components.Zookeeper(data_path=self._data_path)
         ]
 
     def on_apply(self):
@@ -97,8 +98,7 @@ class DataLink(volume.Link):
 
         return super().on_requirements() | {
             "zk": {
-                "interface": components.ZookeeperService,
-                "bind_to": "destination",
+                "interface": components.Zookeeper,
                 "required": True
             },
         }

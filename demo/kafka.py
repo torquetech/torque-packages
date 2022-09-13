@@ -70,9 +70,10 @@ class Component(v1.component.Component):
 
         return [
             components.VolumeLink(add=self._add_volume_link),
-            components.KafkaService(link=self._link,
-                                    data_path=self._data_path,
-                                    zookeeper=self._zookeeper)
+            components.Service(link=self._link),
+            components.KafkaService(link=self._link),
+            components.Kafka(data_path=self._data_path,
+                             zookeeper=self._zookeeper)
         ]
 
     def on_apply(self):
@@ -113,8 +114,7 @@ class DataLink(volume.Link):
 
         return super().on_requirements() | {
             "kafka": {
-                "interface": components.KafkaService,
-                "bind_to": "destination",
+                "interface": components.Kafka,
                 "required": True
             },
         }
@@ -137,12 +137,10 @@ class ZookeeperLink(v1.link.Link):
         return {
             "zk": {
                 "interface": components.ZookeeperService,
-                "bind_to": "source",
                 "required": True
             },
             "kafka": {
-                "interface": components.KafkaService,
-                "bind_to": "destination",
+                "interface": components.Kafka,
                 "required": True
             }
         }

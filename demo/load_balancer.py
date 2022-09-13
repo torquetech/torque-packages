@@ -55,17 +55,14 @@ class Link(v1.link.Link):
         return {
             "service": {
                 "interface": components.HttpService,
-                "bind_to": "source",
                 "required": True
             },
             "lb": {
                 "interface": components.HttpLoadBalancer,
-                "bind_to": "destination",
                 "required": True
             },
             "ingress": {
                 "interface": providers.HttpIngressLinks,
-                "bind_to": "provider",
                 "required": True
             }
         }

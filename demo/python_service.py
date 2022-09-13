@@ -50,6 +50,7 @@ class Component(python_app.Component):
         """TODO"""
 
         return super().on_interfaces() + [
+            components.Service(link=self._link),
             components.HttpService(link=self._link)
         ]
 

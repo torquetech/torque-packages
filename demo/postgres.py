@@ -80,9 +80,10 @@ class Component(v1.component.Component):
 
         return [
             components.VolumeLink(add=self._add_volume_link),
+            components.Service(link=self._link),
             components.PostgresService(link=self._link,
-                                       admin=self._admin,
-                                       data_path=self._data_path)
+                                       admin=self._admin),
+            components.Postgres(data_path=self._data_path)
         ]
 
     def on_apply(self):
@@ -132,8 +133,7 @@ class DataLink(volume.Link):
 
         return super().on_requirements() | {
             "pg": {
-                "interface": components.PostgresService,
-                "bind_to": "destination",
+                "interface": components.Postgres,
                 "required": True
             },
         }

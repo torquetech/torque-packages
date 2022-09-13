@@ -24,12 +24,10 @@ class Link(network.Link):
         return super().on_requirements() | {
             "kafka": {
                 "interface": components.KafkaService,
-                "bind_to": "source",
                 "required": True
             },
             "mod": {
                 "interface": components.PythonModules,
-                "bind_to": "destination",
                 "required": True
             }
         }

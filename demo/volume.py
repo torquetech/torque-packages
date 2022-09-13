@@ -26,12 +26,10 @@ class Link(v1.link.Link):
         return {
             "src": {
                 "interface": components.Volume,
-                "bind_to": "source",
                 "required": True
             },
             "dst": {
                 "interface": components.VolumeLink,
-                "bind_to": "destination",
                 "required": True
             },
         }

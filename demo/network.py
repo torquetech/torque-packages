@@ -19,12 +19,10 @@ class Link(v1.link.Link):
         return {
             "src": {
                 "interface": components.Service,
-                "bind_to": "source",
                 "required": True
             },
             "dst": {
                 "interface": components.NetworkLink,
-                "bind_to": "destination",
                 "required": True
             }
         }
