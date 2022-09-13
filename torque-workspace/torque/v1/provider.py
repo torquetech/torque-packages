@@ -11,8 +11,9 @@ from . import deployment
 from . import utils
 
 
-class _Provider:
+class _ProviderContext:
     """TODO"""
+
     def __init__(self, data, pre_apply_hooks, post_apply_hooks):
         self._data = data
         self._pre_apply_hooks = pre_apply_hooks
@@ -82,7 +83,7 @@ class Provider:
     def __enter__(self):
         self._lock.acquire()
 
-        return _Provider(self._data, self._pre_apply_hooks, self._post_apply_hooks)
+        return _ProviderContext(self._data, self._pre_apply_hooks, self._post_apply_hooks)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()

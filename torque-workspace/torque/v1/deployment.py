@@ -10,7 +10,7 @@ import threading
 from . import utils
 
 
-class _Context:
+class _ContextContext:
     """TODO"""
 
     def __init__(self, buckets, modified_buckets, load_bucket):
@@ -95,7 +95,7 @@ class Context:
     def __enter__(self):
         self._lock.acquire()
 
-        return _Context(self._buckets, self._modified_buckets, self.load_bucket)
+        return _ContextContext(self._buckets, self._modified_buckets, self.load_bucket)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
