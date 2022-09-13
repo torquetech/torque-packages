@@ -42,6 +42,14 @@ class Interface:
             return func(*args, **kwargs)
 
 
+class SourceInterface(Interface):
+    """TODO"""
+
+
+class DestinationInterface(Interface):
+    """TODO"""
+
+
 class Component:
     """TODO"""
 
@@ -78,19 +86,9 @@ class Component:
 
             # pylint: disable=W0212
             interface._torque_lock = self._torque_lock
-            cls = interface.__class__
+            type = utils.fqcn(interface)
 
-            while cls is not Interface:
-                cls_type = utils.fqcn(cls)
-
-                if len(cls.__bases__) != 1:
-                    raise exceptions.RuntimeError(f"{cls_type}: multiple inheritance not supported")
-
-                if cls_type in self._torque_interfaces:
-                    print(f"WARNING: {utils.fqcn(self)}: duplicate interface: {cls_type}")
-
-                self._torque_interfaces[cls_type] = interface
-                cls = cls.__bases__[0]
+            self._torque_interfaces[type] = interface
 
     def _torque_interface(self, cls: type, required: bool) -> Interface:
         """TODO"""
