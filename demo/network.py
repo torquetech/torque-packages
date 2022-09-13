@@ -30,4 +30,5 @@ class Link(v1.link.Link):
     def on_apply(self):
         """TODO"""
 
-        self.bonds.dst.add(self.source, self.bonds.src.link())
+        self.interfaces.dst.add(self.source,
+                                self.interfaces.src.link())

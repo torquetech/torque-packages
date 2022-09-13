@@ -79,7 +79,7 @@ class Component(v1.component.Component):
     def on_apply(self):
         """TODO"""
 
-        self._service_link = self.bonds.services.create(self.name, "tcp", 9092, 9092)
+        self._service_link = self.interfaces.services.create(self.name, "tcp", 9092, 9092)
 
         zk_link = self._zookeeper_link.get()
 
@@ -88,16 +88,16 @@ class Component(v1.component.Component):
             types.KeyValue("ALLOW_PLAINTEXT_LISTENER", "yes")
         ]
 
-        self.bonds.deployments.create(self.name,
-                                      "bitnami/kafka:latest",
-                                      None,
-                                      None,
-                                      None,
-                                      env,
-                                      None,
-                                      None,
-                                      self._volume_links,
-                                      None)
+        self.interfaces.deployments.create(self.name,
+                                           "bitnami/kafka:latest",
+                                           None,
+                                           None,
+                                           None,
+                                           env,
+                                           None,
+                                           None,
+                                           self._volume_links,
+                                           None)
 
 
 class DataLink(volume.Link):
@@ -122,9 +122,9 @@ class DataLink(volume.Link):
     def on_apply(self):
         """TODO"""
 
-        self.bonds.dst.add(self.source,
-                           self.bonds.kafka.data_path(),
-                           self.bonds.src.link())
+        self.interfaces.dst.add(self.source,
+                                self.interfaces.kafka.data_path(),
+                                self.interfaces.src.link())
 
 
 class ZookeeperLink(v1.link.Link):
@@ -148,4 +148,4 @@ class ZookeeperLink(v1.link.Link):
     def on_apply(self):
         """TODO"""
 
-        self.bonds.kafka.zookeeper(self.bonds.zk.link())
+        self.interfaces.kafka.zookeeper(self.interfaces.zk.link())

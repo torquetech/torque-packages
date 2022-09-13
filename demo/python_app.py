@@ -173,10 +173,10 @@ class Component(v1.component.Component):
 
         env += self._environment
 
-        image = self.bonds.images.push(self._image())
+        image = self.interfaces.images.push(self._image())
 
         if not self.configuration["development_mode"]:
-            self.bonds.deployments.create(self.name,
+            self.interfaces.deployments.create(self.name,
                                           image,
                                           None,
                                           None,
@@ -188,14 +188,14 @@ class Component(v1.component.Component):
                                           self._secret_links)
 
         else:
-            if not self.bonds.development:
+            if not self.interfaces.development:
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
                 types.VolumeLink("app", "/app", utils.Future(self.parameters["path"]))
             ]
 
-            self.bonds.development.create_deployment(self.name,
+            self.interfaces.development.create_deployment(self.name,
                                                      image,
                                                      None,
                                                      None,

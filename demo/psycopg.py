@@ -58,7 +58,7 @@ class Link(network.Link):
         template_path = f"{utils.module_path()}/templates/psycopg.py.template"
         template = jinja2.Template(utils.load_file(template_path))
 
-        target_path = f"{self.bonds.mod.path()}/{self.source}.py"
+        target_path = f"{self.interfaces.mod.path()}/{self.source}.py"
 
         if os.path.exists(v1.utils.resolve_path(target_path)):
             raise RuntimeError(f"{target_path}: file already exists")
@@ -67,7 +67,7 @@ class Link(network.Link):
             file.write(template.render(COMPONENT=self.source.upper()))
             file.write("\n")
 
-        self.bonds.mod.add_requirements(["psycopg"])
+        self.interfaces.mod.add_requirements(["psycopg"])
 
     def on_apply(self):
         """TODO"""
@@ -75,8 +75,8 @@ class Link(network.Link):
         super().on_apply()
 
         source = self.source.upper()
-        secret = self.bonds.pg.admin()
+        secret = self.interfaces.pg.admin()
 
-        self.bonds.env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])
-        self.bonds.sec.add(f"{source}_PSYCOPG_USER", "user", secret)
-        self.bonds.sec.add(f"{source}_PSYCOPG_PASSWORD", "password", secret)
+        self.interfaces.env.add(f"{source}_PSYCOPG_DB", self.configuration["database"])
+        self.interfaces.sec.add(f"{source}_PSYCOPG_USER", "user", secret)
+        self.interfaces.sec.add(f"{source}_PSYCOPG_PASSWORD", "password", secret)

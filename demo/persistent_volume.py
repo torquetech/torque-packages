@@ -66,5 +66,5 @@ class Component(v1.component.Component):
     def on_apply(self):
         """TODO"""
 
-        self._volume_link = self.bonds.vol.create(self.name,
-                                                  self.parameters["size"])
+        self._volume_link = self.interfaces.vol.create(self.name,
+                                                       self.parameters["size"])

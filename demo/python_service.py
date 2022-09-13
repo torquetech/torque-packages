@@ -57,9 +57,9 @@ class Component(python_app.Component):
     def on_apply(self):
         """TODO"""
 
-        self._service_link = self.bonds.services.create(self.name,
-                                                        "tcp",
-                                                        self.configuration["port"],
-                                                        self.configuration["port"])
+        self._service_link = self.interfaces.services.create(self.name,
+                                                            "tcp",
+                                                            self.configuration["port"],
+                                                            self.configuration["port"])
 
         super().on_apply()

@@ -565,7 +565,7 @@ class PersistentVolumes(v1.bond.Bond):
         return utils.Future({
             "name": utils.normalize(name),
             "awsElasticBlockStore": {
-                "volumeID": self.bonds.vol.create(name, size),
+                "volumeID": self.interfaces.vol.create(name, size),
                 "fsType": "ext4"
             }
         })

@@ -131,31 +131,31 @@ class Component(v1.component.Component):
     def on_apply(self):
         """TODO"""
 
-        self._service_link = self.bonds.services.create(self.name, "tcp", 80, 80)
+        self._service_link = self.interfaces.services.create(self.name, "tcp", 80, 80)
 
-        image = self.bonds.images.push(self._image())
+        image = self.interfaces.images.push(self._image())
 
         if not self.configuration["development_mode"]:
-            self.bonds.deployments.create(self.name,
-                                          image,
-                                          None,
-                                          None,
-                                          None,
-                                          None,
-                                          None,
-                                          None,
-                                          None,
-                                          None)
+            self.interfaces.deployments.create(self.name,
+                                               image,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None,
+                                               None)
 
         else:
-            if not self.bonds.development:
+            if not self.interfaces.development:
                 raise RuntimeError("providers.Development: implementation not found")
 
             local_volume_links = [
                 types.VolumeLink("app", "/app", utils.Future(self.parameters["path"]))
             ]
 
-            self.bonds.development.create_deployment(self.name,
+            self.interfaces.development.create_deployment(self.name,
                                                      image,
                                                      None,
                                                      None,

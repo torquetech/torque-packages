@@ -35,7 +35,7 @@ class Component(v1.component.Component):
     def on_apply(self):
         """TODO"""
 
-        self.bonds.lb.create()
+        self.interfaces.lb.create()
 
 
 class Link(v1.link.Link):
@@ -70,7 +70,7 @@ class Link(v1.link.Link):
     def on_apply(self):
         """TODO"""
 
-        self.bonds.ingress.create(self.source,
-                                  self.parameters["path"],
-                                  types.NetworkLink(self.source,
-                                                    self.bonds.service.link()))
+        self.interfaces.ingress.create(self.source,
+                                       self.parameters["path"],
+                                       types.NetworkLink(self.source,
+                                                         self.interfaces.service.link()))
