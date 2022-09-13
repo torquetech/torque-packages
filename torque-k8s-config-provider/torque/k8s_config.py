@@ -17,21 +17,18 @@ class KubernetesClient(v1.bond.Bond):
     IMPLEMENTS = k8s.KubernetesClientInterface
 
     _CONFIGURATION = {
-        "defaults": {
-            "config_file": None,
-            "context": None
-        },
+        "defaults": {},
         "schema": {
-            "config_file": v1.schema.Or(str, None),
-            "context": v1.schema.Or(str, None)
+            v1.schema.Optional("config_file"): str,
+            v1.schema.Optional("context"): str
         }
     }
 
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
 
-        return kubernetes.config.new_client_from_config(self.configuration["config_file"],
-                                                        self.configuration["context"])
+        return kubernetes.config.new_client_from_config(self.configuration.get("config_file"),
+                                                        self.configuration.get("context"))
 
 
 repository = {
