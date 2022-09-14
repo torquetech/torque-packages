@@ -690,6 +690,9 @@ def _load_defaults(providers: [str],
         provider_bonds[provider_name].append((bond_name, bond))
 
     for provider in providers:
+        if provider not in provider_bonds:
+            continue
+
         for bond_name, bond in provider_bonds[provider]:
             bonds[bond_name] = _bond_defaults(bond_name, bond)
 
