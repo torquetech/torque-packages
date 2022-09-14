@@ -140,7 +140,7 @@ def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[st
         raise v1.exceptions.RuntimeError(f"deployment: {name}:\n{exc_str}") from exc
 
 
-class Configuration:
+class _Configuration:
     """TODO"""
 
     def __init__(self, config: dict[str, object]):
@@ -213,7 +213,7 @@ class Deployment:
 
     def __init__(self,
                  context: v1.deployment.Context,
-                 configuration: Configuration,
+                 configuration: _Configuration,
                  dag: model.DAG,
                  repo: repository.Repository):
         # pylint: disable=R0913
@@ -769,7 +769,7 @@ def load(name: str,
     if config["version"] != "torquetech.io/v1":
         raise v1.exceptions.RuntimeError(f"{config['version']}: invalid configuration version")
 
-    config = Configuration(config)
+    config = _Configuration(config)
 
     if dag.revision != config.revision():
         if strict:
