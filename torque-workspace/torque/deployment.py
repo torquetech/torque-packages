@@ -102,7 +102,7 @@ def _validate_type_params(name: str, type: object, config: dict[str, object]):
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
 
-        raise v1.exceptions.RuntimeError(f"{type} parameters: {name}: {exc_str}") from exc
+        raise v1.exceptions.RuntimeError(f"{type} parameters: {name}:\n{exc_str}") from exc
 
 
 def _validate_type_config(name: str, type: object, config: dict[str, object]):
@@ -124,7 +124,7 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         exc_str = str(exc)
         exc_str = " " + exc_str.replace("\n", "\n ")
 
-        raise v1.exceptions.RuntimeError(f"{type} configuration: {name}: {exc_str}") from exc
+        raise v1.exceptions.RuntimeError(f"{type} configuration: {name}:\n{exc_str}") from exc
 
 
 def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[str, object]:

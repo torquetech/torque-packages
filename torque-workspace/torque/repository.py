@@ -254,6 +254,12 @@ def load() -> Repository:
 
             repository = v1.utils.merge_dicts(repository, package_repository)
 
+        except v1.schema.SchemaError as exc:
+            exc_str = str(exc)
+            exc_str = " " + exc_str.replace("\n", "\n ")
+
+            print(f"WARNING: {entry_point.name}: unable to load repository:\n{exc_str}")
+
         except Exception as exc:
             traceback.print_exc()
 
