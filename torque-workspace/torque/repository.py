@@ -46,7 +46,13 @@ def _is_bond(obj: type) -> bool:
     if not isinstance(obj, type):
         return False
 
-    return issubclass(obj, v1.bond.Bond)
+    if not issubclass(obj, v1.bond.Bond):
+        return False
+
+    if not issubclass(obj.PROVIDER, v1.provider.Provider):
+        return False
+
+    return issubclass(obj.IMPLEMENTS, v1.bond.Interface)
 
 
 def _is_context(obj: type) -> bool:
@@ -215,20 +221,6 @@ def _process_items(repository: dict[str, object], name: str) -> dict[str, object
 
     return repository
 
-def _check_bonds(repository: dict[str, object]):
-    """TODO"""
-
-    if "bonds" not in repository["v1"]:
-        return
-
-    for bond_name, bond in repository["v1"]["bonds"].items():
-        if not issubclass(bond.PROVIDER, v1.provider.Provider):
-            raise exceptions.InvalidBondProvider(bond_name)
-
-        if not issubclass(bond.IMPLEMENTS, v1.bond.Interface):
-            raise exceptions.InvalidBondInterface(bond_name)
-
-
 def load() -> Repository:
     """TODO"""
 
@@ -249,8 +241,6 @@ def load() -> Repository:
             package_repository = _process_items(package_repository, "links")
             package_repository = _process_items(package_repository, "providers")
             package_repository = _process_items(package_repository, "bonds")
-
-            _check_bonds(package_repository)
 
             repository = v1.utils.merge_dicts(repository, package_repository)
 
