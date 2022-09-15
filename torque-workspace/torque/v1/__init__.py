@@ -4,7 +4,11 @@
 
 """TODO"""
 
-import schema
+try:
+    import schema
+
+except ModuleNotFoundError:
+    schema = None
 
 # pylint: disable=R0401
 
