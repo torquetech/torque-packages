@@ -6,16 +6,22 @@
 
 import secrets
 import threading
+import typing
 
 from . import utils
 
 
-class _ContextContext:
+class _ContextData:
     """TODO"""
 
-    def __init__(self, buckets, modified_buckets, load_bucket):
+    def __init__(self,
+                 buckets,
+                 modified_buckets,
+                 hooks: [typing.Callable],
+                 load_bucket):
         self._buckets = buckets
         self._modified_buckets = modified_buckets
+        self._hooks = hooks
         self._load_bucket = load_bucket
 
     def _set_data(self, bucket: str, name: type, data: object):
@@ -60,6 +66,14 @@ class _ContextContext:
 
         return s
 
+    def add_hook(self, bucket: str, hook: typing.Callable):
+        """TODO"""
+
+        if bucket not in self._hooks:
+            self._hooks[bucket] = []
+
+        self._hooks[bucket].append(hook)
+
 
 class Context:
     """TODO"""
@@ -91,14 +105,23 @@ class Context:
         self._lock = threading.Lock()
         self._buckets = {}
         self._modified_buckets = set()
+        self._hooks = {}
 
     def __enter__(self):
         self._lock.acquire()
 
-        return _ContextContext(self._buckets, self._modified_buckets, self.load_bucket)
+        return _ContextData(self._buckets,
+                            self._modified_buckets,
+                            self._hooks,
+                            self.load_bucket)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
+
+    def get_hooks(self, bucket: str):
+        """TODO"""
+
+        return self._hooks.get(bucket, [])
 
     def store(self):
         """TODO"""

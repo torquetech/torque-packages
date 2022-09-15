@@ -5,7 +5,6 @@
 """TODO"""
 
 from . import deployment
-from . import provider
 from . import utils
 
 
@@ -16,7 +15,6 @@ class Interface:
 class Bond:
     """TODO"""
 
-    PROVIDER = None
     IMPLEMENTS = None
 
     _PARAMETERS = {
@@ -30,16 +28,14 @@ class Bond:
     }
 
     def __init__(self,
-                 provider: provider.Provider,
-                 parameters: dict,
-                 configuration: dict,
-                 context: deployment.Context):
-        self.provider = provider
+                 parameters: object,
+                 configuration: object,
+                 context: deployment.Context,
+                 interfaces: object):
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-
-        self.interfaces = None
+        self.interfaces = interfaces
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

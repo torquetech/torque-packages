@@ -5,7 +5,6 @@
 """TODO"""
 
 import threading
-import typing
 
 from . import deployment
 from . import utils
@@ -14,10 +13,9 @@ from . import utils
 class _ProviderContext:
     """TODO"""
 
-    def __init__(self, data, pre_apply_hooks, post_apply_hooks):
+    def __init__(self,
+                 data: dict[str, object]):
         self._data = data
-        self._pre_apply_hooks = pre_apply_hooks
-        self._post_apply_hooks = post_apply_hooks
 
     def set_data(self, cls: type, name: str, data: object):
         """TODO"""
@@ -39,16 +37,6 @@ class _ProviderContext:
 
         return self._data[cls_type].get(name)
 
-    def add_pre_apply_hook(self, hook: typing.Callable):
-        """TODO"""
-
-        self._pre_apply_hooks.append(hook)
-
-    def add_post_apply_hook(self, hook: typing.Callable):
-        """TODO"""
-
-        self._post_apply_hooks.append(hook)
-
 
 class Provider:
     # pylint: disable=R0902
@@ -66,48 +54,25 @@ class Provider:
     }
 
     def __init__(self,
-                 parameters: dict,
-                 configuration: dict,
-                 context: deployment.Context):
+                 parameters: object,
+                 configuration: object,
+                 context: deployment.Context,
+                 interfaces: object):
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-
-        self.interfaces = None
+        self.interfaces = interfaces
 
         self._lock = threading.Lock()
         self._data = {}
-        self._pre_apply_hooks = []
-        self._post_apply_hooks = []
 
     def __enter__(self):
         self._lock.acquire()
 
-        return _ProviderContext(self._data, self._pre_apply_hooks, self._post_apply_hooks)
+        return _ProviderContext(self._data)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
-
-    def apply(self):
-        """TODO"""
-
-        for hook in self._pre_apply_hooks:
-            hook()
-
-        self.on_apply()
-
-        for hook in self._post_apply_hooks:
-            hook()
-
-    def delete(self):
-        """TODO"""
-
-        self.on_delete()
-
-    def command(self, argv: [str]):
-        """TODO"""
-
-        self.on_command(argv)
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:
@@ -130,12 +95,3 @@ class Provider:
         """TODO"""
 
         return {}
-
-    def on_apply(self):
-        """TODO"""
-
-    def on_delete(self):
-        """TODO"""
-
-    def on_command(self, argv: [str]):
-        """TODO"""

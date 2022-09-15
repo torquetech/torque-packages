@@ -221,6 +221,7 @@ def _process_items(repository: dict[str, object], name: str) -> dict[str, object
 
     return repository
 
+
 def load() -> Repository:
     """TODO"""
 

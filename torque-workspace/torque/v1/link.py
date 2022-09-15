@@ -23,11 +23,12 @@ class Link:
 
     def __init__(self,
                  name: str,
-                 parameters: dict[str, object],
-                 configuration: dict[str, object],
+                 parameters: object,
+                 configuration: object,
                  context: deployment.Context,
                  source: str,
-                 destination: str):
+                 destination: str,
+                 interfaces: object):
         # pylint: disable=R0913
 
         self.name = name
@@ -36,8 +37,7 @@ class Link:
         self.context = context
         self.source = source
         self.destination = destination
-
-        self.interfaces = None
+        self.interfaces = interfaces
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

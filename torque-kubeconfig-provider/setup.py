@@ -17,14 +17,14 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-setup(name="torque-k8s-kubeconfig",
+setup(name="torque-kubeconfig-provider",
       version=f"0.1",
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
-      url="https://github.com/torquetech/torque-k8s-kubeconfig",
+      url="https://github.com/torquetech/torque-kubeconfig-provider",
       license="MPL v2.0",
       classifiers=[
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
@@ -38,6 +38,6 @@ setup(name="torque-k8s-kubeconfig",
       ],
       entry_points={
           "torque": [
-              "torque-k8s-kubeconfig=torque.k8s_kubeconfig:repository"
+              "torque-kubeconfig-provider=torque.kubeconfig:repository"
           ]
       })

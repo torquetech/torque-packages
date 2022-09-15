@@ -176,10 +176,11 @@ class Workspace:
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
 
-    def _bind_to_component(self,
-                           interface: object,
-                           required: bool,
-                           component_name: str) -> object:
+    def _create_bond(self,
+                     for_type: type,
+                     name: str,
+                     interface: type,
+                     required: bool) -> v1.bond.Bond:
         # pylint: disable=W0613
 
         """TODO"""
@@ -191,28 +192,15 @@ class Workspace:
 
         type = self.repo.component(component.type)
 
-        instance = type(component.name,
-                        component.parameters,
-                        None,
-                        None)
+        bound_interfaces = interfaces.bind_to_component(type,
+                                                        component.name,
+                                                        self._create_bond)
 
-        instance.interfaces = interfaces.bind_to_component(type,
-                                                           component.name,
-                                                           self._bind_to_component)
-
-        return instance
-
-    def _bind_to_link(self,
-                      interface: object,
-                      required: bool,
-                      link_name: str,
-                      source: model.Component,
-                      destination: model.Component) -> object:
-        # pylint: disable=W0613
-
-        """TODO"""
-
-        return None
+        return type(component.name,
+                    component.parameters,
+                    None,
+                    None,
+                    bound_interfaces)
 
     def _link(self,
               link: model.Link,
@@ -222,20 +210,19 @@ class Workspace:
 
         type = self.repo.link(link.type)
 
-        instance = type(link.name,
-                        link.parameters,
-                        None,
-                        None,
-                        source.name,
-                        destination.name)
+        bound_interfaces = interfaces.bind_to_link(type,
+                                                   link.name,
+                                                   source,
+                                                   destination,
+                                                   self._create_bond)
 
-        instance.interfaces = interfaces.bind_to_link(type,
-                                                      link.name,
-                                                      source,
-                                                      destination,
-                                                      self._bind_to_link)
-
-        return instance
+        return type(link.name,
+                    link.parameters,
+                    None,
+                    None,
+                    source.name,
+                    destination.name,
+                    bound_interfaces)
 
     def _collect_components_for(self, name: str) -> [str]:
         """TODO"""

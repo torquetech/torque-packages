@@ -213,11 +213,8 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     return yaml.safe_load(res.text)
 
 
-class KubernetesClient(v1.bond.Bond):
+class Provider(v1.provider.Provider):
     """TODO"""
-
-    PROVIDER = do.Provider
-    IMPLEMENTS = k8s.KubernetesClientInterface
 
     _CONFIGURATION = {
         "defaults": {
@@ -260,18 +257,23 @@ class KubernetesClient(v1.bond.Bond):
         }
     }
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "do": {
+                "interface": do.Provider,
+                "required": True
+            }
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        k8s_object_name = f"v2/kubernetes/{self.context.deployment_name}.k8s"
-        self._cluster_id = self.provider.object_id(k8s_object_name)
+        self._cluster_id = self._create()
 
-        with self.provider as p:
-            if not p.get_data(self, "initialized"):
-                p.set_data(self, "initialized", True)
-                p.add_pre_apply_hook(self._create_k8s_cluster)
-
-    def _create_k8s_cluster(self):
+    def _create(self):
         """TODO"""
 
         name = f"{self.context.deployment_name}.k8s"
@@ -282,8 +284,8 @@ class KubernetesClient(v1.bond.Bond):
             "name": name,
             "params": {
                 "name": sanitized_name,
-                "region": self.provider.region(),
-                "vpc_uuid": self.provider.vpc_id()
+                "region": self.interfaces.do.region(),
+                "vpc_uuid": self.interfaces.do.vpc_id()
             }
         }
 
@@ -292,15 +294,46 @@ class KubernetesClient(v1.bond.Bond):
         for pool in obj["params"]["node_pools"]:
             pool["name"] = f"{sanitized_name}-{pool['name']}"
 
-        self.provider.add_object(obj)
+        self.interfaces.do.add_object(obj)
+
+        k8s_object_name = f"v2/kubernetes/{self.context.deployment_name}.k8s"
+        return self.interfaces.do.object_id(k8s_object_name)
+
+    def cluster_id(self) -> v1.utils.Future[str]:
+        """TODO"""
+
+        return self._cluster_id
+
+
+class KubernetesClient(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = Provider
+    IMPLEMENTS = k8s.KubernetesClientInterface
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "do": {
+                "interface": do.Provider,
+                "required": True
+            },
+            "do_k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
 
-        client = self.provider.client()
+        client = self.interfaces.do.client()
+        cluster_id = self.interfaces.do_k8s.cluster_id()
 
         try:
-            cluster_id = v1.utils.resolve_futures(self._cluster_id)
+            cluster_id = v1.utils.resolve_futures(cluster_id)
 
         except v1.exceptions.RuntimeError as e:
             raise v1.exceptions.RuntimeError("digitalocean k8s cluster not initialized") from e
@@ -316,6 +349,9 @@ dolib.HANDLERS.update({
 
 repository = {
     "v1": {
+        "providers": [
+            Provider
+        ],
         "bonds": [
             KubernetesClient
         ]

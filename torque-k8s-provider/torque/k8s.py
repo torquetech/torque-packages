@@ -52,6 +52,10 @@ class Provider(v1.provider.Provider):
 
         self._load_state()
 
+        with self.context as ctx:
+            ctx.add_hook("apply", self._apply)
+            ctx.add_hook("delete", self._delete)
+
     def _load_state(self) -> dict[str, object]:
         """TODO"""
 
@@ -69,7 +73,7 @@ class Provider(v1.provider.Provider):
 
         self._client = self.interfaces.client.connect()
 
-    def on_apply(self):
+    def _apply(self):
         """TODO"""
 
         self._connect()
@@ -83,7 +87,7 @@ class Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-    def on_delete(self):
+    def _delete(self):
         """TODO"""
 
         self._connect()

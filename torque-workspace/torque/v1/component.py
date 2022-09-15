@@ -65,17 +65,17 @@ class Component:
 
     def __init__(self,
                  name: str,
-                 parameters: dict[str, object],
-                 configuration: dict[str, object],
-                 context: deployment.Context):
+                 parameters: object,
+                 configuration: object,
+                 context: deployment.Context,
+                 interfaces: object):
         # pylint: disable=R0913
 
         self.name = name
         self.parameters = parameters
         self.configuration = configuration
         self.context = context
-
-        self.interfaces = None
+        self.interfaces = interfaces
 
         self._torque_lock = threading.Lock()
         self._torque_interfaces = {}

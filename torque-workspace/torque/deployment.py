@@ -20,6 +20,17 @@ from torque import v1
 
 _CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
+    "interfaces": {
+        v1.schema.Optional(str): {
+            "bond": str
+        }
+    },
+    "bonds": {
+        v1.schema.Optional(str): {
+            "parameters": dict,
+            "configuration": dict
+        }
+    },
     "providers": {
         v1.schema.Optional(str): {
             "parameters": dict,
@@ -70,17 +81,6 @@ _CONFIGURATION_SCHEMA = v1.schema.Schema({
                     }
                 }
             }
-        }
-    },
-    "bonds": {
-        v1.schema.Optional(str): {
-            "parameters": dict,
-            "configuration": dict
-        }
-    },
-    "interfaces": {
-        v1.schema.Optional(str): {
-            "bond": str
         }
     }
 })
@@ -258,73 +258,33 @@ class Deployment:
             params = _validate_type_params(name, type, params)
             config = _validate_type_config(name, type, config)
 
-            provider = type(params, config, self._context)
-            self._providers[name] = provider
+            bound_interfaces = interfaces.bind_to_provider(type,
+                                                           self._create_bond,
+                                                           self._bind_provider)
 
-            provider.interfaces = interfaces.bind_to_provider(type,
-                                                              name,
-                                                              self._bind_to_provider)
+            self._providers[name] = type(params,
+                                         config,
+                                         self._context,
+                                         bound_interfaces)
 
-    def _component(self, name: str) -> v1.component.Component:
+    def _bind_provider(self,
+                       interface: type,
+                       required: bool) -> v1.provider.Provider:
         """TODO"""
 
-        if name in self._components:
-            return self._components[name]
+        if self._providers is None:
+            return None
 
-        component = self._dag.components[name]
-        profile = self._configuration.component(name)
+        name = v1.utils.fqcn(interface)
+        provider = self._providers.get(name)
 
-        config = profile["configuration"]
-        type = self._repo.component(component.type)
+        if not provider:
+            if required:
+                raise exceptions.ProviderNotFound(name)
 
-        config = _validate_type_config(component.name, type, config)
+            return None
 
-        component = type(component.name,
-                         component.parameters,
-                         config,
-                         self._context)
-
-        component.interfaces = interfaces.bind_to_component(type,
-                                                            component.name,
-                                                            self._bind_to_component)
-
-        self._components[component.name] = component
-
-        return component
-
-    def _link(self, name: str) -> v1.link.Link:
-        """TODO"""
-
-        if name in self._links:
-            return self._links[name]
-
-        link = self._dag.links[name]
-        profile = self._configuration.link(name)
-
-        config = profile["configuration"]
-        type = self._repo.link(link.type)
-
-        config = _validate_type_config(link.name, type, config)
-
-        source = self._component(link.source)
-        destination = self._component(link.destination)
-
-        link = type(link.name,
-                    link.parameters,
-                    config,
-                    self._context,
-                    source.name,
-                    destination.name)
-
-        link.interfaces = interfaces.bind_to_link(type,
-                                                  link.name,
-                                                  source,
-                                                  destination,
-                                                  self._bind_to_link)
-
-        self._links[link.name] = link
-
-        return link
+        return provider
 
     def _get_bond_for(self,
                       interface: type,
@@ -386,104 +346,111 @@ class Deployment:
         params = _validate_type_params(name, type, params)
         config = _validate_type_config(name, type, config)
 
-        provider_name = v1.utils.fqcn(type.PROVIDER)
-        provider = self._providers[provider_name]
+        return type, params, config
 
-        return type, params, config, provider
-
-    def _bind_to_provider(self,
-                          interface: type,
-                          required: bool,
-                          provider_name: str) -> object:
-        # pylint: disable=R0914
-
+    def _create_bond(self,
+                     for_type: type,
+                     name: str,
+                     interface: type,
+                     required: bool) -> v1.bond.Bond:
         """TODO"""
 
         if self._providers is None:
             return None
 
-        profile = self._configuration.provider(provider_name)
+        if issubclass(for_type, v1.component.Component):
+            profile = self._configuration.component(name)
+
+        elif issubclass(for_type, v1.link.Link):
+            profile = self._configuration.link(name)
+
+        elif issubclass(for_type, v1.provider.Provider):
+            profile = self._configuration.provider(name)
+
+        else:
+            assert False
+
         info = self._bond_info(interface, required, profile)
 
         if not info:
             return None
 
-        type, params, config, provider = info
+        type, params, config = info
 
-        bond = type(provider,
-                    params,
+        bound_interfaces = interfaces.bind_to_bond(for_type,
+                                                   name,
+                                                   type,
+                                                   self._create_bond,
+                                                   self._bind_provider)
+
+        return type(params,
                     config,
-                    self._context)
+                    self._context,
+                    bound_interfaces)
 
-        bond.interfaces = interfaces.bind_to_provider(type,
-                                                      provider_name,
-                                                      self._bind_to_provider)
-
-        return bond
-
-    def _bind_to_component(self,
-                           interface: type,
-                           required: bool,
-                           component_name: str) -> object:
-        # pylint: disable=R0914
-
+    def _component(self, name: str) -> v1.component.Component:
         """TODO"""
 
-        if self._providers is None:
-            return None
+        if name in self._components:
+            return self._components[name]
 
-        profile = self._configuration.component(component_name)
-        info = self._bond_info(interface, required, profile)
+        component = self._dag.components[name]
+        profile = self._configuration.component(name)
 
-        if not info:
-            return None
+        config = profile["configuration"]
+        type = self._repo.component(component.type)
 
-        type, params, config, provider = info
+        config = _validate_type_config(component.name, type, config)
 
-        bond = type(provider,
-                    params,
-                    config,
-                    self._context)
 
-        bond.interfaces = interfaces.bind_to_component(type,
-                                                       component_name,
-                                                       self._bind_to_component)
+        bound_interfaces = interfaces.bind_to_component(type,
+                                                        component.name,
+                                                        self._create_bond)
 
-        return bond
+        component = type(component.name,
+                        component.parameters,
+                        config,
+                        self._context,
+                        bound_interfaces)
 
-    def _bind_to_link(self,
-                      interface: type,
-                      required: bool,
-                      link_name: str,
-                      source: model.Component,
-                      destination: model.Component) -> object:
-        # pylint: disable=R0914
+        self._components[name] = component
 
+        return component
+
+    def _link(self, name: str) -> v1.link.Link:
         """TODO"""
 
-        if self._providers is None:
-            return None
+        if name in self._links:
+            return self._links[name]
 
-        profile = self._configuration.link(link_name)
-        info = self._bond_info(interface, required, profile)
+        link = self._dag.links[name]
+        profile = self._configuration.link(name)
 
-        if not info:
-            return None
+        config = profile["configuration"]
+        type = self._repo.link(link.type)
 
-        type, params, config, provider = info
+        config = _validate_type_config(link.name, type, config)
 
-        bond = type(provider,
-                    params,
+        source = self._component(link.source)
+        destination = self._component(link.destination)
+
+        bound_interfaces = interfaces.bind_to_link(type,
+                                                   link.name,
+                                                   source,
+                                                   destination,
+                                                   self._create_bond)
+
+        link = type(link.name,
+                    link.parameters,
                     config,
-                    self._context)
+                    self._context,
+                    source.name,
+                    destination.name,
+                    bound_interfaces)
 
-        bond.interfaces = interfaces.bind_to_link(type,
-                                                  link_name,
-                                                  source,
-                                                  destination,
-                                                  self._bind_to_link)
+        self._links[name] = link
 
-        return bond
+        return link
 
     def _execute(self, workers: int, callback: typing.Callable):
         """TODO"""
@@ -559,31 +526,18 @@ class Deployment:
 
         self._execute(workers, _on_apply)
 
-        for provider in self._providers.values():
-            print(f"applying {v1.utils.fqcn(provider)}...")
-            provider.apply()
+        for apply_hook in self._context.get_hooks("apply"):
+            print(f"applying {apply_hook.__module__}...")
+            apply_hook()
 
     def delete(self):
         """TODO"""
 
         self._setup_providers()
 
-        for provider in reversed(self._providers.values()):
-            print(f"deleting {v1.utils.fqcn(provider)}...")
-            provider.delete()
-
-    def command(self, provider: str, argv: [str]):
-        """TODO"""
-
-        self._setup_providers()
-
-        if provider not in self._providers:
-            raise exceptions.ProviderNotFound(provider)
-
-        provider = self._providers[provider]
-
-        if provider is not None:
-            provider.command(argv)
+        for delete_hook in reversed(self._context.get_hooks("delete")):
+            print(f"deleting {delete_hook.__module__}...")
+            delete_hook()
 
     def dot(self) -> str:
         """TODO"""
@@ -614,12 +568,15 @@ def _create_context(name: str,
     return context_type(name, config)
 
 
-def _bond_defaults(name: str, type: v1.bond.Bond) -> dict[str, object]:
+def _bond_defaults(type: v1.bond.Bond) -> dict[str, object]:
     """TODO"""
 
+    params = type.on_parameters({})
+    config = type.on_configuration({})
+
     return {
-        "parameters": type.on_parameters({}),
-        "configuration": type.on_configuration({})
+        "parameters": params,
+        "configuration": config
     }
 
 
@@ -694,7 +651,7 @@ def _load_defaults(providers: [str],
             continue
 
         for bond_name, bond in provider_bonds[provider]:
-            bonds[bond_name] = _bond_defaults(bond_name, bond)
+            bonds[bond_name] = _bond_defaults(bond)
 
             interface = v1.utils.fqcn(bond.IMPLEMENTS)
 
@@ -705,12 +662,12 @@ def _load_defaults(providers: [str],
 
     return {
         "version": "torquetech.io/v1",
+        "interfaces": interfaces,
+        "bonds": bonds,
         "providers": {
             name: _provider_defaults(name, repo)
             for name in providers
         },
-        "bonds": bonds,
-        "interfaces": interfaces,
         "dag": {
             "revision": dag.revision,
             "components": {

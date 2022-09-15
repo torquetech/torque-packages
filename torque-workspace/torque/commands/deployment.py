@@ -116,20 +116,6 @@ def _dot(arguments: argparse.Namespace):
     print(deployment.dot(), file=sys.stdout)
 
 
-def _command(arguments: argparse.Namespace, argv: [str]):
-    """TODO"""
-
-    ws = workspace.load(arguments.workspace, arguments.deployments)
-
-    deployment = ws.load_deployment(arguments.name)
-
-    try:
-        deployment.command(arguments.provider, argv)
-
-    finally:
-        deployment.store()
-
-
 def add_arguments(subparsers):
     """TODO"""
 
@@ -194,28 +180,22 @@ def add_arguments(subparsers):
     dot_parser = subparsers.add_parser("dot", help="generate dot file")
     dot_parser.add_argument("name", help="deployment name")
 
-    command_parser = subparsers.add_parser("command", help="run a custom command")
-    command_parser.add_argument("name", help="deployment name")
-    command_parser.add_argument("provider", help="provider to use")
-
 
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
+    # pylint: disable=W0613
+
     """TODO"""
 
-    if arguments.deployment_cmd == "command":
-        _command(arguments, unparsed_argv)
+    cmds = {
+        "create": _create,
+        "remove": _remove,
+        "update": _update,
+        "show": _show,
+        "list": _list,
+        "build": _build,
+        "apply": _apply,
+        "delete": _delete,
+        "dot": _dot
+    }
 
-    else:
-        cmds = {
-            "create": _create,
-            "remove": _remove,
-            "update": _update,
-            "show": _show,
-            "list": _list,
-            "build": _build,
-            "apply": _apply,
-            "delete": _delete,
-            "dot": _dot
-        }
-
-        cmds[arguments.deployment_cmd](arguments)
+    cmds[arguments.deployment_cmd](arguments)

@@ -17,14 +17,14 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-setup(name="torque-do-managed-k8s",
+setup(name="torque-do-managed-k8s-provider",
       version=f"0.1",
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
-      url="https://github.com/torquetech/torque-do-managed-k8s",
+      url="https://github.com/torquetech/torque-do-managed-k8s-provider",
       license="MPL v2.0",
       classifiers=[
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
@@ -38,6 +38,6 @@ setup(name="torque-do-managed-k8s",
       ],
       entry_points={
           "torque": [
-              "torque-do-managed-k8s=torque.do_managed_k8s:repository"
+              "torque-do-managed-k8s-provider=torque.do_managed_k8s:repository"
           ]
       })

@@ -204,6 +204,10 @@ class Provider(v1.provider.Provider):
             }
         })
 
+        with self.context as ctx:
+            ctx.add_hook("apply", self._apply)
+            ctx.add_hook("delete", self._delete)
+
     def _load_params(self):
         """TODO"""
 
@@ -246,7 +250,7 @@ class Provider(v1.provider.Provider):
 
         self._client = dolib.connect(self._params["endpoint"], do_token)
 
-    def on_apply(self):
+    def _apply(self):
         """TODO"""
 
         try:
@@ -255,12 +259,13 @@ class Provider(v1.provider.Provider):
                                      self._new_state,
                                      self.configuration["quiet"])
 
-            self._post_apply_hooks.extend(wait_hooks)
+            for wait_hook in wait_hooks:
+                wait_hook()
 
         finally:
             self._store_state()
 
-    def on_delete(self):
+    def _delete(self):
         """TODO"""
 
         try:
