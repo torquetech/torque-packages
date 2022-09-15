@@ -148,6 +148,10 @@ class Provider(v1.provider.Provider):
 
         self._setup_aws_provider()
 
+        with self.context as ctx:
+            ctx.add_hook("apply", self._apply)
+            ctx.add_hook("delete", self._delete)
+
     def _setup_aws_provider(self):
         """TODO"""
 
@@ -171,7 +175,7 @@ class Provider(v1.provider.Provider):
             _Key("region"): _Str(config["region"])
         }
 
-    def on_apply(self):
+    def _apply(self):
         """TODO"""
 
         with open(f"{self.context.path()}/main.tf", "w", encoding="utf8") as file:
@@ -215,7 +219,7 @@ class Provider(v1.provider.Provider):
         for future in self._futures:
             future(state)
 
-    def on_delete(self):
+    def _delete(self):
         """TODO"""
 
         cmd = [
@@ -260,13 +264,24 @@ class PersistentVolumesProvider(v1.bond.Bond):
         }
     }
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "tf": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
 
         name = f"{self.context.deployment_name}.{name}"
         name = name.replace(".", "-")
 
-        self.provider.add_target(_Block("resource", "aws_ebs_volume", name), {
+        self.interfaces.tf.add_target(_Block("resource", "aws_ebs_volume", name), {
             _Key("availability_zone"): _Str(self.configuration["zone"]),
             _Key("type"): _Str(self.configuration["type"]),
             _Key("size"): _Int(size)
@@ -286,4 +301,4 @@ class PersistentVolumesProvider(v1.bond.Bond):
 
             raise RuntimeError("{name}: terraform resource not found")
 
-        return self.provider.add_future(resolve_future)
+        return self.interfaces.tf.add_future(resolve_future)

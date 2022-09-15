@@ -72,6 +72,10 @@ class Provider(v1.provider.Provider):
 
         self._lock = threading.Lock()
 
+        with self.context as ctx:
+            ctx.add_hook("apply", self._apply)
+            ctx.add_hook("delete", self._delete)
+
     def _push_images(self):
         """TODO"""
 
@@ -195,7 +199,7 @@ class Provider(v1.provider.Provider):
 
         print("\n" f"Load balancer: http://{lb_host}")
 
-    def on_apply(self):
+    def _apply(self):
         """TODO"""
 
         self._apply_targets()
@@ -213,7 +217,7 @@ class Provider(v1.provider.Provider):
 
         self._print_info()
 
-    def on_delete(self):
+    def _delete(self):
         """TODO"""
 
         cmd = [
@@ -261,15 +265,26 @@ class Images(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.Images
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def push(self, image: str) -> str:
         """TODO"""
 
-        self.provider.add_image(image)
+        self.interfaces.k8s.add_image(image)
 
-        ns = self.provider.namespace()
+        ns = self.interfaces.k8s.namespace()
 
         if ns:
-            return f"{self.provider.namespace()}/{image}"
+            return f"{ns}/{image}"
 
         return image
 
@@ -279,6 +294,17 @@ class Secrets(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Secrets
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     @staticmethod
     def encode_b64(string: str) -> str:
@@ -311,7 +337,7 @@ class Secrets(v1.bond.Bond):
     def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
 
-        self.provider.add_to_target(f"component_{name}", [
+        self.interfaces.k8s.add_to_target(f"component_{name}", [
             self._k8s_create(name, entries)
         ])
 
@@ -323,6 +349,17 @@ class Services(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Services
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def _k8s_create(self, name: str, type: str, port: int, target_port: int) -> dict:
         """TODO"""
@@ -350,7 +387,7 @@ class Services(v1.bond.Bond):
     def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
-        self.provider.add_to_target(f"component_{name}", [
+        self.interfaces.k8s.add_to_target(f"component_{name}", [
             self._k8s_create(name, type, port, target_port),
         ])
 
@@ -362,6 +399,17 @@ class Deployments(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Deployments
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
         """TODO"""
@@ -528,7 +576,7 @@ class Deployments(v1.bond.Bond):
                secret_links: [types.SecretLink]):
         """TODO"""
 
-        self.provider.add_to_target(f"component_{name}", [
+        self.interfaces.k8s.add_to_target(f"component_{name}", [
             self._k8s_create(name,
                              image,
                              cmd,
@@ -553,6 +601,10 @@ class PersistentVolumes(v1.bond.Bond):
         """TODO"""
 
         return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            },
             "vol": {
                 "interface": providers.PersistentVolumesProvider,
                 "required": True
@@ -577,10 +629,21 @@ class HttpLoadBalancers(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.HttpLoadBalancers
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self):
         """TODO"""
 
-        self.provider.add_load_balancer()
+        self.interfaces.k8s.add_load_balancer()
 
         templates = utils.load_file(f"{utils.module_path()}/templates/http_lb.yaml.template")
         templates = templates.split("---")
@@ -588,7 +651,7 @@ class HttpLoadBalancers(v1.bond.Bond):
         templates = map(jinja2.Template, templates)
 
         for template in templates:
-            self.provider.add_to_target("k8s_http_load_balancer",
+            self.interfaces.k8s.add_to_target("k8s_http_load_balancer",
                                         [yaml.safe_load(template.render())])
 
 
@@ -597,6 +660,17 @@ class HttpIngressLinks(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.HttpIngressLinks
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "k8s": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def _convert_network_link(self, path: str, network_link: types.NetworkLink) -> dict:
         """TODO"""
@@ -641,6 +715,6 @@ class HttpIngressLinks(v1.bond.Bond):
     def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
-        self.provider.add_to_target(f"component_{name}", [
+        self.interfaces.k8s.add_to_target(f"component_{name}", [
             self._k8s_create(name, path, network_link)
         ])

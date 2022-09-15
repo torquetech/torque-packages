@@ -63,6 +63,10 @@ class Provider(v1.provider.Provider):
         if "workspace_path" not in self.configuration:
             self.configuration["workspace_path"] = None
 
+        with self.context as ctx:
+            ctx.add_hook("apply", self._apply)
+            ctx.add_hook("delete", self._delete)
+
     def _convert_environment(self, env: [types.KeyValue]) -> [dict]:
         """TODO"""
 
@@ -244,7 +248,7 @@ class Provider(v1.provider.Provider):
         if self._load_balancer:
             print("\n" f"Load balancer: http://localhost:{self._load_balancer}")
 
-    def on_apply(self):
+    def _apply(self):
         """TODO"""
 
         deployments = self._deployments | \
@@ -268,7 +272,7 @@ class Provider(v1.provider.Provider):
 
         self._print_info()
 
-    def on_delete(self):
+    def _delete(self):
         """TODO"""
 
         cmd = [
@@ -347,6 +351,17 @@ class Images(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.Images
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def push(self, image: str) -> str:
         """TODO"""
 
@@ -358,6 +373,17 @@ class Secrets(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Secrets
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def create(self, name: str, entries: [types.KeyValue]) -> utils.Future[object]:
         """TODO"""
@@ -371,6 +397,17 @@ class Services(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.Services
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self, name: str, type: str, port: int, target_port: int) -> utils.Future[object]:
         """TODO"""
 
@@ -382,6 +419,17 @@ class Deployments(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Deployments
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def create(self,
                name: str,
@@ -403,15 +451,15 @@ class Deployments(v1.bond.Bond):
             else:
                 cmd = args
 
-        self.provider.add_deployment(name,
-                                     image,
-                                     cmd,
-                                     cwd,
-                                     env,
-                                     network_links,
-                                     volume_links,
-                                     secret_links,
-                                     [])
+        self.interfaces.dc.add_deployment(name,
+                                          image,
+                                          cmd,
+                                          cwd,
+                                          env,
+                                          network_links,
+                                          volume_links,
+                                          secret_links,
+                                          [])
 
 
 class Development(v1.bond.Bond):
@@ -419,6 +467,17 @@ class Development(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.Development
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def create_deployment(self,
                           name: str,
@@ -441,15 +500,15 @@ class Development(v1.bond.Bond):
             else:
                 cmd = args
 
-        self.provider.add_deployment(name,
-                                     image,
-                                     cmd,
-                                     cwd,
-                                     env,
-                                     network_links,
-                                     volume_links,
-                                     secret_links,
-                                     local_volume_links)
+        self.interfaces.dc.add_deployment(name,
+                                          image,
+                                          cmd,
+                                          cwd,
+                                          env,
+                                          network_links,
+                                          volume_links,
+                                          secret_links,
+                                          local_volume_links)
 
 
 class PersistentVolumes(v1.bond.Bond):
@@ -458,10 +517,21 @@ class PersistentVolumes(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.PersistentVolumes
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self, name: str, size: int) -> utils.Future[object]:
         """TODO"""
 
-        self.provider.add_volume(name)
+        self.interfaces.dc.add_volume(name)
 
         return utils.Future(name)
 
@@ -471,6 +541,17 @@ class PersistentVolumesProvider(v1.bond.Bond):
 
     PROVIDER = Provider
     IMPLEMENTS = providers.PersistentVolumesProvider
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
 
     def create(self, name: str, size: int) -> utils.Future[str]:
         """TODO"""
@@ -493,10 +574,21 @@ class HttpLoadBalancers(v1.bond.Bond):
         }
     }
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self):
         """TODO"""
 
-        self.provider.add_load_balancer(self.configuration["port"])
+        self.interfaces.dc.add_load_balancer(self.configuration["port"])
 
 
 class HttpIngressLinks(v1.bond.Bond):
@@ -505,7 +597,18 @@ class HttpIngressLinks(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.HttpIngressLinks
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "dc": {
+                "interface": Provider,
+                "required": True
+            }
+        }
+
     def create(self, name: str, path: str, network_link: types.NetworkLink):
         """TODO"""
 
-        self.provider.add_load_balancer_link(path, network_link)
+        self.interfaces.dc.add_load_balancer_link(path, network_link)
