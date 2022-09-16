@@ -248,13 +248,10 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         try:
-            wait_hooks = dolib.apply(self._client,
-                                     self._current_state,
-                                     self._new_state,
-                                     self.configuration["quiet"])
-
-            for wait_hook in wait_hooks:
-                wait_hook()
+            dolib.apply(self._client,
+                        self._current_state,
+                        self._new_state,
+                        self.configuration["quiet"])
 
         finally:
             self._store_state()

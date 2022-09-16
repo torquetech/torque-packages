@@ -5,7 +5,6 @@
 """TODO"""
 
 import difflib
-import functools
 import sys
 import typing
 
@@ -87,8 +86,6 @@ def apply(client: Client,
           quiet: bool) -> [typing.Callable]:
     """TODO"""
 
-    wait_hooks = []
-
     for name, new_obj in new_state.items():
         current_obj = current_state.get(name, None)
         new_obj = v1.utils.resolve_futures(new_obj)
@@ -104,8 +101,7 @@ def apply(client: Client,
         changed, diff = _diff(name, current_params, new_params)
 
         if not changed:
-            wait_hooks.append(functools.partial(handler.wait, client, current_obj))
-
+            handler.wait(client, current_obj)
             continue
 
         if not quiet:
@@ -126,7 +122,7 @@ def apply(client: Client,
 
         current_state[name] = new_obj
 
-        wait_hooks.append(functools.partial(handler.wait, client, new_obj))
+        handler.wait(client, new_obj)
 
     for name, current_obj in list(reversed(current_state.items())):
         if name in new_state:
@@ -144,5 +140,3 @@ def apply(client: Client,
         handler.delete(client, current_obj)
 
         current_state.pop(name)
-
-    return wait_hooks
