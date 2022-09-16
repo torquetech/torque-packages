@@ -55,51 +55,7 @@ class Client:
                                     json={})
 
 
-class V2Certificates:
-    """TODO"""
-
-    @classmethod
-    def create(cls, client: Client, obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        res = client.post("v2/certificates", obj["params"])
-        data = res.json()
-
-        if res.status_code != 201:
-            raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
-
-        return {
-            "kind": obj["kind"],
-            "name": obj["name"],
-            "metadata": {
-                "id": data["certificate"]["id"]
-            },
-            "params": obj["params"]
-        }
-
-    @classmethod
-    def update(cls,
-               client: Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update certificates")
-
-    @classmethod
-    def delete(cls, client: Client, obj: dict[str, object]):
-        """TODO"""
-
-        client.delete(f"v2/certificates/{obj['metadata']['id']}")
-
-    @classmethod
-    def wait(cls, client: Client, obj: dict[str, object]):
-        """TODO"""
-
-
-HANDLERS = {
-    "v2/certificates": V2Certificates
-}
+HANDLERS = {}
 
 
 def connect(endpoint: str, token: str) -> Client:
