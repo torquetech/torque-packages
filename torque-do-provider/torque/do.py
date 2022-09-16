@@ -35,28 +35,25 @@ class _V2Projects:
     @classmethod
     def create(cls,
                client: dolib.Client,
-               obj: dict[str, object]) -> dict[str, object]:
+               new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        res = client.post("v2/projects", obj["params"])
+        res = client.post("v2/projects", new_obj["params"])
         data = res.json()
 
         if res.status_code != 201:
             if res.status_code != 409:
-                raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
-            data = cls._get_project(client, obj["name"])
+            data = cls._get_project(client, new_obj["name"])
 
         else:
             data = data["project"]
 
-        return {
-            "kind": obj["kind"],
-            "name": obj["name"],
+        return new_obj | {
             "metadata": {
                 "id": data["id"]
-            },
-            "params": obj["params"]
+            }
         }
 
     @classmethod
@@ -69,10 +66,10 @@ class _V2Projects:
         raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update projects")
 
     @classmethod
-    def delete(cls, client: dolib.Client, obj: dict[str, object]):
+    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
         """TODO"""
 
-        client.delete(f"v2/projects/{obj['metadata']['id']}")
+        client.delete(f"v2/projects/{old_obj['metadata']['id']}")
 
     @classmethod
     def wait(cls, client: dolib.Client, obj: dict[str, object]):
@@ -103,28 +100,25 @@ class _V2Vpcs:
     @classmethod
     def create(cls,
                client: dolib.Client,
-               obj: dict[str, object]) -> dict[str, object]:
+               new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        res = client.post("v2/vpcs", obj["params"])
+        res = client.post("v2/vpcs", new_obj["params"])
         data = res.json()
 
         if res.status_code != 201:
             if res.status_code != 422:
-                raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
-            data = cls._get_vpc(client, obj["name"])
+            data = cls._get_vpc(client, new_obj["name"])
 
         else:
             data = data["vpc"]
 
-        return {
-            "kind": obj["kind"],
-            "name": obj["name"],
+        return new_obj | {
             "metadata": {
                 "id": data["id"]
-            },
-            "params": obj["params"]
+            }
         }
 
     @classmethod
@@ -137,10 +131,10 @@ class _V2Vpcs:
         raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update vpcs")
 
     @classmethod
-    def delete(cls, client: dolib.Client, obj: dict[str, object]):
+    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
         """TODO"""
 
-        client.delete(f"v2/vpcs/{obj['metadata']['id']}")
+        client.delete(f"v2/vpcs/{old_obj['metadata']['id']}")
 
     @classmethod
     def wait(cls, client: dolib.Client, obj: dict[str, object]):

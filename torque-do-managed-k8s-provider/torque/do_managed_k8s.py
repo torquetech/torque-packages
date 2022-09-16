@@ -99,14 +99,14 @@ class _V2KubernetesClusters:
     @classmethod
     def create(cls,
                client: dolib.Client,
-               obj: dict[str, object]) -> dict[str, object]:
+               new_obj: dict[str, object]) -> dict[str, object]:
         """TODO"""
 
-        res = client.post("v2/kubernetes/clusters", obj["params"])
+        res = client.post("v2/kubernetes/clusters", new_obj["params"])
         data = res.json()
 
         if res.status_code != 201:
-            raise v1.exceptions.RuntimeError(f"{obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
         data = data["kubernetes_cluster"]
 
@@ -114,17 +114,14 @@ class _V2KubernetesClusters:
             pool["name"]: pool["id"] for pool in data["node_pools"]
         }
 
-        return {
-            "kind": obj["kind"],
-            "name": obj["name"],
+        return new_obj | {
             "metadata": {
                 "id": data["id"],
                 "node_pools": {
                     pool["name"]: attached_pools[pool["name"]]
-                    for pool in obj["params"]["node_pools"]
+                    for pool in new_obj["params"]["node_pools"]
                 }
-            },
-            "params": obj["params"]
+            }
         }
 
     @classmethod
@@ -153,24 +150,21 @@ class _V2KubernetesClusters:
             pool["name"]: pool["id"] for pool in data["node_pools"]
         }
 
-        return {
-            "kind": new_obj["kind"],
-            "name": new_obj["name"],
+        return new_obj | {
             "metadata": {
                 "id": data["id"],
                 "node_pools": {
                     pool["name"]: attached_pools[pool["name"]]
                     for pool in new_obj["params"]["node_pools"]
                 }
-            },
-            "params": new_obj["params"]
+            }
         }
 
     @classmethod
-    def delete(cls, client: dolib.Client, obj: dict[str, object]):
+    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
         """TODO"""
 
-        client.delete(f"v2/kubernetes/clusters/{obj['metadata']['id']}")
+        client.delete(f"v2/kubernetes/clusters/{old_obj['metadata']['id']}")
 
     @classmethod
     def wait(cls, client: dolib.Client, obj: dict[str, object]):
