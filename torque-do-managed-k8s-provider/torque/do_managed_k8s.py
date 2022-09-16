@@ -271,10 +271,11 @@ class Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._cluster_id = self._create()
         self._params = None
 
         self._load_params()
+        self._create()
+
     def _load_params(self):
         """TODO"""
 
@@ -310,10 +311,7 @@ class Provider(v1.provider.Provider):
         for pool in obj["params"]["node_pools"]:
             pool["name"] = f"{sanitized_name}-{pool['name']}"
 
-        self.interfaces.do.add_object(obj)
-
-        k8s_object_name = f"v2/kubernetes/{self.context.deployment_name}.k8s"
-        return self.interfaces.do.object_id(k8s_object_name)
+        self._cluster_id = self.interfaces.do.add_object(obj)
 
     def cluster_id(self) -> v1.utils.Future[str]:
         """TODO"""

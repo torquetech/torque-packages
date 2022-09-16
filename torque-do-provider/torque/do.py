@@ -268,20 +268,20 @@ class Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-    def client(self) -> dolib.Client:
-        """TODO"""
-
-        return self._client
-
-    def _resolve_object_id(self, name: str) -> str:
+    def _resolve_object_metadata(self, name: str) -> dict[str, object]:
         """TODO"""
 
         if name not in self._current_state:
             raise v1.exceptions.RuntimeError(f"{name}: object not found")
 
-        return self._current_state[name]["metadata"]["id"]
+        return self._current_state[name]["metadata"]
 
-    def object_id(self, name: str) -> v1.utils.Future[str]:
+    def _resolve_object_id(self, name: str) -> str:
+        """TODO"""
+
+        return self._resolve_object_metadata(name)["id"]
+
+    def _object_id(self, name: str) -> v1.utils.Future[str]:
         """TODO"""
 
         return v1.utils.Future(functools.partial(self._resolve_object_id, name))
@@ -289,28 +289,45 @@ class Provider(v1.provider.Provider):
     def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self.object_id(f"v2/projects/{self._params['project_name']}")
+        return self._object_id(f"v2/projects/{self._params['project_name']}")
 
     def vpc_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self.object_id(f"v2/vpcs/{self._params['vpc_name']}")
+        return self._object_id(f"v2/vpcs/{self._params['vpc_name']}")
 
     def region(self) -> str:
         """TODO"""
 
         return self._params["region"]
 
+    def client(self) -> dolib.Client:
+        """TODO"""
+
+        return self._client
+
+    def object_name(self, obj: dict[str, object]) -> str:
+        """TODO"""
+
+        return f"{obj['kind']}/{obj['name']}"
+
+    def object_metadata(self, name: str) -> dict[str, object]:
+        """TODO"""
+
+        return self._resolve_object_metadata(name)
+
     def add_object(self, obj: dict[str, object]):
         """TODO"""
 
         with self._lock:
-            name = f"{obj['kind']}/{obj['name']}"
+            name = self.object_name(obj)
 
             if name in self._new_state:
                 raise v1.exceptions.RuntimeError(f"{name}: digitalocean object already exists")
 
             self._new_state[name] = obj
+
+            return self._object_id(name)
 
 
 dolib.HANDLERS.update({
