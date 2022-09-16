@@ -24,7 +24,7 @@ class _ContextData:
         self._hooks = hooks
         self._load_bucket = load_bucket
 
-    def _set_data(self, bucket: str, name: type, data: object):
+    def set_data(self, bucket: str, name: type, data: object):
         """TODO"""
 
         if bucket not in self._buckets:
@@ -35,7 +35,7 @@ class _ContextData:
         bucket = self._buckets[bucket]
         bucket[name] = data
 
-    def _get_data(self, bucket: str, name: str) -> object:
+    def get_data(self, bucket: str, name: str) -> object:
         """TODO"""
 
         if bucket not in self._buckets:
@@ -44,25 +44,15 @@ class _ContextData:
         bucket = self._buckets[bucket]
         return bucket.get(name)
 
-    def set_data(self, bucket: str, cls: type, data: object):
-        """TODO"""
-
-        self._set_data(bucket, utils.fqcn(cls), data)
-
-    def get_data(self, bucket: str, cls: type) -> object:
-        """TODO"""
-
-        return self._get_data(bucket, utils.fqcn(cls))
-
     def secret(self, cls: type, name: str, length: int = 16) -> str:
         """TODO"""
 
         name = f"{utils.fqcn(cls)}-{name}"
-        s = self._get_data("secrets", name)
+        s = self.get_data("secrets", name)
 
         if not s:
             s = secrets.token_urlsafe(length)
-            self._set_data("secrets", name, s)
+            self.set_data("secrets", name, s)
 
         return s
 

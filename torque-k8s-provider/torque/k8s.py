@@ -60,13 +60,15 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         with self.context as ctx:
-            self._current_state = ctx.get_data("state", self) or {}
+            self._current_state = ctx.get_data("state", v1.utils.fqcn(self)) or {}
 
     def _store_state(self):
         """TODO"""
 
         with self.context as ctx:
-            ctx.set_data("state", self, self._current_state)
+            ctx.set_data("state",
+                         v1.utils.fqcn(self),
+                         self._current_state)
 
     def _connect(self):
         """TODO"""
