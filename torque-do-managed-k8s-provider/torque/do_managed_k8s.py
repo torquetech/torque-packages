@@ -210,6 +210,13 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
 class Provider(v1.provider.Provider):
     """TODO"""
 
+    _PARAMETERS = {
+        "defaults": {},
+        "schema": {
+            v1.schema.Optional("ha"): bool
+        }
+    }
+
     _CONFIGURATION = {
         "defaults": {
             "version": "latest",
@@ -246,8 +253,7 @@ class Provider(v1.provider.Provider):
                 "day": str
             }),
             v1.schema.Optional("auto_upgrade"): bool,
-            v1.schema.Optional("surge_upgrade"): bool,
-            v1.schema.Optional("ha"): bool
+            v1.schema.Optional("surge_upgrade"): bool
         }
     }
 
@@ -266,6 +272,21 @@ class Provider(v1.provider.Provider):
         super().__init__(*args, **kwargs)
 
         self._cluster_id = self._create()
+        self._params = None
+
+        self._load_params()
+    def _load_params(self):
+        """TODO"""
+
+        with self.context as ctx:
+            self._params = ctx.get_data("parameters", v1.utils.fqcn(self))
+
+            if not self._params:
+                self._params = {
+                    "ha": self.parameters.get("ha", False)
+                }
+
+                ctx.set_data("parameters", v1.utils.fqcn(self), self._params)
 
     def _create(self):
         """TODO"""
@@ -279,7 +300,8 @@ class Provider(v1.provider.Provider):
             "params": {
                 "name": sanitized_name,
                 "region": self.interfaces.do.region(),
-                "vpc_uuid": self.interfaces.do.vpc_id()
+                "vpc_uuid": self.interfaces.do.vpc_id(),
+                "ha": self._params["ha"]
             }
         }
 
