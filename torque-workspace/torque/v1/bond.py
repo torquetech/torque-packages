@@ -28,10 +28,12 @@ class Bond:
     }
 
     def __init__(self,
+                 name: str,
                  parameters: object,
                  configuration: object,
                  context: deployment.Context,
                  interfaces: object):
+        self.name = name
         self.parameters = parameters
         self.configuration = configuration
         self.context = context

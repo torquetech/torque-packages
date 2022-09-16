@@ -383,7 +383,8 @@ class Deployment:
                                                    self._create_bond,
                                                    self._bind_provider)
 
-        return type(params,
+        return type(name,
+                    params,
                     config,
                     self._context,
                     bound_interfaces)
