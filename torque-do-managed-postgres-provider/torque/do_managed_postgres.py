@@ -174,11 +174,11 @@ class Provider(v1.provider.Provider):
     """TODO"""
 
 
-class PostgresCluster(v1.bond.Bond):
+class Cluster(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = Provider
-    IMPLEMENTS = postgres.PostgresClusterInterface
+    IMPLEMENTS = postgres.ClusterInterface
 
     _PARAMETERS = {
         "defaults": {
@@ -328,7 +328,7 @@ repository = {
             Provider
         ],
         "bonds": [
-            PostgresCluster
+            Cluster
         ]
     }
 }

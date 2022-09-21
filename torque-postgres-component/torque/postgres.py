@@ -7,7 +7,7 @@
 from torque import v1
 
 
-class PostgresClusterInterface(v1.bond.Interface):
+class ClusterInterface(v1.bond.Interface):
     """TODO"""
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
@@ -30,7 +30,7 @@ class Component(v1.component.Component):
 
         return {
             "cluster": {
-                "interface": PostgresClusterInterface,
+                "interface": ClusterInterface,
                 "required": True
             }
         }
