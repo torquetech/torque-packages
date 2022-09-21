@@ -14,7 +14,7 @@ class PostgresClusterInterface(v1.bond.Interface):
         """TODO"""
 
 
-class PostgresService(v1.component.SourceInterface):
+class ServiceInterface(v1.component.SourceInterface):
     """TODO"""
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
@@ -39,7 +39,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            PostgresService(uri=self._uri)
+            ServiceInterface(uri=self._uri)
         ]
 
     def _uri(self, database: str, user: str) -> v1.utils.Future[str]:
