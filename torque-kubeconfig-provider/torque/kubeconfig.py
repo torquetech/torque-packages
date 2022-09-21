@@ -14,11 +14,11 @@ class Provider(v1.provider.Provider):
     """TODO"""
 
 
-class KubernetesClient(v1.bond.Bond):
+class Client(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = Provider
-    IMPLEMENTS = k8s.KubernetesClientInterface
+    IMPLEMENTS = k8s.ClientInterface
 
     _CONFIGURATION = {
         "defaults": {},
@@ -41,7 +41,7 @@ repository = {
             Provider
         ],
         "bonds": [
-            KubernetesClient
+            Client
         ]
     }
 }

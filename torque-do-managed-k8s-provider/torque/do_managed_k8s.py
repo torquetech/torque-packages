@@ -319,11 +319,11 @@ class Provider(v1.provider.Provider):
         return self._cluster_id
 
 
-class KubernetesClient(v1.bond.Bond):
+class Client(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = Provider
-    IMPLEMENTS = k8s.KubernetesClientInterface
+    IMPLEMENTS = k8s.ClientInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -367,7 +367,7 @@ repository = {
             Provider
         ],
         "bonds": [
-            KubernetesClient
+            Client
         ]
     }
 }
