@@ -226,11 +226,11 @@ class Cluster(v1.bond.Bond):
 
         with self.context as ctx:
             name = f"{v1.utils.fqcn(self)}-{self.name}"
-            self._params = ctx.get_data("parameters", self.name)
+            self._params = ctx.get_data("parameters", name)
 
             if not self._params:
                 self._params = self.parameters
-                ctx.set_data("parameters", self.name, self._params)
+                ctx.set_data("parameters", name, self._params)
 
     def _create_cluster(self):
         """TODO"""
