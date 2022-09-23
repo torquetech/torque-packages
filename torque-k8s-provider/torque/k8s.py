@@ -4,10 +4,14 @@
 
 """TODO"""
 
+import codecs
+import json
+
 import kubernetes
 
-from torque import v1
+from torque import container_registry
 from torque import k8slib
+from torque import v1
 
 
 class ClientInterface(v1.bond.Interface):
@@ -39,6 +43,10 @@ class Provider(v1.provider.Provider):
             "client": {
                 "interface": ClientInterface,
                 "required": True
+            },
+            "cr": {
+                "interface": container_registry.ClientInterface,
+                "required": True
             }
         }
 
@@ -49,6 +57,8 @@ class Provider(v1.provider.Provider):
 
         self._current_state = {}
         self._new_state = {}
+
+        self._namespaces = set()
 
         self._load_state()
 
@@ -75,8 +85,52 @@ class Provider(v1.provider.Provider):
 
         self._client = self.interfaces.client.connect()
 
+    def _setup_container_registry(self):
+        """TODO"""
+
+        auth = self.interfaces.cr.auth()
+
+        server = auth["server"]
+        username = auth["username"]
+        password = auth["password"]
+
+        auth = f"{username}:{password}"
+        auth = bytes(auth, encoding="utf-8")
+        auth = codecs.encode(auth, encoding="base64")
+        auth = str(auth, encoding="utf-8")
+        auth = auth.replace("\n", "")
+
+        dockerconfig = json.dumps({
+            "auths": {
+                server: {
+                    "auth": auth
+                }
+            }
+        })
+
+        dockerconfig = bytes(dockerconfig, encoding="utf-8")
+        dockerconfig = codecs.encode(dockerconfig, encoding="base64")
+        dockerconfig = str(dockerconfig, encoding="utf-8")
+        dockerconfig = dockerconfig.replace("\n", "")
+
+        for namespace in self._namespaces:
+            self.add_object({
+                "apiVersion": "v1",
+                "kind": "Secret",
+                "metadata": {
+                    "name": "registry",
+                    "namespace": namespace
+                },
+                "type": "kubernetes.io/dockerconfigjson",
+                "data": {
+                    ".dockerconfigjson": dockerconfig
+                }
+            })
+
     def _apply(self):
         """TODO"""
+
+        self._setup_container_registry()
 
         self._connect()
 
@@ -108,7 +162,10 @@ class Provider(v1.provider.Provider):
 
         with self._lock:
             if "namespace" in obj["metadata"]:
-                name = f"{obj['metadata']['namespace']}/"
+                namespace = obj["metadata"]["namespace"]
+                self._namespaces.add(namespace)
+
+                name = f"{namespace}/"
 
             name += f"{obj['kind']}/{obj['metadata']['name']}"
 
