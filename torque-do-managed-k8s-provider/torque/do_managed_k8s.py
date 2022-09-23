@@ -351,7 +351,7 @@ class Client(v1.bond.Bond):
             cluster_id = v1.utils.resolve_futures(cluster_id)
 
         except v1.exceptions.RuntimeError as e:
-            raise v1.exceptions.RuntimeError("digitalocean k8s cluster not initialized") from e
+            raise k8s.ClusterNotInitialized("digitalocean k8s cluster not initialized") from e
 
         config = _kubeconfig(client, cluster_id)
 

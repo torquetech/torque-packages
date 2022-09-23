@@ -14,6 +14,10 @@ from torque import k8slib
 from torque import v1
 
 
+class ClusterNotInitialized(v1.exceptions.TorqueException):
+    """TODO"""
+
+
 class ClientInterface(v1.bond.Interface):
     """TODO"""
 
@@ -130,11 +134,11 @@ class Provider(v1.provider.Provider):
     def _apply(self):
         """TODO"""
 
-        self._setup_container_registry()
-
-        self._connect()
-
         try:
+            self._connect()
+
+            self._setup_container_registry()
+
             k8slib.apply(self._client,
                          self._current_state,
                          self._new_state,
@@ -146,16 +150,22 @@ class Provider(v1.provider.Provider):
     def _delete(self):
         """TODO"""
 
-        self._connect()
-
         try:
+            self._connect()
+
             k8slib.apply(self._client,
                          self._current_state,
                          {},
                          self.configuration["quiet"])
 
+        except ClusterNotInitialized:
+            pass
+
         finally:
             self._store_state()
+
+        with self.context as ctx:
+            ctx.set_data("parameters", v1.utils.fqcn(self), {})
 
     def add_object(self, obj: dict[str, object]):
         """TODO"""
