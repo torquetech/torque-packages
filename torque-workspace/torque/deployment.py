@@ -403,16 +403,15 @@ class Deployment:
 
         config = _validate_type_config(component.name, type, config)
 
-
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         self._create_bond)
 
         component = type(component.name,
-                        component.parameters,
-                        config,
-                        self._context,
-                        bound_interfaces)
+                         component.parameters,
+                         config,
+                         self._context,
+                         bound_interfaces)
 
         self._components[name] = component
 
