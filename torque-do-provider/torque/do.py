@@ -141,6 +141,75 @@ class _V2Vpcs:
         """TODO"""
 
 
+class _V2Resources:
+    """TODO"""
+
+    @classmethod
+    def _assign(cls,
+                client: dolib.Client,
+                project_name: str,
+                project_id: str,
+                resources: [str]):
+        """TODO"""
+
+        if not resources:
+            return
+
+        res = client.post(f"v2/projects/{project_id}/resources", {
+            "resources": resources
+        })
+
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{project_name}: {data['message']}")
+
+    @classmethod
+    def create(cls,
+               client: dolib.Client,
+               new_obj: dict[str, object]) -> dict[str, object]:
+        """TODO"""
+
+        params = new_obj["params"]
+        project_name = new_obj["name"]
+
+        project_id = params["project_id"]
+        resources = params["resources"]
+
+        cls._assign(client, project_name, project_id, resources)
+
+        return new_obj | {
+            "metadata": {}
+        }
+
+    @classmethod
+    def update(cls,
+               client: dolib.Client,
+               old_obj: dict[str, object],
+               new_obj: dict[str, object]) -> dict[str, object]:
+        """TODO"""
+
+        params = new_obj["params"]
+        project_name = new_obj["name"]
+
+        project_id = params["project_id"]
+        resources = params["resources"]
+
+        cls._assign(client, project_name, project_id, resources)
+
+        return new_obj | {
+            "metadata": {}
+        }
+
+    @classmethod
+    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
+        """TODO"""
+
+    @classmethod
+    def wait(cls, client: dolib.Client, obj: dict[str, object]):
+        """TODO"""
+
+
 class Provider(v1.provider.Provider):
     """TODO"""
 
@@ -173,6 +242,7 @@ class Provider(v1.provider.Provider):
 
         self._current_state = {}
         self._new_state = {}
+        self._resources = []
 
         self._load_params()
         self._load_state()
@@ -247,6 +317,15 @@ class Provider(v1.provider.Provider):
     def _apply(self):
         """TODO"""
 
+        self.add_object({
+            "kind": "v2/resources",
+            "name": self._params["project_name"],
+            "params": {
+                "project_id": self.project_id(),
+                "resources": self._resources
+            }
+        })
+
         try:
             dolib.apply(self._client,
                         self._current_state,
@@ -267,6 +346,11 @@ class Provider(v1.provider.Provider):
 
         finally:
             self._store_state()
+
+    def _resolve_resource(self, type: str, resource_id: object):
+        """TODO"""
+
+        return f"{type}:{v1.utils.resolve_futures(resource_id)}"
 
     def _resolve_object_metadata(self, name: str) -> dict[str, object]:
         """TODO"""
@@ -329,10 +413,20 @@ class Provider(v1.provider.Provider):
 
             return self._object_id(name)
 
+    def add_resource(self, type: str, resource_id: object):
+        """TODO"""
+
+        with self._lock:
+            resource = v1.utils.Future(functools.partial(self._resolve_resource,
+                                                         type,
+                                                         resource_id))
+            self._resources.append(resource)
+
 
 dolib.HANDLERS.update({
     "v2/projects": _V2Projects,
-    "v2/vpcs": _V2Vpcs
+    "v2/vpcs": _V2Vpcs,
+    "v2/resources": _V2Resources
 })
 
 repository = {
