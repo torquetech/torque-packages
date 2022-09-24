@@ -259,7 +259,7 @@ class Workspace:
     def _get_full_component_name(self, name: str) -> str:
         """TODO"""
 
-        if '.' in name:
+        if "." in name:
             return name
 
         processed = self._process_names(self.dag.components.keys())
@@ -275,7 +275,7 @@ class Workspace:
     def _get_full_link_name(self, name: str) -> str:
         """TODO"""
 
-        if '.' in name:
+        if "." in name:
             return name
 
         processed = self._process_names(self.dag.links.keys())
@@ -291,7 +291,7 @@ class Workspace:
     def _get_full_deployment_name(self, name: str) -> str:
         """TODO"""
 
-        if '.' in name:
+        if "." in name:
             return name
 
         processed = self._process_names(self.deployments.keys())

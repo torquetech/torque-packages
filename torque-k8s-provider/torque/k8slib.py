@@ -16,8 +16,8 @@ import yaml
 from torque import v1
 
 
-UPPER_FOLLOWED_BY_LOWER_RE = re.compile('(.)([A-Z][a-z]+)')
-LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE = re.compile('([a-z0-9])([A-Z])')
+UPPER_FOLLOWED_BY_LOWER_RE = re.compile("(.)([A-Z][a-z]+)")
+LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE = re.compile("([a-z0-9])([A-Z])")
 
 
 def _get_api_for(client: kubernetes.client.ApiClient, obj: dict[str, object]):
@@ -32,13 +32,13 @@ def _get_api_for(client: kubernetes.client.ApiClient, obj: dict[str, object]):
     group = "".join(group.rsplit(".k8s.io", 1))
     # convert group name from DNS subdomain format to
     # python class name convention
-    group = "".join(word.capitalize() for word in group.split('.'))
+    group = "".join(word.capitalize() for word in group.split("."))
     fcn_to_call = "{0}{1}Api".format(group, version.capitalize())
     api = getattr(kubernetes.client, fcn_to_call)(client)
     # Replace CamelCased action_type into snake_case
     kind = obj["kind"]
-    kind = UPPER_FOLLOWED_BY_LOWER_RE.sub(r'\1_\2', kind)
-    kind = LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE.sub(r'\1_\2', kind).lower()
+    kind = UPPER_FOLLOWED_BY_LOWER_RE.sub(r"\1_\2", kind)
+    kind = LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE.sub(r"\1_\2", kind).lower()
     # Expect the user to create namespaced objects more often
     if hasattr(api, "create_namespaced_{0}".format(kind)):
         create = getattr(api, "create_namespaced_{0}".format(kind))

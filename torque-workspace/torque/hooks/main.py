@@ -25,9 +25,9 @@ def fix_pyyaml():
         """TODO"""
 
         if len(data.splitlines()) > 1:
-            return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+            return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
-        return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
     yaml.representer.SafeRepresenter.add_representer(str, str_presenter)
 

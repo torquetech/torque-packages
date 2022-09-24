@@ -25,7 +25,7 @@ class Job:
         self.handler = handler
 
     def __repr__(self) -> str:
-        depends = ','.join(self.depends)
+        depends = ",".join(self.depends)
         return f"Job({self.name}, depends=[{depends}])"
 
 
