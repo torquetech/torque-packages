@@ -291,7 +291,7 @@ class DAG:
             graph.add_node(node)
 
         for link in self.links.values():
-            edge = pydot.Edge(link.source, link.destination, label=link.type)
+            edge = pydot.Edge(link.source, link.destination)
             graph.add_edge(edge)
 
         return graph.to_string()
