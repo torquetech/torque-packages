@@ -306,13 +306,7 @@ class Provider(v1.provider.Provider):
     def _connect(self) -> dolib.Client:
         """TODO"""
 
-        if "token" in self.configuration:
-            do_token = self.configuration["token"]
-
-        else:
-            do_token = os.getenv("DO_TOKEN")
-
-        self._client = dolib.connect(self._params["endpoint"], do_token)
+        self._client = dolib.connect(self._params["endpoint"], self.token())
 
     def _apply(self):
         """TODO"""
@@ -384,6 +378,14 @@ class Provider(v1.provider.Provider):
         """TODO"""
 
         return self._params["region"]
+
+    def token(self) -> str:
+        """TODO"""
+
+        if "token" in self.configuration:
+            return self.configuration["token"]
+
+        return os.getenv("DO_TOKEN")
 
     def client(self) -> dolib.Client:
         """TODO"""
