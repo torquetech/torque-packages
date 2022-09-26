@@ -171,10 +171,10 @@ class Provider(v1.provider.Provider):
 
         with self._lock:
             if "namespace" in obj["metadata"]:
-                namespace = obj["metadata"]["namespace"]
-                self._namespaces.add(namespace)
+                name = f"{obj['metadata']['namespace']}/"
 
-                name = f"{namespace}/"
+            else:
+                name = ""
 
             name += f"{obj['kind']}/{obj['metadata']['name']}"
 
@@ -182,6 +182,11 @@ class Provider(v1.provider.Provider):
                 raise v1.exceptions.RuntimeError(f"{name}: k8s object already exists")
 
             self._new_state[name] = obj
+
+    def add_container_registry_to(self, namespace: str):
+        """TODO"""
+
+        self._namespaces.add(namespace)
 
     def namespace(self) -> str:
         """TODO"""
