@@ -4,7 +4,7 @@
 
 """TODO"""
 
-import codecs
+import base64
 import json
 
 import kubernetes
@@ -99,10 +99,10 @@ class Provider(v1.provider.Provider):
         password = auth["password"]
 
         auth = f"{username}:{password}"
-        auth = bytes(auth, encoding="utf-8")
-        auth = codecs.encode(auth, encoding="base64")
-        auth = str(auth, encoding="utf-8")
-        auth = auth.replace("\n", "")
+
+        auth = auth.encode()
+        auth = base64.b64encode(auth)
+        auth = auth.decode()
 
         dockerconfig = json.dumps({
             "auths": {
@@ -112,10 +112,9 @@ class Provider(v1.provider.Provider):
             }
         })
 
-        dockerconfig = bytes(dockerconfig, encoding="utf-8")
-        dockerconfig = codecs.encode(dockerconfig, encoding="base64")
-        dockerconfig = str(dockerconfig, encoding="utf-8")
-        dockerconfig = dockerconfig.replace("\n", "")
+        dockerconfig = dockerconfig.encode()
+        dockerconfig = base64.b64encode(dockerconfig)
+        dockerconfig = dockerconfig.decode()
 
         for namespace in self._namespaces:
             self.add_object({
