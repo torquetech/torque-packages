@@ -314,7 +314,7 @@ class Provider(v1.provider.Provider):
 
         self._cluster_id = self.interfaces.do.add_object(obj)
 
-        self.interfaces.do.add_resource(f"do:kubernetes", self._cluster_id)
+        self.interfaces.do.add_resource("do:kubernetes", self._cluster_id)
 
     def cluster_id(self) -> v1.utils.Future[str]:
         """TODO"""

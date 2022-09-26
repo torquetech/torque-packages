@@ -254,7 +254,7 @@ class Cluster(v1.bond.Bond):
         self._cluster_id = self.interfaces.do.add_object(obj)
         self._cluster_name = self.interfaces.do.object_name(obj)
 
-        self.interfaces.do.add_resource(f"do:dbaas", self._cluster_id)
+        self.interfaces.do.add_resource("do:dbaas", self._cluster_id)
 
     def _create_database(self, name: str):
         """TODO"""

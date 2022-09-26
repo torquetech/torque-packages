@@ -4,13 +4,11 @@
 
 """TODO"""
 
-import base64
 import jinja2
 import yaml
 
 from torque import v1
 from torque import do
-from torque import dolib
 from torque import do_certificates
 from torque import do_domains
 from torque import k8s

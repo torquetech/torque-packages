@@ -187,6 +187,8 @@ class _V2Resources:
                client: dolib.Client,
                old_obj: dict[str, object],
                new_obj: dict[str, object]) -> dict[str, object]:
+        # pylint: disable=W0613
+
         """TODO"""
 
         params = new_obj["params"]
