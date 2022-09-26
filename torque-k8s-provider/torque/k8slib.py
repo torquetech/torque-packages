@@ -87,7 +87,7 @@ def _update_object(client: kubernetes.client.ApiClient,
             get(obj["metadata"]["name"], obj["metadata"]["namespace"]).to_dict()
 
         else:
-            get(obj["name"]).to_dict()
+            get(obj["metadata"]["name"]).to_dict()
 
         do_replace = True
 
