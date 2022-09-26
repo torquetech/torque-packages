@@ -22,6 +22,20 @@ class ClientInterface(v1.bond.Interface):
         """TODO"""
 
 
+def _strip_dop_username(cmd: [str]) -> [str]:
+    """TODO"""
+
+    res = []
+
+    for i in cmd:
+        if i.startswith("dop_"):
+            i = "****"
+
+        res.append(i)
+
+    return res
+
+
 class Provider(v1.provider.Provider):
     """TODO"""
 
@@ -70,7 +84,7 @@ class Provider(v1.provider.Provider):
             self._auth["server"]
         ]
 
-        print(f"+ {' '.join(cmd)}")
+        print(f"+ {' '.join(_strip_dop_username(cmd))}")
         subprocess.run(cmd,
                        env=os.environ,
                        cwd=self.context.path(),
