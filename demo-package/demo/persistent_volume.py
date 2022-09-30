@@ -28,7 +28,7 @@ def _validate_size(size: object) -> int:
 class Component(v1.component.Component):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {
             "size": v1.schema.Use(_validate_size)

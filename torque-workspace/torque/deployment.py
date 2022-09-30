@@ -18,7 +18,7 @@ from torque import repository
 from torque import v1
 
 
-_CONFIGURATION_SCHEMA = v1.schema.Schema({
+CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
     "interfaces": {
         v1.schema.Optional(str): {
@@ -131,7 +131,7 @@ def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[st
     """TODO"""
 
     try:
-        return _CONFIGURATION_SCHEMA.validate(config)
+        return CONFIGURATION_SCHEMA.validate(config)
 
     except v1.schema.SchemaError as exc:
         exc_str = str(exc)

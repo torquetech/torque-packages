@@ -41,7 +41,7 @@ class Component(v1.component.Component):
 class Link(v1.link.Link):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {
             "path": str

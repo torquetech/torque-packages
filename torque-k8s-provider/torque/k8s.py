@@ -28,7 +28,7 @@ class ClientInterface(v1.bond.Interface):
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "namespace": "default",
             "quiet": True

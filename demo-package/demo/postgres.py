@@ -16,7 +16,7 @@ from demo import volume
 class Component(v1.component.Component):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "version": "14.2"
         },
@@ -122,7 +122,7 @@ class Component(v1.component.Component):
 class DataLink(volume.Link):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {}
     }

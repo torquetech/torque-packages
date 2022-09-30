@@ -68,12 +68,12 @@ class _ContextData:
 class Context:
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {}
     }
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {},
         "schema": {}
     }
@@ -82,8 +82,8 @@ class Context:
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema(cls._CONFIGURATION["schema"],
-                                     cls._CONFIGURATION["defaults"],
+        return utils.validate_schema(cls.CONFIGURATION["schema"],
+                                     cls.CONFIGURATION["defaults"],
                                      configuration)
 
     def __init__(self, deployment_name: str, configuration: dict[str, object]):

@@ -18,7 +18,7 @@ class Link(network.Link):
     """TODO"""
 
     # pylint: disable=W0212
-    _CONFIGURATION = v1.utils.merge_dicts(network.Link._CONFIGURATION, {
+    CONFIGURATION = v1.utils.merge_dicts(network.Link.CONFIGURATION, {
         "defaults": {
             "database": "postgres"
         },

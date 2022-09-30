@@ -39,7 +39,7 @@ def _strip_dop_username(cmd: [str]) -> [str]:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {},
         "schema": {
             v1.schema.Optional("prefix"): str

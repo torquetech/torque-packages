@@ -11,12 +11,12 @@ from . import utils
 class Link:
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {}
     }
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {},
         "schema": {}
     }
@@ -43,16 +43,16 @@ class Link:
     def on_parameters(cls, parameters: object) -> object:
         """TODO"""
 
-        return utils.validate_schema(cls._PARAMETERS["schema"],
-                                     cls._PARAMETERS["defaults"],
+        return utils.validate_schema(cls.PARAMETERS["schema"],
+                                     cls.PARAMETERS["defaults"],
                                      parameters)
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
         """TODO"""
 
-        return utils.validate_schema(cls._CONFIGURATION["schema"],
-                                     cls._CONFIGURATION["defaults"],
+        return utils.validate_schema(cls.CONFIGURATION["schema"],
+                                     cls.CONFIGURATION["defaults"],
                                      configuration)
 
     @classmethod

@@ -16,7 +16,7 @@ class Component(python_app.Component):
     """TODO"""
 
     # pylint: disable=W0212
-    _CONFIGURATION = v1.utils.merge_dicts(python_app.Component._CONFIGURATION, {
+    CONFIGURATION = v1.utils.merge_dicts(python_app.Component.CONFIGURATION, {
         "defaults": {
             "port": 8080
         },

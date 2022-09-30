@@ -20,14 +20,14 @@ from demo import utils
 class Component(v1.component.Component):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {
             "path": str
         }
     }
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "development_mode": False
         },

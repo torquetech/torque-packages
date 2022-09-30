@@ -103,7 +103,7 @@ class Component(v1.component.Component):
 class DataLink(volume.Link):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {}
     }

@@ -215,7 +215,7 @@ class _V2Resources:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {
             "endpoint": "https://api.digitalocean.com",
             "region": "nyc3"
@@ -226,7 +226,7 @@ class Provider(v1.provider.Provider):
         }
     }
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "quiet": True
         },

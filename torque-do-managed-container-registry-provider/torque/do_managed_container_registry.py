@@ -87,7 +87,7 @@ class _V2ContainerRegistry:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {
             "subscription_tier_slug": "starter"
         },

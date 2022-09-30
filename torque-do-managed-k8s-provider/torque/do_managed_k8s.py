@@ -211,14 +211,14 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {
             v1.schema.Optional("ha"): bool
         }
     }
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "version": "latest",
             "node_pools": [{

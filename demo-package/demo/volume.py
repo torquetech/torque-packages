@@ -12,7 +12,7 @@ from demo import components
 class Link(v1.link.Link):
     """TODO"""
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {},
         "schema": {
             "mount_point": str

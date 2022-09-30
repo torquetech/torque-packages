@@ -48,7 +48,7 @@ def _process_futures(obj: object) -> object:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "registry": {
                 "server": "index.docker.io",

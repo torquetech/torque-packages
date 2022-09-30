@@ -497,7 +497,7 @@ class LoadBalancer(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = hlb.LoadBalancerInterface
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "domain": "my-domain.com",
             "certificate_type": "letsencrypt"

@@ -20,7 +20,7 @@ class Client(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = k8s.ClientInterface
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {},
         "schema": {
             v1.schema.Optional("config_file"): str,

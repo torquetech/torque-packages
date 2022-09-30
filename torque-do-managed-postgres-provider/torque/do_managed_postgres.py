@@ -224,7 +224,7 @@ class Cluster(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = postgres.ClusterInterface
 
-    _PARAMETERS = {
+    PARAMETERS = {
         "defaults": {
             "version": "14",
             "num_nodes": 1,

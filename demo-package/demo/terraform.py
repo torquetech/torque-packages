@@ -118,7 +118,7 @@ def _to_tf(obj: dict, level: int) -> str:
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "aws": {
                 "region": "us-east-1",
@@ -253,7 +253,7 @@ class PersistentVolumesProvider(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.PersistentVolumesProvider
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "zone": "us-east-1a",
             "type": "gp2"

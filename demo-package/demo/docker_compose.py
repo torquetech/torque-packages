@@ -43,7 +43,7 @@ _LOAD_BALANCER_TEMPLATE = """server {
 class Provider(v1.provider.Provider):
     """TODO"""
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {},
         "schema": {
             v1.schema.Optional("workspace_path"): str
@@ -565,7 +565,7 @@ class HttpLoadBalancers(v1.bond.Bond):
     PROVIDER = Provider
     IMPLEMENTS = providers.HttpLoadBalancers
 
-    _CONFIGURATION = {
+    CONFIGURATION = {
         "defaults": {
             "port": 8080
         },
