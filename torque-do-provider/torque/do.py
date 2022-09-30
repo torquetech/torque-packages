@@ -231,7 +231,6 @@ class Provider(v1.provider.Provider):
             "quiet": True
         },
         "schema": {
-            v1.schema.Optional("token"): str,
             "quiet": bool
         }
     }
@@ -383,9 +382,6 @@ class Provider(v1.provider.Provider):
 
     def token(self) -> str:
         """TODO"""
-
-        if "token" in self.configuration:
-            return self.configuration["token"]
 
         return os.getenv("DO_TOKEN")
 
