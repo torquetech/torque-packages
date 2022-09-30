@@ -88,7 +88,7 @@ def _apply(arguments: argparse.Namespace):
     deployment = ws.load_deployment(arguments.name)
 
     try:
-        deployment.apply(arguments.workers)
+        deployment.apply(arguments.workers, arguments.show_secrets)
 
     finally:
         deployment.store()
@@ -172,6 +172,9 @@ def add_arguments(subparsers):
                               type=int,
                               default=1,
                               help="number of build workers to use, default: %(default)s")
+    apply_parser.add_argument("--show-secrets",
+                              action="store_true",
+                              help="show secrets when done")
     apply_parser.add_argument("name", help="deployment name")
 
     delete_parser = subparsers.add_parser("delete", help="delete deployment")

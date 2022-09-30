@@ -502,7 +502,7 @@ class Deployment:
 
         self._execute(workers, _on_build)
 
-    def apply(self, workers: int):
+    def apply(self, workers: int, show_secrets: bool):
         """TODO"""
 
         self._setup_providers()
@@ -529,6 +529,11 @@ class Deployment:
         for apply_hook in self._context.get_hooks("apply"):
             print(f"applying {apply_hook.__module__}...")
             apply_hook()
+
+        if show_secrets:
+            print("\nSecrets:\n")
+            for show_hook in self._context.get_hooks("show-secrets"):
+                show_hook()
 
     def delete(self):
         """TODO"""
