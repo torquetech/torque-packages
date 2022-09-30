@@ -44,10 +44,10 @@ class _ContextData:
         bucket = self._buckets[bucket]
         return bucket.get(name)
 
-    def secret(self, cls: type, name: str, length: int = 16) -> str:
+    def secret(self, object_name: str, secret_name: str, length: int = 16) -> str:
         """TODO"""
 
-        name = f"{utils.fqcn(cls)}-{name}"
+        name = f"{object_name}-{secret_name}"
         s = self.get_data("secrets", name)
 
         if not s:
