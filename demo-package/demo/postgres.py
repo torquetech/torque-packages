@@ -90,7 +90,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         with self.context as ctx:
-            password = ctx.secret(self, f"{self.name}-postgres")
+            password = ctx.secret(self.name, "postgres")
 
         self._secret_link = self.interfaces.secrets.create(f"{self.name}_admin", [
             types.KeyValue("user", "postgres"),
