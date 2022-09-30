@@ -87,6 +87,25 @@ class _V2PostgresDatabase:
     """TODO"""
 
     @classmethod
+    def _get_database(cls,
+                      client: dolib.Client,
+                      cluster_id: str,
+                      name: str) -> dict[str, object]:
+        """TODO"""
+
+        res = client.get(f"v2/databases/{cluster_id}/dbs")
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
+
+        for db in data["dbs"]:
+            if name == db["name"]:
+                return {"db": db}
+
+        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
+
+    @classmethod
     def create(cls,
                client: dolib.Client,
                new_obj: dict[str, object]) -> dict[str, object]:
@@ -96,7 +115,10 @@ class _V2PostgresDatabase:
                           new_obj["params"])
         data = res.json()
 
-        if res.status_code != 201:
+        if res.status_code == 422:
+            data = cls._get_database(client, new_obj["cluster_id"], new_obj["params"]["name"])
+
+        elif res.status_code != 201:
             raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
         data = data["db"]
@@ -130,6 +152,25 @@ class _V2PostgresUser:
     """TODO"""
 
     @classmethod
+    def _get_user(cls,
+                  client: dolib.Client,
+                  cluster_id: str,
+                  name: str) -> dict[str, object]:
+        """TODO"""
+
+        res = client.get(f"v2/databases/{cluster_id}/users")
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
+
+        for user in data["users"]:
+            if name == user["name"]:
+                return {"user": user}
+
+        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
+
+    @classmethod
     def create(cls,
                client: dolib.Client,
                new_obj: dict[str, object]) -> dict[str, object]:
@@ -139,7 +180,10 @@ class _V2PostgresUser:
                           new_obj["params"])
         data = res.json()
 
-        if res.status_code != 201:
+        if res.status_code == 422:
+            data = cls._get_user(client, new_obj["cluster_id"], new_obj["params"]["name"])
+
+        elif res.status_code != 201:
             raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
 
         data = data["user"]
