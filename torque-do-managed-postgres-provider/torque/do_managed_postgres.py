@@ -232,6 +232,13 @@ class Cluster(v1.bond.Bond):
                 self._params = self.parameters
                 ctx.set_data("parameters", name, self._params)
 
+    def _show_secret(self, user: str):
+        """TODO"""
+
+        user_metadata = self.interfaces.do.object_metadata(self._users[user])
+
+        print(f"{self.name}: user: {user}, password: {user_metadata['password']}")
+
     def _create_cluster(self):
         """TODO"""
 
@@ -281,6 +288,10 @@ class Cluster(v1.bond.Bond):
         with self._lock:
             if name in self._users:
                 return
+
+            with self.context as ctx:
+                ctx.add_hook("show-secrets", functools.partial(self._show_secret,
+                                                               name))
 
             obj = {
                 "kind": "v2/databases/postgres/user",
