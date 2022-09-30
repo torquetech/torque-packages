@@ -7,16 +7,15 @@
 import jinja2
 import yaml
 
-from torque import v1
 from torque import do
 from torque import do_certificates
 from torque import do_domains
 from torque import k8s
 from torque import hlb
+from torque import v1
 
 
-_INGRESS_LB = jinja2.Template("""
-apiVersion: v1
+_INGRESS_LB = jinja2.Template("""apiVersion: v1
 kind: Namespace
 metadata:
   labels:
@@ -50,6 +49,7 @@ metadata:
   namespace: {{instance}}
 data:
   allow-snippet-annotations: 'true'
+  use-proxy-protocol: 'true'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -277,13 +277,13 @@ spec:
   ipFamilies:
     - IPv4
   ports:
-    - name: http
-      port: 80
+    - name: https
+      port: 443
       protocol: TCP
       targetPort: http
       appProtocol: http
-    - name: https
-      port: 443
+    - name: http
+      port: 80
       protocol: TCP
       targetPort: http
       appProtocol: http
@@ -448,10 +448,12 @@ class Provider(v1.provider.Provider):
                 obj["metadata"]["annotations"] = {
                     "external-dns.alpha.kubernetes.io/hostname": hosts,
                     "service.beta.kubernetes.io/do-loadbalancer-name": name,
-                    "service.beta.kubernetes.io/do-loadbalancer-protocol": "https",
+                    "service.beta.kubernetes.io/do-loadbalancer-protocol": "http",
+                    "service.beta.kubernetes.io/do-loadbalancer-tls-ports": "443",
                     "service.beta.kubernetes.io/do-loadbalancer-certificate-id": certificate_id,
                     "service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https": "true",
-                    "service.beta.kubernetes.io/do-loadbalancer-size-unit": "1"
+                    "service.beta.kubernetes.io/do-loadbalancer-enable-backend-keepalive": "true",
+                    "service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol": "true"
                 }
 
             self.interfaces.k8s.add_object(obj)
