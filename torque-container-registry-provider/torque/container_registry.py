@@ -87,7 +87,6 @@ class Provider(v1.provider.Provider):
         print(f"+ {' '.join(_strip_dop_username(cmd))}")
         subprocess.run(cmd,
                        env=os.environ,
-                       cwd=self.context.path(),
                        input=bytes(self._auth["password"], encoding="utf-8"),
                        check=True)
 
@@ -105,7 +104,6 @@ class Provider(v1.provider.Provider):
             print(f"+ {' '.join(cmd)}")
             subprocess.run(cmd,
                            env=os.environ,
-                           cwd=self.context.path(),
                            check=True)
 
             cmd = [
@@ -116,7 +114,6 @@ class Provider(v1.provider.Provider):
             print(f"+ {' '.join(cmd)}")
             subprocess.run(cmd,
                            env=os.environ,
-                           cwd=self.context.path(),
                            check=True)
 
     def _apply(self):
