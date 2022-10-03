@@ -8,6 +8,7 @@ import secrets
 import threading
 import typing
 
+from . import exceptions
 from . import utils
 
 
@@ -128,3 +129,5 @@ class Context:
 
     def path(self) -> str:
         """TODO"""
+
+        raise exceptions.RuntimeError(f"{v1.utils.fqcn(self)}: no path defined for this context")
