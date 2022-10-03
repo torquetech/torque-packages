@@ -73,6 +73,8 @@ class Provider(v1.provider.Provider):
             }
         })
 
+        self.interfaces.do.add_resource("do:domain", domain)
+
 
 dolib.HANDLERS.update({
     "v2/domains": _V2Domains
