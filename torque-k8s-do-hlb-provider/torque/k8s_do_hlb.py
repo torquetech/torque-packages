@@ -419,10 +419,6 @@ class Provider(v1.provider.Provider):
             "k8s": {
                 "interface": k8s.Provider,
                 "required": True
-            },
-            "domains": {
-                "interface": do_domains.Provider,
-                "required": False
             }
         }
 
@@ -432,9 +428,6 @@ class Provider(v1.provider.Provider):
                    certificate_id: v1.utils.Future[str],
                    ingress_list: [hlb.Ingress]):
         """TODO"""
-
-        if self.interfaces.domains:
-            self.interfaces.domains.create(domain)
 
         objs = _INGRESS_LB.render(instance=name)
 
@@ -517,6 +510,10 @@ class LoadBalancer(v1.bond.Bond):
         """TODO"""
 
         return {
+            "domains": {
+                "interface": do_domains.Provider,
+                "required": False
+            },
             "certs": {
                 "interface": do_certificates.Provider,
                 "required": True
@@ -529,6 +526,9 @@ class LoadBalancer(v1.bond.Bond):
 
     def create(self, ingress_list: [hlb.Ingress]):
         """TODO"""
+
+        if self.interfaces.domains:
+            self.interfaces.domains.create(self.configuration["domain"])
 
         if self.configuration["certificate_type"] == "external":
             certificate = self.configuration.get("certificate")
