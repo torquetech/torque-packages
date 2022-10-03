@@ -34,7 +34,8 @@ setup(name="torque-do-provider",
       ],
       python_requires=">=3.9",
       install_requires=[
-          "requests"
+          "requests",
+          "boto3"
       ],
       entry_points={
           "torque": [

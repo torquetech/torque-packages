@@ -5,7 +5,13 @@
 """TODO"""
 
 import functools
+import io
 import os
+
+import boto3
+import yaml
+
+from botocore.exceptions import ClientError
 
 from torque import v1
 from torque import dolib
@@ -383,7 +389,12 @@ class Provider(v1.provider.Provider):
     def token(self) -> str:
         """TODO"""
 
-        return os.getenv("DO_TOKEN")
+        token = os.getenv("DO_TOKEN")
+
+        if not token:
+            raise v1.exceptions.RuntimeError("DO_TOKEN environment not set")
+
+        return token
 
     def client(self) -> dolib.Client:
         """TODO"""
@@ -423,6 +434,93 @@ class Provider(v1.provider.Provider):
             self._resources.append(resource)
 
 
+class Context(v1.deployment.Context):
+    """TODO"""
+
+    CONFIGURATION = {
+        "defaults": {
+            "region": "nyc3",
+            "bucket": "unique-spaces-bucket",
+            "path": "deployments"
+        },
+        "schema": {
+            "region": str,
+            "bucket": str,
+            "path": str,
+            v1.schema.Optional("endpoint"): str
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._key = os.getenv("DO_SPACES_KEY")
+        self._secret = os.getenv("DO_SPACES_SECRET")
+
+        if not self._key:
+            raise v1.exceptions.RuntimeError("DO_SPACES_KEY environment not set")
+
+        if not self._secret:
+            raise v1.exceptions.RuntimeError("DO_SPACES_SECRET environment not set")
+
+        endpoint = self.configuration.get("endpoint", "digitaloceanspaces.com")
+        self._endpoint_url = f"https://{self.configuration['region']}.{endpoint}"
+
+        self._session = boto3.session.Session()
+
+        self._client = self._session.client("s3",
+                                            endpoint_url=self._endpoint_url,
+                                            region_name=self.configuration["region"],
+                                            aws_access_key_id=self._key,
+                                            aws_secret_access_key=self._secret)
+
+        try:
+            self._client.create_bucket(Bucket=self.configuration["bucket"])
+
+        except self._client.exceptions.BucketAlreadyExists:
+            pass
+
+    def _get_s3_key(self, key: str) -> object:
+        """TODO"""
+
+        key = f"{self.configuration['path']}/{key}"
+
+        try:
+            res = self._client.get_object(Bucket=self.configuration["bucket"],
+                                          Key=key)
+
+            return res["Body"]
+
+        except self._client.exceptions.NoSuchKey:
+            return io.BytesIO(b"")
+
+    def _put_s3_key(self, key: str, body: bytes):
+        """TODO"""
+
+        key = f"{self.configuration['path']}/{key}"
+
+        self._client.put_object(Bucket=self.configuration["bucket"],
+                                Key=key,
+                                Body=body,
+                                ACL='private')
+
+    def load_bucket(self, name: str) -> dict[str, object]:
+        """TODO"""
+
+        key = f"{self.deployment_name}/{name}.yaml"
+
+        return yaml.safe_load(self._get_s3_key(key)) or {}
+
+    def store_bucket(self, name: str, data: dict[str, object]):
+        """TODO"""
+
+        data = yaml.safe_dump(data,
+                              default_flow_style=False,
+                              sort_keys=False)
+
+        self._put_s3_key(f"{self.deployment_name}/{name}.yaml", data)
+
+
 dolib.HANDLERS.update({
     "v2/projects": _V2Projects,
     "v2/vpcs": _V2Vpcs,
@@ -433,6 +531,9 @@ repository = {
     "v1": {
         "providers": [
             Provider
+        ],
+        "contexts": [
+            Context
         ]
     }
 }
