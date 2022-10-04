@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+# This file contains k8s yaml files generated from ingress-nginx helm
+# repository. For more details, visit https://kubernetes.github.io/ingress-nginx/
+
 """TODO"""
 
 import jinja2
