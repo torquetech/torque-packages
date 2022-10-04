@@ -18,7 +18,7 @@ def load_file(name: str) -> str:
 
 
 setup(name="torque-postgres-component",
-      version=f"0.1",
+      version=load_file("VERSION"),
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",

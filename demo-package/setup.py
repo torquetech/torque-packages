@@ -36,7 +36,7 @@ def package_data(module: str, patterns: [str]) -> [str]:
 
 
 setup(name="demo-package",
-      version="0.1",
+      version=load_file("VERSION"),
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",

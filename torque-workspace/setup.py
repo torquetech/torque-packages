@@ -19,7 +19,7 @@ def load_file(name: str) -> str:
 
 
 setup(name="torque-workspace",
-      version="0.1",
+      version=load_file("VERSION"),
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",
