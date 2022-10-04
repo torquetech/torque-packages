@@ -84,7 +84,7 @@ class _V2ContainerRegistry:
         """TODO"""
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     PARAMETERS = {
@@ -102,7 +102,7 @@ class Provider(v1.provider.Provider):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             }
         }
@@ -166,11 +166,11 @@ class Provider(v1.provider.Provider):
         }
 
 
-class Client(v1.bond.Bond):
+class V1Client(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = container_registry.ClientInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = container_registry.V1ClientInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -178,7 +178,7 @@ class Client(v1.bond.Bond):
 
         return {
             "cr": {
-                "interface": Provider,
+                "interface": V1Provider,
                 "required": True
             }
         }
@@ -201,10 +201,10 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            Client
+            V1Client
         ]
     }
 }

@@ -53,7 +53,7 @@ class _V2Certificates:
         """TODO"""
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     @classmethod
@@ -62,7 +62,7 @@ class Provider(v1.provider.Provider):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             }
         }
@@ -116,7 +116,7 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ]
     }
 }

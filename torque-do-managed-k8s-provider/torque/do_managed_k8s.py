@@ -208,7 +208,7 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
     return yaml.safe_load(res.text)
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     PARAMETERS = {
@@ -264,7 +264,7 @@ class Provider(v1.provider.Provider):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             }
         }
@@ -322,11 +322,11 @@ class Provider(v1.provider.Provider):
         return self._cluster_id
 
 
-class Client(v1.bond.Bond):
+class V1Client(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = k8s.ClientInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = k8s.V1ClientInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -334,11 +334,11 @@ class Client(v1.bond.Bond):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             },
             "do_k8s": {
-                "interface": Provider,
+                "interface": V1Provider,
                 "required": True
             }
         }
@@ -367,10 +367,10 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            Client
+            V1Client
         ]
     }
 }

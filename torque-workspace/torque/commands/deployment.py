@@ -134,7 +134,7 @@ def add_arguments(subparsers):
                                action="store_true",
                                help="create strict deployment")
     create_parser.add_argument("--context",
-                               default="torque.defaults.LocalContext",
+                               default="torque.defaults.V1LocalContext",
                                help="deployment context, default: %(default)s")
     create_parser.add_argument("--extra-config",
                                action="append",

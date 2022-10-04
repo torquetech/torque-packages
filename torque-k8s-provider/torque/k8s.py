@@ -18,14 +18,14 @@ class ClusterNotInitialized(v1.exceptions.TorqueException):
     """TODO"""
 
 
-class ClientInterface(v1.bond.Interface):
+class V1ClientInterface(v1.bond.Interface):
     """TODO"""
 
     def connect(self) -> kubernetes.client.ApiClient:
         """TODO"""
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     CONFIGURATION = {
@@ -45,11 +45,11 @@ class Provider(v1.provider.Provider):
 
         return {
             "client": {
-                "interface": ClientInterface,
+                "interface": V1ClientInterface,
                 "required": True
             },
             "cr": {
-                "interface": container_registry.ClientInterface,
+                "interface": container_registry.V1ClientInterface,
                 "required": True
             }
         }
@@ -197,7 +197,7 @@ class Provider(v1.provider.Provider):
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ]
     }
 }

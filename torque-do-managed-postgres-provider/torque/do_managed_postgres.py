@@ -214,15 +214,15 @@ class _V2PostgresUser:
         """TODO"""
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class Cluster(v1.bond.Bond):
+class V1Cluster(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = postgres.ClusterInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = postgres.V1ClusterInterface
 
     PARAMETERS = {
         "defaults": {
@@ -244,7 +244,7 @@ class Cluster(v1.bond.Bond):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             }
         }
@@ -382,10 +382,10 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            Cluster
+            V1Cluster
         ]
     }
 }

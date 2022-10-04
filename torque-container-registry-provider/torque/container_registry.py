@@ -12,7 +12,7 @@ import threading
 from torque import v1
 
 
-class ClientInterface(v1.bond.Interface):
+class V1ClientInterface(v1.bond.Interface):
     """TODO"""
 
     def prefix(self) -> str:
@@ -36,7 +36,7 @@ def _strip_dop_username(cmd: [str]) -> [str]:
     return res
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     CONFIGURATION = {
@@ -52,7 +52,7 @@ class Provider(v1.provider.Provider):
 
         return {
             "client": {
-                "interface": ClientInterface,
+                "interface": V1ClientInterface,
                 "required": True
             }
         }
@@ -148,18 +148,18 @@ class Provider(v1.provider.Provider):
             return future
 
 
-class ImageInterface(v1.bond.Interface):
+class V1ImageInterface(v1.bond.Interface):
     """TODO"""
 
     def push(self, image: str) -> v1.utils.Future[str]:
         """TODO"""
 
 
-class Image(v1.bond.Bond):
+class V1Image(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = ImageInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = V1ImageInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -167,7 +167,7 @@ class Image(v1.bond.Bond):
 
         return {
             "cr": {
-                "interface": Provider,
+                "interface": V1Provider,
                 "required": True
             }
         }
@@ -181,10 +181,10 @@ class Image(v1.bond.Bond):
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            Image
+            V1Image
         ]
     }
 }

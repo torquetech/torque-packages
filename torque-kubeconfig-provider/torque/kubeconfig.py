@@ -10,15 +10,15 @@ from torque import v1
 from torque import k8s
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class Client(v1.bond.Bond):
+class V1Client(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = k8s.ClientInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = k8s.V1ClientInterface
 
     CONFIGURATION = {
         "defaults": {},
@@ -38,10 +38,10 @@ class Client(v1.bond.Bond):
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            Client
+            V1Client
         ]
     }
 }

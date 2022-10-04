@@ -218,7 +218,7 @@ class _V2Resources:
         """TODO"""
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     PARAMETERS = {
@@ -434,7 +434,7 @@ class Provider(v1.provider.Provider):
             self._resources.append(resource)
 
 
-class Context(v1.deployment.Context):
+class V1Context(v1.deployment.Context):
     """TODO"""
 
     CONFIGURATION = {
@@ -530,10 +530,10 @@ dolib.HANDLERS.update({
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "contexts": [
-            Context
+            V1Context
         ]
     }
 }

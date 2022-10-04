@@ -404,7 +404,7 @@ spec:
 """)
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     @classmethod
@@ -413,11 +413,11 @@ class Provider(v1.provider.Provider):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             },
             "k8s": {
-                "interface": k8s.Provider,
+                "interface": k8s.V1Provider,
                 "required": True
             }
         }
@@ -484,11 +484,11 @@ class Provider(v1.provider.Provider):
             })
 
 
-class LoadBalancer(v1.bond.Bond):
+class V1LoadBalancer(v1.bond.Bond):
     """TODO"""
 
-    PROVIDER = Provider
-    IMPLEMENTS = hlb.LoadBalancerInterface
+    PROVIDER = V1Provider
+    IMPLEMENTS = hlb.V1LoadBalancerInterface
 
     CONFIGURATION = {
         "defaults": {
@@ -511,15 +511,15 @@ class LoadBalancer(v1.bond.Bond):
 
         return {
             "domains": {
-                "interface": do_domains.Provider,
+                "interface": do_domains.V1Provider,
                 "required": False
             },
             "certs": {
-                "interface": do_certificates.Provider,
+                "interface": do_certificates.V1Provider,
                 "required": True
             },
             "hlb": {
-                "interface": Provider,
+                "interface": V1Provider,
                 "required": True
             }
         }
@@ -553,10 +553,10 @@ class LoadBalancer(v1.bond.Bond):
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ],
         "bonds": [
-            LoadBalancer
+            V1LoadBalancer
         ]
     }
 }

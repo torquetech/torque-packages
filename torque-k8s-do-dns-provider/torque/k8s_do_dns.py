@@ -114,7 +114,7 @@ spec:
 """)
 
 
-class Provider(v1.provider.Provider):
+class V1Provider(v1.provider.Provider):
     """TODO"""
 
     @classmethod
@@ -123,11 +123,11 @@ class Provider(v1.provider.Provider):
 
         return {
             "do": {
-                "interface": do.Provider,
+                "interface": do.V1Provider,
                 "required": True
             },
             "k8s": {
-                "interface": k8s.Provider,
+                "interface": k8s.V1Provider,
                 "required": True
             }
         }
@@ -151,7 +151,7 @@ class Provider(v1.provider.Provider):
 repository = {
     "v1": {
         "providers": [
-            Provider
+            V1Provider
         ]
     }
 }

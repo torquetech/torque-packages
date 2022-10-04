@@ -92,7 +92,7 @@ def add_arguments(subparsers):
                                help="link parameter")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",
-                               default="torquetech.io/dependency",
+                               default="torque.defaults.V1DependencyLink",
                                help="link type, default: %(default)s")
     create_parser.add_argument("source", help="source component")
     create_parser.add_argument("destination", help="destination component")

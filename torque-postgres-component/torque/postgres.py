@@ -7,21 +7,21 @@
 from torque import v1
 
 
-class ClusterInterface(v1.bond.Interface):
+class V1ClusterInterface(v1.bond.Interface):
     """TODO"""
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
         """TODO"""
 
 
-class ServiceInterface(v1.component.SourceInterface):
+class V1ServiceInterface(v1.component.SourceInterface):
     """TODO"""
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
         """TODO"""
 
 
-class Component(v1.component.Component):
+class V1Component(v1.component.Component):
     """TODO"""
 
     @classmethod
@@ -30,7 +30,7 @@ class Component(v1.component.Component):
 
         return {
             "cluster": {
-                "interface": ClusterInterface,
+                "interface": V1ClusterInterface,
                 "required": True
             }
         }
@@ -39,7 +39,7 @@ class Component(v1.component.Component):
         """TODO"""
 
         return [
-            ServiceInterface(uri=self._uri)
+            V1ServiceInterface(uri=self._uri)
         ]
 
     def _uri(self, database: str, user: str) -> v1.utils.Future[str]:
@@ -51,7 +51,7 @@ class Component(v1.component.Component):
 repository = {
     "v1": {
         "components": [
-            Component
+            V1Component
         ]
     }
 }

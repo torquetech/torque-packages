@@ -87,11 +87,11 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
 _DEFAULT_REPOSITORY = {
     "v1": {
         "contexts": {
-            v1.utils.fqcn(defaults.LocalContext): defaults.LocalContext
+            v1.utils.fqcn(defaults.V1LocalContext): defaults.V1LocalContext
         },
         "components": {},
         "links": {
-            v1.utils.fqcn(defaults.DependencyLink): defaults.DependencyLink
+            v1.utils.fqcn(defaults.V1DependencyLink): defaults.V1DependencyLink
         },
         "providers": {},
         "bonds": {}

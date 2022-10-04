@@ -22,11 +22,11 @@ def _create_path(name: str) -> str:
     return path
 
 
-class DependencyLink(v1.link.Link):
+class V1DependencyLink(v1.link.Link):
     """TODO"""
 
 
-class LocalContext(v1.deployment.Context):
+class V1LocalContext(v1.deployment.Context):
     """TODO"""
 
     def __init__(self, *args, **kwargs):
