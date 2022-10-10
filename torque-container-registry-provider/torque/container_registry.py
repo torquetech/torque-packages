@@ -148,43 +148,10 @@ class V1Provider(v1.provider.Provider):
             return future
 
 
-class V1ImageInterface(v1.bond.Interface):
-    """TODO"""
-
-    def push(self, image: str) -> v1.utils.Future[str]:
-        """TODO"""
-
-
-class V1Image(v1.bond.Bond):
-    """TODO"""
-
-    PROVIDER = V1Provider
-    IMPLEMENTS = V1ImageInterface
-
-    @classmethod
-    def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
-
-        return {
-            "cr": {
-                "interface": V1Provider,
-                "required": True
-            }
-        }
-
-    def push(self, image: str) -> v1.utils.Future[str]:
-        """TODO"""
-
-        return self.interfaces.cr.push(image)
-
-
 repository = {
     "v1": {
         "providers": [
             V1Provider
-        ],
-        "bonds": [
-            V1Image
         ]
     }
 }
