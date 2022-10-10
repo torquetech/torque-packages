@@ -12,16 +12,6 @@ import threading
 from torque import v1
 
 
-class V1ClientInterface(v1.bond.Interface):
-    """TODO"""
-
-    def prefix(self) -> str:
-        """TODO"""
-
-    def auth(self) -> dict[str, dict]:
-        """TODO"""
-
-
 def _strip_dop_username(cmd: [str]) -> [str]:
     """TODO"""
 
@@ -34,6 +24,16 @@ def _strip_dop_username(cmd: [str]) -> [str]:
         res.append(i)
 
     return res
+
+
+class V1ClientInterface(v1.bond.Interface):
+    """TODO"""
+
+    def prefix(self) -> str:
+        """TODO"""
+
+    def auth(self) -> dict[str, dict]:
+        """TODO"""
 
 
 class V1Provider(v1.provider.Provider):
