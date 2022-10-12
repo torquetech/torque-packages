@@ -317,7 +317,7 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
-            raise v1.exceptions.RuntimeError("{name}: deployment name too long")
+            raise v1.exceptions.RuntimeError(f"{name}: deployment name too long")
 
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         context = self.repo.context(context_type)
@@ -392,7 +392,7 @@ class Workspace:
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_COMPONENT_NAME_LENGTH:
-            raise v1.exceptions.RuntimeError("{name}: component name too long")
+            raise v1.exceptions.RuntimeError(f"{name}: component name too long")
 
         name = f"{name}.{secrets.token_hex(2)[:3]}"
         component_type = self.repo.component(type)
@@ -442,7 +442,7 @@ class Workspace:
         """TODO"""
 
         if len(name) > _MAX_LINK_NAME_LENGTH:
-            raise v1.exceptions.RuntimeError("{name}: link name too long")
+            raise v1.exceptions.RuntimeError(f"{name}: link name too long")
 
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
