@@ -304,6 +304,26 @@ class Workspace:
 
         return f"{name}.{processed[name][0]}"
 
+    def _resolve_components(self, components: [str]) -> [str]:
+        """TODO"""
+
+        if not components:
+            return None
+
+        processed = self._process_names(self.dag.components.keys())
+        _components = []
+
+        for name in components:
+            if name not in processed:
+                raise exceptions.ComponentNotFound(name)
+
+            if len(processed[name]) != 1:
+                raise v1.exceptions.RuntimeError(f"{name}: ambigous component name")
+
+            _components.append(f"{name}.{processed[name][0]}")
+
+        return _components
+
     def create_deployment(self,
                           name: str,
                           context_type: str,
@@ -331,9 +351,7 @@ class Workspace:
         except v1.schema.SchemaError as exc:
             raise v1.exceptions.RuntimeError(f"component parameters: {name}: {exc}") from exc
 
-        for component in components or []:
-            if component not in self.dag.components:
-                raise exceptions.ComponentNotFound(component)
+        components = self._resolve_components(components)
 
         deployment = Deployment(name,
                                 context_type,
