@@ -128,8 +128,6 @@ class Context:
                                      configuration)
 
     def __init__(self, deployment_name: str, configuration: dict[str, object]):
-        # pylint: disable=R0913
-
         self.deployment_name = deployment_name
         self.configuration = configuration
 

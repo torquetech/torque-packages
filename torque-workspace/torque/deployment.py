@@ -207,8 +207,6 @@ class _Configuration:
 
 
 class Deployment:
-    # pylint: disable=R0902
-
     """TODO"""
 
     def __init__(self,
