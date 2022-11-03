@@ -48,6 +48,7 @@ class Client:
                                     headers=self._headers,
                                     json={})
 
+
 class Resource:
     """TODO"""
 

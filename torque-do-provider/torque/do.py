@@ -291,7 +291,7 @@ class V1Provider(v1.provider.Provider):
     CONFIGURATION = {
         "defaults": {
             "endpoint": "https://api.digitalocean.com",
-           "region": "nyc3",
+            "region": "nyc3",
             "quiet": True
         },
         "schema": {
