@@ -59,15 +59,32 @@ class _ContextData:
         bucket = self._buckets[bucket]
         return bucket.get(name)
 
-    def secret(self, object_name: str, secret_name: str, length: int = 16) -> str:
+    def set_secret_data(self, object_name: str, secret_name: str, data: object):
         """TODO"""
 
         name = f"{object_name}-{secret_name}"
-        s = self.get_data("secrets", name)
+        self.set_data("secrets", name, data)
+
+    def delete_secret_data(self, object_name: str, secret_name: str):
+        """TODO"""
+
+        name = f"{object_name}-{secret_name}"
+        return self.delete_data("secrets", name)
+
+    def get_secret_data(self, object_name: str, secret_name: str) -> object:
+        """TODO"""
+
+        name = f"{object_name}-{secret_name}"
+        return self.get_data("secrets", name)
+
+    def secret(self, object_name: str, secret_name: str, length: int = 16) -> object:
+        """TODO"""
+
+        s = self.get_secret_data(object_name, secret_name)
 
         if not s:
             s = secrets.token_urlsafe(length)
-            self.set_data("secrets", name, s)
+            self.set_secret_data(object_name, secret_name, s)
 
         return s
 
