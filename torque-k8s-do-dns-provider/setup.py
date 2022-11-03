@@ -32,7 +32,7 @@ setup(name="torque-k8s-do-dns-provider",
       packages=[
           "torque"
       ],
-      python_requires=">=3.9",
+      python_requires=">=3.10",
       install_requires=[
           "jinja2"
       ],

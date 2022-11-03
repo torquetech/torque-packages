@@ -31,7 +31,7 @@ setup(name="torque-workspace-cli",
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
       ],
       packages=find_packages(),
-      python_requires=">=3.9",
+      python_requires=">=3.10",
       install_requires=[
           "pyyaml",
           "wheel",

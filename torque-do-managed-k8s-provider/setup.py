@@ -32,7 +32,7 @@ setup(name="torque-do-managed-k8s-provider",
       packages=[
           "torque"
       ],
-      python_requires=">=3.9",
+      python_requires=">=3.10",
       install_requires=[
           "kubernetes"
       ],

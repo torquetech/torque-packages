@@ -52,7 +52,7 @@ setup(name="demo-package",
           "demo": package_data("demo", ["templates/**"])
       },
       include_package_data=True,
-      python_requires=">=3.9",
+      python_requires=">=3.10",
       install_requires=[
           "jinja2",
           "pyyaml",

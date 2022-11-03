@@ -32,7 +32,7 @@ setup(name="torque-container-registry-provider",
       packages=[
           "torque"
       ],
-      python_requires=">=3.9",
+      python_requires=">=3.10",
       entry_points={
           "torque": [
               "torque-container-registry-provider=torque.container_registry:repository"
