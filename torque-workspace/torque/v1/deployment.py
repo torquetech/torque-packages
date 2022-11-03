@@ -41,6 +41,15 @@ class _ContextData:
         bucket = self._buckets[bucket]
         bucket[name] = data
 
+    def delete_data(self, bucket: str, name: str):
+        """TODO"""
+
+        if bucket not in self._buckets:
+            self._buckets[bucket] = self._load_bucket(bucket)
+
+        bucket = self._buckets[bucket]
+        return bucket.pop(name, None)
+
     def get_data(self, bucket: str, name: str) -> object:
         """TODO"""
 
