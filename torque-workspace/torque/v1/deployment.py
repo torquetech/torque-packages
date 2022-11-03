@@ -16,12 +16,10 @@ class _ContextData:
     """TODO"""
 
     def __init__(self,
-                 buckets,
-                 modified_buckets,
+                 buckets: dict[str, object],
                  hooks: [typing.Callable],
                  load_bucket):
         self._buckets = buckets
-        self._modified_buckets = modified_buckets
         self._hooks = hooks
         self._load_bucket = load_bucket
 
@@ -30,8 +28,6 @@ class _ContextData:
 
         if bucket not in self._buckets:
             self._buckets[bucket] = {}
-
-        self._modified_buckets.add(bucket)
 
         bucket = self._buckets[bucket]
         bucket[name] = data
@@ -95,14 +91,12 @@ class Context:
 
         self._lock = threading.Lock()
         self._buckets = {}
-        self._modified_buckets = set()
         self._hooks = {}
 
     def __enter__(self):
         self._lock.acquire()
 
         return _ContextData(self._buckets,
-                            self._modified_buckets,
                             self._hooks,
                             self.load_bucket)
 
@@ -118,8 +112,7 @@ class Context:
         """TODO"""
 
         for name, data in self._buckets.items():
-            if name in self._modified_buckets:
-                self.store_bucket(name, data)
+            self.store_bucket(name, data)
 
     def load_bucket(self, name: str) -> dict[str, object]:
         """TODO"""
