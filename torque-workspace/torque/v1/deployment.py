@@ -109,11 +109,6 @@ class _ContextData:
 class Context:
     """TODO"""
 
-    PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     CONFIGURATION = {
         "defaults": {},
         "schema": {}

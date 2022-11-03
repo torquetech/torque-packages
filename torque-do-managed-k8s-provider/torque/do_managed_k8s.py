@@ -211,16 +211,10 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
-    PARAMETERS = {
-        "defaults": {},
-        "schema": {
-            v1.schema.Optional("ha"): bool
-        }
-    }
-
     CONFIGURATION = {
         "defaults": {
             "version": "latest",
+            "ha": False,
             "node_pools": [{
                 "size": "s-1vcpu-2gb",
                 "name": "pool-1",
@@ -272,23 +266,8 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._params = None
-
-        self._load_params()
         self._create()
 
-    def _load_params(self):
-        """TODO"""
-
-        with self.context as ctx:
-            self._params = ctx.get_data("parameters", v1.utils.fqcn(self))
-
-            if not self._params:
-                self._params = {
-                    "ha": self.parameters.get("ha", False)
-                }
-
-                ctx.set_data("parameters", v1.utils.fqcn(self), self._params)
 
     def _create(self):
         """TODO"""
@@ -303,7 +282,6 @@ class V1Provider(v1.provider.Provider):
                 "name": sanitized_name,
                 "region": self.interfaces.do.region(),
                 "vpc_uuid": self.interfaces.do.vpc_id(),
-                "ha": self._params["ha"]
             }
         }
 

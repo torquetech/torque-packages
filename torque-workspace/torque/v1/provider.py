@@ -41,22 +41,15 @@ class _ProviderContext:
 class Provider:
     """TODO"""
 
-    PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     CONFIGURATION = {
         "defaults": {},
         "schema": {}
     }
 
     def __init__(self,
-                 parameters: object,
                  configuration: object,
                  context: deployment.Context,
                  interfaces: object):
-        self.parameters = parameters
         self.configuration = configuration
         self.context = context
         self.interfaces = interfaces
@@ -71,14 +64,6 @@ class Provider:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
-
-    @classmethod
-    def on_parameters(cls, parameters: object) -> object:
-        """TODO"""
-
-        return utils.validate_schema(cls.PARAMETERS["schema"],
-                                     cls.PARAMETERS["defaults"],
-                                     parameters)
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

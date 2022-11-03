@@ -27,17 +27,14 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
     },
     "bonds": {
         v1.schema.Optional(str): {
-            "parameters": dict,
             "configuration": dict
         }
     },
     "providers": {
         v1.schema.Optional(str): {
-            "parameters": dict,
             "configuration": dict,
             "bonds": {
                 v1.schema.Optional(str): {
-                    "parameters": dict,
                     "configuration": dict
                 }
             },
@@ -55,7 +52,6 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
-                        "parameters": dict,
                         "configuration": dict
                     }
                 },
@@ -71,7 +67,6 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
-                        "parameters": dict,
                         "configuration": dict
                     }
                 },
@@ -84,25 +79,6 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
         }
     }
 })
-
-
-def _validate_type_params(name: str, type: object, config: dict[str, object]):
-    """TODO"""
-
-    try:
-        return type.on_parameters(config or {})
-
-    except v1.schema.SchemaError as exc:
-        if issubclass(type, v1.provider.Provider):
-            type = "provider"
-
-        elif issubclass(type, v1.bond.Bond):
-            type = "bond"
-
-        exc_str = str(exc)
-        exc_str = " " + exc_str.replace("\n", "\n ")
-
-        raise v1.exceptions.RuntimeError(f"{type} parameters: {name}:\n{exc_str}") from exc
 
 
 def _validate_type_config(name: str, type: object, config: dict[str, object]):
@@ -247,23 +223,17 @@ class Deployment:
 
         for name in self._configuration.providers():
             profile = self._configuration.provider(name)
-
-            params = profile["parameters"]
             config = profile["configuration"]
 
             type = self._repo.provider(name)
 
-            params = _validate_type_params(name, type, params)
             config = _validate_type_config(name, type, config)
 
             bound_interfaces = interfaces.bind_to_provider(type,
                                                            self._create_bond,
                                                            self._bind_provider)
 
-            self._providers[name] = type(params,
-                                         config,
-                                         self._context,
-                                         bound_interfaces)
+            self._providers[name] = type(config, self._context, bound_interfaces)
 
     def _bind_provider(self,
                        interface: type,
@@ -310,17 +280,13 @@ class Deployment:
         if name not in self._bonds:
             raise v1.exceptions.RuntimeError(f"{name}: bond not configured")
 
-        params = self._bonds[name]["parameters"]
         config = self._bonds[name]["configuration"]
 
         if name in local_bonds:
-            local_params = local_bonds[name]["parameters"]
-            params = v1.utils.merge_dicts(params, local_params)
-
             local_config = local_bonds[name]["configuration"]
             config = v1.utils.merge_dicts(config, local_config)
 
-        return name, params, config
+        return name, config
 
     def _bond_info(self,
                    interface: type,
@@ -337,14 +303,13 @@ class Deployment:
         if not info:
             return None
 
-        name, params, config = info
+        name, config = info
 
         type = self._repo.bond(name)
 
-        params = _validate_type_params(name, type, params)
         config = _validate_type_config(name, type, config)
 
-        return type, params, config
+        return type, config
 
     def _create_bond(self,
                      for_type: type,
@@ -373,7 +338,7 @@ class Deployment:
         if not info:
             return None
 
-        type, params, config = info
+        type, config = info
 
         bound_interfaces = interfaces.bind_to_bond(for_type,
                                                    name,
@@ -382,7 +347,6 @@ class Deployment:
                                                    self._bind_provider)
 
         return type(name,
-                    params,
                     config,
                     self._context,
                     bound_interfaces)
@@ -573,11 +537,9 @@ def _create_context(name: str,
 def _bond_defaults(type: v1.bond.Bond) -> dict[str, object]:
     """TODO"""
 
-    params = type.on_parameters({})
     config = type.on_configuration({})
 
     return {
-        "parameters": params,
         "configuration": config
     }
 
@@ -588,11 +550,9 @@ def _provider_defaults(name: str,
 
     type = repo.provider(name)
 
-    params = type.on_parameters({})
     config = type.on_configuration({})
 
     return {
-        "parameters": params,
         "configuration": config,
         "bonds": {},
         "interfaces": {}

@@ -221,22 +221,15 @@ class _V2Resources:
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
-    PARAMETERS = {
-        "defaults": {
-            "endpoint": "https://api.digitalocean.com",
-            "region": "nyc3"
-        },
-        "schema": {
-            "endpoint": str,
-            "region": str
-        }
-    }
-
     CONFIGURATION = {
         "defaults": {
+            "endpoint": "https://api.digitalocean.com",
+           "region": "nyc3",
             "quiet": True
         },
         "schema": {
+            "endpoint": str,
+            "region": str,
             "quiet": bool
         }
     }
@@ -244,59 +237,43 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._params = None
+        self._region = self.configuration["region"]
+
+        self._project_name = self.context.deployment_name
+        self._vpc_name = self.context.deployment_name
+
         self._client = None
 
         self._current_state = {}
         self._new_state = {}
         self._resources = []
 
-        self._load_params()
         self._load_state()
 
         self._connect()
 
         self.add_object({
             "kind": "v2/projects",
-            "name": self._params["project_name"],
+            "name": self._project_name,
             "params": {
-                "name": self._params["project_name"],
                 "purpose": "torquetech.io deployment",
+                "name": self._project_name,
                 "environment": "Production"
             }
         })
 
         self.add_object({
             "kind": "v2/vpcs",
-            "name": self._params["vpc_name"],
+            "name": self._vpc_name,
             "params": {
-                "name": self._params["vpc_name"],
-                "region": self._params["region"]
+                "name": self._vpc_name,
+                "region": self._region
             }
         })
 
         with self.context as ctx:
             ctx.add_hook("apply", self._apply)
             ctx.add_hook("delete", self._delete)
-
-    def _load_params(self):
-        """TODO"""
-
-        with self.context as ctx:
-            self._params = ctx.get_data("parameters", v1.utils.fqcn(self))
-
-            if not self._params:
-                project_name = self.context.deployment_name
-                vpc_name = f"{project_name}-{self.parameters['region']}"
-
-                self._params = {
-                    "endpoint": self.parameters["endpoint"],
-                    "region": self.parameters["region"],
-                    "project_name": project_name,
-                    "vpc_name": vpc_name
-                }
-
-                ctx.set_data("parameters", v1.utils.fqcn(self), self._params)
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -313,14 +290,14 @@ class V1Provider(v1.provider.Provider):
     def _connect(self) -> dolib.Client:
         """TODO"""
 
-        self._client = dolib.connect(self._params["endpoint"], self.token())
+        self._client = dolib.connect(self.configuration["endpoint"], self.token())
 
     def _apply(self):
         """TODO"""
 
         self.add_object({
             "kind": "v2/resources",
-            "name": self._params["project_name"],
+            "name": self._project_name,
             "params": {
                 "project_id": self.project_id(),
                 "resources": self._resources
@@ -374,17 +351,17 @@ class V1Provider(v1.provider.Provider):
     def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._object_id(f"v2/projects/{self._params['project_name']}")
+        return self._object_id(f"v2/project/{self._project_name}")
 
     def vpc_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._object_id(f"v2/vpcs/{self._params['vpc_name']}")
+        return self._object_id(f"v2/vpc/{self._vpc_name}")
 
     def region(self) -> str:
         """TODO"""
 
-        return self._params["region"]
+        return self._region
 
     def token(self) -> str:
         """TODO"""

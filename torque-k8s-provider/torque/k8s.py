@@ -163,9 +163,6 @@ class V1Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-        with self.context as ctx:
-            ctx.set_data("parameters", v1.utils.fqcn(self), {})
-
     def add_object(self, obj: dict[str, object]):
         """TODO"""
 

@@ -17,11 +17,6 @@ class Bond:
 
     IMPLEMENTS = None
 
-    PARAMETERS = {
-        "defaults": {},
-        "schema": {}
-    }
-
     CONFIGURATION = {
         "defaults": {},
         "schema": {}
@@ -29,23 +24,13 @@ class Bond:
 
     def __init__(self,
                  name: str,
-                 parameters: object,
                  configuration: object,
                  context: deployment.Context,
                  interfaces: object):
         self.name = name
-        self.parameters = parameters
         self.configuration = configuration
         self.context = context
         self.interfaces = interfaces
-
-    @classmethod
-    def on_parameters(cls, parameters: object) -> object:
-        """TODO"""
-
-        return utils.validate_schema(cls.PARAMETERS["schema"],
-                                     cls.PARAMETERS["defaults"],
-                                     parameters)
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

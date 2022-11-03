@@ -87,7 +87,7 @@ class _V2ContainerRegistry:
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
-    PARAMETERS = {
+    CONFIGURATION = {
         "defaults": {
             "subscription_tier_slug": "starter"
         },
@@ -110,22 +110,10 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._params = None
         self._name = None
         self._prefix = None
 
-        self._load_params()
         self._create()
-
-    def _load_params(self):
-        """TODO"""
-
-        with self.context as ctx:
-            self._params = ctx.get_data("parameters", v1.utils.fqcn(self))
-
-            if not self._params:
-                self._params = self.parameters
-                ctx.set_data("parameters", v1.utils.fqcn(self), self._params)
 
     def _create(self):
         """TODO"""
@@ -142,7 +130,7 @@ class V1Provider(v1.provider.Provider):
             }
         }
 
-        obj["params"] = v1.utils.merge_dicts(obj["params"], self._params)
+        obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
         self.interfaces.do.add_object(obj)
 

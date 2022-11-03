@@ -224,7 +224,7 @@ class V1Cluster(v1.bond.Bond):
     PROVIDER = V1Provider
     IMPLEMENTS = postgres.V1ClusterInterface
 
-    PARAMETERS = {
+    CONFIGURATION = {
         "defaults": {
             "version": "14",
             "num_nodes": 1,
@@ -252,8 +252,6 @@ class V1Cluster(v1.bond.Bond):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._params = None
-
         self._cluster_id = None
         self._cluster_name = None
 
@@ -262,19 +260,7 @@ class V1Cluster(v1.bond.Bond):
 
         self._lock = threading.Lock()
 
-        self._load_params()
         self._create_cluster()
-
-    def _load_params(self):
-        """TODO"""
-
-        with self.context as ctx:
-            name = f"{v1.utils.fqcn(self)}-{self.name}"
-            self._params = ctx.get_data("parameters", name)
-
-            if not self._params:
-                self._params = self.parameters
-                ctx.set_data("parameters", name, self._params)
 
     def _show_secret(self, user: str):
         """TODO"""
@@ -300,7 +286,7 @@ class V1Cluster(v1.bond.Bond):
             }
         }
 
-        obj["params"] = v1.utils.merge_dicts(obj["params"], self._params)
+        obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
         self._cluster_id = self.interfaces.do.add_object(obj)
         self._cluster_name = self.interfaces.do.object_name(obj)
