@@ -6,14 +6,9 @@
 
 """TODO"""
 
-import difflib
 import re
-import sys
 
 import kubernetes
-import yaml
-
-from torque import v1
 
 
 UPPER_FOLLOWED_BY_LOWER_RE = re.compile("(.)([A-Z][a-z]+)")
@@ -56,25 +51,8 @@ def _get_api_for(client: kubernetes.client.ApiClient, obj: dict[str, object]):
     return create, get, delete, replace, namespaced
 
 
-def _diff(name: str, obj1: dict[str, object], obj2: dict[str, object]):
-    """TODO"""
-
-    obj1 = yaml.safe_dump(obj1, sort_keys=False) if obj1 else ""
-    obj2 = yaml.safe_dump(obj2, sort_keys=False) if obj2 else ""
-
-    diff = difflib.unified_diff(obj1.split("\n"),
-                                obj2.split("\n"),
-                                fromfile=f"a/{name}",
-                                tofile=f"b/{name}",
-                                lineterm="")
-
-    diff = "\n".join(diff)
-
-    return obj1 != obj2, diff
-
-
-def _update_object(client: kubernetes.client.ApiClient,
-                   obj: dict[str, object]) -> dict[str, object]:
+def update_object(client: kubernetes.client.ApiClient,
+                  obj: dict[str, object]) -> dict[str, object]:
     """TODO"""
 
     api = _get_api_for(client, obj)
@@ -112,7 +90,8 @@ def _update_object(client: kubernetes.client.ApiClient,
     return obj
 
 
-def _delete_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
+def delete_object(client: kubernetes.client.ApiClient,
+                  obj: dict[str, object]):
     """TODO"""
 
     api = _get_api_for(client, obj)
@@ -128,46 +107,3 @@ def _delete_object(client: kubernetes.client.ApiClient, obj: dict[str, object]):
     except kubernetes.client.exceptions.ApiException as e:
         if e.status != 404:
             raise
-
-
-def apply(client: kubernetes.client.ApiClient,
-          current_state: dict[str, object],
-          new_state: dict[str, object],
-          quiet: bool):
-    """TODO"""
-
-    for name, new_obj in new_state.items():
-        current_obj = current_state.get(name, None)
-        new_obj = v1.utils.resolve_futures(new_obj)
-
-        changed, diff = _diff(name, current_obj, new_obj)
-
-        if not changed:
-            continue
-
-        if not quiet:
-            if not current_obj:
-                print(f"creating {name}...", file=sys.stdout)
-
-            else:
-                print(f"updating {name}...", file=sys.stdout)
-
-        if not quiet:
-            print(diff, file=sys.stdout)
-
-        current_state[name] = _update_object(client, new_obj)
-
-    for name, current_obj in list(reversed(current_state.items())):
-        if name in new_state:
-            continue
-
-        if not quiet:
-            print(f"deleting {name}...", file=sys.stdout)
-
-        _, diff = _diff(name, current_obj, None)
-
-        if not quiet:
-            print(diff, file=sys.stdout)
-
-        _delete_object(client, current_obj)
-        current_state.pop(name)
