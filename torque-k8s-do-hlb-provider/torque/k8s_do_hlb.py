@@ -410,82 +410,6 @@ spec:
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
-    @classmethod
-    def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
-
-        return {
-            "do": {
-                "interface": do.V1Provider,
-                "required": True
-            },
-            "k8s": {
-                "interface": k8s.V1Provider,
-                "required": True
-            }
-        }
-
-    def create_hlb(self,
-                   name: str,
-                   domain: str,
-                   certificate_id: v1.utils.Future[str],
-                   ingress_list: [hlb.Ingress]):
-        """TODO"""
-
-        objs = _INGRESS_LB.render(instance=name)
-
-        for obj in objs.split("---"):
-            obj = yaml.safe_load(obj)
-
-            if obj["kind"] == "Service":
-                hosts = [f"{i.host}.{domain}." for i in ingress_list]
-                hosts = ",".join(hosts)
-
-                obj["metadata"]["annotations"] = {
-                    "external-dns.alpha.kubernetes.io/hostname": hosts,
-                    "service.beta.kubernetes.io/do-loadbalancer-name": name,
-                    "service.beta.kubernetes.io/do-loadbalancer-protocol": "http",
-                    "service.beta.kubernetes.io/do-loadbalancer-tls-ports": "443",
-                    "service.beta.kubernetes.io/do-loadbalancer-certificate-id": certificate_id,
-                    "service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https": "true",
-                    "service.beta.kubernetes.io/do-loadbalancer-enable-backend-keepalive": "true",
-                    "service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol": "true"
-                }
-
-            self.interfaces.k8s.add_object(obj)
-
-        for ingress in ingress_list:
-            service, namespace = ingress.service.split(".")
-
-            self.interfaces.k8s.add_object({
-                "apiVersion": "networking.k8s.io/v1",
-                "kind": "Ingress",
-                "metadata": {
-                    "name": f"{ingress.id}",
-                    "namespace": namespace
-                },
-                "spec": {
-                    "ingressClassName": f"{name}-ingress",
-                    "rules": [{
-                        "host": f"{ingress.host}.{domain}",
-                        "http": {
-                            "paths": [{
-                                "pathType": "Prefix",
-                                "path": ingress.path,
-                                "backend": {
-                                    "service": {
-                                        "name": service,
-                                        "port": {
-                                            "number": ingress.port
-                                        }
-                                    }
-                                }
-                            }]
-                        }
-                    }]
-                }
-            })
-
 
 class V1LoadBalancer(v1.bond.Bond):
     """TODO"""
@@ -513,6 +437,14 @@ class V1LoadBalancer(v1.bond.Bond):
         """TODO"""
 
         return {
+            "do": {
+                "interface": do.V1Provider,
+                "required": True
+            },
+            "k8s": {
+                "interface": k8s.V1Provider,
+                "required": True
+            },
             "domains": {
                 "interface": do_domains.V1Provider,
                 "required": False
@@ -520,12 +452,69 @@ class V1LoadBalancer(v1.bond.Bond):
             "certs": {
                 "interface": do_certificates.V1Provider,
                 "required": True
-            },
-            "hlb": {
-                "interface": V1Provider,
-                "required": True
             }
         }
+
+    def _create_hlb(self,
+                    domain: str,
+                    certificate_id: v1.utils.Future[str],
+                    ingress_list: [hlb.Ingress]):
+        """TODO"""
+
+        sanitized_name = self.name.replace(".", "-")
+        objs = _INGRESS_LB.render(instance=sanitized_name)
+
+        for obj in objs.split("---"):
+            obj = yaml.safe_load(obj)
+
+            if obj["kind"] == "Service":
+                hosts = [f"{i.host}.{domain}." for i in ingress_list]
+                hosts = ",".join(hosts)
+
+                obj["metadata"]["annotations"] = {
+                    "external-dns.alpha.kubernetes.io/hostname": hosts,
+                    "service.beta.kubernetes.io/do-loadbalancer-name": sanitized_name,
+                    "service.beta.kubernetes.io/do-loadbalancer-protocol": "http",
+                    "service.beta.kubernetes.io/do-loadbalancer-tls-ports": "443",
+                    "service.beta.kubernetes.io/do-loadbalancer-certificate-id": certificate_id,
+                    "service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https": "true",
+                    "service.beta.kubernetes.io/do-loadbalancer-enable-backend-keepalive": "true",
+                    "service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol": "true"
+                }
+
+            self.interfaces.k8s.add_object(obj)
+
+        for ingress in ingress_list:
+            service, namespace = ingress.service.split(".")
+
+            self.interfaces.k8s.add_object({
+                "apiVersion": "networking.k8s.io/v1",
+                "kind": "Ingress",
+                "metadata": {
+                    "name": f"{ingress.id}",
+                    "namespace": namespace
+                },
+                "spec": {
+                    "ingressClassName": f"{sanitized_name}-ingress",
+                    "rules": [{
+                        "host": f"{ingress.host}.{domain}",
+                        "http": {
+                            "paths": [{
+                                "pathType": "Prefix",
+                                "path": ingress.path,
+                                "backend": {
+                                    "service": {
+                                        "name": service,
+                                        "port": {
+                                            "number": ingress.port
+                                        }
+                                    }
+                                }
+                            }]
+                        }
+                    }]
+                }
+            })
 
     def create(self, ingress_list: [hlb.Ingress]):
         """TODO"""
@@ -545,12 +534,7 @@ class V1LoadBalancer(v1.bond.Bond):
         else:
             certificate_id = self.interfaces.certs.create_managed(self.configuration["domain"])
 
-        sanitized_name = self.name.replace(".", "-")
-
-        self.interfaces.hlb.create_hlb(sanitized_name,
-                                       self.configuration["domain"],
-                                       certificate_id,
-                                       ingress_list)
+        self._create_hlb(self.configuration["domain"], certificate_id, ingress_list)
 
 
 repository = {
