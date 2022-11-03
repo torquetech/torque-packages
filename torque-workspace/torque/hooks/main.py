@@ -7,6 +7,7 @@
 import argparse
 import os
 import sys
+import traceback
 
 import yaml
 
@@ -96,9 +97,15 @@ def main() -> int:
         pass
 
     except exceptions.InternalError as exc:
+        if os.getenv("TORQUE_VERBOSE"):
+            traceback.print_exc()
+
         print(f"[CRITICAL]: {exc}", file=sys.stderr)
 
     except v1.exceptions.TorqueException as exc:
+        if os.getenv("TORQUE_VERBOSE"):
+            traceback.print_exc()
+
         print(exc, file=sys.stderr)
 
     return 1
