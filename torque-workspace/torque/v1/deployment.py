@@ -18,7 +18,7 @@ class _ContextData:
     def __init__(self,
                  buckets: dict[str, object],
                  hooks: [typing.Callable],
-                 load_bucket):
+                 load_bucket: typing.Callable):
         self._buckets = buckets
         self._hooks = hooks
         self._load_bucket = load_bucket
