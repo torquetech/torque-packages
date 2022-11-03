@@ -7,214 +7,281 @@
 import functools
 import io
 import os
+import sys
+import time
 
 import boto3
 import yaml
 
-from botocore.exceptions import ClientError
-
-from torque import v1
 from torque import dolib
+from torque import v1
 
 
-class _V2Projects:
+class _V2Project(dolib.Resource):
     """TODO"""
 
-    @classmethod
-    def _get_project(cls,
-                     client: dolib.Client,
-                     name: str) -> dict[str, object]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._do_name = self._object["name"]
+
+        self._current_params = None
+        self._project_id = None
+
+        if "metadata" in self._object:
+            self._project_id = self._object["metadata"]["id"]
+
+    def _get(self) -> bool:
         """TODO"""
 
-        res = client.get("v2/projects")
+        res = self._client.get("v2/projects")
         data = res.json()
 
         if res.status_code != 200:
-            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
         for project in data["projects"]:
-            if name == project["name"]:
-                return project
+            if self._do_name == project["name"]:
+                self._current_params = {
+                    "name": project["name"],
+                    "description": project["description"],
+                    "purpose": project["purpose"],
+                    "environment": project["environment"]
+                }
 
-        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
+                self._project_id = project["id"]
 
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
+                return True
+
+        return False
+
+    def _create(self):
         """TODO"""
 
-        res = client.post("v2/projects", new_obj["params"])
+        res = self._client.post("v2/projects", self._object["params"])
         data = res.json()
 
-        if res.status_code != 201:
-            if res.status_code != 409:
-                raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
+        if res.status_code not in (201, 202):
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-            data = cls._get_project(client, new_obj["name"])
+        self._project_id = data["project"]["id"]
 
-        else:
-            data = data["project"]
-
-        return new_obj | {
-            "metadata": {
-                "id": data["id"]
-            }
-        }
-
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def _update(self):
         """TODO"""
 
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update projects")
-
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
-
-        client.delete(f"v2/projects/{old_obj['metadata']['id']}")
-
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
-
-
-class _V2Vpcs:
-    """TODO"""
-
-    @classmethod
-    def _get_vpc(cls,
-                 client: dolib.Client,
-                 name: str) -> dict[str, object]:
-        """TODO"""
-
-        res = client.get("v2/vpcs")
-        data = res.json()
-
-        if res.status_code != 200:
-            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
-
-        for vpc in data["vpcs"]:
-            if name == vpc["name"]:
-                return vpc
-
-        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
-
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        res = client.post("v2/vpcs", new_obj["params"])
-        data = res.json()
-
-        if res.status_code != 201:
-            if res.status_code != 422:
-                raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
-
-            data = cls._get_vpc(client, new_obj["name"])
-
-        else:
-            data = data["vpc"]
-
-        return new_obj | {
-            "metadata": {
-                "id": data["id"]
-            }
-        }
-
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
-        """TODO"""
-
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update vpcs")
-
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
-
-        client.delete(f"v2/vpcs/{old_obj['metadata']['id']}")
-
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
-
-
-class _V2Resources:
-    """TODO"""
-
-    @classmethod
-    def _assign(cls,
-                client: dolib.Client,
-                project_name: str,
-                project_id: str,
-                resources: [str]):
-        """TODO"""
-
-        if not resources:
+        if self._object["params"] == self._current_params:
             return
 
-        res = client.post(f"v2/projects/{project_id}/resources", {
-            "resources": resources
-        })
+        params = {} | self._object["params"]
+        params["is_default"] = False
 
+        res = self._client.put(f"v2/projects/{self._project_id}", params)
         data = res.json()
 
         if res.status_code != 200:
-            raise v1.exceptions.RuntimeError(f"{project_name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def update(self) -> dict[str, object]:
         """TODO"""
 
-        params = new_obj["params"]
-        project_name = new_obj["name"]
+        if not self._get():
+            self._create()
 
-        project_id = params["project_id"]
-        resources = params["resources"]
+        else:
+            self._update()
 
-        cls._assign(client, project_name, project_id, resources)
+        return self._object | {
+            "metadata": {
+                "id": self._project_id
+            }
+        }
 
-        return new_obj | {
+    def delete(self):
+        """TODO"""
+
+        res = self._client.delete(f"v2/projects/{self._project_id}")
+
+        if res.status_code != 204:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
+
+
+class _V2Vpc(dolib.Resource):
+    """TODO"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._do_name = self._object["name"]
+
+        self._current_params = None
+        self._vpc_id = None
+
+        if "metadata" in self._object:
+            self._vpc_id = self._object["metadata"]["id"]
+
+    def _get(self) -> bool:
+        """TODO"""
+
+        res = self._client.get("v2/vpcs")
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+        for vpc in data["vpcs"]:
+            if self._do_name == vpc["name"]:
+                self._current_params = {
+                    "name": vpc["name"],
+                    "region": vpc["region"]
+                }
+
+                self._vpc_id = vpc["id"]
+
+                return True
+
+        return False
+
+    def _create(self):
+        """TODO"""
+
+        res = self._client.post("v2/vpcs", self._object["params"])
+        data = res.json()
+
+        if res.status_code not in (201, 202):
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+        self._vpc_id = data["vpc"]["id"]
+
+    def _update(self):
+        """TODO"""
+
+        current_region = self._current_params["region"]
+        new_region = self._object["params"]["region"]
+
+        if current_region != new_region:
+            raise v1.exceptions.RuntimeError(f"{self._name}: cannot change region")
+
+    def update(self) -> dict[str, object]:
+        """TODO"""
+
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        return self._object | {
+            "metadata": {
+                "id": self._vpc_id
+            }
+        }
+
+    def delete(self):
+        """TODO"""
+
+        i = 0
+
+        while True:
+            res = self._client.delete(f"v2/vpcs/{self._vpc_id}")
+
+            if res.status_code == 204:
+                break
+
+            if res.status_code != 403:
+                raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
+
+            if i == 0:
+                print(f"waiting for {self._name} resources to be deleted",
+                      file=sys.stdout, end="")
+
+                i = 1
+
+            if i != 4:
+                print(".", end="")
+                i += 1
+
+            else:
+                print("\x08\x08\x08   \x08\x08\x08", file=sys.stdout, end="")
+                i = 1
+
+            sys.stdout.flush()
+
+            time.sleep(1)
+
+        if i != 0:
+            print("." * (4 - i), file=sys.stdout)
+
+
+class _V2Resources(dolib.Resource):
+    """TODO"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._current_params = None
+        self._project_id = None
+
+        if "params" in self._object:
+            self._project_id = self._object["params"]["project_id"]
+
+    def _get(self) -> bool:
+        """TODO"""
+
+        res = self._client.get(f"v2/projects/{self._project_id}/resources")
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+        self._current_params = {
+            "resources": sorted([
+                resource["urn"] for resource in data["resources"]
+            ])
+        }
+
+    def _assign(self, params: dict[str, object]):
+        """TODO"""
+
+        if not params["resources"]:
+            return
+
+        res = self._client.post(f"v2/projects/{self._project_id}/resources", params)
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+    def _create(self):
+        """TODO"""
+
+        self._assign(self._object["params"])
+
+    def _update(self):
+        """TODO"""
+
+        params = {
+            "resources": sorted(self._object["params"]["resources"])
+        }
+
+        if params == self._current_params:
+            return
+
+        self._assign(params)
+
+    def update(self) -> dict[str, object]:
+        """TODO"""
+
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        return self._object | {
             "metadata": {}
         }
 
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
-        # pylint: disable=W0613
-
-        """TODO"""
-
-        params = new_obj["params"]
-        project_name = new_obj["name"]
-
-        project_id = params["project_id"]
-        resources = params["resources"]
-
-        cls._assign(client, project_name, project_id, resources)
-
-        return new_obj | {
-            "metadata": {}
-        }
-
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
-
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
+    def delete(self):
         """TODO"""
 
 
@@ -253,17 +320,18 @@ class V1Provider(v1.provider.Provider):
         self._connect()
 
         self.add_object({
-            "kind": "v2/projects",
+            "kind": "v2/project",
             "name": self._project_name,
             "params": {
-                "purpose": "torquetech.io deployment",
                 "name": self._project_name,
+                "description": "torquetech.io deployment",
+                "purpose": "Other: Torque deployment",
                 "environment": "Production"
             }
         })
 
         self.add_object({
-            "kind": "v2/vpcs",
+            "kind": "v2/vpc",
             "name": self._vpc_name,
             "params": {
                 "name": self._vpc_name,
@@ -292,6 +360,53 @@ class V1Provider(v1.provider.Provider):
 
         self._client = dolib.connect(self.configuration["endpoint"], self.token())
 
+    def _update_object(self, name: str):
+        """TODO"""
+
+        old_obj = self._current_state.get(name)
+        obj = v1.utils.resolve_futures(self._new_state.get(name))
+
+        if old_obj:
+            old_obj = {} | old_obj
+            old_obj.pop("metadata", None)
+
+        if old_obj == obj:
+            return
+
+        if not self.configuration["quiet"]:
+            diff = v1.utils.diff_objects(name, old_obj, obj)
+            print(diff, file=sys.stdout)
+
+        handler = dolib.HANDLERS[obj["kind"]](self._client,
+                                              self.context,
+                                              name,
+                                              obj,
+                                              self.configuration["quiet"])
+
+        self._current_state[name] = handler.update()
+
+    def _delete_object(self, name: str):
+        """TODO"""
+
+        obj = self._current_state.get(name)
+
+        handler = dolib.HANDLERS[obj["kind"]](self._client,
+                                              self.context,
+                                              name,
+                                              obj,
+                                              self.configuration["quiet"])
+
+        def _delete_object():
+            if not self.configuration["quiet"]:
+                diff = v1.utils.diff_objects(name, obj, {})
+                print(diff, file=sys.stdout)
+
+            handler.delete()
+            self._current_state.pop(name)
+
+        with self.context as ctx:
+            ctx.add_hook("gc", _delete_object)
+
     def _apply(self):
         """TODO"""
 
@@ -305,10 +420,10 @@ class V1Provider(v1.provider.Provider):
         })
 
         try:
-            dolib.apply(self._client,
-                        self._current_state,
-                        self._new_state,
-                        self.configuration["quiet"])
+            v1.utils.apply_objects(self._current_state,
+                                   self._new_state,
+                                   self._update_object,
+                                   self._delete_object)
 
         finally:
             self._store_state()
@@ -317,10 +432,10 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         try:
-            dolib.apply(self._client,
-                        self._current_state,
-                        {},
-                        self.configuration["quiet"])
+            v1.utils.apply_objects(self._current_state,
+                                   {},
+                                   self._update_object,
+                                   self._delete_object)
 
         finally:
             self._store_state()
@@ -499,8 +614,8 @@ class V1Context(v1.deployment.Context):
 
 
 dolib.HANDLERS.update({
-    "v2/projects": _V2Projects,
-    "v2/vpcs": _V2Vpcs,
+    "v2/project": _V2Project,
+    "v2/vpc": _V2Vpc,
     "v2/resources": _V2Resources
 })
 

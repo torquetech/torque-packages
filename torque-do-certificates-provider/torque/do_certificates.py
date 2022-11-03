@@ -12,45 +12,107 @@ from torque import do
 from torque import dolib
 
 
-class _V2Certificates:
+class _V2Certificates(dolib.Resource):
     """TODO"""
 
-    @classmethod
-    def create(cls, client: dolib.Client, new_obj: dict[str, object]) -> dict[str, object]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._do_name = self._object["name"]
+
+        self._current_params = None
+        self._cert_id = None
+
+        if "metadata" in self._object:
+            self._cert_id = self._object["metadata"]["id"]
+
+    def _get(self) -> bool:
         """TODO"""
 
-        res = client.post("v2/certificates", new_obj["params"])
+        page = 1
+
+        while True:
+            res = self._client.get(f"v2/certificates?page={page}&per_page=20")
+            data = res.json()
+
+            if res.status_code != 200:
+                raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+            certs = data["certificates"]
+
+            for cert in certs:
+                if self._do_name == cert["name"]:
+                    self._current_params = {
+                        "name": cert["name"],
+                        "type": cert["type"]
+                    }
+
+                    self._cert_id = cert["id"]
+
+                    return True
+
+            if len(certs) != 20:
+                break
+
+            page += 1
+
+        return False
+
+    def _create(self):
+        """TODO"""
+
+        res = self._client.post("v2/certificates", self._object["params"])
         data = res.json()
 
         if res.status_code not in (201, 202):
-            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-        data = data["certificate"]
+        self._cert_id = data["certificate"]["id"]
 
-        return new_obj | {
+    def _update(self):
+        """TODO"""
+
+        params = self._object["params"]
+        params = {
+            "name": params["name"],
+            "type": params["type"]
+        }
+
+        if params == self._current_params:
+            return
+
+        raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify certificate")
+
+    def update(self) -> dict[str, object]:
+        """TODO"""
+
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        return self._object | {
             "metadata": {
-                "id": data["id"]
+                "id": self._cert_id
             }
         }
 
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def delete(self):
         """TODO"""
 
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update certificates")
+        def cond():
+            res = self._client.delete(f"v2/certificates/{self._cert_id}")
 
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
+            if res.status_code == 204:
+                return True
 
-        client.delete(f"v2/certificates/{old_obj['metadata']['id']}")
+            if res.status_code != 403:
+                raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
 
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
+            return False
+
+        v1.utils.wait_for(cond, f"waiting for {self._name} to be released")
 
 
 class V1Provider(v1.provider.Provider):
@@ -83,7 +145,7 @@ class V1Provider(v1.provider.Provider):
         sha1 = hashlib.sha1(der).hexdigest()
 
         return self.interfaces.do.add_object({
-            "kind": "v2/certificates",
+            "kind": "v2/certificate",
             "name": sha1,
             "params": {
                 "name": sha1,
@@ -97,7 +159,7 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         return self.interfaces.do.add_object({
-            "kind": "v2/certificates",
+            "kind": "v2/certificate",
             "name": domain,
             "params": {
                 "name": domain,
@@ -110,7 +172,7 @@ class V1Provider(v1.provider.Provider):
 
 
 dolib.HANDLERS.update({
-    "v2/certificates": _V2Certificates
+    "v2/certificate": _V2Certificates
 })
 
 repository = {

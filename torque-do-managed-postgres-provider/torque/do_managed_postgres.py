@@ -5,213 +5,269 @@
 """TODO"""
 
 import functools
-import sys
-import time
 import threading
 
-from torque import v1
-from torque import postgres
 from torque import do
 from torque import dolib
+from torque import postgres
+from torque import v1
 
 
-class _V2PostgresClusters:
+class _V2PostgresCluster(dolib.Resource):
     """TODO"""
 
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._current_params = None
+        self._cluster_name = self._object["cluster_name"]
+
+        self._host = None
+        self._port = None
+        self._ssl = None
+
+        self._cluster_id = None
+
+        if "metadata" in self._object:
+            self._cluster_id = self._object["metadata"]["id"]
+
+    def _get(self) -> bool:
         """TODO"""
 
-        res = client.post("v2/databases", new_obj["params"])
+        res = self._client.get("v2/databases")
+        data = res.json()
+
+        if res.status_code != 200:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
+
+        databases = data["databases"]
+
+        for database in databases:
+            if self._cluster_name == database["name"]:
+                self._current_params = {
+                    "name": database["name"],
+                    "engine": database["engine"],
+                    "region": database["region"],
+                    "private_network_uuid": database["private_network_uuid"],
+                    "version": database["version"],
+                    "num_nodes": database["num_nodes"],
+                    "size": database["size"]
+                }
+
+                self._cluster_id = database["id"]
+
+                conn = database["private_connection"]
+
+                self._host = conn["host"]
+                self._port = conn["port"]
+                self._ssl = conn["ssl"]
+
+                return True
+
+        return False
+
+    def _create(self):
+        """TODO"""
+
+        res = self._client.post("v2/databases", self._object["params"])
         data = res.json()
 
         if res.status_code != 201:
-            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-        data = data["database"]
-        conn = data["private_connection"]
+        database = data["database"]
 
-        return new_obj | {
-            "metadata": {
-                "id": data["id"],
-                "host": conn["host"],
-                "port": conn["port"],
-                "ssl": conn["ssl"]
-            }
-        }
+        self._cluster_id = database["id"]
 
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
+        conn = database["private_connection"]
+
+        self._host = conn["host"]
+        self._port = conn["port"]
+        self._ssl = conn["ssl"]
+
+    def _update(self):
         """TODO"""
 
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update database cluster")
+        if self._object["params"] == self._current_params:
+            return
 
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
+        raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify database")
+
+    def _wait(self):
         """TODO"""
 
-        client.delete(f"v2/databases/{old_obj['metadata']['id']}")
-
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
-
-        cluster_name = obj["name"]
-        cluster_id = obj["metadata"]["id"]
-
-        while True:
-            res = client.get(f"v2/databases/{cluster_id}")
+        def cond():
+            res = self._client.get(f"v2/databases/{self._cluster_id}")
             data = res.json()
 
             if res.status_code != 200:
-                raise v1.exceptions.RuntimeError(f"{cluster_name}: {data['message']}")
+                raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-            data = data["database"]
-            done = data["status"] == "online"
+            database = data["database"]
+            done = database["status"] == "online"
 
-            if done:
-                break
+            return done
 
-            print(f"waiting for cluster {cluster_name} to become ready...",
-                  file=sys.stdout)
+        v1.utils.wait_for(cond, f"waiting for cluster {self._name} to become ready")
 
-            time.sleep(10)
-
-
-class _V2PostgresDatabase:
-    """TODO"""
-
-    @classmethod
-    def _get_database(cls,
-                      client: dolib.Client,
-                      cluster_id: str,
-                      name: str) -> dict[str, object]:
+    def update(self) -> dict[str, object]:
         """TODO"""
 
-        res = client.get(f"v2/databases/{cluster_id}/dbs")
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        self._wait()
+
+        return self._object | {
+            "metadata": {
+                "id": self._cluster_id,
+                "host": self._host,
+                "port": self._port,
+                "ssl": self._ssl
+            }
+        }
+
+    def delete(self):
+        """TODO"""
+
+        res = self._client.delete(f"v2/databases/{self._cluster_id}")
+
+        if res.status_code != 204:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
+
+
+class _V2PostgresDatabase(dolib.Resource):
+    """TODO"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._cluster_id = self._object["cluster_id"]
+        self._db_name = self._object["db_name"]
+
+    def _get(self):
+        """TODO"""
+
+        res = self._client.get(f"v2/databases/{self._cluster_id}/dbs")
         data = res.json()
 
         if res.status_code != 200:
-            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
         for db in data["dbs"]:
-            if name == db["name"]:
-                return {"db": db}
+            if self._db_name == db["name"]:
+                return True
 
-        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
+        return False
 
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def _create(self):
         """TODO"""
 
-        res = client.post(f"v2/databases/{new_obj['cluster_id']}/dbs",
-                          new_obj["params"])
+        res = self._client.post(f"v2/databases/{self._cluster_id}/dbs", self._object["params"])
         data = res.json()
 
-        if res.status_code == 422:
-            data = cls._get_database(client, new_obj["cluster_id"], new_obj["params"]["name"])
+        if res.status_code != 201:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-        elif res.status_code != 201:
-            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
+    def _update(self):
+        """TODO"""
 
-        data = data["db"]
+    def update(self):
+        """TODO"""
 
-        return new_obj | {
-            "metadata": {
-                "id": new_obj["name"],
-                "database": data["name"]
-            }
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        return self._object | {
+            "metadata": {}
         }
 
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def delete(self):
         """TODO"""
 
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update database")
+        res = self._client.delete(f"v2/databases/{self._cluster_id}/dbs/{self._db_name}")
 
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
-
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
+        if res.status_code not in (204, 412):
+            raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
 
 
-class _V2PostgresUser:
+class _V2PostgresUser(dolib.Resource):
     """TODO"""
 
-    @classmethod
-    def _get_user(cls,
-                  client: dolib.Client,
-                  cluster_id: str,
-                  name: str) -> dict[str, object]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._cluster_id = self._object["cluster_id"]
+        self._user_name = self._object["user"]
+
+    def _get(self):
         """TODO"""
 
-        res = client.get(f"v2/databases/{cluster_id}/users")
+        res = self._client.get(f"v2/databases/{self._cluster_id}/users")
         data = res.json()
 
         if res.status_code != 200:
-            raise v1.exceptions.RuntimeError(f"{name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
         for user in data["users"]:
-            if name == user["name"]:
-                return {"user": user}
+            if self._user_name == user["name"]:
+                with self._context as ctx:
+                    ctx.set_secret_data(self._object["name"],
+                                        "password",
+                                        user["password"])
 
-        raise v1.exceptions.RuntimeError(f"unexpected error while looking for {name}")
+                return True
 
-    @classmethod
-    def create(cls,
-               client: dolib.Client,
-               new_obj: dict[str, object]) -> dict[str, object]:
+        return False
+
+    def _create(self):
         """TODO"""
 
-        res = client.post(f"v2/databases/{new_obj['cluster_id']}/users",
-                          new_obj["params"])
+        res = self._client.post(f"v2/databases/{self._cluster_id}/users", self._object["params"])
         data = res.json()
 
-        if res.status_code == 422:
-            data = cls._get_user(client, new_obj["cluster_id"], new_obj["params"]["name"])
+        if res.status_code != 201:
+            raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
-        elif res.status_code != 201:
-            raise v1.exceptions.RuntimeError(f"{new_obj['name']}: {data['message']}")
+        user = data["user"]
 
-        data = data["user"]
+        with self._context as ctx:
+            ctx.set_secret_data(self._object["name"],
+                                "password",
+                                user["password"])
 
-        return new_obj | {
-            "metadata": {
-                "id": new_obj["name"],
-                "user": data["name"],
-                "password": data["password"]
-            }
+    def _update(self):
+        """TODO"""
+
+    def update(self):
+        """TODO"""
+
+        if not self._get():
+            self._create()
+
+        else:
+            self._update()
+
+        return self._object | {
+            "metadata": {}
         }
 
-    @classmethod
-    def update(cls,
-               client: dolib.Client,
-               old_obj: dict[str, object],
-               new_obj: dict[str, object]) -> dict[str, object]:
+    def delete(self):
         """TODO"""
 
-        raise v1.exceptions.RuntimeError(f"{old_obj['name']}: cannot update database user")
+        with self._context as ctx:
+            ctx.delete_secret_data(self._object["name"], "password")
 
-    @classmethod
-    def delete(cls, client: dolib.Client, old_obj: dict[str, object]):
-        """TODO"""
+        res = self._client.delete(f"v2/databases/{self._cluster_id}/users/{self._user_name}")
 
-    @classmethod
-    def wait(cls, client: dolib.Client, obj: dict[str, object]):
-        """TODO"""
+        if res.status_code not in (204, 412):
+            raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
 
 
 class V1Provider(v1.provider.Provider):
@@ -233,8 +289,7 @@ class V1Cluster(v1.bond.Bond):
         "schema": {
             "version": str,
             "num_nodes": int,
-            "size": str,
-            v1.schema.Optional("tags"): [str]
+            "size": str
         }
     }
 
@@ -265,9 +320,10 @@ class V1Cluster(v1.bond.Bond):
     def _show_secret(self, user: str):
         """TODO"""
 
-        user_metadata = self.interfaces.do.object_metadata(self._users[user])
+        with self.context as ctx:
+            password = ctx.get_secret_data(self._users[user], "password")
 
-        print(f"{self.name}: user: {user}, password: {user_metadata['password']}")
+        print(f"{self.name}: user: {user}, password: {password}")
 
     def _create_cluster(self):
         """TODO"""
@@ -276,8 +332,10 @@ class V1Cluster(v1.bond.Bond):
         sanitized_name = name.replace(".", "-")
 
         obj = {
-            "kind": "v2/databases/postgres",
+            "kind": "v2/database/postgres",
             "name": name,
+            "owner": self.name,
+            "cluster_name": sanitized_name,
             "params": {
                 "name": sanitized_name,
                 "engine": "pg",
@@ -296,73 +354,80 @@ class V1Cluster(v1.bond.Bond):
     def _create_database(self, name: str):
         """TODO"""
 
-        with self._lock:
-            if name in self._databases:
-                return
+        if name in self._databases:
+            return
 
-            obj = {
-                "kind": "v2/databases/postgres/db",
-                "name": f"{self.name}-database-{name}",
-                "cluster_id": self._cluster_id,
-                "params": {
-                    "name": name
-                }
+        obj = {
+            "kind": "v2/database/postgres/db",
+            "name": f"{self.name}-database-{name}",
+            "owner": self.name,
+            "depends_on": self._cluster_name,
+            "cluster_id": self._cluster_id,
+            "db_name": name,
+            "params": {
+                "name": name
             }
+        }
 
-            self.interfaces.do.add_object(obj)
-            self._databases[name] = self.interfaces.do.object_name(obj)
+        self.interfaces.do.add_object(obj)
+        self._databases[name] = f"{self.name}-database-{name}"
 
     def _create_user(self, name: str):
         """TODO"""
 
-        with self._lock:
-            if name in self._users:
-                return
+        if name in self._users:
+            return
 
-            with self.context as ctx:
-                ctx.add_hook("show-secrets", functools.partial(self._show_secret,
-                                                               name))
+        with self.context as ctx:
+            ctx.add_hook("show-secrets", functools.partial(self._show_secret,
+                                                           name))
 
-            obj = {
-                "kind": "v2/databases/postgres/user",
-                "name": f"{self.name}-user-{name}",
-                "cluster_id": self._cluster_id,
-                "params": {
-                    "name": name
-                }
+        obj = {
+            "kind": "v2/database/postgres/user",
+            "name": f"{self.name}-user-{name}",
+            "owner": self.name,
+            "depends_on": self._cluster_name,
+            "cluster_id": self._cluster_id,
+            "user": name,
+            "params": {
+                "name": name
             }
+        }
 
-            self.interfaces.do.add_object(obj)
-            self._users[name] = self.interfaces.do.object_name(obj)
+        self.interfaces.do.add_object(obj)
+        self._users[name] = f"{self.name}-user-{name}"
 
     def _resolve_uri(self, database: str, user: str) -> str:
         """TODO"""
 
-        user_metadata = self.interfaces.do.object_metadata(self._users[user])
-        db_metadata = self.interfaces.do.object_metadata(self._databases[database])
-        cluster_metadata = self.interfaces.do.object_metadata(self._cluster_name)
+        with self.context as ctx:
+            password = ctx.get_secret_data(self._users[user], "password")
 
-        user = user_metadata["user"]
-        password = user_metadata["password"]
-        database = db_metadata["database"]
-        host = cluster_metadata["host"]
-        port = cluster_metadata["port"]
+        metadata = self.interfaces.do.object_metadata(self._cluster_name)
 
-        return f"postgres://{user}:{password}@{host}:{port}/{database}"
+        host = metadata["host"]
+        port = metadata["port"]
+        ssl = metadata["ssl"]
+
+        if ssl:
+            params = "sslmode=require&"
+
+        return f"postgres://{user}:{password}@{host}:{port}/{database}?{params}"
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
         """TODO"""
 
-        self._create_database(database)
-        self._create_user(user)
+        with self._lock:
+            self._create_database(database)
+            self._create_user(user)
 
         return v1.utils.Future(functools.partial(self._resolve_uri, database, user))
 
 
 dolib.HANDLERS.update({
-    "v2/databases/postgres": _V2PostgresClusters,
-    "v2/databases/postgres/db": _V2PostgresDatabase,
-    "v2/databases/postgres/user": _V2PostgresUser
+    "v2/database/postgres": _V2PostgresCluster,
+    "v2/database/postgres/db": _V2PostgresDatabase,
+    "v2/database/postgres/user": _V2PostgresUser
 })
 
 repository = {
