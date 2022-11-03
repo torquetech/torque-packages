@@ -23,6 +23,15 @@ class _ContextData:
         self._hooks = hooks
         self._load_bucket = load_bucket
 
+    def _find_ndx(self, hooks: list, obj: object):
+        """TODO"""
+
+        for i, hook in enumerate(hooks):
+            if obj == hook.__self__.__class__:
+                return i
+
+        return len(hooks)
+
     def set_data(self, bucket: str, name: type, data: object):
         """TODO"""
 
@@ -53,13 +62,22 @@ class _ContextData:
 
         return s
 
-    def add_hook(self, bucket: str, hook: typing.Callable):
+    def add_hook(self, bucket: str, hook: typing.Callable, **kwargs):
         """TODO"""
 
         if bucket not in self._hooks:
             self._hooks[bucket] = []
 
-        self._hooks[bucket].append(hook)
+        hooks = self._hooks[bucket]
+        add_before = kwargs.get("add_before", None)
+
+        if add_before:
+            ndx = self._find_ndx(hooks, add_before)
+
+        else:
+            ndx = len(hooks)
+
+        hooks.insert(ndx, hook)
 
 
 class Context:
