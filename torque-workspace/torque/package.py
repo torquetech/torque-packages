@@ -194,7 +194,7 @@ def install_package(uri: str):
         shutil.rmtree(tmp)
 
 
-def remove_package(name: str):
+def uninstall_package(name: str):
     """TODO"""
 
     packages = installed_packages()
@@ -242,7 +242,7 @@ def upgrade_package(name: str):
     if name not in packages:
         raise exceptions.PackageNotFound(name)
 
-    remove_package(name)
+    uninstall_package(name)
     install_package(packages[name]["uri"])
 
     install_deps()
@@ -252,7 +252,7 @@ def upgrade_all_packages():
     """TODO"""
 
     for name, metadata in installed_packages().items():
-        remove_package(name)
+        uninstall_package(name)
         install_package(metadata["uri"])
 
     install_deps()

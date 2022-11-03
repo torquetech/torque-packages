@@ -18,12 +18,12 @@ def _install(arguments: argparse.Namespace):
     package.install_deps()
 
 
-def _remove(arguments: argparse.Namespace):
+def _uninstall(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
     """TODO"""
 
-    package.remove_package(arguments.name)
+    package.uninstall_package(arguments.name)
 
 
 def _list(arguments: argparse.Namespace):
@@ -57,11 +57,11 @@ def add_arguments(subparsers):
     install_parser = subparsers.add_parser("install", help="install package")
     install_parser.add_argument("uri", help="package uri")
 
+    uninstall_parser = subparsers.add_parser("uninstall", help="uninstall package")
+    uninstall_parser.add_argument("name", help="package name")
+
     upgrade_parser = subparsers.add_parser("upgrade", help="upgrade package")
     upgrade_parser.add_argument("name", help="upgrade package")
-
-    remove_parser = subparsers.add_parser("remove", help="remove package")
-    remove_parser.add_argument("name", help="package name")
 
     subparsers.add_parser("upgrade-all", help="upgrade all packages")
     subparsers.add_parser("list", help="list installed packages")
@@ -74,7 +74,7 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
 
     cmds = {
         "install": _install,
-        "remove": _remove,
+        "uninstall": _uninstall,
         "upgrade": _upgrade,
         "upgrade-all": _upgrade_all,
         "list": _list
