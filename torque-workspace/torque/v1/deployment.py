@@ -180,7 +180,7 @@ class Context:
     def path(self) -> str:
         """TODO"""
 
-        raise exceptions.RuntimeError(f"{v1.utils.fqcn(self)}: no path defined for this context")
+        raise exceptions.RuntimeError(f"{utils.fqcn(self)}: no path defined for this context")
 
     def external_path(self) -> str:
         """TODO"""
