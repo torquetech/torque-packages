@@ -181,3 +181,8 @@ class Context:
         """TODO"""
 
         raise exceptions.RuntimeError(f"{v1.utils.fqcn(self)}: no path defined for this context")
+
+    def external_path(self) -> str:
+        """TODO"""
+
+        return self.path()

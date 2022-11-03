@@ -11,10 +11,10 @@ import yaml
 from torque import v1
 
 
-def _create_path(name: str) -> str:
+def _create_path(context_path: str) -> str:
     """TODO"""
 
-    path = f"{v1.utils.torque_dir()}/local/deployments/{name}"
+    path = f"{v1.utils.torque_dir()}/{context_path}"
 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -29,10 +29,26 @@ class V1DependencyLink(v1.link.Link):
 class V1LocalContext(v1.deployment.Context):
     """TODO"""
 
+    CONFIGURATION = {
+        "defaults": {},
+        "schema": {
+            v1.schema.Optional("workspace_path"): str
+        }
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._path = _create_path(self.deployment_name)
+        context_path = f"local/deployments/{self.deployment_name}"
+        self._path = _create_path(context_path)
+
+        workspace_path = self.configuration.get("workspace_path")
+
+        if workspace_path:
+            self._external_path = f"{workspace_path}/.torque/{context_path}"
+
+        else:
+            self._external_path = self._path
 
     def load_bucket(self, name: str) -> dict[str, object]:
         """TODO"""
@@ -62,3 +78,8 @@ class V1LocalContext(v1.deployment.Context):
         """TODO"""
 
         return self._path
+
+    def external_path(self) -> str:
+        """TOOD"""
+
+        return self._external_path
