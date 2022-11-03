@@ -81,9 +81,7 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         with self.context as ctx:
-            ctx.set_data("state",
-                         v1.utils.fqcn(self),
-                         self._current_state)
+            ctx.set_data("state", v1.utils.fqcn(self), self._current_state)
 
     def _connect(self):
         """TODO"""
