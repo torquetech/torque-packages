@@ -4,10 +4,15 @@
 
 """TODO"""
 
+import difflib
 import inspect
 import os
 import pathlib
 import typing
+import sys
+import time
+
+import yaml
 
 from . import exceptions
 from . import schema as schema_v1
@@ -168,3 +173,70 @@ def resolve_futures(obj: object) -> object:
         return resolve_futures(obj())
 
     return obj
+
+
+def diff_objects(name: str, obj1: dict[str, object], obj2: dict[str, object]):
+    """TODO"""
+
+    obj1 = yaml.safe_dump(obj1, sort_keys=False) if obj1 else ""
+    obj2 = yaml.safe_dump(obj2, sort_keys=False) if obj2 else ""
+
+    diff = difflib.unified_diff(obj1.split("\n"),
+                                obj2.split("\n"),
+                                fromfile=f"a/{name}",
+                                tofile=f"b/{name}",
+                                lineterm="")
+
+    return "\n".join(diff)
+
+
+def apply_objects(current_state: dict[str, object],
+                  new_state: dict[str, object],
+                  update_fn: typing.Callable,
+                  delete_fn: typing.Callable):
+    """TODO"""
+
+    for name in list(new_state.keys()):
+        update_fn(name)
+
+    for name in list(current_state.keys()):
+        if name in new_state:
+            continue
+
+        delete_fn(name)
+
+
+def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
+    """TOOD"""
+
+    if cond_fn():
+        return
+
+    last_ts = time.time()
+    ndx = 0
+
+    while True:
+        if ndx == 4:
+            blanks = " " * (ndx + len(message))
+            print(f"\r{blanks}\r{message}", end="", file=sys.stdout)
+
+            ndx = 1
+
+        else:
+            dots = "." * ndx
+            print(f"\r{message}{dots}", end="", file=sys.stdout)
+
+            ndx += 1
+
+        sys.stdout.flush()
+
+        time.sleep(1)
+
+        if (time.time() - last_ts) >= interval:
+            if cond_fn():
+                break
+
+            last_ts = time.time()
+
+    if ndx != 0:
+        print("." * (4 - ndx), file=sys.stdout)
