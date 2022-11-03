@@ -526,23 +526,20 @@ class Deployment:
 
         self._execute(workers, _on_apply)
 
-        for apply_hook in self._context.get_hooks("apply"):
-            print(f"applying {apply_hook.__module__}...")
-            apply_hook()
+        self._context.run_hooks("apply", op="applying", quiet=False)
+        self._context.run_hooks("gc", reverse=True)
 
         if show_secrets:
             print("\nSecrets:\n")
-            for show_hook in self._context.get_hooks("show-secrets"):
-                show_hook()
+            self._context.run_hooks("show-secrets")
 
     def delete(self):
         """TODO"""
 
         self._setup_providers()
 
-        for delete_hook in reversed(self._context.get_hooks("delete")):
-            print(f"deleting {delete_hook.__module__}...")
-            delete_hook()
+        self._context.run_hooks("delete", op="deleting", quiet=False)
+        self._context.run_hooks("gc", reverse=True)
 
     def dot(self) -> str:
         """TODO"""

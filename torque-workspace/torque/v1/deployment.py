@@ -121,10 +121,23 @@ class Context:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
 
-    def get_hooks(self, bucket: str):
+    def run_hooks(self, bucket: str, **kwargs):
         """TODO"""
 
-        return self._hooks.get(bucket, [])
+        quiet = kwargs.get("quiet", True)
+        reverse = kwargs.get("reverse", False)
+        op = kwargs.get("op", bucket)
+
+        hooks = self._hooks.get(bucket, [])
+
+        if reverse:
+            hooks = reversed(hooks)
+
+        for hook in hooks:
+            if not quiet:
+                print(f"{op} {hook.__module__}...")
+
+            hook()
 
     def store(self):
         """TODO"""
