@@ -74,13 +74,6 @@ class LinkTypeNotFound(v1.exceptions.TorqueException):
         return f"{self.args[0]}: link type not found"
 
 
-class PackageNotFound(v1.exceptions.TorqueException):
-    """TODO"""
-
-    def __str__(self) -> str:
-        return f"{self.args[0]}: package not found"
-
-
 class ProviderNotFound(v1.exceptions.TorqueException):
     """TODO"""
 

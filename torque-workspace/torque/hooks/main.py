@@ -13,6 +13,7 @@ import yaml
 
 from torque import commands
 from torque import exceptions
+from torque import package
 from torque import v1
 
 
@@ -103,6 +104,12 @@ def main() -> int:
         print(f"[CRITICAL]: {exc}", file=sys.stderr)
 
     except v1.exceptions.TorqueException as exc:
+        if os.getenv("TORQUE_VERBOSE"):
+            traceback.print_exc()
+
+        print(exc, file=sys.stderr)
+
+    except package.Exception as exc:
         if os.getenv("TORQUE_VERBOSE"):
             traceback.print_exc()
 

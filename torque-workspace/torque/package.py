@@ -16,13 +16,28 @@ import zipfile
 
 from importlib import metadata
 
-from torque import exceptions
-from torque import v1
-
 
 _URI = r"^[^:]+://"
 _TORQUE_CWD = None
 _TORQUE_ROOT = None
+
+
+class Exception(RuntimeError):
+    """TODO"""
+
+
+class PackageNotFound(Exception):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: package not found"
+
+
+class WorkspaceNotFound(Exception):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return "workspace not found!"
 
 
 def torque_cwd() -> str:
@@ -57,7 +72,7 @@ def torque_root() -> str:
             break
 
         if cwd.parent == cwd:
-            raise v1.exceptions.RuntimeError("workspace root not found!")
+            raise WorkspaceNotFound()
 
         cwd = cwd.parent
 
@@ -200,7 +215,7 @@ def uninstall_package(name: str):
     packages = installed_packages()
 
     if name not in packages:
-        raise exceptions.PackageNotFound(name)
+        raise PackageNotFound(name)
 
     dist = metadata.Distribution.at(packages[name]["path"])
     files = set()
@@ -240,7 +255,7 @@ def upgrade_package(name: str):
     packages = installed_packages()
 
     if name not in packages:
-        raise exceptions.PackageNotFound(name)
+        raise PackageNotFound(name)
 
     uninstall_package(name)
     install_package(packages[name]["uri"])
