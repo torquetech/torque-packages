@@ -31,12 +31,11 @@ class V1Provider(v1.provider.Provider):
 
     CONFIGURATION = {
         "defaults": {
-            "namespace": "default",
             "quiet": True
         },
         "schema": {
-            "namespace": str,
-            "quiet": bool
+            "quiet": bool,
+            v1.schema.Optional("namespace"): str
         }
     }
 
@@ -65,11 +64,16 @@ class V1Provider(v1.provider.Provider):
 
         self._namespaces = set()
 
+        self._namespace = self.configuration.get("namespace", self.context.deployment_name)
+        self._namespace = self._namespace.replace(".", "-")
+
         self._load_state()
 
         with self.context as ctx:
             ctx.add_hook("apply", self._apply)
             ctx.add_hook("delete", self._delete)
+
+        self._setup_namespace()
 
     def _load_state(self) -> dict[str, object]:
         """TODO"""
@@ -87,6 +91,20 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         self._client = self.interfaces.client.connect()
+
+    def _setup_namespace(self):
+        """TODO"""
+
+        if self._namespace == "default":
+            return
+
+        self.add_object({
+            "apiVersion": "v1",
+            "kind": "Namespace",
+            "metadata": {
+                "name": self._namespace
+            }
+        })
 
     def _setup_container_registry(self):
         """TODO"""
@@ -220,7 +238,7 @@ class V1Provider(v1.provider.Provider):
     def namespace(self) -> str:
         """TODO"""
 
-        return self.configuration["namespace"]
+        return self._namespace
 
 
 repository = {
