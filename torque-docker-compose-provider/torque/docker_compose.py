@@ -40,9 +40,10 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         compose = f"{self.context.path()}/docker-compose.yaml"
+        objects = v1.utils.resolve_futures(self._objects)
 
         with open(compose, "w", encoding="utf8") as file:
-            file.write(yaml.safe_dump(self._objects, sort_keys=False))
+            file.write(yaml.safe_dump(objects, sort_keys=False))
 
         cmd = [
             "docker", "compose",
