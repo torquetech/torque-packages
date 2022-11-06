@@ -411,11 +411,11 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1LoadBalancer(v1.bond.Bond):
+class V1Implementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = hlb.V1LoadBalancerInterface
+    IMPLEMENTS = hlb.V1ImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
@@ -468,7 +468,7 @@ class V1LoadBalancer(v1.bond.Bond):
             obj = yaml.safe_load(obj)
 
             if obj["kind"] == "Service":
-                hosts = [f"{i.host}.{domain}." for i in ingress_list]
+                hosts = sorted([f"{i.host}.{domain}." for i in ingress_list])
                 hosts = ",".join(hosts)
 
                 obj["metadata"]["annotations"] = {
@@ -485,13 +485,14 @@ class V1LoadBalancer(v1.bond.Bond):
             self.interfaces.k8s.add_object(obj)
 
         for ingress in ingress_list:
+            ingress_id = ingress.id.replace("_", "-")
             service, namespace = ingress.service.split(".")
 
             self.interfaces.k8s.add_object({
                 "apiVersion": "networking.k8s.io/v1",
                 "kind": "Ingress",
                 "metadata": {
-                    "name": f"{ingress.id}",
+                    "name": f"{ingress_id}",
                     "namespace": namespace
                 },
                 "spec": {
@@ -543,7 +544,7 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1LoadBalancer
+            V1Implementation
         ]
     }
 }

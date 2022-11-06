@@ -18,7 +18,7 @@ Ingress = collections.namedtuple("Ingress", [
 ])
 
 
-class V1LoadBalancerInterface(v1.bond.Interface):
+class V1ImplementationInterface(v1.bond.Interface):
     """TODO"""
 
     def create(self, ingress_list: [Ingress]):
@@ -40,8 +40,8 @@ class V1Component(v1.component.Component):
         """TODO"""
 
         return {
-            "hlb": {
-                "interface": V1LoadBalancerInterface,
+            "impl": {
+                "interface": V1ImplementationInterface,
                 "required": True
             }
         }
@@ -66,7 +66,7 @@ class V1Component(v1.component.Component):
     def on_apply(self):
         """TODO"""
 
-        self.interfaces.hlb.create(self._ingress_list)
+        self.interfaces.impl.create(self._ingress_list)
 
 
 repository = {

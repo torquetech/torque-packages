@@ -13,13 +13,7 @@ from torque import hlb
 from torque import v1
 
 
-_INGRESS_LB = jinja2.Template("""server {
-  listen 80;
-  server_name localhost;
-  location / {
-    root /usr/share/nginx/html;
-  }
-}
+_INGRESS_LB = jinja2.Template("""
 {% for host in hosts %}
 server {
   listen 80;
@@ -43,11 +37,11 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1LoadBalancer(v1.bond.Bond):
+class V1Implementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = hlb.V1LoadBalancerInterface
+    IMPLEMENTS = hlb.V1ImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
@@ -83,11 +77,11 @@ class V1LoadBalancer(v1.bond.Bond):
         domain = self.configuration["domain"]
         hosts = sorted(list({i.host for i in ingress_list}))
 
-        ingress_lb_conf = _INGRESS_LB.render(domain=domain, hosts=hosts, ingress_list=ingress_list)
-        ingress_lb_conf_hash = hashlib.sha1(bytes(ingress_lb_conf, encoding="utf-8"))
+        conf = _INGRESS_LB.render(domain=domain, hosts=hosts, ingress_list=ingress_list)
+        conf_hash = hashlib.sha1(bytes(conf, encoding="utf-8"))
 
         with open(local_conf_path, "w", encoding="utf-8") as f:
-            f.write(ingress_lb_conf)
+            f.write(conf)
 
         self.interfaces.dc.add_object("configs", self._sanitized_name, {
             "file": external_conf_path
@@ -95,10 +89,10 @@ class V1LoadBalancer(v1.bond.Bond):
 
         self.interfaces.dc.add_object("services", self._sanitized_name, {
             "image": "nginx:latest",
-            "restart": "unless-stopped",
-            "environment": {
-                "RESTART_TRIGGER": ingress_lb_conf_hash.hexdigest()
+            "labels": {
+                "conf_hash": conf_hash.hexdigest()
             },
+            "restart": "unless-stopped",
             "configs": [{
                 "source": self._sanitized_name,
                 "target": "/etc/nginx/conf.d/ingress.conf"
@@ -112,7 +106,7 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1LoadBalancer
+            V1Implementation
         ]
     }
 }
