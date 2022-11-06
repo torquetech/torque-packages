@@ -14,25 +14,24 @@ from torque import postgres
 from torque import v1
 
 
-_INIT_SQL = jinja2.Template("""{% for user, password in users.items() %}
+_INIT_SQL = jinja2.Template("""
+{%- for user, password in users.items() %}
 {%- if user != 'postgres' -%}
 create user {{user}} with createdb createrole password '{{password}}';
-{%- endif %}
-{% endfor -%}
-
-{% for database, users in databases.items() -%}
+{% endif -%}
+{%- endfor %}
+{% for database, users in databases.items() %}
 {%- if database != 'postgres' -%}
 create database {{database}};
-{%- endif %}
-{% endfor -%}
-
+{% endif -%}
+{%- endfor %}
 {% for database, users in databases.items() -%}
 {% for user in users -%}
 {%- if user != 'postgres' -%}
 grant all privileges on database {{database}} to {{user}};
 {% endif -%}
-{% endfor -%}
-{% endfor -%}
+{%- endfor -%}
+{%- endfor -%}
 """)
 
 
@@ -40,11 +39,11 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1Cluster(v1.bond.Bond):
+class V1Implementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = postgres.V1ClusterInterface
+    IMPLEMENTS = postgres.V1ImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
@@ -74,40 +73,68 @@ class V1Cluster(v1.bond.Bond):
         self._databases = {}
         self._users = {}
 
+        self._image = f"postgres:{self.configuration['version']}"
+        self._password = self._create_access("postgres", "postgres")
+
         with self.context as ctx:
-            ctx.add_hook("apply", self._apply, add_before=docker_compose.V1Provider)
+            ctx.add_hook("apply", self._create_init, add_before=docker_compose.V1Provider)
 
-    def _apply(self):
+    def _create_init(self):
         """TODO"""
-
-        password = self._create_access("postgres", "postgres")
 
         local_sql_path = f"{self.context.path()}/{self.name}.sql"
         external_sql_path = f"{self.context.external_path()}/{self.name}.sql"
 
-        init_sql = _INIT_SQL.render(databases=self._databases, users=self._users)
-        init_sql_hash = hashlib.sha1(bytes(init_sql, encoding="utf-8"))
+        sql = _INIT_SQL.render(databases=self._databases, users=self._users)
+        sql_hash = hashlib.sha1(bytes(sql, encoding="utf-8"))
 
         with open(local_sql_path, "w", encoding="utf-8") as f:
-            f.write(init_sql)
-
-        version = self.configuration["version"]
-        image = f"postgres:{version}"
+            f.write(sql)
 
         self.interfaces.dc.add_object("configs", self._sanitized_name, {
             "file": external_sql_path
         })
 
+        self.interfaces.dc.add_object("services", f"{self._sanitized_name}-init", {
+            "image": f"postgres:{self.configuration['version']}",
+            "labels": {
+                "sql_hash": sql_hash.hexdigest()
+            },
+            "command": [
+                "psql",
+                "-h", self._sanitized_name,
+                "-U", "postgres",
+                "-f", "/init.sql",
+                "postgres"
+            ],
+            "restart": "no",
+            "environment": {
+                "PGPASSWORD": self._password
+            },
+            "configs": [{
+                "source": self._sanitized_name,
+                "target": "/init.sql"
+            }],
+            "depends_on": {
+                self._sanitized_name: {
+                    "condition": "service_healthy"
+                }
+            }
+        })
+
+    def create(self):
+        """TODO"""
+
         self.interfaces.dc.add_object("volumes", self._sanitized_name, {})
 
         self.interfaces.dc.add_object("services", self._sanitized_name, {
-            "image": image,
+            "image": self._image,
             "restart": "unless-stopped",
             "environment": {
                 "PGDATA": "/data",
                 "POSTGRES_DB": "postgres",
                 "POSTGRES_USER": "postgres",
-                "POSTGRES_PASSWORD": password
+                "POSTGRES_PASSWORD": self._password
             },
             "volumes": [{
                 "type": "volume",
@@ -119,31 +146,6 @@ class V1Cluster(v1.bond.Bond):
                 "interval": "10s",
                 "timeout": "3s",
                 "retries": 3
-            }
-        })
-
-        self.interfaces.dc.add_object("services", f"{self._sanitized_name}-init", {
-            "image": image,
-            "command": [
-                "psql",
-                "-h", self._sanitized_name,
-                "-U", "postgres",
-                "-f", "/init.sql",
-                "postgres"
-            ],
-            "restart": "no",
-            "environment": {
-                "PGPASSWORD": password,
-                "RESTART_TRIGGER": init_sql_hash.hexdigest()
-            },
-            "configs": [{
-                "source": self._sanitized_name,
-                "target": "/init.sql"
-            }],
-            "depends_on": {
-                self._sanitized_name: {
-                    "condition": "service_healthy"
-                }
             }
         })
 
@@ -185,7 +187,7 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1Cluster
+            V1Implementation
         ]
     }
 }

@@ -7,8 +7,11 @@
 from torque import v1
 
 
-class V1ClusterInterface(v1.bond.Interface):
+class V1ImplementationInterface(v1.bond.Interface):
     """TODO"""
+
+    def create(self):
+        """TODO"""
 
     def uri(self, database: str, user: str) -> v1.utils.Future[str]:
         """TODO"""
@@ -29,11 +32,16 @@ class V1Component(v1.component.Component):
         """TODO"""
 
         return {
-            "cluster": {
-                "interface": V1ClusterInterface,
+            "impl": {
+                "interface": V1ImplementationInterface,
                 "required": True
             }
         }
+
+    def _uri(self, database: str, user: str) -> v1.utils.Future[str]:
+        """TODO"""
+
+        return self.interfaces.impl.uri(database, user)
 
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
@@ -42,10 +50,10 @@ class V1Component(v1.component.Component):
             V1ServiceInterface(uri=self._uri)
         ]
 
-    def _uri(self, database: str, user: str) -> v1.utils.Future[str]:
+    def on_apply(self):
         """TODO"""
 
-        return self.interfaces.cluster.uri(database, user)
+        self.interfaces.impl.create()
 
 
 repository = {

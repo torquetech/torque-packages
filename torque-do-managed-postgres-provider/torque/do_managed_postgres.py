@@ -274,11 +274,11 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1Cluster(v1.bond.Bond):
+class V1Implementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = postgres.V1ClusterInterface
+    IMPLEMENTS = postgres.V1ImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
@@ -315,8 +315,6 @@ class V1Cluster(v1.bond.Bond):
 
         self._lock = threading.Lock()
 
-        self._create_cluster()
-
     def _show_secret(self, user: str):
         """TODO"""
 
@@ -325,7 +323,7 @@ class V1Cluster(v1.bond.Bond):
 
         print(f"{self.name}: user: {user}, password: {password}")
 
-    def _create_cluster(self):
+    def create(self):
         """TODO"""
 
         name = f"{self.context.deployment_name}-{self.name}"
@@ -436,7 +434,7 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1Cluster
+            V1Implementation
         ]
     }
 }
