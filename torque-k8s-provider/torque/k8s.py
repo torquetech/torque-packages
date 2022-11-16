@@ -73,6 +73,7 @@ class V1Provider(v1.provider.Provider):
 
         self._namespace = self.configuration.get("namespace", self.context.deployment_name)
         self._namespace = self._namespace.replace(".", "-")
+        self._namespace = self._namespace.replace("_", "-")
 
         self._load_state()
 

@@ -462,6 +462,8 @@ class V1Implementation(v1.bond.Bond):
         """TODO"""
 
         sanitized_name = self.name.replace(".", "-")
+        sanitized_name = sanitized_name.replace("_", "-")
+
         objs = _INGRESS_LB.render(instance=sanitized_name)
 
         for obj in objs.split("---"):
@@ -486,6 +488,8 @@ class V1Implementation(v1.bond.Bond):
 
         for ingress in ingress_list:
             ingress_id = ingress.id.replace("_", "-")
+            ingress_id = ingress_id.replace(".", "-")
+
             service, namespace = ingress.service.split(".")
 
             self.interfaces.k8s.add_object({
