@@ -167,8 +167,6 @@ class Workspace:
                  deployments: dict[str, Deployment],
                  dag: model.DAG,
                  repo: repository.Repository):
-        # pylint: disable=R0913
-
         self.dag = dag
         self.repo = repo
         self.deployments = deployments
