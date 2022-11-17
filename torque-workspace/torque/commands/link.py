@@ -7,23 +7,25 @@
 import argparse
 import sys
 
+from torque import v1
 from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
     """TODO"""
 
-    if not arguments.name:
-        name = f"{arguments.source}_{arguments.destination}"
-
     params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
-    ws.create_link(name,
+    if arguments.no_suffix and not arguments.name:
+        raise v1.exceptions.RuntimeError("if --no-suffix is specified, name must be supplied")
+
+    ws.create_link(arguments.name,
                    arguments.type,
                    params,
                    arguments.source,
-                   arguments.destination)
+                   arguments.destination,
+                   arguments.no_suffix)
     ws.store()
 
 
@@ -90,6 +92,9 @@ def add_arguments(subparsers):
                                metavar="NAME=VALUE",
                                dest="params",
                                help="link parameter")
+    create_parser.add_argument("--no-suffix",
+                               action="store_true",
+                               help="don't append unique suffix to the name")
     create_parser.add_argument("--name", help="link name")
     create_parser.add_argument("--type",
                                default="torque.defaults.V1DependencyLink",

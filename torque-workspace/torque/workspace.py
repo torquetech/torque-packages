@@ -9,6 +9,7 @@ import re
 import secrets
 import sys
 
+import pytrie
 import yaml
 
 from torque import deployment
@@ -20,7 +21,9 @@ from torque import v1
 
 
 _PROTO = r"^([^:]+)://"
-_NAME = r"^[A-Za-z_][A-Za-z0-9_]*$"
+_NAME = r"^[a-z_][a-z0-9_]*$"
+
+_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 _MAX_DEPLOYMENT_NAME_LENGTH = 16
 _MAX_COMPONENT_NAME_LENGTH = 16
@@ -174,7 +177,11 @@ class Workspace:
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
 
-        self._demo_mode = True
+    def _generate_extension(self):
+        """TODO"""
+
+        return ''.join([_SYMBOLS[i % len(_SYMBOLS)]
+                        for i in secrets.token_bytes(3)])
 
     def _create_bond(self,
                      for_type: type,
@@ -241,77 +248,56 @@ class Workspace:
 
         return list(collected_components)
 
-    def _process_names(self, names: list) -> dict[str, [str]]:
-        """TODO"""
-
-        names = [n.split(".") for n in names]
-        processed = {}
-
-        for n, r in names:
-            if n in processed:
-                processed[n].append(r)
-
-            else:
-                processed[n] = [r]
-
-        return processed
-
     def _get_full_component_name(self, name: str) -> str:
         """TODO"""
 
-        if "." in name:
-            return name
+        trie = pytrie.StringTrie(self.dag.components.items())
+        names = trie.keys(prefix=name)
 
-        if self._demo_mode:
-            return name
-
-        processed = self._process_names(self.dag.components.keys())
-
-        if name not in processed:
+        if not names:
             raise exceptions.ComponentNotFound(name)
 
-        if len(processed[name]) != 1:
+        if len(names) != 1:
+            if name in names:
+                return name
+
             raise v1.exceptions.RuntimeError(f"{name}: ambigous component name")
 
-        return f"{name}.{processed[name][0]}"
+        return names[0]
 
     def _get_full_link_name(self, name: str) -> str:
         """TODO"""
 
-        if "." in name:
-            return name
+        trie = pytrie.StringTrie(self.dag.links.items())
+        names = trie.keys(prefix=name)
 
-        if self._demo_mode:
-            return name
-
-        processed = self._process_names(self.dag.links.keys())
-
-        if name not in processed:
+        if not names:
             raise exceptions.LinkNotFound(name)
 
-        if len(processed[name]) != 1:
+        if len(names) != 1:
+            if name in names:
+                return name
+
             raise v1.exceptions.RuntimeError(f"{name}: ambigous link name")
 
-        return f"{name}.{processed[name][0]}"
+        return names[0]
 
     def _get_full_deployment_name(self, name: str) -> str:
         """TODO"""
 
-        if "." in name:
-            return name
+        trie = pytrie.StringTrie(self.deployments.items())
+        names = trie.keys(prefix=name)
 
-        if self._demo_mode:
-            return name
-
-        processed = self._process_names(self.deployments.keys())
-
-        if name not in processed:
+        if not names:
             raise exceptions.DeploymentNotFound(name)
 
-        if len(processed[name]) != 1:
+        if len(names) != 1:
+            if name in names:
+                return name
+
             raise v1.exceptions.RuntimeError(f"{name}: ambigous deployment name")
 
-        return f"{name}.{processed[name][0]}"
+        return names[0]
 
     def _resolve_components(self, components: [str]) -> [str]:
         """TODO"""
@@ -319,20 +305,23 @@ class Workspace:
         if not components:
             return None
 
-        if not self._demo_mode:
-            return components
-
-        processed = self._process_names(self.dag.components.keys())
+        trie = pytrie.StringTrie(self.dag.components.items())
         _components = []
 
         for name in components:
-            if name not in processed:
+            names = trie.keys(prefix=name)
+
+            if not names:
                 raise exceptions.ComponentNotFound(name)
 
-            if len(processed[name]) != 1:
-                raise v1.exceptions.RuntimeError(f"{name}: ambigous component name")
+            if len(names) != 1:
+                if name not in names:
+                    raise v1.exceptions.RuntimeError(f"{name}: ambigous component name")
 
-            _components.append(f"{name}.{processed[name][0]}")
+                _components.append(name)
+
+            else:
+                _components.append(names[0])
 
         return _components
 
@@ -342,7 +331,8 @@ class Workspace:
                           providers: [str],
                           extra_configs: [str],
                           components: [str],
-                          strict: bool) -> Deployment:
+                          strict: bool,
+                          no_suffix: bool) -> Deployment:
         """TODO"""
 
         if not re.match(_NAME, name):
@@ -351,8 +341,8 @@ class Workspace:
         if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: deployment name too long")
 
-        if not self._demo_mode:
-            name = f"{name}.{secrets.token_hex(2)[:3]}"
+        if not no_suffix:
+            name = f"{name}.{self._generate_extension()}"
 
         context = self.repo.context(context_type)
 
@@ -415,7 +405,8 @@ class Workspace:
     def create_component(self,
                          name: str,
                          type: str,
-                         params: object) -> model.Component:
+                         params: object,
+                         no_suffix: bool) -> model.Component:
         # pylint: disable=W0622
 
         """TODO"""
@@ -426,8 +417,8 @@ class Workspace:
         if len(name) > _MAX_COMPONENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: component name too long")
 
-        if not self._demo_mode:
-            name = f"{name}.{secrets.token_hex(2)[:3]}"
+        if not no_suffix:
+            name = f"{name}.{self._generate_extension()}"
 
         component_type = self.repo.component(type)
 
@@ -470,19 +461,24 @@ class Workspace:
                     type: str,
                     params: object,
                     source: str,
-                    destination: str) -> model.Link:
+                    destination: str,
+                    no_suffix: bool) -> model.Link:
         # pylint: disable=W0622,R0913
 
         """TODO"""
 
-        if len(name) > _MAX_LINK_NAME_LENGTH:
-            raise v1.exceptions.RuntimeError(f"{name}: link name too long")
+        if not name:
+            name = f"link.{self._generate_extension()}"
 
-        if not re.match(_NAME, name):
-            raise exceptions.InvalidName(name)
+        else:
+            if len(name) > _MAX_LINK_NAME_LENGTH:
+                raise v1.exceptions.RuntimeError(f"{name}: link name too long")
 
-        if not self._demo_mode:
-            name = f"{name}.{secrets.token_hex(2)[:3]}"
+            if not re.match(_NAME, name):
+                raise exceptions.InvalidName(name)
+
+            if not no_suffix:
+                name = f"{name}.{self._generate_extension()}"
 
         link_type = self.repo.link(type)
 

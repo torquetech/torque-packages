@@ -22,7 +22,8 @@ def _create(arguments: argparse.Namespace):
                              arguments.provider,
                              arguments.extra_configs,
                              arguments.components,
-                             arguments.strict)
+                             arguments.strict,
+                             arguments.no_suffix)
     deployment = ws.load_deployment(d.name, False)
 
     deployment.update()
@@ -146,6 +147,9 @@ def add_arguments(subparsers):
                                metavar="COMPONENT",
                                dest="components",
                                help="component")
+    create_parser.add_argument("--no-suffix",
+                               action="store_true",
+                               help="don't append unique suffix to the name")
     create_parser.add_argument("name", help="deployment name")
     create_parser.add_argument("provider", nargs="+", help="provider name")
 

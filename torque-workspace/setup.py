@@ -35,5 +35,6 @@ setup(name="torque-workspace",
       install_requires=[
           "pyyaml",
           "pydot",
+          "pytrie",
           "schema"
       ])

@@ -16,7 +16,7 @@ def _create(arguments: argparse.Namespace):
     params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
-    ws.create_component(arguments.name, arguments.type, params)
+    ws.create_component(arguments.name, arguments.type, params, arguments.no_suffix)
     ws.store()
 
 
@@ -83,6 +83,9 @@ def add_arguments(subparsers):
                                metavar="NAME=VALUE",
                                dest="params",
                                help="component parameter")
+    create_parser.add_argument("--no-suffix",
+                               action="store_true",
+                               help="don't append unique suffix to the name")
     create_parser.add_argument("name", help="component name")
     create_parser.add_argument("type", help="component type")
 
