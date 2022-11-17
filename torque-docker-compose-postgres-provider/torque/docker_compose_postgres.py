@@ -178,7 +178,7 @@ class V1Implementation(v1.bond.Bond):
 
         return \
             f"postgres://{user}:{password}@" \
-            f"{self._sanitized_name}:5432/{database}"
+            f"{self._sanitized_name}:5432/{database}?sslmode=disable"
 
 
 repository = {
