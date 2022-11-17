@@ -176,6 +176,8 @@ class Workspace:
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
 
+        self._demo_mode = True
+
     def _create_bond(self,
                      for_type: type,
                      name: str,
@@ -262,6 +264,9 @@ class Workspace:
         if "." in name:
             return name
 
+        if self._demo_mode:
+            return name
+
         processed = self._process_names(self.dag.components.keys())
 
         if name not in processed:
@@ -276,6 +281,9 @@ class Workspace:
         """TODO"""
 
         if "." in name:
+            return name
+
+        if self._demo_mode:
             return name
 
         processed = self._process_names(self.dag.links.keys())
@@ -294,6 +302,9 @@ class Workspace:
         if "." in name:
             return name
 
+        if self._demo_mode:
+            return name
+
         processed = self._process_names(self.deployments.keys())
 
         if name not in processed:
@@ -309,6 +320,9 @@ class Workspace:
 
         if not components:
             return None
+
+        if not self._demo_mode:
+            return components
 
         processed = self._process_names(self.dag.components.keys())
         _components = []
@@ -339,7 +353,9 @@ class Workspace:
         if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: deployment name too long")
 
-        name = f"{name}.{secrets.token_hex(2)[:3]}"
+        if not self._demo_mode:
+            name = f"{name}.{secrets.token_hex(2)[:3]}"
+
         context = self.repo.context(context_type)
 
         if name in self.deployments:
@@ -412,7 +428,9 @@ class Workspace:
         if len(name) > _MAX_COMPONENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: component name too long")
 
-        name = f"{name}.{secrets.token_hex(2)[:3]}"
+        if not self._demo_mode:
+            name = f"{name}.{secrets.token_hex(2)[:3]}"
+
         component_type = self.repo.component(type)
 
         try:
@@ -465,7 +483,9 @@ class Workspace:
         if not re.match(_NAME, name):
             raise exceptions.InvalidName(name)
 
-        name = f"{name}.{secrets.token_hex(2)[:3]}"
+        if not self._demo_mode:
+            name = f"{name}.{secrets.token_hex(2)[:3]}"
+
         link_type = self.repo.link(type)
 
         try:
