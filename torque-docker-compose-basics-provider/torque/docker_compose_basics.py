@@ -30,8 +30,7 @@ class V1Implementation(v1.bond.Bond):
             },
             "volumes": {
                 v1.schema.Optional(str): str
-            },
-            v1.schema.Optional("overrides"): object
+            }
         }
     }
 
@@ -93,9 +92,6 @@ class V1Implementation(v1.bond.Bond):
 
         if working_directory:
             obj["working_dir"] = working_directory
-
-        overrides = self.configuration.get("overrides", {})
-        obj = v1.utils.merge_dicts(obj, overrides)
 
         self.interfaces.dc.add_object("services", self._sanitized_name, obj)
 

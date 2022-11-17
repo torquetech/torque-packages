@@ -34,8 +34,7 @@ class V1Implementation(v1.bond.Bond):
                     "path": str,
                     "size": str
                 }
-            },
-            v1.schema.Optional("overrides"): object
+            }
         }
     }
 
@@ -151,9 +150,6 @@ class V1Implementation(v1.bond.Bond):
                 self.interfaces.vol.create(f"{prefix}-{name}", vol["size"])
                 for name, vol in volumes.items()
             ]
-
-        overrides = self.configuration.get("overrides", {})
-        obj = v1.utils.merge_dicts(obj, overrides)
 
         self.interfaces.k8s.add_object(obj)
 

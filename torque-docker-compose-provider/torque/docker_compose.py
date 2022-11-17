@@ -17,7 +17,9 @@ class V1Provider(v1.provider.Provider):
 
     CONFIGURATION = {
         "defaults": {},
-        "schema": {}
+        "schema": {
+            v1.schema.Optional("overrides"): dict
+        }
     }
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +42,9 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         compose = f"{self.context.path()}/docker-compose.yaml"
+
         objects = v1.utils.resolve_futures(self._objects)
+        objects = v1.utils.merge_dicts(objects, self.configuration.get("overrides", {}))
 
         with open(compose, "w", encoding="utf8") as file:
             file.write(yaml.safe_dump(objects, sort_keys=False))

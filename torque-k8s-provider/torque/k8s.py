@@ -42,8 +42,9 @@ class V1Provider(v1.provider.Provider):
         },
         "schema": {
             "quiet": bool,
-            v1.schema.Optional("namespace"): str
-        }
+            v1.schema.Optional("namespace"): str,
+            v1.schema.Optional("overrides"): dict
+       }
     }
 
     @classmethod
@@ -158,8 +159,13 @@ class V1Provider(v1.provider.Provider):
     def _update_object(self, name: str):
         """TODO"""
 
+        overrides = self.configuration.get("overrides", {})
+        overrides = overrides.get(name, {})
+
         old_obj = self._current_state.get(name)
+
         obj = v1.utils.resolve_futures(self._new_state.get(name))
+        obj = v1.utils.merge_dicts(obj, overrides)
 
         if old_obj == obj:
             return
