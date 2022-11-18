@@ -496,7 +496,7 @@ class V1Implementation(v1.bond.Bond):
                 "apiVersion": "networking.k8s.io/v1",
                 "kind": "Ingress",
                 "metadata": {
-                    "name": f"{ingress_id}",
+                    "name": ingress_id,
                     "namespace": namespace
                 },
                 "spec": {
