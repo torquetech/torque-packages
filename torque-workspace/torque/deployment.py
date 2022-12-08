@@ -656,13 +656,18 @@ def _load_defaults(providers: [str],
 def _load_configuration(context: v1.deployment.Context,
                         providers: [str],
                         dag: model.DAG,
-                        repo: repository.Repository) -> dict[str, object]:
+                        repo: repository.Repository,
+                        strict: bool) -> dict[str, object]:
     """TODO"""
 
     with context as ctx:
         config = ctx.get_data("configuration", v1.utils.fqcn(Deployment))
 
-    defaults = _load_defaults(providers, dag, repo)
+    if not strict:
+        defaults = _load_defaults(providers, dag, repo)
+
+    else:
+        defaults = {}
 
     if not config:
         return defaults
@@ -684,7 +689,7 @@ def load(name: str,
     """TODO"""
 
     context = _create_context(name, context_type, context_config, repo)
-    config = _load_configuration(context, providers, dag, repo)
+    config = _load_configuration(context, providers, dag, repo, strict)
 
     for extra_config in extra_configs:
         extra_config = v1.utils.resolve_path(extra_config)
