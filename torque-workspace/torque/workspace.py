@@ -188,7 +188,7 @@ class Workspace:
         """TODO"""
 
         return ''.join([_SYMBOLS[i % len(_SYMBOLS)]
-                        for i in secrets.token_bytes(3)])
+                        for i in secrets.token_bytes(4)])
 
     def _create_bond(self,
                      for_type: type,
