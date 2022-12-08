@@ -144,14 +144,19 @@ T = typing.TypeVar("T")
 class Future(typing.Generic[T]):
     """TODO"""
 
-    def __init__(self, callback: typing.Callable):
-        self._callback = callback
+    def __init__(self, obj: object):
+        self._obj = obj
         self._cached_value = None
 
     def __call__(self):
-        if self._callback:
-            self._cached_value = self._callback()
-            self._callback = None
+        if self._cached_value:
+            return self._cached_value
+
+        if callable(self._obj):
+            self._cached_value = self._obj()
+
+        else:
+            self._cached_value = self._obj
 
         return self._cached_value
 
