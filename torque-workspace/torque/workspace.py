@@ -21,13 +21,12 @@ from torque import v1
 
 
 _PROTO = r"^([^:]+)://"
-_NAME = r"^[a-z_][a-z0-9_]*$"
-
+_NAME = re.compile(r"^[a-z-][a-z0-9-]*$")
 _SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 _MAX_DEPLOYMENT_NAME_LENGTH = 16
-_MAX_COMPONENT_NAME_LENGTH = 16
-_MAX_LINK_NAME_LENGTH = 33
+_MAX_COMPONENT_NAME_LENGTH = 32
+_MAX_LINK_NAME_LENGTH = 32
 
 _WORKSPACE_SCHEMA = v1.schema.Schema({
     "version": str,
@@ -344,14 +343,14 @@ class Workspace:
                           no_suffix: bool) -> Deployment:
         """TODO"""
 
-        if not re.match(_NAME, name):
+        if not _NAME.match(name):
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_DEPLOYMENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: deployment name too long")
 
         if not no_suffix:
-            name = f"{name}.{self._generate_extension()}"
+            name = f"{name}-{self._generate_extension()}"
 
         context = self.repo.context(context_type)
 
@@ -420,14 +419,14 @@ class Workspace:
 
         """TODO"""
 
-        if not re.match(_NAME, name):
+        if not _NAME.match(name):
             raise exceptions.InvalidName(name)
 
         if len(name) > _MAX_COMPONENT_NAME_LENGTH:
             raise v1.exceptions.RuntimeError(f"{name}: component name too long")
 
         if not no_suffix:
-            name = f"{name}.{self._generate_extension()}"
+            name = f"{name}-{self._generate_extension()}"
 
         component_type = self.repo.component(type)
 
@@ -477,17 +476,17 @@ class Workspace:
         """TODO"""
 
         if not name:
-            name = f"link.{self._generate_extension()}"
+            name = f"link-{self._generate_extension()}"
 
         else:
             if len(name) > _MAX_LINK_NAME_LENGTH:
                 raise v1.exceptions.RuntimeError(f"{name}: link name too long")
 
-            if not re.match(_NAME, name):
+            if not _NAME.match(name):
                 raise exceptions.InvalidName(name)
 
             if not no_suffix:
-                name = f"{name}.{self._generate_extension()}"
+                name = f"{name}-{self._generate_extension()}"
 
         link_type = self.repo.link(type)
 
