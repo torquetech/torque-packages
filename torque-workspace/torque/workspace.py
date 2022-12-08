@@ -20,7 +20,6 @@ from torque import repository
 from torque import v1
 
 
-_PROTO = r"^([^:]+)://"
 _NAME = re.compile(r"^[a-z-][a-z0-9-]*$")
 _SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
