@@ -31,6 +31,8 @@ def _create(arguments: argparse.Namespace):
 
     ws.store()
 
+    print(d.name)
+
 
 def _remove(arguments: argparse.Namespace):
     """TODO"""

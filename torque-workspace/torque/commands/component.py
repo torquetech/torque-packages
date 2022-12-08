@@ -16,8 +16,10 @@ def _create(arguments: argparse.Namespace):
     params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
-    ws.create_component(arguments.name, arguments.type, params, arguments.no_suffix)
+    component = ws.create_component(arguments.name, arguments.type, params, arguments.no_suffix)
     ws.store()
+
+    print(component.name)
 
 
 def _remove(arguments: argparse.Namespace):

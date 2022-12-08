@@ -20,13 +20,15 @@ def _create(arguments: argparse.Namespace):
     if arguments.no_suffix and not arguments.name:
         raise v1.exceptions.RuntimeError("if --no-suffix is specified, name must be supplied")
 
-    ws.create_link(arguments.name,
-                   arguments.type,
-                   params,
-                   arguments.source,
-                   arguments.destination,
-                   arguments.no_suffix)
+    link = ws.create_link(arguments.name,
+                          arguments.type,
+                          params,
+                          arguments.source,
+                          arguments.destination,
+                          arguments.no_suffix)
     ws.store()
+
+    print(link.name)
 
 
 def _remove(arguments: argparse.Namespace):
