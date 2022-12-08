@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import os
 import threading
 import traceback
 import typing
@@ -120,6 +121,9 @@ class Runner:
                         self._quit()
 
             except v1.exceptions.TorqueException as exc:
+                if os.getenv("VERBOSE"):
+                    traceback.print_exc()
+
                 print(exc, file=sys.stderr)
 
                 self._exception = True
