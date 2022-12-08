@@ -161,6 +161,15 @@ def _generate_dag(workspace: dict[str, object]):
     return dag
 
 
+class _DummyInterfaceImplementation:
+    """TODO"""
+
+    def __getattribute__(self, attr):
+        """TOOD"""
+
+        return None
+
+
 class Workspace:
     """TODO"""
 
@@ -192,7 +201,7 @@ class Workspace:
 
         """TODO"""
 
-        return None
+        return _DummyInterfaceImplementation()
 
     def _component(self, component: model.Component):
         """TODO"""

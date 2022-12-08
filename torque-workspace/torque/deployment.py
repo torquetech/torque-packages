@@ -116,6 +116,15 @@ def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[st
         raise v1.exceptions.RuntimeError(f"deployment: {name}:\n{exc_str}") from exc
 
 
+class _DummyInterfaceImplementation:
+    """TODO"""
+
+    def __getattribute__(self, attr):
+        """TOOD"""
+
+        return None
+
+
 class _Configuration:
     """TODO"""
 
@@ -319,7 +328,7 @@ class Deployment:
         """TODO"""
 
         if self._providers is None:
-            return None
+            return _DummyInterfaceImplementation()
 
         if issubclass(for_type, v1.component.Component):
             profile = self._configuration.component(name)
