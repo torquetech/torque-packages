@@ -315,13 +315,6 @@ class V1Implementation(v1.bond.Bond):
 
         self._lock = threading.Lock()
 
-    def _show_secret(self, user: str):
-        """TODO"""
-
-        with self.context as ctx:
-            password = ctx.get_secret_data(self._users[user], "password")
-
-        print(f"{self.name}: user: {user}, password: {password}")
 
     def create(self):
         """TODO"""
@@ -375,10 +368,6 @@ class V1Implementation(v1.bond.Bond):
 
         if name in self._users:
             return
-
-        with self.context as ctx:
-            ctx.add_hook("show-secrets", functools.partial(self._show_secret,
-                                                           name))
 
         obj = {
             "kind": "v2/database/postgres/user",

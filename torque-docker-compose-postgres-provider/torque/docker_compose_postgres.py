@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import functools
 import hashlib
 
 import jinja2
@@ -149,11 +148,6 @@ class V1Implementation(v1.bond.Bond):
             }
         })
 
-    def _show_secret(self, user: str):
-        """TODO"""
-
-        print(f"{self.name}: user: {user}, password: {self._users[user]}")
-
     def _create_access(self, database: str, user: str):
         """TODO"""
 
@@ -163,9 +157,6 @@ class V1Implementation(v1.bond.Bond):
 
             if user not in self._users:
                 self._users[user] = ctx.secret(self.name, user)
-
-                ctx.add_hook("show-secrets", functools.partial(self._show_secret,
-                                                               user))
 
             self._databases[database].add(user)
 
