@@ -44,7 +44,7 @@ class V1Provider(v1.provider.Provider):
             "quiet": bool,
             v1.schema.Optional("namespace"): str,
             v1.schema.Optional("overrides"): dict
-       }
+        }
     }
 
     @classmethod
@@ -84,7 +84,7 @@ class V1Provider(v1.provider.Provider):
 
         self._setup_namespace()
 
-    def _load_state(self) -> dict[str, object]:
+    def _load_state(self):
         """TODO"""
 
         with self.context as ctx:
@@ -227,7 +227,7 @@ class V1Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-    def add_object(self, obj: dict[str, object]):
+    def add_object(self, obj: dict[str, object]) -> str:
         """TODO"""
 
         with self._lock:
@@ -253,6 +253,19 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         return self._namespace
+
+    def object(self, name: str) -> dict[str, object]:
+        """TODO"""
+
+        if name not in self._new_state:
+            raise v1.exceptions.RuntimeError(f"{name}: object not found")
+
+        return self._new_state[name]
+
+    def objects(self) -> dict[str, object]:
+        """TODO"""
+
+        return self._new_state
 
 
 repository = {
