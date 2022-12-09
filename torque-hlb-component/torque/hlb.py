@@ -14,18 +14,19 @@ Ingress = collections.namedtuple("Ingress", [
     "service",
     "port",
     "host",
-    "path"
+    "path",
+    "options"
 ])
 
 
 class V1ImplementationInterface(v1.bond.Interface):
     """TODO"""
 
-    def create(self, ingress_list: [Ingress]):
+    def add(self, ingress: Ingress):
         """TODO"""
 
 
-class V1IngressInterface(v1.component.DestinationInterface):
+class V1DestinationInterface(v1.component.DestinationInterface):
     """TODO"""
 
     def add(self, ingress: Ingress):
@@ -46,27 +47,12 @@ class V1Component(v1.component.Component):
             }
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._ingress_list = []
-
-    def _add_ingress(self, ingress: Ingress):
-        """TODO"""
-
-        self._ingress_list.append(ingress)
-
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
-            V1IngressInterface(add=self._add_ingress)
+            V1DestinationInterface(add=self.interfaces.impl.add)
         ]
-
-    def on_apply(self):
-        """TODO"""
-
-        self.interfaces.impl.create(self._ingress_list)
 
 
 repository = {

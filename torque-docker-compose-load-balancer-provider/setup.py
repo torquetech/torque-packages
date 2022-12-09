@@ -17,14 +17,14 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-setup(name="torque-docker-compose-hlb-provider",
+setup(name="torque-docker-compose-load-balancer-provider",
       version=load_file("VERSION"),
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
-      url="https://github.com/torquetech/torque-docker-compose-hlb-provider",
+      url="https://github.com/torquetech/torque-docker-compose-load-balancer-provider",
       license="MPL v2.0",
       classifiers=[
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
@@ -38,6 +38,6 @@ setup(name="torque-docker-compose-hlb-provider",
       ],
       entry_points={
           "torque": [
-              "torque-docker-compose-hlb-provider=torque.docker_compose_hlb:repository"
+              "torque-docker-compose-load-balancer-provider=torque.docker_compose_load_balancer:repository"
           ]
       })

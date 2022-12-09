@@ -101,8 +101,18 @@ class V1Provider(v1.provider.Provider):
             }
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._domains = set()
+
     def create(self, domain: str):
         """TODO"""
+
+        if domain in self._domains:
+            return
+
+        self._domains.add(domain)
 
         self.interfaces.do.add_object({
             "kind": "v2/domain",

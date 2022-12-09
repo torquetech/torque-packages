@@ -12,8 +12,8 @@ import yaml
 
 from torque import do
 from torque import do_certificates
-from torque import do_domains
 from torque import k8s
+from torque import k8s_load_balancer
 from torque import hlb
 from torque import v1
 
@@ -265,7 +265,6 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: {{instance}}
@@ -417,21 +416,6 @@ class V1Implementation(v1.bond.Bond):
     PROVIDER = V1Provider
     IMPLEMENTS = hlb.V1ImplementationInterface
 
-    CONFIGURATION = {
-        "defaults": {
-            "domain": "my-domain.com",
-            "certificate_type": "letsencrypt"
-        },
-        "schema": {
-            "domain": str,
-            "certificate_type": v1.schema.Or("letsencrypt", "external"),
-            v1.schema.Optional("certificate"): {
-                "certificate_file": str,
-                "key_file": str
-            }
-        }
-    }
-
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
         """TODO"""
@@ -441,54 +425,57 @@ class V1Implementation(v1.bond.Bond):
                 "interface": do.V1Provider,
                 "required": True
             },
+            "cert": {
+                "interface": do_certificates.V1Interface,
+                "required": True
+            },
             "k8s": {
                 "interface": k8s.V1Provider,
                 "required": True
             },
-            "domains": {
-                "interface": do_domains.V1Provider,
-                "required": False
-            },
-            "certs": {
-                "interface": do_certificates.V1Provider,
+            "lb": {
+                "interface": k8s_load_balancer.V1Provider,
                 "required": True
             }
         }
 
-    def _create_hlb(self,
-                    domain: str,
-                    certificate_id: v1.utils.Future[str],
-                    ingress_list: [hlb.Ingress]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._ingress_list = []
+
+        with self.interfaces.k8s as p:
+            p.add_hook("apply-objects", self._apply)
+
+    def _apply(self):
         """TODO"""
 
-        sanitized_name = self.name.replace(".", "-")
-        sanitized_name = sanitized_name.replace("_", "-")
+        domain = self.interfaces.cert.domain()
+        cert_id = self.interfaces.cert.certificate_id()
 
-        objs = _INGRESS_LB.render(instance=sanitized_name)
+        hosts = sorted([f"{i.host}" for i in self._ingress_list])
+
+        objs = _INGRESS_LB.render(instance=self.name)
 
         for obj in objs.split("---"):
             obj = yaml.safe_load(obj)
+            svc_name = self.interfaces.k8s.add_object(obj)
 
             if obj["kind"] == "Service":
-                hosts = sorted([f"{i.host}.{domain}." for i in ingress_list])
-                hosts = ",".join(hosts)
-
                 obj["metadata"]["annotations"] = {
-                    "external-dns.alpha.kubernetes.io/hostname": hosts,
-                    "service.beta.kubernetes.io/do-loadbalancer-name": sanitized_name,
+                    "service.beta.kubernetes.io/do-loadbalancer-certificate-id": cert_id,
+                    "service.beta.kubernetes.io/do-loadbalancer-name": self.name,
                     "service.beta.kubernetes.io/do-loadbalancer-protocol": "http",
                     "service.beta.kubernetes.io/do-loadbalancer-tls-ports": "443",
-                    "service.beta.kubernetes.io/do-loadbalancer-certificate-id": certificate_id,
                     "service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https": "true",
                     "service.beta.kubernetes.io/do-loadbalancer-enable-backend-keepalive": "true",
                     "service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol": "true"
                 }
 
-            self.interfaces.k8s.add_object(obj)
+                self.interfaces.lb.add_entry(k8s_load_balancer.Entry(svc_name, domain, hosts))
 
-        for ingress in ingress_list:
-            ingress_id = ingress.id.replace("_", "-")
-            ingress_id = ingress_id.replace(".", "-")
+        for ingress in self._ingress_list:
+            assert not isinstance(ingress.service, v1.utils.Future)
 
             service, namespace = ingress.service.split(".")
 
@@ -496,11 +483,11 @@ class V1Implementation(v1.bond.Bond):
                 "apiVersion": "networking.k8s.io/v1",
                 "kind": "Ingress",
                 "metadata": {
-                    "name": ingress_id,
-                    "namespace": namespace
+                    "name": ingress.id,
+                    "namespace": namespace,
                 },
                 "spec": {
-                    "ingressClassName": f"{sanitized_name}-ingress",
+                    "ingressClassName": f"{self.name}-ingress",
                     "rules": [{
                         "host": f"{ingress.host}.{domain}",
                         "http": {
@@ -521,25 +508,10 @@ class V1Implementation(v1.bond.Bond):
                 }
             })
 
-    def create(self, ingress_list: [hlb.Ingress]):
+    def add(self, ingress: hlb.Ingress):
         """TODO"""
 
-        if self.interfaces.domains:
-            self.interfaces.domains.create(self.configuration["domain"])
-
-        if self.configuration["certificate_type"] == "external":
-            certificate = self.configuration.get("certificate")
-
-            if not certificate:
-                raise v1.exceptions.RuntimeError(f"{self.name}: certificate configuration missing")
-
-            certificate_id = self.interfaces.certs.create_external(certificate["certificate_file"],
-                                                                   certificate["key_file"])
-
-        else:
-            certificate_id = self.interfaces.certs.create_managed(self.configuration["domain"])
-
-        self._create_hlb(self.configuration["domain"], certificate_id, ingress_list)
+        self._ingress_list.append(ingress)
 
 
 repository = {

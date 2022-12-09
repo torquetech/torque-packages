@@ -10,6 +10,7 @@ import yaml
 
 from torque import do
 from torque import k8s
+from torque import k8s_load_balancer
 from torque import v1
 
 
@@ -129,11 +130,21 @@ class V1Provider(v1.provider.Provider):
             "k8s": {
                 "interface": k8s.V1Provider,
                 "required": True
+            },
+            "lb": {
+                "interface": k8s_load_balancer.V1Provider,
+                "required": True
             }
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        with self.interfaces.k8s as p:
+            p.add_hook("apply-utils", self._apply)
+
+    def _apply(self):
+        """TODO"""
 
         token = self.interfaces.do.token()
 
@@ -144,8 +155,17 @@ class V1Provider(v1.provider.Provider):
         objs = _EXTERNAL_DNS.render(token=token)
 
         for obj in objs.split("---"):
-            obj = yaml.safe_load(obj)
-            self.interfaces.k8s.add_object(obj)
+            self.interfaces.k8s.add_object(yaml.safe_load(obj))
+
+        for entry in self.interfaces.lb.get_entries():
+            hosts = sorted([f"{host}.{entry.domain}." for host in entry.hosts])
+            hosts = ",".join(hosts)
+
+            service_obj = self.interfaces.k8s.object(entry.service)
+
+            service_obj["metadata"]["annotations"].update({
+                "external-dns.alpha.kubernetes.io/hostname": hosts
+            })
 
 
 repository = {

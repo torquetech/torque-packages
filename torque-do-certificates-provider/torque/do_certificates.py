@@ -10,6 +10,17 @@ import ssl
 from torque import v1
 from torque import do
 from torque import dolib
+from torque import do_domains
+
+
+class V1Interface(v1.bond.Interface):
+    """TODO"""
+
+    def domain(self) -> str:
+        """TODO"""
+
+    def certificate_id(self) -> v1.utils.Future[str]:
+        """TODO"""
 
 
 class _V2Certificates(dolib.Resource):
@@ -118,6 +129,26 @@ class _V2Certificates(dolib.Resource):
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
+
+class V1External(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = V1Provider
+    IMPLEMENTS = V1Interface
+
+    CONFIGURATION = {
+        "defaults": {
+            "domain": "my-domain.com",
+            "key_file": "key.pem",
+            "certificate_file": "cert.pem"
+        },
+        "schema": {
+            "domain": str,
+            "key_file": str,
+            "certificate_file": str
+        }
+    }
+
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
         """TODO"""
@@ -126,14 +157,30 @@ class V1Provider(v1.provider.Provider):
             "do": {
                 "interface": do.V1Provider,
                 "required": True
+            },
+            "domains": {
+                "interface": do_domains.V1Provider,
+                "required": False
             }
         }
 
-    def create_external(self, cert: str, key: str) -> v1.utils.Future[str]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._domain = self.configuration["domain"]
+        self._cert_id = None
+
+        with self.interfaces.do as p:
+            p.add_hook("apply-objects", self._apply)
+
+    def _apply(self):
         """TODO"""
 
-        cert = v1.utils.resolve_path(cert)
-        key = v1.utils.resolve_path(key)
+        if self.interfaces.domains:
+            self.interfaces.domains.create(self._domain)
+
+        cert = v1.utils.resolve_path(self.configuration["certificate_file"])
+        key = v1.utils.resolve_path(self.configuration["key_file"])
 
         with open(cert, encoding="utf-8") as f:
             cert = f.read()
@@ -144,7 +191,7 @@ class V1Provider(v1.provider.Provider):
         der = ssl.PEM_cert_to_DER_cert(cert)
         sha1 = hashlib.sha1(der).hexdigest()
 
-        return self.interfaces.do.add_object({
+        self._cert_id = self.interfaces.do.object_id(self.interfaces.do.add_object({
             "kind": "v2/certificate",
             "name": sha1,
             "params": {
@@ -153,22 +200,85 @@ class V1Provider(v1.provider.Provider):
                 "private_key": key,
                 "leaf_certificate": cert
             }
-        })
+        }))
 
-    def create_managed(self, domain: str) -> v1.utils.Future[str]:
+    def domain(self) -> str:
         """TODO"""
 
-        return self.interfaces.do.add_object({
+        return self._domain
+
+    def certificate_id(self) -> v1.utils.Future[str]:
+        """TODO"""
+
+        return self._cert_id
+
+
+class V1LetsEncrypt(v1.bond.Bond):
+    """TODO"""
+
+    PROVIDER = V1Provider
+    IMPLEMENTS = V1Interface
+
+    CONFIGURATION = {
+        "defaults": {
+            "domain": "my-domain.com"
+        },
+        "schema": {
+            "domain": str
+        }
+    }
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "do": {
+                "interface": do.V1Provider,
+                "required": True
+            },
+            "domains": {
+                "interface": do_domains.V1Provider,
+                "required": False
+            }
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._domain = self.configuration["domain"]
+        self._cert_id = None
+
+        with self.interfaces.do as p:
+            p.add_hook("apply", self._apply)
+
+    def _apply(self):
+        """TODO"""
+
+        if self.interfaces.domains:
+            self.interfaces.domains.create(self._domain)
+
+        self._cert_id = self.interfaces.do.object_id(self.interfaces.do.add_object({
             "kind": "v2/certificate",
-            "name": domain,
+            "name": self._domain,
             "params": {
-                "name": domain,
+                "name": self._domain,
                 "type": "lets_encrypt",
                 "dns_names": [
-                    f"*.{domain}"
+                    f"*.{self._domain}"
                 ]
             }
-        })
+        }))
+
+    def domain(self) -> str:
+        """TODO"""
+
+        return self._domain
+
+    def certificate_id(self) -> v1.utils.Future[str]:
+        """TODO"""
+
+        return self._cert_id
 
 
 dolib.HANDLERS.update({
@@ -179,6 +289,10 @@ repository = {
     "v1": {
         "providers": [
             V1Provider
+        ],
+        "bonds": [
+            V1External,
+            V1LetsEncrypt
         ]
     }
 }
