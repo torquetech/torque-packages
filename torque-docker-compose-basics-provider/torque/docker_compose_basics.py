@@ -13,24 +13,21 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1Implementation(v1.bond.Bond):
+class V1TaskImplementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = basics.V1ImplementationInterface
+    IMPLEMENTS = basics.V1TaskImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
-            "environment": {},
-            "volumes": {}
+            "environment": {}
         },
         "schema": {
             "environment": {
                 v1.schema.Optional(str): str
             },
-            "volumes": {
-                v1.schema.Optional(str): str
-            }
+            v1.schema.Optional("volume"): str
         }
     }
 
@@ -48,59 +45,107 @@ class V1Implementation(v1.bond.Bond):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._sanitized_name = self.name.replace(".", "-")
+        self._environment = []
+        self._image = None
+        self._command = None
+        self._arguments = None
+        self._working_directory = None
 
-    def create_task(self, image: str, **kwargs):
+        with self.interfaces.dc as p:
+            p.add_hook("apply-objects", self._apply)
+
+    def _apply(self):
         """TODO"""
 
         obj = {
-            "image": image,
-            "restart": "unless-stopped",
-            "volumes": []
+            "image": self._image,
+            "restart": "unless-stopped"
         }
 
-        command = kwargs.get("command")
-        arguments = kwargs.get("arguments")
-        environment = kwargs.get("environment")
-        working_directory = kwargs.get("working_directory")
-
-        if command:
-            obj["command"] = command
+        if self._command:
+            obj["command"] = self._command
 
         else:
-            if arguments:
-                obj["command"] = arguments
+            if self._arguments:
+                obj["command"] = self._arguments
 
-        obj["environment"] = [
-            f"{name.upper()}={value}" for name, value in environment
-        ]
+        obj["environment"] = {
+            name.upper(): value
+            for name, value in self.configuration["environment"].items()
+        }
 
-        obj["environment"].extend([
-            f"{name.upper()}={value}" for name, value in self.configuration["environment"]
-        ])
+        obj["environment"].update({
+            name.upper(): v1.utils.resolve_futures(value)
+            for name, value in self._environment
+        })
 
-        for name, path in self.configuration["volumes"].items():
-            volume_name = f"{self._sanitized_name}-{name}"
+        path = self.configuration.get("volume")
 
-            self.interfaces.dc.add_object("volumes", volume_name, {})
+        if path:
+            self.interfaces.dc.add_object("volumes", self.name, {})
 
-            obj["volumes"].append({
+            obj["volumes"] = [{
                 "type": "volume",
-                "source": volume_name,
+                "source": self.name,
                 "target": path
-            })
+            }]
 
-        if working_directory:
-            obj["working_dir"] = working_directory
+        if self._working_directory:
+            obj["working_dir"] = self._working_directory
 
-        self.interfaces.dc.add_object("services", self._sanitized_name, obj)
+        self.interfaces.dc.add_object("services", self.name, obj)
 
-    def create_service(self, image: str, proto: str, port: str, **kwargs) -> str:
+    def add_environment(self, name: str, value: v1.utils.Future[str] | str):
         """TODO"""
 
-        self.create_task(image, **kwargs)
+        self._environment.append((name, value))
 
-        return f"{proto}://{self._sanitized_name}:{port}"
+    def set_image(self, image: str):
+        """TODO"""
+
+        self._image = image
+
+    def set_command(self, command: [str]):
+        """TODO"""
+
+        self._command = command
+
+    def set_arguments(self, arguments: [str]):
+        """TODO"""
+
+        self._arguments = arguments
+
+    def set_working_directory(self, working_directory: str):
+        """TODO"""
+
+        self._working_directory = working_directory
+
+
+class V1ServiceImplementation(V1TaskImplementation):
+    """TODO"""
+
+    IMPLEMENTS = basics.V1ServiceImplementationInterface
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._proto = None
+        self._port = None
+
+    def set_proto(self, proto: str):
+        """TODO"""
+
+        self._proto = proto
+
+    def set_port(self, port: int):
+        """TODO"""
+
+        self._port = port
+
+    def service(self) -> basics.Service:
+        """TODO"""
+
+        return basics.Service(self._proto, self.name, self._port)
 
 
 repository = {
@@ -109,7 +154,8 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1Implementation
+            V1TaskImplementation,
+            V1ServiceImplementation
         ]
     }
 }

@@ -4,44 +4,89 @@
 
 """TODO"""
 
+import functools
 import os
 import subprocess
 
-from urllib.parse import urlparse
+from collections import namedtuple
 
 from torque import hlb
 from torque import postgres
 from torque import v1
 
 
-class V1ImplementationInterface(v1.bond.Interface):
+Service = namedtuple("Service", [
+    "proto",
+    "host",
+    "port"
+])
+
+
+class V1TaskImplementationInterface(v1.bond.Interface):
     """TODO"""
 
-    def create_task(self, image: str, **kwargs):
+    def add_environment(self, name: str, value: v1.utils.Future[str] | str):
         """TODO"""
 
-    def create_service(self, image: str, proto: str, port: str, **kwargs) -> str:
+    def set_image(self, image: str):
+        """TODO"""
+
+    def set_command(self, command: [str]):
+        """TODO"""
+
+    def set_arguments(self, arguments: [str]):
+        """TODO"""
+
+    def set_working_directory(self, working_directory: str):
         """TODO"""
 
 
-class V1TCPServiceInterface(v1.component.SourceInterface):
+class V1ServiceImplementationInterface(v1.bond.Interface):
     """TODO"""
 
-    def uri(self) -> str:
+    def add_environment(self, name: str, value: v1.utils.Future[str] | str):
+        """TODO"""
+
+    def set_image(self, image: str):
+        """TODO"""
+
+    def set_command(self, command: [str]):
+        """TODO"""
+
+    def set_arguments(self, arguments: [str]):
+        """TODO"""
+
+    def set_working_directory(self, working_directory: str):
+        """TODO"""
+
+    def set_proto(self, proto: str):
+        """TODO"""
+
+    def set_port(self, port: int):
+        """TODO"""
+
+    def service(self) -> v1.utils.Future[Service] | Service:
         """TODO"""
 
 
-class V1HttpServiceInterface(v1.component.SourceInterface):
+class V1TCPSourceInterface(v1.component.SourceInterface):
     """TODO"""
 
-    def uri(self) -> str:
+    def service(self) -> v1.utils.Future[Service] | Service:
+        """TODO"""
+
+
+class V1HttpSourceInterface(v1.component.SourceInterface):
+    """TODO"""
+
+    def service(self) -> v1.utils.Future[Service] | Service:
         """TODO"""
 
 
 class V1EnvironmentInterface(v1.component.DestinationInterface):
     """TODO"""
 
-    def add(self, name: str, value: str):
+    def add(self, name: str, value: object):
         """TODO"""
 
 
@@ -56,8 +101,7 @@ class BaseComponent(v1.component.Component):
                     "-t", "$IMAGE", "."
                 ]
             },
-            "run": {},
-            "environment": {}
+            "run": {}
         },
         "schema": {
             "path": str,
@@ -68,48 +112,9 @@ class BaseComponent(v1.component.Component):
                 v1.schema.Optional("command"): [str],
                 v1.schema.Optional("arguments"): [str],
                 v1.schema.Optional("work_directory"): str
-            },
-            "environment": {
-                v1.schema.Optional(str): str
             }
         }
     }
-
-    @classmethod
-    def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
-
-        return {
-            "impl": {
-                "interface": V1ImplementationInterface,
-                "required": True
-            }
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._path = v1.utils.resolve_path(self.parameters["path"])
-        self._image = None
-
-        self._environment = [
-            (name, value) for name, value in self.parameters["environment"].items()
-        ]
-
-    def _add_environment(self, name: str, value: str):
-        """TODO"""
-
-        self._environment.append((name, value))
-
-    def _get_image(self) -> str:
-        """TODO"""
-
-        if self._image:
-            return self._image
-
-        self._image = f"{self.name}:latest"
-
-        return self._image
 
     def _resolve_cmd(self) -> [str]:
         """TODO"""
@@ -117,7 +122,7 @@ class BaseComponent(v1.component.Component):
         cmd = []
 
         for i in self.parameters["build"]["command"]:
-            i = i.replace("$IMAGE", self._get_image())
+            i = i.replace("$IMAGE", f"{self.name}:latest")
             cmd.append(i)
 
         return cmd
@@ -126,16 +131,43 @@ class BaseComponent(v1.component.Component):
         """TODO"""
 
         return [
-            V1EnvironmentInterface(add=self._add_environment)
+            V1EnvironmentInterface(add=self.interfaces.impl.add_environment)
         ]
 
     def on_build(self):
         """TODO"""
 
+        path = v1.utils.resolve_path(self.parameters["path"])
         cmd = self._resolve_cmd()
 
         print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd, env=os.environ, cwd=self._path, check=True)
+        subprocess.run(cmd,
+                       env=os.environ,
+                       cwd=path,
+                       check=True)
+
+    def on_apply(self):
+        """TODO"""
+
+        self.interfaces.impl.set_image(f"{self.name}:latest")
+        self.interfaces.impl.set_command(self.parameters["run"].get("command"))
+        self.interfaces.impl.set_arguments(self.parameters["run"].get("arguments"))
+        self.interfaces.impl.set_working_directory(self.parameters["run"].get("working_directory"))
+
+
+class V1Task(BaseComponent):
+    """TODO"""
+
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "impl": {
+                "interface": V1TaskImplementationInterface,
+                "required": True
+            }
+        }
 
 
 class BaseService(BaseComponent):
@@ -148,40 +180,29 @@ class BaseService(BaseComponent):
         }
     })
 
+    @classmethod
+    def on_requirements(cls) -> dict[str, object]:
+        """TODO"""
+
+        return {
+            "impl": {
+                "interface": V1ServiceImplementationInterface,
+                "required": True
+            }
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._proto = None
-        self._uri = None
-
-    def _get_uri(self) -> v1.utils.Future[str]:
-        """TODO"""
-
-        return self._uri
 
     def on_apply(self):
         """TODO"""
 
-        self._uri = self.interfaces.impl.create_service(self._get_image(),
-                                                        self._proto,
-                                                        self.parameters["port"],
-                                                        environment=self._environment,
-                                                        commands=self.parameters.get("command"),
-                                                        arguments=self.parameters.get("arguments"),
-                                                        working_directory=self.parameters.get("working_directory"))
+        super().on_apply()
 
-
-class V1Task(BaseComponent):
-    """TODO"""
-
-    def on_apply(self):
-        """TODO"""
-
-        self.interfaces.impl.create_task(self._get_image(),
-                                         environment=self._environment,
-                                         commands=self.parameters.get("command"),
-                                         arguments=self.parameters.get("arguments"),
-                                         working_directory=self.parameters.get("working_directory"))
+        self.interfaces.impl.set_proto(self._proto)
+        self.interfaces.impl.set_port(int(self.parameters["port"]))
 
 
 class V1TCPService(BaseService):
@@ -205,7 +226,7 @@ class V1TCPService(BaseService):
         """TODO"""
 
         return super().on_interfaces() + [
-            V1TCPServiceInterface(uri=self._get_uri)
+            V1TCPSourceInterface(service=self.interfaces.impl.service)
         ]
 
 
@@ -221,7 +242,7 @@ class V1HttpService(BaseService):
         """TODO"""
 
         return super().on_interfaces() + [
-            V1HttpServiceInterface(uri=self._get_uri)
+            V1HttpSourceInterface(service=self.interfaces.impl.service)
         ]
 
 
@@ -242,11 +263,11 @@ class V1IngressLink(v1.link.Link):
 
         return {
             "src": {
-                "interface": V1HttpServiceInterface,
+                "interface": V1HttpSourceInterface,
                 "required": True
             },
             "dst": {
-                "interface": hlb.V1IngressInterface,
+                "interface": hlb.V1DestinationInterface,
                 "required": True
             }
         }
@@ -254,13 +275,17 @@ class V1IngressLink(v1.link.Link):
     def on_apply(self):
         """TODO"""
 
-        uri = urlparse(self.interfaces.src.uri())
+        service = self.interfaces.src.service()
+
+        if isinstance(service, v1.utils.Future):
+            raise v1.exceptions.RuntimeError(f"{self.source}: cannot link remote object")
 
         self.interfaces.dst.add(hlb.Ingress(self.name,
-                                            uri.hostname,
-                                            uri.port,
+                                            service.host,
+                                            service.port,
                                             self.parameters["host"],
-                                            self.parameters["path"]))
+                                            self.parameters["path"],
+                                            {}))
 
 
 class BaseLink(v1.link.Link):
@@ -277,11 +302,21 @@ class BaseLink(v1.link.Link):
             }
         }
 
+    def _resolve_uri(self, service: v1.utils.Future[Service] | Service):
+        """TODO"""
+
+        service = v1.utils.resolve_futures(service)
+
+        return f"{service.proto}://{service.host}:{service.port}"
+
     def on_apply(self):
         """TODO"""
 
-        self.interfaces.dst.add(self.source.replace(".", "_"),
-                                self.interfaces.src.uri())
+        service = self.interfaces.src.service()
+
+        self.interfaces.dst.add(self.source.replace("-", "_"),
+                                v1.utils.Future(functools.partial(self._resolve_uri,
+                                                                  service)))
 
 
 class V1PostgresLink(BaseLink):
@@ -301,17 +336,35 @@ class V1PostgresLink(BaseLink):
 
         return super().on_requirements() | {
             "src": {
-                "interface": postgres.V1ServiceInterface,
+                "interface": postgres.V1SourceInterface,
                 "required": True
             }
         }
 
+    def _resolve_pg_uri(self,
+                        auth: v1.utils.Future[postgres.Authorization],
+                        service: v1.utils.Future[postgres.Service] | postgres.Service) -> str:
+        """TODO"""
+
+        auth = v1.utils.resolve_futures(auth)
+        service = v1.utils.resolve_futures(service)
+
+        args = "&".join([f"{k}={v}" for k, v in service.options.items()])
+
+        return f"postgres://{auth.user}:{auth.password}@{service.host}:{service.port}/{auth.database}?{args}"
+
     def on_apply(self):
         """TODO"""
 
-        self.interfaces.dst.add(self.source.replace(".", "_"),
-                                self.interfaces.src.uri(self.parameters["database"],
-                                                        self.parameters["user"]))
+        auth = self.interfaces.src.auth(self.parameters["database"],
+                                        self.parameters["user"])
+
+        service = self.interfaces.src.service()
+
+        self.interfaces.dst.add(self.source.replace("-", "_"),
+                                v1.utils.Future(functools.partial(self._resolve_pg_uri,
+                                                                  auth,
+                                                                  service)))
 
 
 class V1TCPServiceLink(BaseLink):
@@ -323,7 +376,7 @@ class V1TCPServiceLink(BaseLink):
 
         return super().on_requirements() | {
             "src": {
-                "interface": V1TCPServiceInterface,
+                "interface": V1TCPSourceInterface,
                 "required": True
             }
         }
@@ -338,7 +391,7 @@ class V1HttpServiceLink(BaseLink):
 
         return super().on_requirements() | {
             "src": {
-                "interface": V1HttpServiceInterface,
+                "interface": V1HttpSourceInterface,
                 "required": True
             }
         }

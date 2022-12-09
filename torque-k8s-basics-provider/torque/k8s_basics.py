@@ -5,8 +5,8 @@
 """TODO"""
 
 from torque import basics
-from torque import container_registry
 from torque import k8s
+from torque import k8s_volumes
 from torque import v1
 
 
@@ -14,27 +14,21 @@ class V1Provider(v1.provider.Provider):
     """TODO"""
 
 
-class V1Implementation(v1.bond.Bond):
+class V1TaskImplementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = basics.V1ImplementationInterface
+    IMPLEMENTS = basics.V1TaskImplementationInterface
 
     CONFIGURATION = {
         "defaults": {
-            "environment": {},
-            "volumes": {}
+            "environment": {}
         },
         "schema": {
             "environment": {
                 v1.schema.Optional(str): str
             },
-            "volumes": {
-                v1.schema.Optional(str): {
-                    "path": str,
-                    "size": str
-                }
-            }
+            v1.schema.Optional("volume"): str
         }
     }
 
@@ -47,12 +41,8 @@ class V1Implementation(v1.bond.Bond):
                 "interface": k8s.V1Provider,
                 "required": True
             },
-            "cr": {
-                "interface": container_registry.V1Provider,
-                "required": True
-            },
             "vol": {
-                "interface": k8s.V1VolumeInterface,
+                "interface": k8s_volumes.V1Interface,
                 "required": False
             }
         }
@@ -60,35 +50,42 @@ class V1Implementation(v1.bond.Bond):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._sanitized_name = self.name.replace(".", "-")
-        self._sanitized_name = self._sanitized_name.replace("_", "-")
+        self._environment = []
+        self._image = None
+        self._command = None
+        self._arguments = None
+        self._working_directory = None
 
-    def create_task(self, image: str, **kwargs):
+        with self.interfaces.k8s as p:
+            p.add_hook("apply-objects", self._task_apply)
+
+    def _task_apply(self):
         """TODO"""
 
-        image = self.interfaces.cr.push(image)
+        namespace = self.interfaces.k8s.namespace()
+        image = self.interfaces.k8s.register_image(self._image, namespace)
 
         obj = {
             "apiVersion": "apps/v1",
             "kind": "Deployment",
             "metadata": {
-                "name": self._sanitized_name,
-                "namespace": self.interfaces.k8s.namespace(),
+                "name": self.name,
+                "namespace": namespace,
                 "labels": {
-                    "app.kubernetes.io/name": self._sanitized_name
+                    "app.kubernetes.io/name": self.name
                 }
             },
             "spec": {
                 "replicas": 1,
                 "selector": {
                     "matchLabels": {
-                        "app.kubernetes.io/name": self._sanitized_name
+                        "app.kubernetes.io/name": self.name
                     }
                 },
                 "template": {
                     "metadata": {
                         "labels": {
-                            "app.kubernetes.io/name": self._sanitized_name
+                            "app.kubernetes.io/name": self.name
                         }
                     },
                     "spec": {
@@ -105,86 +102,127 @@ class V1Implementation(v1.bond.Bond):
             }
         }
 
-        command = kwargs.get("command")
-        arguments = kwargs.get("arguments")
-        environment = kwargs.get("environment")
-        working_directory = kwargs.get("working_directory")
-
         spec = obj["spec"]["template"]["spec"]
         container = spec["containers"][0]
 
-        if command:
-            container["command"] = command
+        if self._command:
+            container["command"] = self._command
 
-        if arguments:
-            container["args"] = arguments
+        if self._arguments:
+            container["args"] = self._arguments
 
-        if working_directory:
-            container["workDir"] = working_directory
+        if self._working_directory:
+            container["workDir"] = self._working_directory
 
         container["env"] = [{
             "name": name.upper(),
             "value": value
-        } for name, value in environment]
+        } for name, value in self.configuration["environment"].items()]
 
         container["env"].extend([{
             "name": name.upper(),
-            "value": value
-        } for name, value in self.configuration["environment"]])
+            "value": v1.utils.resolve_futures(value)
+        } for name, value in self._environment])
 
-        volumes = self.configuration["volumes"]
+        path = self.configuration.get("volume")
 
-        if volumes:
+        if path:
             if not self.interfaces.vol:
                 raise v1.exceptions.RuntimeError(f"{self.name}: no volumes provider")
 
-            prefix = f"{self.context.deployment_name}-{self.name}"
-            prefix = prefix.replace(".", "-")
-
             container["volumeMounts"] = [{
-                "name": f"{prefix}-{name}",
-                "mountPath": vol["path"]
-            } for name, vol in volumes.items()]
+                "name": self.interfaces.vol.ref_name(),
+                "mountPath": path
+            }]
 
             spec["volumes"] = [
-                self.interfaces.vol.create(f"{prefix}-{name}", vol["size"])
-                for name, vol in volumes.items()
+                self.interfaces.vol.spec()
             ]
 
         self.interfaces.k8s.add_object(obj)
 
-        namespace = obj["metadata"]["namespace"]
-        self.interfaces.k8s.add_container_registry_to(namespace)
-
-        return namespace
-
-    def create_service(self, image: str, proto: str, port: str, **kwargs) -> str:
+    def add_environment(self, name: str, value: v1.utils.Future[str] | str):
         """TODO"""
 
-        namespace = self.create_task(image, **kwargs)
+        self._environment.append((name, value))
+
+    def set_image(self, image: str):
+        """TODO"""
+
+        self._image = image
+
+    def set_command(self, command: [str]):
+        """TODO"""
+
+        self._command = command
+
+    def set_arguments(self, arguments: [str]):
+        """TODO"""
+
+        self._arguments = arguments
+
+    def set_working_directory(self, working_directory: str):
+        """TODO"""
+
+        self._working_directory = working_directory
+
+
+class V1ServiceImplementation(V1TaskImplementation):
+    """TODO"""
+
+    IMPLEMENTS = basics.V1ServiceImplementationInterface
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._proto = None
+        self._port = None
+
+        with self.interfaces.k8s as p:
+            p.add_hook("apply-objects", self._svc_apply)
+
+    def _svc_apply(self) -> str:
+        """TODO"""
+
+        namespace = self.interfaces.k8s.namespace()
 
         obj = {
             "apiVersion": "v1",
             "kind": "Service",
             "metadata": {
-                "name": self._sanitized_name,
+                "name": self.name,
                 "namespace": namespace
             },
             "spec": {
                 "selector": {
-                    "app.kubernetes.io/name": self._sanitized_name
+                    "app.kubernetes.io/name": self.name
                 },
                 "ports": [{
                     "protocol": "TCP",
-                    "port": int(port),
-                    "targetPort": int(port)
+                    "port": int(self._port),
+                    "targetPort": int(self._port)
                 }]
             }
         }
 
         self.interfaces.k8s.add_object(obj)
 
-        return f"{proto}://{self._sanitized_name}.{namespace}:{port}"
+    def set_proto(self, proto: str):
+        """TODO"""
+
+        self._proto = proto
+
+    def set_port(self, port: int):
+        """TODO"""
+
+        self._port = port
+
+    def service(self) -> basics.Service:
+        """TODO"""
+
+        host = f"{self.name}.{self.interfaces.k8s.namespace()}"
+
+        return basics.Service(self._proto, host, self._port)
 
 
 repository = {
@@ -193,7 +231,8 @@ repository = {
             V1Provider
         ],
         "bonds": [
-            V1Implementation
+            V1TaskImplementation,
+            V1ServiceImplementation
         ]
     }
 }
