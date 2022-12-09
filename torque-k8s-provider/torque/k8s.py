@@ -77,9 +77,9 @@ class V1Provider(v1.provider.Provider):
 
         self._load_state()
 
-        with self.context as ctx:
-            ctx.add_hook("apply", self._apply)
-            ctx.add_hook("delete", self._delete)
+        with self as p:
+            p.add_hook("apply", self._apply)
+            p.add_hook("delete", self._delete)
 
         self._setup_namespace()
 
@@ -187,8 +187,8 @@ class V1Provider(v1.provider.Provider):
             k8slib.delete_object(self._client, obj)
             self._current_state.pop(name)
 
-        with self.context as ctx:
-            ctx.add_hook("gc", _delete_object)
+        with self as p:
+            p.add_hook("collect-garbage", _delete_object)
 
     def _apply(self):
         """TODO"""

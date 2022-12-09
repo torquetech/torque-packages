@@ -17,20 +17,9 @@ class _ContextData:
 
     def __init__(self,
                  buckets: dict[str, object],
-                 hooks: [typing.Callable],
                  load_bucket: typing.Callable):
         self._buckets = buckets
-        self._hooks = hooks
         self._load_bucket = load_bucket
-
-    def _find_ndx(self, hooks: list, obj: object):
-        """TODO"""
-
-        for i, hook in enumerate(hooks):
-            if obj == hook.__self__.__class__:
-                return i
-
-        return len(hooks)
 
     def set_data(self, bucket: str, name: type, data: object):
         """TODO"""
@@ -88,23 +77,6 @@ class _ContextData:
 
         return s
 
-    def add_hook(self, bucket: str, hook: typing.Callable, **kwargs):
-        """TODO"""
-
-        if bucket not in self._hooks:
-            self._hooks[bucket] = []
-
-        hooks = self._hooks[bucket]
-        add_before = kwargs.get("add_before", None)
-
-        if add_before:
-            ndx = self._find_ndx(hooks, add_before)
-
-        else:
-            ndx = len(hooks)
-
-        hooks.insert(ndx, hook)
-
 
 class Context:
     """TODO"""
@@ -128,35 +100,14 @@ class Context:
 
         self._lock = threading.Lock()
         self._buckets = {}
-        self._hooks = {}
 
     def __enter__(self):
         self._lock.acquire()
 
-        return _ContextData(self._buckets,
-                            self._hooks,
-                            self.load_bucket)
+        return _ContextData(self._buckets, self.load_bucket)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
-
-    def run_hooks(self, bucket: str, **kwargs):
-        """TODO"""
-
-        quiet = kwargs.get("quiet", True)
-        reverse = kwargs.get("reverse", False)
-        op = kwargs.get("op", bucket)
-
-        hooks = self._hooks.get(bucket, [])
-
-        if reverse:
-            hooks = reversed(hooks)
-
-        for hook in hooks:
-            if not quiet:
-                print(f"{op} {hook.__module__}...")
-
-            hook()
 
     def store(self):
         """TODO"""

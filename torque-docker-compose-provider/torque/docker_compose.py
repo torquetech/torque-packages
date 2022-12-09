@@ -40,9 +40,9 @@ class V1Provider(v1.provider.Provider):
 
         self._lock = threading.Lock()
 
-        with self.context as ctx:
-            ctx.add_hook("apply", self._apply)
-            ctx.add_hook("delete", self._delete)
+        with self as p:
+            p.add_hook("apply", self._apply)
+            p.add_hook("delete", self._delete)
 
     def _apply(self):
         """TODO"""

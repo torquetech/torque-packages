@@ -459,17 +459,21 @@ class Deployment:
 
         self._execute(workers, _on_apply)
 
-        self._context.run_hooks("apply", op="applying", quiet=False)
-        self._context.run_hooks("gc", reverse=True)
+        for provider in self._providers.values():
+            provider.run_hooks("apply-objects", op="applying", quiet=False)
+            provider.run_hooks("apply-utils", op="applying", quiet=False)
+            provider.run_hooks("apply", op="applying", quiet=False)
 
+        for provider in reversed(self._providers.values()):
+            provider.run_hooks("collect-garbage", reverse=True)
 
     def delete(self):
         """TODO"""
 
         self._setup_providers()
 
-        self._context.run_hooks("delete", op="deleting", quiet=False)
-        self._context.run_hooks("gc", reverse=True)
+        for provider in reversed(self._providers.values()):
+            provider.run_hooks("delete", op="deleting", quiet=False)
 
         for provider in reversed(self._providers.values()):
             provider.run_hooks("collect-garbage", reverse=True)

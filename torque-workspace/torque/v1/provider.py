@@ -4,7 +4,9 @@
 
 """TODO"""
 
+import inspect
 import threading
+import typing
 
 from . import deployment
 from . import utils
@@ -14,8 +16,10 @@ class _ProviderContext:
     """TODO"""
 
     def __init__(self,
-                 data: dict[str, object]):
+                 data: dict[str, object],
+                 hooks: list[typing.Callable]):
         self._data = data
+        self._hooks = hooks
 
     def set_data(self, cls: type, name: str, data: object):
         """TODO"""
@@ -37,6 +41,16 @@ class _ProviderContext:
 
         return self._data[cls_type].get(name)
 
+    def add_hook(self, bucket: str, hook: typing.Callable):
+        """TODO"""
+
+        assert callable(hook)
+
+        if bucket not in self._hooks:
+            self._hooks[bucket] = []
+
+        self._hooks[bucket].append(hook)
+
 
 class Provider:
     """TODO"""
@@ -56,11 +70,12 @@ class Provider:
 
         self._lock = threading.Lock()
         self._data = {}
+        self._hooks = {}
 
     def __enter__(self):
         self._lock.acquire()
 
-        return _ProviderContext(self._data)
+        return _ProviderContext(self._data, self._hooks)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
@@ -78,3 +93,30 @@ class Provider:
         """TODO"""
 
         return {}
+
+    def run_hooks(self, bucket: str, **kwargs):
+        """TODO"""
+
+        quiet = kwargs.get("quiet", True)
+        reverse = kwargs.get("reverse", False)
+        op = kwargs.get("op", bucket)
+
+        hooks = self._hooks.get(bucket, [])
+
+        if reverse:
+            hooks = reversed(hooks)
+
+        for hook in hooks:
+            if not quiet:
+                if inspect.isfunction(hook):
+                    name = f"{hook.__module__}.{hook.__qualname__}"
+
+                elif inspect.ismethod(hook):
+                    name = utils.fqcn(hook.__self__)
+
+                else:
+                    name = utils.fqcn(hook)
+
+                print(f"{op} {name}...")
+
+            hook()

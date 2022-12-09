@@ -75,10 +75,10 @@ class V1Implementation(v1.bond.Bond):
         self._image = f"postgres:{self.configuration['version']}"
         self._password = self._create_access("postgres", "postgres")
 
-        with self.context as ctx:
-            ctx.add_hook("apply", self._create_init, add_before=docker_compose.V1Provider)
+        with self.interfaces.dc as p:
+            p.add_hook("apply-objects", self._apply)
 
-    def _create_init(self):
+    def _apply(self):
         """TODO"""
 
         local_sql_path = f"{self.context.path()}/{self.name}.sql"
