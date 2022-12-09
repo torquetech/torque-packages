@@ -4,9 +4,6 @@
 
 """TODO"""
 
-import base64
-import json
-
 import kubernetes
 
 from torque import container_registry
@@ -49,8 +46,8 @@ class V1Provider(v1.provider.Provider):
                 "required": True
             },
             "cr": {
-                "interface": container_registry.V1ClientInterface,
-                "required": True
+                "interface": container_registry.V1Provider,
+                "required": False
             }
         }
 
@@ -63,10 +60,7 @@ class V1Provider(v1.provider.Provider):
         self._new_state = {}
 
         self._namespaces = set()
-
         self._namespace = self.configuration.get("namespace", self.context.deployment_name)
-        self._namespace = self._namespace.replace(".", "-")
-        self._namespace = self._namespace.replace("_", "-")
 
         self._load_state()
 
@@ -110,29 +104,10 @@ class V1Provider(v1.provider.Provider):
     def _setup_container_registry(self):
         """TODO"""
 
-        auth = self.interfaces.cr.auth()
+        if not self._namespaces:
+            return
 
-        server = auth["server"]
-        username = auth["username"]
-        password = auth["password"]
-
-        auth = f"{username}:{password}"
-
-        auth = auth.encode()
-        auth = base64.b64encode(auth)
-        auth = auth.decode()
-
-        dockerconfig = json.dumps({
-            "auths": {
-                server: {
-                    "auth": auth
-                }
-            }
-        })
-
-        dockerconfig = dockerconfig.encode()
-        dockerconfig = base64.b64encode(dockerconfig)
-        dockerconfig = dockerconfig.decode()
+        dockerconfig = self.interfaces.cr.login()
 
         for namespace in self._namespaces:
             self.add_object({
@@ -147,6 +122,8 @@ class V1Provider(v1.provider.Provider):
                     ".dockerconfigjson": dockerconfig
                 }
             })
+
+        self.interfaces.cr.push_images()
 
     def _update_object(self, name: str):
         """TODO"""
@@ -189,7 +166,7 @@ class V1Provider(v1.provider.Provider):
         try:
             self._connect()
 
-            if self._namespaces:
+            if self.interfaces.cr:
                 self._setup_container_registry()
 
             v1.utils.apply_objects(self._current_state,
@@ -234,10 +211,18 @@ class V1Provider(v1.provider.Provider):
 
             self._new_state[name] = obj
 
-    def add_container_registry_to(self, namespace: str):
+            return name
+
+    def register_image(self, image: str, namespace: str) -> str:
         """TODO"""
 
-        self._namespaces.add(namespace)
+        if not self.interfaces.cr:
+            raise v1.exceptions.RuntimeError("container registry not initialized")
+
+        with self._lock:
+            self._namespaces.add(namespace)
+
+        return self.interfaces.cr.register_image(image)
 
     def namespace(self) -> str:
         """TODO"""

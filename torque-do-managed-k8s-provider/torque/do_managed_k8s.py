@@ -355,22 +355,21 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._cluster_name = f"{self.context.deployment_name}.k8s"
+        self._cluster_name = f"{self.context.deployment_name}-k8s"
         self._cluster_id = None
 
-        self._create_cluster()
+        with self.interfaces.do as p:
+            p.add_hook("apply-objects", self._apply)
 
-    def _create_cluster(self):
+    def _apply(self):
         """TODO"""
-
-        sanitized_name = self._cluster_name.replace(".", "-")
 
         obj = {
             "kind": "v2/kubernetes",
             "name": self._cluster_name,
-            "cluster_name": sanitized_name,
+            "cluster_name": self._cluster_name,
             "params": {
-                "name": sanitized_name,
+                "name": self._cluster_name,
                 "region": self.interfaces.do.region(),
                 "vpc_uuid": self.interfaces.do.vpc_id(),
                 "version": "latest"
@@ -380,9 +379,9 @@ class V1Provider(v1.provider.Provider):
         obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
         for pool in obj["params"]["node_pools"]:
-            pool["name"] = f"{sanitized_name}-{pool['name']}"
+            pool["name"] = f"{self._cluster_name}-{pool['name']}"
 
-        self._cluster_id = self.interfaces.do.add_object(obj)
+        self._cluster_id = self.interfaces.do.object_id(self.interfaces.do.add_object(obj))
 
         self.interfaces.do.add_resource("do:kubernetes", self._cluster_id)
 
@@ -412,7 +411,7 @@ class V1Client(v1.bond.Bond):
                 "interface": do.V1Provider,
                 "required": True
             },
-            "do_k8s": {
+            "k8s": {
                 "interface": V1Provider,
                 "required": True
             }
@@ -422,10 +421,13 @@ class V1Client(v1.bond.Bond):
         """TODO"""
 
         with self.context as ctx:
-            config = ctx.get_secret_data(self.interfaces.do_k8s.cluster_name(), "kubeconfig")
+            config = ctx.get_secret_data(self.interfaces.k8s.cluster_name(), "kubeconfig")
 
             if not config:
-                cluster_id = self.interfaces.do_k8s.cluster_id()
+                cluster_id = self.interfaces.k8s.cluster_id()
+
+                if not cluster_id:
+                    raise k8s.ClusterNotInitialized("digitalocean k8s cluster not initialized")
 
                 try:
                     cluster_id = v1.utils.resolve_futures(cluster_id)
@@ -436,7 +438,7 @@ class V1Client(v1.bond.Bond):
                 client = self.interfaces.do.client()
                 config = _kubeconfig(client, cluster_id)
 
-                ctx.set_secret_data(self.interfaces.do_k8s.cluster_name(), "kubeconfig", config)
+                ctx.set_secret_data(self.interfaces.k8s.cluster_name(), "kubeconfig", config)
 
             return kubernetes.config.load_kube_config_from_dict(config)
 

@@ -181,19 +181,19 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._name = f"{self.context.deployment_name}.registry"
-        self._prefix = self._name.replace(".", "-")
+        self._name = f"{self.context.deployment_name}-registry"
 
-        self._create_registry()
+        with self.interfaces.do as p:
+            p.add_hook("apply-objects", self._apply)
 
-    def _create_registry(self):
+    def _apply(self):
         """TODO"""
 
         obj = {
             "kind": "v2/registry",
             "name": self._name,
             "params": {
-                "name": self._prefix,
+                "name": self._name,
                 "region": self.interfaces.do.region()
             }
         }
@@ -201,11 +201,6 @@ class V1Provider(v1.provider.Provider):
         obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
         self.interfaces.do.add_object(obj)
-
-    def prefix(self) -> str:
-        """TODO"""
-
-        return self._prefix
 
     def auth(self) -> dict[str, object]:
         """TODO"""
@@ -215,6 +210,8 @@ class V1Provider(v1.provider.Provider):
 
             if not auth:
                 auth = _auth(self.interfaces.do.client(), self._name)
+                auth["prefix"] = self._name
+
                 ctx.set_secret_data(self._name, "auth", auth)
 
             return auth
@@ -224,7 +221,7 @@ class V1Client(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = container_registry.V1ClientInterface
+    IMPLEMENTS = container_registry.V1Interface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -236,11 +233,6 @@ class V1Client(v1.bond.Bond):
                 "required": True
             }
         }
-
-    def prefix(self) -> str:
-        """TODO"""
-
-        return self.interfaces.cr.prefix()
 
     def auth(self) -> dict[str, object]:
         """TODO"""

@@ -4,7 +4,9 @@
 
 """TODO"""
 
+import base64
 import functools
+import json
 import os
 import subprocess
 import threading
@@ -12,25 +14,8 @@ import threading
 from torque import v1
 
 
-def _strip_dop_username(cmd: [str]) -> [str]:
+class V1Interface(v1.bond.Interface):
     """TODO"""
-
-    res = []
-
-    for i in cmd:
-        if i.startswith("dop_"):
-            i = "****"
-
-        res.append(i)
-
-    return res
-
-
-class V1ClientInterface(v1.bond.Interface):
-    """TODO"""
-
-    def prefix(self) -> str:
-        """TODO"""
 
     def auth(self) -> dict[str, dict]:
         """TODO"""
@@ -39,20 +24,13 @@ class V1ClientInterface(v1.bond.Interface):
 class V1Provider(v1.provider.Provider):
     """TODO"""
 
-    CONFIGURATION = {
-        "defaults": {},
-        "schema": {
-            v1.schema.Optional("prefix"): str
-        }
-    }
-
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
         """TODO"""
 
         return {
-            "client": {
-                "interface": V1ClientInterface,
+            "impl": {
+                "interface": V1Interface,
                 "required": True
             }
         }
@@ -60,22 +38,48 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._images = {}
+        self._tags = {}
         self._auth = None
-        self._prefix = None
+
         self._lock = threading.Lock()
 
-        with self.context as ctx:
-            ctx.add_hook("apply", self._apply)
-
-    def _connect(self):
+    def _resolve_tag(self, image: str) -> str:
         """TODO"""
 
-        self._auth = self.interfaces.client.auth()
-        self._prefix = self.interfaces.client.prefix()
+        return "/".join([self._auth["server"],
+                         self._auth["prefix"],
+                         image])
 
-    def _login(self):
+    def _dockerconfig(self) -> str:
         """TODO"""
+
+        server = self._auth["server"]
+        username = self._auth["username"]
+        password = self._auth["password"]
+
+        auth = f"{username}:{password}"
+
+        auth = auth.encode()
+        auth = base64.b64encode(auth)
+        auth = auth.decode()
+
+        dockerconfig = json.dumps({
+            "auths": {
+                server: {
+                    "auth": auth
+                }
+            }
+        })
+
+        dockerconfig = dockerconfig.encode()
+        dockerconfig = base64.b64encode(dockerconfig)
+
+        return dockerconfig.decode()
+
+    def login(self) -> str:
+        """TODO"""
+
+        self._auth = self.interfaces.impl.auth()
 
         cmd = [
             "docker", "login",
@@ -84,16 +88,18 @@ class V1Provider(v1.provider.Provider):
             self._auth["server"]
         ]
 
-        print(f"+ {' '.join(_strip_dop_username(cmd))}")
+        print(f"+ {' '.join(cmd[:3] + ['****'] + cmd[4:])}")
         subprocess.run(cmd,
                        env=os.environ,
                        input=bytes(self._auth["password"], encoding="utf-8"),
                        check=True)
 
-    def _push(self):
+        return self._dockerconfig()
+
+    def push_images(self):
         """TODO"""
 
-        for image, tag in self._images.items():
+        for image, tag in self._tags.items():
             tag = v1.utils.resolve_futures(tag)
 
             cmd = [
@@ -116,36 +122,14 @@ class V1Provider(v1.provider.Provider):
                            env=os.environ,
                            check=True)
 
-    def _apply(self):
-        """TODO"""
-
-        self._connect()
-
-        self._login()
-        self._push()
-
-    def _resolve_tag(self, image: str) -> str:
-        """TODO"""
-
-        el = filter(lambda x: x != "", [self._auth["server"],
-                                        self._prefix,
-                                        self.configuration.get("prefix", ""),
-                                        image])
-        tag = "/".join(el)
-
-        return tag
-
-    def push(self, image: str) -> v1.utils.Future[str]:
+    def register_image(self, image: str) -> v1.utils.Future[str]:
         """TODO"""
 
         with self._lock:
-            if image in self._images:
-                raise v1.exceptions.RuntimeError(f"{image}: already exists")
+            if image not in self._tags:
+                self._tags[image] = v1.utils.Future(functools.partial(self._resolve_tag, image))
 
-            future = v1.utils.Future(functools.partial(self._resolve_tag, image))
-            self._images[image] = future
-
-            return future
+            return self._tags[image]
 
 
 repository = {
