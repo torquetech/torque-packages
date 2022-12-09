@@ -512,10 +512,18 @@ class Deployment:
         self._context.run_hooks("delete", op="deleting", quiet=False)
         self._context.run_hooks("gc", reverse=True)
 
-    def dot(self) -> str:
+        for provider in reversed(self._providers.values()):
+            provider.run_hooks("collect-garbage", reverse=True)
+
+    def load_object(self, name: str) -> dict[str, object]:
         """TODO"""
 
-        return self._dag.dot(self._context.deployment_name)
+        return self._context.load_bucket(name)
+
+    def store_object(self, name: str, data: dict[str, object]):
+        """TODO"""
+
+        self._context.store_bucket(name, data)
 
     def update(self):
         """TODO"""
@@ -531,6 +539,11 @@ class Deployment:
         """TODO"""
 
         self._context.store()
+
+    def dot(self) -> str:
+        """TODO"""
+
+        return self._dag.dot(self._context.deployment_name)
 
 
 def _create_context(name: str,
