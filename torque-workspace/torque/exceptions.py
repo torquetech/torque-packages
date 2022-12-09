@@ -88,6 +88,13 @@ class InterfaceNotFound(v1.exceptions.TorqueException):
         return f"{self.args[0]}: interface not found"
 
 
+class InterfaceNotBound(v1.exceptions.TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: interface not bound"
+
+
 class BondNotFound(v1.exceptions.TorqueException):
     """TODO"""
 
@@ -95,11 +102,25 @@ class BondNotFound(v1.exceptions.TorqueException):
         return f"{self.args[0]}: bond not found"
 
 
+class InvalidBond(v1.exceptions.TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: invalid bond: {self.args[1]}"
+
+
 class InvalidRequirement(v1.exceptions.TorqueException):
     """TODO"""
 
     def __str__(self) -> str:
-        return f"{self.args[0]}: invalid requirements"
+        return f"{self.args[0]}: invalid requirement"
+
+
+class InvalidRequirementName(v1.exceptions.TorqueException):
+    """TODO"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: invalid requirement name"
 
 
 class InvalidName(v1.exceptions.TorqueException):

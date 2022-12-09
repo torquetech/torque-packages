@@ -4,6 +4,7 @@
 
 """TODO"""
 
+import re
 import typing
 import types
 
@@ -11,6 +12,8 @@ from torque import exceptions
 from torque import model
 from torque import v1
 
+
+_NAME = re.compile(r"^[a-z][a-z0-9]*$")
 
 _REQUIREMENTS_SCHEMA = v1.schema.Schema({
     v1.schema.Optional(str): {
@@ -20,11 +23,12 @@ _REQUIREMENTS_SCHEMA = v1.schema.Schema({
 })
 
 
-def _bind_to(for_type: type,
-             name: str,
-             bond_type: type,
-             create_bond: typing.Callable,
-             bind_provider: typing.Callable) -> [object]:
+def bind_to_bond(obj_type: type,
+                 obj_name: str,
+                 bond_path: [str],
+                 bond_type: type,
+                 create_bond: typing.Callable,
+                 bind_provider: typing.Callable) -> [object]:
     """TODO"""
 
     interfaces = types.SimpleNamespace()
@@ -38,32 +42,25 @@ def _bind_to(for_type: type,
     for r_name, r in requirements.items():
         interface = None
 
+        if not _NAME.match(r_name):
+            raise exceptions.InvalidRequirementName(r_name)
+
         if issubclass(r["interface"], v1.bond.Interface):
-            interface = create_bond(for_type, name, r["interface"], r["required"])
+            interface = create_bond(obj_type,
+                                    obj_name,
+                                    bond_path + [r_name],
+                                    r["interface"],
+                                    r["required"])
 
         elif issubclass(r["interface"], v1.provider.Provider):
             interface = bind_provider(r["interface"], r["required"])
 
         else:
-            raise exceptions.InvalidRequirement(name)
+            raise exceptions.InvalidRequirement(obj_name)
 
         setattr(interfaces, r_name, interface)
 
     return interfaces
-
-
-def bind_to_bond(for_type: type,
-                 name: str,
-                 bond_type: type,
-                 create_bond: typing.Callable,
-                 bind_provider: typing.Callable) -> [object]:
-    """TODO"""
-
-    return _bind_to(for_type,
-                    name,
-                    bond_type,
-                    create_bond,
-                    bind_provider)
 
 
 def bind_to_provider(provider_type: type,
@@ -71,11 +68,36 @@ def bind_to_provider(provider_type: type,
                      bind_provider: typing.Callable) -> [object]:
     """TODO"""
 
-    return _bind_to(provider_type,
-                    v1.utils.fqcn(provider_type),
-                    provider_type,
-                    create_bond,
-                    bind_provider)
+    interfaces = types.SimpleNamespace()
+    requirements = provider_type.on_requirements()
+
+    if not requirements:
+        return interfaces
+
+    requirements = _REQUIREMENTS_SCHEMA.validate(requirements)
+
+    for r_name, r in requirements.items():
+        interface = None
+
+        if not _NAME.match(r_name):
+            raise exceptions.InvalidRequirementName(r_name)
+
+        if issubclass(r["interface"], v1.bond.Interface):
+            interface = create_bond(provider_type,
+                                    v1.utils.fqcn(provider_type),
+                                    [r_name],
+                                    r["interface"],
+                                    r["required"])
+
+        elif issubclass(r["interface"], v1.provider.Provider):
+            interface = bind_provider(r["interface"], r["required"])
+
+        else:
+            raise exceptions.InvalidRequirement(v1.utils.fqcn(provider_type))
+
+        setattr(interfaces, r_name, interface)
+
+    return interfaces
 
 
 def bind_to_component(component_type: type,
@@ -94,9 +116,13 @@ def bind_to_component(component_type: type,
     for r_name, r in requirements.items():
         interface = None
 
+        if not _NAME.match(r_name):
+            raise exceptions.InvalidRequirementName(r_name)
+
         if issubclass(r["interface"], v1.bond.Interface):
             interface = create_bond(component_type,
                                     component_name,
+                                    [r_name],
                                     r["interface"],
                                     r["required"])
 
@@ -126,6 +152,9 @@ def bind_to_link(link_type: type,
     for r_name, r in requirements.items():
         interface = None
 
+        if not _NAME.match(r_name):
+            raise exceptions.InvalidRequirementName(r_name)
+
         if issubclass(r["interface"], v1.component.SourceInterface):
             # pylint: disable=W0212
             interface = source._torque_interface(r["interface"], r["required"])
@@ -137,6 +166,7 @@ def bind_to_link(link_type: type,
         elif issubclass(r["interface"], v1.bond.Interface):
             interface = create_bond(link_type,
                                     link_name,
+                                    [r_name],
                                     r["interface"],
                                     r["required"])
 

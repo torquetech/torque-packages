@@ -191,8 +191,9 @@ class Workspace:
                         for i in secrets.token_bytes(4)])
 
     def _create_bond(self,
-                     for_type: type,
-                     name: str,
+                     obj_type: type,
+                     obj_name: str,
+                     bond_path: [str],
                      interface: type,
                      required: bool) -> v1.bond.Bond:
         # pylint: disable=W0613

@@ -22,12 +22,12 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
     "version": str,
     "interfaces": {
         v1.schema.Optional(str): {
-            "bond": str
-        }
-    },
-    "bonds": {
-        v1.schema.Optional(str): {
-            "configuration": dict
+            "default": str,
+            "bonds": {
+                v1.schema.Optional(str): {
+                    "configuration": dict
+                }
+            }
         }
     },
     "providers": {
@@ -35,12 +35,8 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
             "configuration": dict,
             "bonds": {
                 v1.schema.Optional(str): {
+                    "implementation": v1.schema.Or(str, None),
                     "configuration": dict
-                }
-            },
-            "interfaces": {
-                v1.schema.Optional(str): {
-                    "bond": str
                 }
             }
         }
@@ -52,12 +48,8 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
+                        "implementation": v1.schema.Or(str, None),
                         "configuration": dict
-                    }
-                },
-                "interfaces": {
-                    v1.schema.Optional(str): {
-                        "bond": str
                     }
                 }
             }
@@ -67,12 +59,8 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
                 "configuration": dict,
                 "bonds": {
                     v1.schema.Optional(str): {
+                        "implementation": v1.schema.Or(str, None),
                         "configuration": dict
-                    }
-                },
-                "interfaces": {
-                    v1.schema.Optional(str): {
-                        "bond": str
                     }
                 }
             }
@@ -141,35 +129,25 @@ class _Configuration:
 
         return self._config["dag"]["revision"]
 
+    def interfaces(self) -> [str]:
+        """TODO"""
+
+        return self._config["interfaces"]
+
+    def bonds(self, interface: str) -> [str]:
+        """TODO"""
+
+        return self._config["interfaces"][interface]["bonds"]
+
     def providers(self) -> [str]:
         """TODO"""
 
         return self._config["providers"].keys()
 
-    def bonds(self) -> [str]:
-        """TODO"""
-
-        return self._config["bonds"].keys()
-
-    def interfaces(self) -> [str]:
-        """TODO"""
-
-        return self._config["interfaces"].keys()
-
     def provider(self, name: str) -> dict[str, object]:
         """TODO"""
 
         return self._config["providers"][name]
-
-    def bond(self, name: str) -> dict[str, object]:
-        """TODO"""
-
-        return self._config["bonds"][name]
-
-    def interface(self, name: str) -> dict[str, object]:
-        """TODO"""
-
-        return self._config["interfaces"][name]
 
     def component(self, name: str) -> dict[str, object]:
         """TODO"""
@@ -210,23 +188,10 @@ class Deployment:
         self._links: dict[str, v1.link.Link] = {}
         self._providers: dict[str, v1.provider.Provider] = None
 
-        self._interfaces = None
-        self._bonds = None
-
         self._lock = threading.Lock()
 
     def _setup_providers(self):
         """TODO"""
-
-        self._interfaces = {
-            name: self._configuration.interface(name)["bond"]
-            for name in self._configuration.interfaces()
-        }
-
-        self._bonds = {
-            name: self._configuration.bond(name)
-            for name in self._configuration.bonds()
-        }
 
         self._providers = {}
 
@@ -263,66 +228,60 @@ class Deployment:
 
         return provider
 
-    def _get_bond_for(self,
-                      interface: type,
-                      required: bool,
-                      profile: dict[str, object]) -> (str, dict[str, object]):
-        """TODO"""
-
-        interface_type = v1.utils.fqcn(interface)
-
-        local_interfaces = profile["interfaces"]
-        local_bonds = profile["bonds"]
-
-        if interface_type in local_interfaces:
-            name = local_interfaces[interface_type]["bond"]
-
-        else:
-            if interface_type not in self._interfaces:
-                if required:
-                    raise v1.exceptions.RuntimeError(f"{interface_type}: interface not bound")
-
-                return None
-
-            name = self._interfaces[interface_type]
-
-        if name not in self._bonds:
-            raise v1.exceptions.RuntimeError(f"{name}: bond not configured")
-
-        config = self._bonds[name]["configuration"]
-
-        if name in local_bonds:
-            local_config = local_bonds[name]["configuration"]
-            config = v1.utils.merge_dicts(config, local_config)
-
-        return name, config
-
     def _bond_info(self,
+                   obj_name: str,
+                   instance_name: str,
                    interface: type,
                    required: bool,
-                   profile: dict[str, object]) -> (v1.bond.Bond,
-                                                   dict[str, object],
-                                                   v1.provider.Provider):
-        # pylint: disable=R0914
-
+                   profile: dict[str, object]) -> (v1.bond.Bond, dict[str, object]):
         """TODO"""
 
-        info = self._get_bond_for(interface, required, profile)
+        interfaces = self._configuration.interfaces()
+        interface_name = v1.utils.fqcn(interface)
 
-        if not info:
-            return None
+        if interface_name not in interfaces:
+            if not required:
+                return None
 
-        name, config = info
+            raise exceptions.InterfaceNotFound(interface_name)
+
+        bonds = self._configuration.bonds(interface_name)
+        local_bonds = profile["bonds"]
+
+        if instance_name in local_bonds:
+            name = local_bonds[instance_name]["implementation"]
+            config = local_bonds[instance_name]["configuration"]
+
+            if name is None:
+                if not required:
+                    return None
+
+                raise exceptions.InterfaceNotBound(f"{obj_name}-{instance_name}")
+
+        else:
+            name = interfaces[interface_name]["default"]
+            config = {}
+
+        if name not in bonds:
+            if not required:
+                return None
+
+            raise exceptions.BondNotFound(name)
 
         type = self._repo.bond(name)
 
-        config = _validate_type_config(name, type, config)
+        if interface is not type.IMPLEMENTS:
+            raise exceptions.InvalidBond(f"{obj_name}-{instance_name}", name)
+
+        config = v1.utils.merge_dicts(bonds[name]["configuration"], config)
+        config = _validate_type_config(f"{obj_name}-{instance_name}", type, config)
 
         return type, config
 
     def _create_bond(self,
-                     for_type: type,
-                     name: str,
+                     obj_type: type,
+                     obj_name: str,
+                     bond_path: [str],
                      interface: type,
                      required: bool) -> v1.bond.Bond:
         """TODO"""
@@ -330,32 +289,35 @@ class Deployment:
         if self._providers is None:
             return _DummyInterfaceImplementation()
 
-        if issubclass(for_type, v1.component.Component):
-            profile = self._configuration.component(name)
+        if issubclass(obj_type, v1.component.Component):
+            profile = self._configuration.component(obj_name)
 
-        elif issubclass(for_type, v1.link.Link):
-            profile = self._configuration.link(name)
+        elif issubclass(obj_type, v1.link.Link):
+            profile = self._configuration.link(obj_name)
 
-        elif issubclass(for_type, v1.provider.Provider):
-            profile = self._configuration.provider(name)
+        elif issubclass(obj_type, v1.provider.Provider):
+            profile = self._configuration.provider(obj_name)
 
         else:
             assert False
 
-        info = self._bond_info(interface, required, profile)
+        instance_name = "-".join(bond_path)
+
+        info = self._bond_info(obj_name, instance_name, interface, required, profile)
 
         if not info:
             return None
 
         type, config = info
 
-        bound_interfaces = interfaces.bind_to_bond(for_type,
-                                                   name,
+        bound_interfaces = interfaces.bind_to_bond(obj_type,
+                                                   obj_name,
+                                                   bond_path,
                                                    type,
                                                    self._create_bond,
                                                    self._bind_provider)
 
-        return type(name,
+        return type(f"{obj_name}-{instance_name}",
                     config,
                     self._context,
                     bound_interfaces)
@@ -576,8 +538,7 @@ def _provider_defaults(name: str,
 
     return {
         "configuration": config,
-        "bonds": {},
-        "interfaces": {}
+        "bonds": {}
     }
 
 
@@ -590,8 +551,7 @@ def _component_defaults(component: model.Component,
 
     return {
         "configuration": config,
-        "bonds": {},
-        "interfaces": {}
+        "bonds": {}
     }
 
 
@@ -604,8 +564,7 @@ def _link_defaults(link: model.Link,
 
     return {
         "configuration": config,
-        "bonds": {},
-        "interfaces": {}
+        "bonds": {}
     }
 
 
@@ -618,8 +577,6 @@ def _load_defaults(providers: [str],
         raise v1.exceptions.RuntimeError("provider specified more than once")
 
     interfaces = {}
-    bonds = {}
-
     provider_bonds = {}
 
     for bond_name, bond in repo.bonds().items():
@@ -635,19 +592,21 @@ def _load_defaults(providers: [str],
             continue
 
         for bond_name, bond in provider_bonds[provider]:
-            bonds[bond_name] = _bond_defaults(bond)
-
             interface = v1.utils.fqcn(bond.IMPLEMENTS)
 
             if interface not in interfaces:
                 interfaces[interface] = {
-                    "bond": bond_name
+                    "default": bond_name,
+                    "bonds": {}
                 }
+
+            interfaces[interface]["bonds"].update({
+                bond_name: _bond_defaults(bond)
+            })
 
     return {
         "version": "torquetech.io/v1",
         "interfaces": interfaces,
-        "bonds": bonds,
         "providers": {
             name: _provider_defaults(name, repo)
             for name in providers
