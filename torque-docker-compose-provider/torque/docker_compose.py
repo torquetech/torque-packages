@@ -27,6 +27,12 @@ class V1Provider(v1.provider.Provider):
 
         self._objects = {
             "version": "3.9",
+            "name": self.context.deployment_name,
+            "networks": {
+                "default": {
+                    "name": self.context.deployment_name
+                }
+            },
             "services": {},
             "volumes": {},
             "configs": {}
