@@ -10,7 +10,6 @@ import pathlib
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import zipfile
 
@@ -246,7 +245,7 @@ def list_packages():
     """TODO"""
 
     for name, metadata in sorted(installed_packages().items()):
-        print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}", file=sys.stdout)
+        print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}")
 
 
 def upgrade_package(name: str):

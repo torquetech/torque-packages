@@ -358,8 +358,7 @@ class V1Provider(v1.provider.Provider):
             return
 
         if not self.configuration["quiet"]:
-            diff = v1.utils.diff_objects(name, old_obj, obj)
-            print(diff, file=sys.stdout)
+            print(v1.utils.diff_objects(name, old_obj, obj))
 
         handler = dolib.HANDLERS[obj["kind"]](self._client,
                                               self.context,
@@ -382,8 +381,7 @@ class V1Provider(v1.provider.Provider):
 
         def _delete_object():
             if not self.configuration["quiet"]:
-                diff = v1.utils.diff_objects(name, obj, {})
-                print(diff, file=sys.stdout)
+                print(v1.utils.diff_objects(name, obj, {}))
 
             handler.delete()
             self._current_state.pop(name)

@@ -5,7 +5,6 @@
 """TODO"""
 
 import argparse
-import sys
 
 from torque import workspace
 
@@ -37,7 +36,7 @@ def _show(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
     component = ws.get_component(arguments.name)
 
-    print(f"{component}", file=sys.stdout)
+    print(component)
 
 
 def _list(arguments: argparse.Namespace):
@@ -48,7 +47,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     for component in ws.dag.components.values():
-        print(f"{component}", file=sys.stdout)
+        print(component)
 
 
 def _show_type(arguments: argparse.Namespace):
@@ -57,7 +56,7 @@ def _show_type(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
 
     component_type = ws.repo.component(arguments.name)
-    print(f"{arguments.name}: {component_type}", file=sys.stdout)
+    print(f"{arguments.name}: {component_type}")
 
 
 def _list_types(arguments: argparse.Namespace):
@@ -69,7 +68,7 @@ def _list_types(arguments: argparse.Namespace):
     component_types = ws.repo.components()
 
     for component in component_types:
-        print(f"{component}: {component_types[component]}", file=sys.stdout)
+        print(f"{component}: {component_types[component]}")
 
 
 def add_arguments(subparsers):

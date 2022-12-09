@@ -223,13 +223,13 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
     while True:
         if ndx == 4:
             blanks = " " * (ndx + len(message))
-            print(f"\r{blanks}\r{message}", end="", file=sys.stdout)
+            print(f"\r{blanks}\r{message}", end="")
 
             ndx = 1
 
         else:
             dots = "." * ndx
-            print(f"\r{message}{dots}", end="", file=sys.stdout)
+            print(f"\r{message}{dots}", end="")
 
             ndx += 1
 
@@ -244,4 +244,4 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
             last_ts = time.time()
 
     if ndx != 0:
-        print("." * (4 - ndx), file=sys.stdout)
+        print("." * (4 - ndx))

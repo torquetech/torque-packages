@@ -61,7 +61,7 @@ def _show(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name, False)
 
-    print(f"{deployment}", file=sys.stdout)
+    print(deployment)
 
 
 def _list(arguments: argparse.Namespace):
@@ -70,7 +70,7 @@ def _list(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
     for deployment in ws.deployments.values():
-        print(f"{deployment}", file=sys.stdout)
+        print(deployment)
 
 
 def _build(arguments: argparse.Namespace):
@@ -143,7 +143,7 @@ def _dot(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
     deployment = ws.load_deployment(arguments.name)
-    print(deployment.dot(), file=sys.stdout)
+    print(deployment.dot())
 
 
 def add_arguments(subparsers):

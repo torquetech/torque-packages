@@ -419,7 +419,7 @@ class Deployment:
         def _on_build(type: str, name: str):
             """TODO"""
 
-            print(f"building {name}...", file=sys.stderr)
+            print(f"building {name}...")
 
             with self._lock:
                 if type == "component":
@@ -443,7 +443,7 @@ class Deployment:
         def _on_apply(type: str, name: str):
             """TODO"""
 
-            print(f"applying {name}...", file=sys.stderr)
+            print(f"applying {name}...")
 
             with self._lock:
                 if type == "component":

@@ -6,7 +6,6 @@
 
 import base64
 import json
-import sys
 
 import kubernetes
 
@@ -171,8 +170,7 @@ class V1Provider(v1.provider.Provider):
             return
 
         if not self.configuration["quiet"]:
-            diff = v1.utils.diff_objects(name, old_obj, obj)
-            print(diff, file=sys.stdout)
+            print(v1.utils.diff_objects(name, old_obj, obj))
 
         k8slib.update_object(self._client, obj)
         self._current_state[name] = obj
@@ -184,8 +182,7 @@ class V1Provider(v1.provider.Provider):
 
         def _delete_object():
             if not self.configuration["quiet"]:
-                diff = v1.utils.diff_objects(name, obj, {})
-                print(diff, file=sys.stdout)
+                print(v1.utils.diff_objects(name, obj, {}))
 
             k8slib.delete_object(self._client, obj)
             self._current_state.pop(name)
