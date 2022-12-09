@@ -85,6 +85,24 @@ class V1Provider(v1.provider.Provider):
 
             self._objects[section][name] = obj
 
+            return (section, name)
+
+    def object(self, section: str, name: str) -> dict[str, object]:
+        """TODO"""
+
+        if section not in self._objects:
+            raise v1.exceptions.RuntimeError(f"{section}: section not found")
+
+        if name not in self._objects[section]:
+            raise v1.exceptions.RuntimeError(f"{name}: object not found")
+
+        return self._objects[section][name]
+
+    def objects(self) -> dict[str, object]:
+        """TODO"""
+
+        return self._objects
+
 
 repository = {
     "v1": {
