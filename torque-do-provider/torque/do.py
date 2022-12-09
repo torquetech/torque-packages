@@ -7,7 +7,6 @@
 import functools
 import io
 import os
-import sys
 import time
 
 import boto3
@@ -179,37 +178,18 @@ class _V2Vpc(dolib.Resource):
     def delete(self):
         """TODO"""
 
-        i = 0
-
-        while True:
+        def cond():
             res = self._client.delete(f"v2/vpcs/{self._vpc_id}")
 
             if res.status_code == 204:
-                break
+                return True
 
             if res.status_code != 403:
                 raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
 
-            if i == 0:
-                print(f"waiting for {self._name} resources to be deleted",
-                      file=sys.stdout, end="")
+            return False
 
-                i = 1
-
-            if i != 4:
-                print(".", end="")
-                i += 1
-
-            else:
-                print("\x08\x08\x08   \x08\x08\x08", file=sys.stdout, end="")
-                i = 1
-
-            sys.stdout.flush()
-
-            time.sleep(1)
-
-        if i != 0:
-            print("." * (4 - i), file=sys.stdout)
+        v1.utils.wait_for(cond, f"waiting for {self._name} resources to be deleted")
 
 
 class _V2Resources(dolib.Resource):
