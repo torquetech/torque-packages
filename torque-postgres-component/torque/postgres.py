@@ -4,23 +4,41 @@
 
 """TODO"""
 
+from collections import namedtuple
+
 from torque import v1
+
+
+Authorization = namedtuple("Authorization", [
+    "database",
+    "user",
+    "password"
+])
+
+Service = namedtuple("Service", [
+    "host",
+    "port",
+    "options"
+])
 
 
 class V1ImplementationInterface(v1.bond.Interface):
     """TODO"""
 
-    def create(self):
+    def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
         """TODO"""
 
-    def uri(self, database: str, user: str) -> v1.utils.Future[str]:
+    def service(self) -> v1.utils.Future[Service] | Service:
         """TODO"""
 
 
-class V1ServiceInterface(v1.component.SourceInterface):
+class V1SourceInterface(v1.component.SourceInterface):
     """TODO"""
 
-    def uri(self, database: str, user: str) -> v1.utils.Future[str]:
+    def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
+        """TODO"""
+
+    def service(self) -> v1.utils.Future[Service] | Service:
         """TODO"""
 
 
@@ -38,22 +56,13 @@ class V1Component(v1.component.Component):
             }
         }
 
-    def _uri(self, database: str, user: str) -> v1.utils.Future[str]:
-        """TODO"""
-
-        return self.interfaces.impl.uri(database, user)
-
     def on_interfaces(self) -> [v1.component.Interface]:
         """TODO"""
 
         return [
-            V1ServiceInterface(uri=self._uri)
+            V1SourceInterface(auth=self.interfaces.impl.auth,
+                              service=self.interfaces.impl.service)
         ]
-
-    def on_apply(self):
-        """TODO"""
-
-        self.interfaces.impl.create()
 
 
 repository = {

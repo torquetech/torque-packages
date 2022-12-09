@@ -67,86 +67,11 @@ class V1Implementation(v1.bond.Bond):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._sanitized_name = self.name.replace(".", "-")
-
         self._databases = {}
         self._users = {}
 
-        self._image = f"postgres:{self.configuration['version']}"
-        self._password = self._create_access("postgres", "postgres")
-
         with self.interfaces.dc as p:
             p.add_hook("apply-objects", self._apply)
-
-    def _apply(self):
-        """TODO"""
-
-        local_sql_path = f"{self.context.path()}/{self.name}.sql"
-        external_sql_path = f"{self.context.external_path()}/{self.name}.sql"
-
-        sql = _INIT_SQL.render(databases=self._databases, users=self._users)
-        sql_hash = hashlib.sha1(bytes(sql, encoding="utf-8"))
-
-        with open(local_sql_path, "w", encoding="utf-8") as f:
-            f.write(sql)
-
-        self.interfaces.dc.add_object("configs", self._sanitized_name, {
-            "file": external_sql_path
-        })
-
-        self.interfaces.dc.add_object("services", f"{self._sanitized_name}-init", {
-            "image": f"postgres:{self.configuration['version']}",
-            "labels": {
-                "sql_hash": sql_hash.hexdigest()
-            },
-            "command": [
-                "psql",
-                "-h", self._sanitized_name,
-                "-U", "postgres",
-                "-f", "/init.sql",
-                "postgres"
-            ],
-            "restart": "no",
-            "environment": {
-                "PGPASSWORD": self._password
-            },
-            "configs": [{
-                "source": self._sanitized_name,
-                "target": "/init.sql"
-            }],
-            "depends_on": {
-                self._sanitized_name: {
-                    "condition": "service_healthy"
-                }
-            }
-        })
-
-    def create(self):
-        """TODO"""
-
-        self.interfaces.dc.add_object("volumes", self._sanitized_name, {})
-
-        self.interfaces.dc.add_object("services", self._sanitized_name, {
-            "image": self._image,
-            "restart": "unless-stopped",
-            "environment": {
-                "PGDATA": "/data",
-                "POSTGRES_DB": "postgres",
-                "POSTGRES_USER": "postgres",
-                "POSTGRES_PASSWORD": self._password
-            },
-            "volumes": [{
-                "type": "volume",
-                "source": self._sanitized_name,
-                "target": "/data"
-            }],
-            "healthcheck": {
-                "test": "pg_isready -U postgres",
-                "interval": "10s",
-                "timeout": "3s",
-                "retries": 3
-            }
-        })
 
     def _create_access(self, database: str, user: str):
         """TODO"""
@@ -162,14 +87,89 @@ class V1Implementation(v1.bond.Bond):
 
             return self._users[user]
 
-    def uri(self, database: str, user: str) -> v1.utils.Future[str]:
+    def _apply(self):
         """TODO"""
 
-        password = self._create_access(database, user)
+        image = f"postgres:{self.configuration['version']}"
+        password = self._create_access("postgres", "postgres")
 
-        return \
-            f"postgres://{user}:{password}@" \
-            f"{self._sanitized_name}:5432/{database}?sslmode=disable"
+        local_sql_path = f"{self.context.path()}/{self.name}.sql"
+        external_sql_path = f"{self.context.external_path()}/{self.name}.sql"
+
+        sql = _INIT_SQL.render(databases=self._databases, users=self._users)
+        sql_hash = hashlib.sha1(bytes(sql, encoding="utf-8"))
+
+        with open(local_sql_path, "w", encoding="utf-8") as f:
+            f.write(sql)
+
+        self.interfaces.dc.add_object("volumes", self.name, {})
+
+        self.interfaces.dc.add_object("configs", self.name, {
+            "file": external_sql_path
+        })
+
+        self.interfaces.dc.add_object("services", f"{self.name}-init", {
+            "image": image,
+            "labels": {
+                "sql_hash": sql_hash.hexdigest()
+            },
+            "command": [
+                "psql",
+                "-h", self.name,
+                "-U", "postgres",
+                "-f", "/init.sql",
+                "postgres"
+            ],
+            "restart": "no",
+            "environment": {
+                "PGPASSWORD": password
+            },
+            "configs": [{
+                "source": self.name,
+                "target": "/init.sql"
+            }],
+            "depends_on": {
+                self.name: {
+                    "condition": "service_healthy"
+                }
+            }
+        })
+
+        self.interfaces.dc.add_object("services", self.name, {
+            "image": image,
+            "restart": "unless-stopped",
+            "environment": {
+                "PGDATA": "/data",
+                "POSTGRES_DB": "postgres",
+                "POSTGRES_USER": "postgres",
+                "POSTGRES_PASSWORD": password
+            },
+            "volumes": [{
+                "type": "volume",
+                "source": self.name,
+                "target": "/data"
+            }],
+            "healthcheck": {
+                "test": "pg_isready -U postgres",
+                "interval": "10s",
+                "timeout": "3s",
+                "retries": 3
+            }
+        })
+
+    def auth(self, database: str, user: str) -> v1.utils.Future[postgres.Authorization]:
+        """TODO"""
+
+        return v1.utils.Future(postgres.Authorization(database,
+                                                      user,
+                                                      self._create_access(database, user)))
+
+    def service(self) -> v1.utils.Future[postgres.Service] | postgres.Service:
+        """TODO"""
+
+        return postgres.Service(self.name, 5432, {
+            "sslmode": "disable"
+        })
 
 
 repository = {

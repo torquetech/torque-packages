@@ -315,20 +315,21 @@ class V1Implementation(v1.bond.Bond):
 
         self._lock = threading.Lock()
 
+        with self.interfaces.do as p:
+            p.add_hook("apply-objects", self._apply)
 
-    def create(self):
+    def _apply(self):
         """TODO"""
 
         name = f"{self.context.deployment_name}-{self.name}"
-        sanitized_name = name.replace(".", "-")
 
         obj = {
             "kind": "v2/database/postgres",
             "name": name,
             "owner": self.name,
-            "cluster_name": sanitized_name,
+            "cluster_name": name,
             "params": {
-                "name": sanitized_name,
+                "name": name,
                 "engine": "pg",
                 "region": self.interfaces.do.region(),
                 "private_network_uuid": self.interfaces.do.vpc_id()
@@ -337,78 +338,75 @@ class V1Implementation(v1.bond.Bond):
 
         obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
 
-        self._cluster_id = self.interfaces.do.add_object(obj)
-        self._cluster_name = self.interfaces.do.object_name(obj)
+        self._cluster_name = self.interfaces.do.add_object(obj)
+        self._cluster_id = self.interfaces.do.object_id(self._cluster_name)
 
         self.interfaces.do.add_resource("do:dbaas", self._cluster_id)
 
-    def _create_database(self, name: str):
-        """TODO"""
+        for name, do_name in self._databases.items():
+            self.interfaces.do.add_object({
+                "kind": "v2/database/postgres/db",
+                "name": do_name,
+                "owner": self.name,
+                "depends_on": self._cluster_name,
+                "cluster_id": self._cluster_id,
+                "db_name": name,
+                "params": {
+                    "name": name
+                }
+            })
 
-        if name in self._databases:
-            return
 
-        obj = {
-            "kind": "v2/database/postgres/db",
-            "name": f"{self.name}-database-{name}",
-            "owner": self.name,
-            "depends_on": self._cluster_name,
-            "cluster_id": self._cluster_id,
-            "db_name": name,
-            "params": {
-                "name": name
-            }
-        }
+        for name, do_name in self._users.items():
+            self.interfaces.do.add_object({
+                "kind": "v2/database/postgres/user",
+                "name": do_name,
+                "owner": self.name,
+                "depends_on": self._cluster_name,
+                "cluster_id": self._cluster_id,
+                "user": name,
+                "params": {
+                    "name": name
+                }
+            })
 
-        self.interfaces.do.add_object(obj)
-        self._databases[name] = f"{self.name}-database-{name}"
-
-    def _create_user(self, name: str):
-        """TODO"""
-
-        if name in self._users:
-            return
-
-        obj = {
-            "kind": "v2/database/postgres/user",
-            "name": f"{self.name}-user-{name}",
-            "owner": self.name,
-            "depends_on": self._cluster_name,
-            "cluster_id": self._cluster_id,
-            "user": name,
-            "params": {
-                "name": name
-            }
-        }
-
-        self.interfaces.do.add_object(obj)
-        self._users[name] = f"{self.name}-user-{name}"
-
-    def _resolve_uri(self, database: str, user: str) -> str:
+    def _resolve_auth(self, database: str, user: str) -> postgres.Authorization:
         """TODO"""
 
         with self.context as ctx:
             password = ctx.get_secret_data(self._users[user], "password")
 
-        metadata = self.interfaces.do.object_metadata(self._cluster_name)
+        return postgres.Authorization(database, user, password)
+
+    def _resolve_service(self) -> postgres.Service:
+        """TODO"""
+
+        metadata = self.interfaces.do.metadata(self._cluster_name)
 
         host = metadata["host"]
         port = metadata["port"]
         ssl = metadata["ssl"]
 
-        if ssl:
-            params = "sslmode=require&"
+        return postgres.Service(host, port, {
+            "sslmode": "require" if ssl else "disabled"
+        })
 
-        return f"postgres://{user}:{password}@{host}:{port}/{database}?{params}"
-
-    def uri(self, database: str, user: str) -> v1.utils.Future[str]:
+    def auth(self, database: str, user: str) -> v1.utils.Future[postgres.Authorization]:
         """TODO"""
 
         with self._lock:
-            self._create_database(database)
-            self._create_user(user)
+            if database not in self._databases:
+                self._databases[database] = f"{self.name}-database-{database}"
 
-        return v1.utils.Future(functools.partial(self._resolve_uri, database, user))
+            if user not in self._users:
+                self._users[user] = f"{self.name}-user-{user}"
+
+        return v1.utils.Future(functools.partial(self._resolve_auth, database, user))
+
+    def service(self) -> v1.utils.Future[postgres.Service]:
+        """TODO"""
+
+        return v1.utils.Future(self._resolve_service)
 
 
 dolib.HANDLERS.update({
