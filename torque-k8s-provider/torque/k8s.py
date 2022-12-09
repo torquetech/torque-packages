@@ -25,13 +25,6 @@ class V1ClientInterface(v1.bond.Interface):
         """TODO"""
 
 
-class V1VolumeInterface(v1.bond.Interface):
-    """TODO"""
-
-    def create(self, name: str, size: str):
-        """TODO"""
-
-
 class V1Provider(v1.provider.Provider):
     """TODO"""
 

@@ -6,6 +6,7 @@
 
 from torque import do
 from torque import k8s
+from torque import k8s_volumes
 from torque import v1
 
 
@@ -17,7 +18,16 @@ class V1Implementation(v1.bond.Bond):
     """TODO"""
 
     PROVIDER = V1Provider
-    IMPLEMENTS = k8s.V1VolumeInterface
+    IMPLEMENTS = k8s_volumes.V1Interface
+
+    CONFIGURATION = {
+        "defaults": {
+            "size": "1G"
+        },
+        "schema": {
+            "size": str
+        }
+    }
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -34,14 +44,20 @@ class V1Implementation(v1.bond.Bond):
             }
         }
 
-    def create(self, name: str, size: str) -> dict[str, object]:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        with self.interfaces.k8s as p:
+            p.add_hook("apply-objects", self._apply)
+
+    def _apply(self) -> dict[str, object]:
         """TODO"""
 
         self.interfaces.k8s.add_object({
             "apiVersion": "v1",
             "kind": "PersistentVolumeClaim",
             "metadata": {
-                "name": name,
+                "name": self.name,
                 "namespace": self.interfaces.k8s.namespace()
             },
             "spec": {
@@ -50,17 +66,25 @@ class V1Implementation(v1.bond.Bond):
                 ],
                 "resources": {
                     "requests": {
-                        "storage": size
+                        "storage": self.configuration["size"]
                     }
                 },
                 "storageClassName": "do-block-storage"
             }
         })
 
+    def ref_name(self) -> str:
+        """TODO"""
+
+        return self.name
+
+    def spec(self) -> dict[str, object]:
+        """TODO"""
+
         return {
-            "name": name,
+            "name": self.name,
             "persistentVolumeClaim": {
-                "claimName": name
+                "claimName": self.name
             }
         }
 

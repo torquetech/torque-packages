@@ -17,14 +17,14 @@ def load_file(name: str) -> str:
         return file.read().strip()
 
 
-setup(name="torque-k8s-do-volume-provider",
+setup(name="torque-k8s-volumes",
       version=load_file("VERSION"),
       author="Torque Team",
       author_email="team@torquetech.io",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
-      url="https://github.com/torquetech/torque-k8s-do-volume-provider",
+      url="https://github.com/torquetech/torque-k8s-volumes",
       license="MPL v2.0",
       classifiers=[
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
@@ -33,11 +33,4 @@ setup(name="torque-k8s-do-volume-provider",
           "torque"
       ],
       python_requires=">=3.10",
-      install_requires=[
-          "jinja2"
-      ],
-      entry_points={
-          "torque": [
-              "torque-k8s-do-volume-provider=torque.k8s_do_volume:repository"
-          ]
-      })
+      install_requires=[])
