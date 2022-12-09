@@ -4,10 +4,8 @@
 
 """TODO"""
 
-import functools
 import io
 import os
-import time
 
 import boto3
 import yaml
@@ -324,7 +322,7 @@ class V1Provider(v1.provider.Provider):
             ctx.add_hook("apply", self._apply)
             ctx.add_hook("delete", self._delete)
 
-    def _load_state(self) -> dict[str, object]:
+    def _load_state(self):
         """TODO"""
 
         with self.context as ctx:
@@ -426,38 +424,25 @@ class V1Provider(v1.provider.Provider):
         finally:
             self._store_state()
 
-    def _resolve_resource(self, type: str, resource_id: object):
+    def metadata(self, name: str) -> dict[str, object]:
         """TODO"""
-
-        return f"{type}:{v1.utils.resolve_futures(resource_id)}"
-
-    def _resolve_object_metadata(self, name: str) -> dict[str, object]:
-        """TODO"""
-
-        if name not in self._current_state:
-            raise v1.exceptions.RuntimeError(f"{name}: object not found")
 
         return self._current_state[name]["metadata"]
 
-    def _resolve_object_id(self, name: str) -> str:
+    def object_id(self, name: str) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._resolve_object_metadata(name)["id"]
-
-    def _object_id(self, name: str) -> v1.utils.Future[str]:
-        """TODO"""
-
-        return v1.utils.Future(functools.partial(self._resolve_object_id, name))
+        return v1.utils.Future(lambda: self.metadata(name)["id"])
 
     def project_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._object_id(f"v2/project/{self._project_name}")
+        return self.object_id(f"v2/project/{self._project_name}")
 
     def vpc_id(self) -> v1.utils.Future[str]:
         """TODO"""
 
-        return self._object_id(f"v2/vpc/{self._vpc_name}")
+        return self.object_id(f"v2/vpc/{self._vpc_name}")
 
     def region(self) -> str:
         """TODO"""
@@ -479,37 +464,39 @@ class V1Provider(v1.provider.Provider):
 
         return self._client
 
-    def object_name(self, obj: dict[str, object]) -> str:
+    def add_resource(self, type: str, resource_id: object):
         """TODO"""
 
-        return f"{obj['kind']}/{obj['name']}"
+        resource = v1.utils.Future(lambda: f"{type}:{v1.utils.resolve_futures(resource_id)}")
 
-    def object_metadata(self, name: str) -> dict[str, object]:
-        """TODO"""
+        with self._lock:
+            self._resources.append(resource)
 
-        return self._resolve_object_metadata(name)
-
-    def add_object(self, obj: dict[str, object]):
+    def add_object(self, obj: dict[str, object]) -> str:
         """TODO"""
 
         with self._lock:
-            name = self.object_name(obj)
+            name = f"{obj['kind']}/{obj['name']}"
 
             if name in self._new_state:
                 raise v1.exceptions.RuntimeError(f"{name}: digitalocean object already exists")
 
             self._new_state[name] = obj
 
-            return self._object_id(name)
+            return name
 
-    def add_resource(self, type: str, resource_id: object):
+    def object(self, name: str) -> dict[str, object]:
         """TODO"""
 
-        with self._lock:
-            resource = v1.utils.Future(functools.partial(self._resolve_resource,
-                                                         type,
-                                                         resource_id))
-            self._resources.append(resource)
+        if name not in self._new_state:
+            raise v1.exceptions.RuntimeError(f"{name}: object not found")
+
+        return self._new_state[name]
+
+    def objects(self) -> dict[str, object]:
+        """TODO"""
+
+        return self._new_state
 
 
 class V1Context(v1.deployment.Context):
