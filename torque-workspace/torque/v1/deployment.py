@@ -21,31 +21,30 @@ class _ContextData:
         self._buckets = buckets
         self._load_bucket = load_bucket
 
-    def set_data(self, bucket: str, name: type, data: object):
+    def _get(self, bucket: str) -> object:
         """TODO"""
 
         if bucket not in self._buckets:
-            self._buckets[bucket] = {}
+            self._buckets[bucket] = self._load_bucket(bucket)
 
-        bucket = self._buckets[bucket]
+        return self._buckets[bucket]
+
+    def set_data(self, bucket: str, name: type, data: object):
+        """TODO"""
+
+        bucket = self._get(bucket)
         bucket[name] = data
 
     def delete_data(self, bucket: str, name: str):
         """TODO"""
 
-        if bucket not in self._buckets:
-            self._buckets[bucket] = self._load_bucket(bucket)
-
-        bucket = self._buckets[bucket]
+        bucket = self._get(bucket)
         return bucket.pop(name, None)
 
     def get_data(self, bucket: str, name: str) -> object:
         """TODO"""
 
-        if bucket not in self._buckets:
-            self._buckets[bucket] = self._load_bucket(bucket)
-
-        bucket = self._buckets[bucket]
+        bucket = self._get(bucket)
         return bucket.get(name)
 
     def set_secret_data(self, object_name: str, secret_name: str, data: object):
