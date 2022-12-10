@@ -4,9 +4,17 @@
 
 """TODO"""
 
+import json
 import os
+import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import zipfile
+
+
+_URI = r"^[^:]+://"
 
 
 def initialize_venv(root: str):
@@ -57,27 +65,62 @@ def initialize_venv(root: str):
         print(os.path.relpath(f"{root}/.torque/site", site_packages), file=file)
 
 
-def install_torque(root: str, package: str):
+def install_torque(root: str, uri: str):
     """TODO"""
 
-    cmd = [
-        sys.executable,
-        "-m", "pip",
-        "install",
-        "-t", ".torque/system",
-        "--platform", "torque",
-        "--implementation", "py3",
-        "--no-deps",
-        "--no-index"
-    ]
+    if re.match(_URI, uri) is None and os.path.exists(uri):
+        if not os.path.isabs(uri):
+            uri = os.path.join(torque_cwd(), uri)
+            uri = os.path.normpath(uri)
 
-    cmd += [package]
+    torque_dir = f"{root}/.torque"
+    tmp = tempfile.mkdtemp()
+
+    env = os.environ | {
+        "VIRTUAL_ENV": ".torque/local/venv"
+    }
 
     try:
-        subprocess.run(cmd, cwd=root, env=os.environ, check=True)
+        subprocess.run([sys.executable,
+                        "-m", "pip", "wheel",
+                        "--wheel-dir", tmp,
+                        "--no-deps",
+                        "--no-index",
+                        uri
+                        ],
+                       cwd=root,
+                       env=env,
+                       check=True)
 
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError("failed to install torque-workspace package") from exc
+        files = os.listdir(tmp)
+
+        for file in files:
+            if not file.endswith("-py3-none-torque.whl"):
+                continue
+
+            with zipfile.ZipFile(f"{tmp}/{file}") as whl:
+                for item in whl.infolist():
+                    path = whl.extract(item, f"{torque_dir}/system")
+
+                    if item.create_system == 3:
+                        attrs = item.external_attr >> 16
+                        os.chmod(path, attrs)
+
+            package = file.replace("-py3-none-torque.whl", ".dist-info")
+
+            direct_url = f"{torque_dir}/system/{package}/direct_url.json"
+            with open(direct_url, "w", encoding="utf-8") as file:
+                file.write(json.dumps({
+                    "dir_info": {},
+                    "url": uri
+                }))
+
+            record = f"{torque_dir}/system/{package}/RECORD"
+            with open(record, "a", encoding="utf-8") as file:
+                file.write(f"{package}/direct_url.json,,\n")
+
+    finally:
+        shutil.rmtree(tmp)
 
 
 def install_deps(root: str):
