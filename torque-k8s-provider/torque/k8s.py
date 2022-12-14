@@ -65,10 +65,10 @@ class V1Provider(v1.provider.Provider):
         self._load_state()
 
         with self as p:
+            p.add_hook("apply-objects", self._apply_namespace)
+            p.add_hook("apply-utils", self._apply_container_registry)
             p.add_hook("apply", self._apply)
             p.add_hook("delete", self._delete)
-
-        self._setup_namespace()
 
     def _load_state(self):
         """TODO"""
@@ -87,7 +87,7 @@ class V1Provider(v1.provider.Provider):
 
         self._client = self.interfaces.client.connect()
 
-    def _setup_namespace(self):
+    def _apply_namespace(self):
         """TODO"""
 
         if self._namespace == "default":
@@ -101,7 +101,7 @@ class V1Provider(v1.provider.Provider):
             }
         })
 
-    def _setup_container_registry(self):
+    def _apply_container_registry(self):
         """TODO"""
 
         if not self._namespaces:
@@ -165,9 +165,6 @@ class V1Provider(v1.provider.Provider):
 
         try:
             self._connect()
-
-            if self.interfaces.cr:
-                self._setup_container_registry()
 
             v1.utils.apply_objects(self._current_state,
                                    self._new_state,

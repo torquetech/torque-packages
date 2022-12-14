@@ -319,29 +319,9 @@ class V1Provider(v1.provider.Provider):
 
         self._load_state()
 
-        self._connect()
-
-        self.add_object({
-            "kind": "v2/project",
-            "name": self._project_name,
-            "params": {
-                "name": self._project_name,
-                "description": "torquetech.io deployment",
-                "purpose": "Other: Torque deployment",
-                "environment": "Production"
-            }
-        })
-
-        self.add_object({
-            "kind": "v2/vpc",
-            "name": self._vpc_name,
-            "params": {
-                "name": self._vpc_name,
-                "region": self._region
-            }
-        })
-
         with self as p:
+            p.add_hook("apply-objects", self._apply_project)
+            p.add_hook("apply-objects", self._apply_vpc)
             p.add_hook("apply", self._apply)
             p.add_hook("delete", self._delete)
 
@@ -412,6 +392,32 @@ class V1Provider(v1.provider.Provider):
         with self as p:
             p.add_hook("collect-garbage", _delete_object)
 
+    def _apply_project(self):
+        """TODO"""
+
+        self.add_object({
+            "kind": "v2/project",
+            "name": self._project_name,
+            "params": {
+                "name": self._project_name,
+                "description": "torquetech.io deployment",
+                "purpose": "Other: Torque deployment",
+                "environment": "Production"
+            }
+        })
+
+    def _apply_vpc(self):
+        """TODO"""
+
+        self.add_object({
+            "kind": "v2/vpc",
+            "name": self._vpc_name,
+            "params": {
+                "name": self._vpc_name,
+                "region": self._region
+            }
+        })
+
     def _apply(self):
         """TODO"""
 
@@ -425,6 +431,8 @@ class V1Provider(v1.provider.Provider):
         })
 
         try:
+            self._connect()
+
             v1.utils.apply_objects(self._current_state,
                                    self._new_state,
                                    self._update_object,
@@ -437,6 +445,8 @@ class V1Provider(v1.provider.Provider):
         """TODO"""
 
         try:
+            self._connect()
+
             v1.utils.apply_objects(self._current_state,
                                    {},
                                    self._update_object,
