@@ -109,9 +109,12 @@ class _V2Vpc(dolib.Resource):
         super().__init__(*args, **kwargs)
 
         self._do_name = self._object["name"]
+        self._region = self._object["params"]["region"]
 
         self._current_params = None
         self._vpc_id = None
+
+        self._has_default_vpc = False
 
         if "metadata" in self._object:
             self._vpc_id = self._object["metadata"]["id"]
@@ -126,6 +129,9 @@ class _V2Vpc(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
         for vpc in data["vpcs"]:
+            if vpc["default"] and vpc["region"] == self._region:
+                self._has_default_vpc = True
+
             if self._do_name == vpc["name"]:
                 self._current_params = {
                     "name": vpc["name"],
@@ -134,12 +140,29 @@ class _V2Vpc(dolib.Resource):
 
                 self._vpc_id = vpc["id"]
 
-                return True
+        return self._vpc_id is not None
 
-        return False
+    def _create_default_vpc(self):
+        """TODO"""
+
+        default_vpc_name = f"{self._region}-vpc-default"
+
+        res = self._client.post("v2/vpcs", {
+            "name": default_vpc_name,
+            "region": self._region,
+            "default": True
+        })
+
+        data = res.json()
+
+        if res.status_code not in (201, 202):
+            raise v1.exceptions.RuntimeError(f"{default_vpc_name}: {data['message']}")
 
     def _create(self):
         """TODO"""
+
+        if not self._has_default_vpc:
+            self._create_default_vpc()
 
         res = self._client.post("v2/vpcs", self._object["params"])
         data = res.json()
