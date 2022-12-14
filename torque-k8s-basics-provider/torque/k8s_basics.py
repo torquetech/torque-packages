@@ -51,7 +51,8 @@ class V1TaskImplementation(v1.bond.Bond):
         super().__init__(*args, **kwargs)
 
         self._environment = []
-        self._image = None
+        self._image_tag = None
+        self._image_id = None
         self._command = None
         self._arguments = None
         self._working_directory = None
@@ -63,7 +64,7 @@ class V1TaskImplementation(v1.bond.Bond):
         """TODO"""
 
         namespace = self.interfaces.k8s.namespace()
-        image = self.interfaces.k8s.register_image(self._image, namespace)
+        image_tag = self.interfaces.k8s.register_image(self._image_tag, namespace)
 
         obj = {
             "apiVersion": "apps/v1",
@@ -86,13 +87,16 @@ class V1TaskImplementation(v1.bond.Bond):
                     "metadata": {
                         "labels": {
                             "app.kubernetes.io/name": self.name
+                        },
+                        "annotations": {
+                            "torquetech.io/image-id": self._image_id
                         }
                     },
                     "spec": {
                         "restartPolicy": "Always",
                         "containers": [{
                             "name": "main",
-                            "image": image
+                            "image": image_tag
                         }],
                         "imagePullSecrets": [{
                             "name": "registry"
@@ -146,10 +150,11 @@ class V1TaskImplementation(v1.bond.Bond):
 
         self._environment.append((name, value))
 
-    def set_image(self, image: str):
+    def set_image(self, tag: str, id: str):
         """TODO"""
 
-        self._image = image
+        self._image_tag = tag
+        self._image_id = id
 
     def set_command(self, command: [str]):
         """TODO"""

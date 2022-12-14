@@ -46,7 +46,8 @@ class V1TaskImplementation(v1.bond.Bond):
         super().__init__(*args, **kwargs)
 
         self._environment = []
-        self._image = None
+        self._image_tag = None
+        self._image_id = None
         self._command = None
         self._arguments = None
         self._working_directory = None
@@ -58,8 +59,11 @@ class V1TaskImplementation(v1.bond.Bond):
         """TODO"""
 
         obj = {
-            "image": self._image,
-            "restart": "unless-stopped"
+            "image": self._image_tag,
+            "restart": "unless-stopped",
+            "labels": {
+                "torquetech.io/image-id": self._image_id
+            }
         }
 
         if self._command:
@@ -100,10 +104,11 @@ class V1TaskImplementation(v1.bond.Bond):
 
         self._environment.append((name, value))
 
-    def set_image(self, image: str):
+    def set_image(self, tag: str, id: str):
         """TODO"""
 
-        self._image = image
+        self._image_tag = tag
+        self._image_id = id
 
     def set_command(self, command: [str]):
         """TODO"""

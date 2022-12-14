@@ -28,7 +28,7 @@ class V1TaskImplementationInterface(v1.bond.Interface):
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
         """TODO"""
 
-    def set_image(self, image: str):
+    def set_image(self, tag: str, id: str):
         """TODO"""
 
     def set_command(self, command: [str]):
@@ -47,7 +47,7 @@ class V1ServiceImplementationInterface(v1.bond.Interface):
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
         """TODO"""
 
-    def set_image(self, image: str):
+    def set_image(self, tag: str, id: str):
         """TODO"""
 
     def set_command(self, command: [str]):
@@ -127,14 +127,7 @@ class BaseComponent(v1.component.Component):
 
         return cmd
 
-    def on_interfaces(self):
-        """TODO"""
-
-        return [
-            V1EnvironmentInterface(add=self.interfaces.impl.add_environment)
-        ]
-
-    def on_build(self):
+    def _build(self) -> str:
         """TODO"""
 
         path = v1.utils.resolve_path(self.parameters["path"])
@@ -146,10 +139,54 @@ class BaseComponent(v1.component.Component):
                        cwd=path,
                        check=True)
 
+        return f"{self.name}:latest"
+
+    def _id(self) -> str:
+        """TODO"""
+
+        cmd = [
+            "docker", "image", "inspect",
+            "-f", "{{.Id}}",
+            f"{self.name}:latest"
+        ]
+
+        print(f"+ {' '.join(cmd)}")
+
+        p = subprocess.run(cmd,
+                           env=os.environ,
+                           check=True,
+                           capture_output=True)
+
+        return p.stdout.decode("utf8").strip()
+
+    def on_interfaces(self):
+        """TODO"""
+
+        return [
+            V1EnvironmentInterface(add=self.interfaces.impl.add_environment)
+        ]
+
+    def on_build(self):
+        """TODO"""
+
+        image = {
+            "tag": self._build(),
+            "id": self._id()
+        }
+
+        with self.context as ctx:
+            ctx.set_data("images", self.name, image)
+
     def on_apply(self):
         """TODO"""
 
-        self.interfaces.impl.set_image(f"{self.name}:latest")
+        with self.context as ctx:
+            image = ctx.get_data("images", self.name)
+
+        if not image:
+            raise v1.exceptions.RuntimeError(f"{self.name}: image not found")
+
+        self.interfaces.impl.set_image(image["tag"], image["id"])
         self.interfaces.impl.set_command(self.parameters["run"].get("command"))
         self.interfaces.impl.set_arguments(self.parameters["run"].get("arguments"))
         self.interfaces.impl.set_working_directory(self.parameters["run"].get("working_directory"))
