@@ -9,7 +9,6 @@ import inspect
 import os
 import pathlib
 import typing
-import sys
 import time
 
 import yaml
@@ -223,17 +222,15 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
     while True:
         if ndx == 4:
             blanks = " " * (ndx + len(message))
-            print(f"\r{blanks}\r{message}", end="")
+            print(f"\r{blanks}\r{message}", end="", flush=True)
 
             ndx = 1
 
         else:
             dots = "." * ndx
-            print(f"\r{message}{dots}", end="")
+            print(f"\r{message}{dots}", end="", flush=True)
 
             ndx += 1
-
-        sys.stdout.flush()
 
         time.sleep(1)
 
@@ -244,4 +241,4 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
             last_ts = time.time()
 
     if ndx != 0:
-        print("." * (4 - ndx))
+        print("." * (4 - ndx), flush=True)
