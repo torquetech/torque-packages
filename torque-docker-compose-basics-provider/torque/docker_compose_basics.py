@@ -73,15 +73,8 @@ class V1TaskImplementation(v1.bond.Bond):
             if self._arguments:
                 obj["command"] = self._arguments
 
-        obj["environment"] = {
-            name.upper(): value
-            for name, value in self.configuration["environment"].items()
-        }
-
-        obj["environment"].update({
-            name.upper(): v1.utils.resolve_futures(value)
-            for name, value in self._environment
-        })
+        obj["environment"] = {} | self.configuration["environment"]
+        obj["environment"].update(self._environment)
 
         path = self.configuration.get("volume")
 

@@ -119,13 +119,13 @@ class V1TaskImplementation(v1.bond.Bond):
             container["workDir"] = self._working_directory
 
         container["env"] = [{
-            "name": name.upper(),
+            "name": name,
             "value": value
         } for name, value in self.configuration["environment"].items()]
 
         container["env"].extend([{
-            "name": name.upper(),
-            "value": v1.utils.resolve_futures(value)
+            "name": name,
+            "value": value
         } for name, value in self._environment])
 
         path = self.configuration.get("volume")

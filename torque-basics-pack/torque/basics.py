@@ -10,8 +10,8 @@ import subprocess
 
 from collections import namedtuple
 
+from torque import environment
 from torque import hlb
-from torque import postgres
 from torque import v1
 
 
@@ -80,13 +80,6 @@ class V1HttpSourceInterface(v1.component.SourceInterface):
     """TODO"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
-
-
-class V1EnvironmentInterface(v1.component.DestinationInterface):
-    """TODO"""
-
-    def add(self, name: str, value: object):
         """TODO"""
 
 
@@ -163,7 +156,7 @@ class BaseComponent(v1.component.Component):
         """TODO"""
 
         return [
-            V1EnvironmentInterface(add=self.interfaces.impl.add_environment)
+            environment.V1DestinationInterface(add=self.interfaces.impl.add_environment)
         ]
 
     def on_build(self):
@@ -325,19 +318,8 @@ class V1IngressLink(v1.link.Link):
                                             {}))
 
 
-class BaseLink(v1.link.Link):
+class BaseLink(environment.V1BaseLink):
     """TODO"""
-
-    @classmethod
-    def on_requirements(cls):
-        """TODO"""
-
-        return {
-            "dst": {
-                "interface": V1EnvironmentInterface,
-                "required": True
-            }
-        }
 
     def _resolve_uri(self, service: v1.utils.Future[Service] | Service):
         """TODO"""
@@ -351,56 +333,8 @@ class BaseLink(v1.link.Link):
 
         service = self.interfaces.src.service()
 
-        self.interfaces.dst.add(self.source.replace("-", "_"),
+        self.interfaces.dst.add(self._name(),
                                 v1.utils.Future(functools.partial(self._resolve_uri,
-                                                                  service)))
-
-
-class V1PostgresLink(BaseLink):
-    """TODO"""
-
-    PARAMETERS = v1.utils.merge_dicts(BaseLink.PARAMETERS, {
-        "defaults": {},
-        "schema": {
-            "database": str,
-            "user": str
-        }
-    })
-
-    @classmethod
-    def on_requirements(cls):
-        """TODO"""
-
-        return super().on_requirements() | {
-            "src": {
-                "interface": postgres.V1SourceInterface,
-                "required": True
-            }
-        }
-
-    def _resolve_pg_uri(self,
-                        auth: v1.utils.Future[postgres.Authorization],
-                        service: v1.utils.Future[postgres.Service] | postgres.Service) -> str:
-        """TODO"""
-
-        auth = v1.utils.resolve_futures(auth)
-        service = v1.utils.resolve_futures(service)
-
-        args = "&".join([f"{k}={v}" for k, v in service.options.items()])
-
-        return f"postgres://{auth.user}:{auth.password}@{service.host}:{service.port}/{auth.database}?{args}"
-
-    def on_apply(self):
-        """TODO"""
-
-        auth = self.interfaces.src.auth(self.parameters["database"],
-                                        self.parameters["user"])
-
-        service = self.interfaces.src.service()
-
-        self.interfaces.dst.add(self.source.replace("-", "_"),
-                                v1.utils.Future(functools.partial(self._resolve_pg_uri,
-                                                                  auth,
                                                                   service)))
 
 
@@ -443,7 +377,6 @@ repository = {
         ],
         "links": [
             V1IngressLink,
-            V1PostgresLink,
             V1TCPServiceLink,
             V1HttpServiceLink
         ]
