@@ -18,18 +18,18 @@ from torque import v1
 
 
 _INIT_SQL = jinja2.Template("""
-{%- for user, password in users.items() %}
+{%- for user, password in users.items() | sort %}
 {%- if user != 'mysql' -%}
 create user {{user}} identified by '{{password}}';
 {% endif -%}
 {%- endfor %}
-{% for database, users in databases.items() %}
+{% for database, users in databases.items() | sort %}
 {%- if database != 'mysql' -%}
 create database {{database}};
 {% endif -%}
 {%- endfor %}
-{% for database, users in databases.items() -%}
-{% for user in users -%}
+{% for database, users in databases.items() | sort -%}
+{% for user in users | sort -%}
 {%- if user != 'mysql' -%}
 grant all on {{database}}.* to {{user}};
 {% endif -%}
