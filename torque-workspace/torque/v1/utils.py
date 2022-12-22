@@ -8,6 +8,7 @@ import difflib
 import inspect
 import os
 import pathlib
+import secrets
 import typing
 import time
 
@@ -17,6 +18,7 @@ from . import exceptions
 from . import schema as schema_v1
 
 
+_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz"
 _TORQUE_CWD = None
 _TORQUE_ROOT = None
 
@@ -242,3 +244,10 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
 
     if ndx != 0:
         print("." * (4 - ndx), flush=True)
+
+
+def random_suffix(length: int):
+    """TODO"""
+
+    return ''.join([_SYMBOLS[i % len(_SYMBOLS)]
+                    for i in secrets.token_bytes(length)])

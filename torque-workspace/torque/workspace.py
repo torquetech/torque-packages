@@ -6,7 +6,6 @@
 
 import os
 import re
-import secrets
 import sys
 
 import pytrie
@@ -21,7 +20,6 @@ from torque import v1
 
 
 _NAME = re.compile(r"^[a-z-][a-z0-9-]*$")
-_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 _MAX_DEPLOYMENT_NAME_LENGTH = 16
 _MAX_COMPONENT_NAME_LENGTH = 32
@@ -184,12 +182,6 @@ class Workspace:
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
 
-    def _generate_extension(self):
-        """TODO"""
-
-        return ''.join([_SYMBOLS[i % len(_SYMBOLS)]
-                        for i in secrets.token_bytes(4)])
-
     def _create_bond(self,
                      obj_type: type,
                      obj_name: str,
@@ -350,7 +342,7 @@ class Workspace:
             raise v1.exceptions.RuntimeError(f"{name}: deployment name too long")
 
         if not no_suffix:
-            name = f"{name}-{self._generate_extension()}"
+            name = f"{name}-{v1.utils.random_suffix(4)}"
 
         context = self.repo.context(context_type)
 
@@ -426,7 +418,7 @@ class Workspace:
             raise v1.exceptions.RuntimeError(f"{name}: component name too long")
 
         if not no_suffix:
-            name = f"{name}-{self._generate_extension()}"
+            name = f"{name}-{v1.utils.random_suffix(4)}"
 
         component_type = self.repo.component(type)
 
@@ -476,7 +468,7 @@ class Workspace:
         """TODO"""
 
         if not name:
-            name = f"link-{self._generate_extension()}"
+            name = f"link-{v1.utils.random_suffix(4)}"
 
         else:
             if len(name) > _MAX_LINK_NAME_LENGTH:
@@ -486,7 +478,7 @@ class Workspace:
                 raise exceptions.InvalidName(name)
 
             if not no_suffix:
-                name = f"{name}-{self._generate_extension()}"
+                name = f"{name}-{v1.utils.random_suffix(4)}"
 
         link_type = self.repo.link(type)
 
