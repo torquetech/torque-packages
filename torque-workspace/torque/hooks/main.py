@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import argparse
 import os
@@ -18,13 +18,13 @@ from torque import v1
 
 
 def fix_pyyaml():
-    """TODO"""
+    """DOCSTRING"""
 
     # Credits for the code in this function:
     # https://stackoverflow.com/a/33300001
 
     def str_presenter(dumper, data):
-        """TODO"""
+        """DOCSTRING"""
 
         if len(data.splitlines()) > 1:
             return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
@@ -35,14 +35,14 @@ def fix_pyyaml():
 
 
 def fix_paths():
-    """TODO"""
+    """DOCSTRING"""
 
     if sys.path[0] == os.getcwd():
         sys.path = sys.path[1:]
 
 
 def main() -> int:
-    """TODO"""
+    """DOCSTRING"""
 
     # For 'python -m module' python always puts in current directory
     # as the first path element and that can mess up the whole environment

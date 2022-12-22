@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import json
 import os
@@ -22,18 +22,18 @@ _TORQUE_ROOT = None
 
 
 class Exception(RuntimeError):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class PackageNotFound(Exception):
-    """TODO"""
+    """DOCSTRING"""
 
     def __str__(self) -> str:
         return f"{self.args[0]}: package not found"
 
 
 class WorkspaceNotFound(Exception):
-    """TODO"""
+    """DOCSTRING"""
 
     def __str__(self) -> str:
         return "workspace not found!"
@@ -42,7 +42,7 @@ class WorkspaceNotFound(Exception):
 def torque_cwd() -> str:
     # pylint: disable=W0603
 
-    """TODO"""
+    """DOCSTRING"""
 
     global _TORQUE_CWD
 
@@ -57,7 +57,7 @@ def torque_cwd() -> str:
 def torque_root() -> str:
     # pylint: disable=W0603
 
-    """TODO"""
+    """DOCSTRING"""
 
     global _TORQUE_ROOT
 
@@ -81,19 +81,19 @@ def torque_root() -> str:
 
 
 def torque_dir() -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     return f"{torque_root()}/.torque"
 
 
 def package_dist(path: str):
-    """TODO"""
+    """DOCSTRING"""
 
     return metadata.Distribution.at(path)
 
 
 def installed_packages():
-    """TODO"""
+    """DOCSTRING"""
 
     packages = {}
 
@@ -117,7 +117,7 @@ def installed_packages():
 
 
 def install_deps():
-    """TODO"""
+    """DOCSTRING"""
 
     requirements = []
 
@@ -152,7 +152,7 @@ def install_deps():
 
 
 def install_package(uri: str):
-    """TODO"""
+    """DOCSTRING"""
 
     if re.match(_URI, uri) is None and os.path.exists(uri):
         if not os.path.isabs(uri):
@@ -209,7 +209,7 @@ def install_package(uri: str):
 
 
 def uninstall_package(name: str):
-    """TODO"""
+    """DOCSTRING"""
 
     packages = installed_packages()
 
@@ -242,14 +242,14 @@ def uninstall_package(name: str):
 
 
 def list_packages():
-    """TODO"""
+    """DOCSTRING"""
 
     for name, metadata in sorted(installed_packages().items()):
         print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}")
 
 
 def upgrade_package(name: str):
-    """TODO"""
+    """DOCSTRING"""
 
     packages = installed_packages()
 
@@ -263,7 +263,7 @@ def upgrade_package(name: str):
 
 
 def upgrade_all_packages():
-    """TODO"""
+    """DOCSTRING"""
 
     for name, metadata in installed_packages().items():
         uninstall_package(name)

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import base64
 import functools
@@ -15,18 +15,18 @@ from torque import v1
 
 
 class V1Interface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def auth(self) -> dict[str, dict]:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "impl": {
@@ -44,14 +44,14 @@ class V1Provider(v1.provider.Provider):
         self._lock = threading.Lock()
 
     def _resolve_tag(self, image: str) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return "/".join([self._auth["server"],
                          self._auth["prefix"],
                          image])
 
     def _dockerconfig(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         server = self._auth["server"]
         username = self._auth["username"]
@@ -77,7 +77,7 @@ class V1Provider(v1.provider.Provider):
         return dockerconfig.decode()
 
     def login(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         self._auth = self.interfaces.impl.auth()
 
@@ -97,7 +97,7 @@ class V1Provider(v1.provider.Provider):
         return self._dockerconfig()
 
     def push_images(self):
-        """TODO"""
+        """DOCSTRING"""
 
         for image, tag in self._tags.items():
             tag = v1.utils.resolve_futures(tag)
@@ -123,7 +123,7 @@ class V1Provider(v1.provider.Provider):
                            check=True)
 
     def register_image(self, image: str) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         with self._lock:
             if image not in self._tags:

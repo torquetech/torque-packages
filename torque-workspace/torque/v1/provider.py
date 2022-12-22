@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import inspect
 import threading
@@ -13,7 +13,7 @@ from . import utils
 
 
 class _ProviderContext:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  data: dict[str, object],
@@ -22,7 +22,7 @@ class _ProviderContext:
         self._hooks = hooks
 
     def set_data(self, cls: type, name: str, data: object):
-        """TODO"""
+        """DOCSTRING"""
 
         cls_type = utils.fqcn(cls)
 
@@ -32,7 +32,7 @@ class _ProviderContext:
         self._data[cls_type][name] = data
 
     def get_data(self, cls: type, name: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         cls_type = utils.fqcn(cls)
 
@@ -42,7 +42,7 @@ class _ProviderContext:
         return self._data[cls_type].get(name)
 
     def add_hook(self, bucket: str, hook: typing.Callable):
-        """TODO"""
+        """DOCSTRING"""
 
         assert callable(hook)
 
@@ -53,7 +53,7 @@ class _ProviderContext:
 
 
 class Provider:
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {},
@@ -82,7 +82,7 @@ class Provider:
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.CONFIGURATION["schema"],
                                      cls.CONFIGURATION["defaults"],
@@ -90,12 +90,12 @@ class Provider:
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {}
 
     def run_hooks(self, bucket: str, **kwargs):
-        """TODO"""
+        """DOCSTRING"""
 
         quiet = kwargs.get("quiet", True)
         reverse = kwargs.get("reverse", False)

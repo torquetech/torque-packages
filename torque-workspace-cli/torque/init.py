@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 import re
@@ -16,7 +16,7 @@ _URI = r"^[^:]+://"
 
 
 def add_arguments(subparsers):
-    """TODO"""
+    """DOCSTRING"""
 
     init_parser = subparsers.add_parser("init",
                                         description="initialize workspace",
@@ -34,7 +34,7 @@ def add_arguments(subparsers):
 
 
 def run(cwd: str, arguments: Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     package = arguments.package
 

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import functools
 import inspect
@@ -15,7 +15,7 @@ from . import utils
 
 
 class Interface:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, **kwargs):
         self._torque_lock = None
@@ -43,15 +43,15 @@ class Interface:
 
 
 class SourceInterface(Interface):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class DestinationInterface(Interface):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class Component:
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {},
@@ -91,7 +91,7 @@ class Component:
             self._torque_interfaces[type] = interface
 
     def _torque_interface(self, cls: type, required: bool) -> Interface:
-        """TODO"""
+        """DOCSTRING"""
 
         cls_type = utils.fqcn(cls)
 
@@ -105,7 +105,7 @@ class Component:
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.PARAMETERS["schema"],
                                      cls.PARAMETERS["defaults"],
@@ -113,7 +113,7 @@ class Component:
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.CONFIGURATION["schema"],
                                      cls.CONFIGURATION["defaults"],
@@ -121,23 +121,23 @@ class Component:
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {}
 
     def on_interfaces(self) -> [Interface]:
-        """TODO"""
+        """DOCSTRING"""
 
         return []
 
     def on_create(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_remove(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_build(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import hashlib
 
@@ -36,11 +36,11 @@ grant all on {{database}}.* to {{user}};
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Implementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = mysql.V1ImplementationInterface
@@ -56,7 +56,7 @@ class V1Implementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "k8s": {
@@ -81,7 +81,7 @@ class V1Implementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _create_access(self, database: str, user: str):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             if database not in self._databases:
@@ -95,7 +95,7 @@ class V1Implementation(v1.bond.Bond):
             return self._users[user]
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         image = f"mysql:{self.configuration['version']}"
         password = self._create_access("mysql", "mysql")
@@ -232,14 +232,14 @@ class V1Implementation(v1.bond.Bond):
         })
 
     def auth(self, database: str, user: str) -> v1.utils.Future[mysql.Authorization]:
-        """TODO"""
+        """DOCSTRING"""
 
         return v1.utils.Future(mysql.Authorization(database,
                                                    user,
                                                    self._create_access(database, user)))
 
     def service(self) -> mysql.Service:
-        """TODO"""
+        """DOCSTRING"""
 
         host = f"{self.name}.{self._namespace}"
 

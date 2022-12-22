@@ -5,7 +5,7 @@
 # This file contains k8s yaml files generated from ingress-nginx helm
 # repository. For more details, visit https://kubernetes.github.io/ingress-nginx/
 
-"""TODO"""
+"""DOCSTRING"""
 
 import jinja2
 import yaml
@@ -407,18 +407,18 @@ spec:
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Implementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = hlb.V1ImplementationInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -448,7 +448,7 @@ class V1Implementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         domain = self.interfaces.cert.domain()
         cert_id = self.interfaces.cert.certificate_id()
@@ -509,7 +509,7 @@ class V1Implementation(v1.bond.Bond):
             })
 
     def add(self, ingress: hlb.Ingress):
-        """TODO"""
+        """DOCSTRING"""
 
         self._ingress_list.append(ingress)
 

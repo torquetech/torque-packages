@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import do
 from torque import dolib
@@ -10,7 +10,7 @@ from torque import v1
 
 
 class _V2Domain(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,7 +20,7 @@ class _V2Domain(dolib.Resource):
         self._current_params = None
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         page = 1
 
@@ -49,7 +49,7 @@ class _V2Domain(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/domains", self._object["params"])
         data = res.json()
@@ -58,7 +58,7 @@ class _V2Domain(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self._object["params"] == self._current_params:
             return
@@ -66,7 +66,7 @@ class _V2Domain(dolib.Resource):
         raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify domain")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -79,7 +79,7 @@ class _V2Domain(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.delete(f"v2/domains/{self._do_name}")
 
@@ -88,11 +88,11 @@ class _V2Domain(dolib.Resource):
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -107,7 +107,7 @@ class V1Provider(v1.provider.Provider):
         self._domains = set()
 
     def create(self, domain: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if domain in self._domains:
             return

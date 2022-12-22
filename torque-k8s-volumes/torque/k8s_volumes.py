@@ -2,16 +2,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import v1
 
 
 class V1Interface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def ref_name(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
     def spec(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""

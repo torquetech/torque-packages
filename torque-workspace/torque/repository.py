@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import importlib
 import traceback
@@ -14,7 +14,7 @@ from torque import v1
 
 
 def _is_component(obj: type) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     if not isinstance(obj, type):
         return False
@@ -23,7 +23,7 @@ def _is_component(obj: type) -> bool:
 
 
 def _is_link(obj: type) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     if not isinstance(obj, type):
         return False
@@ -32,7 +32,7 @@ def _is_link(obj: type) -> bool:
 
 
 def _is_provider(obj: type) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     if not isinstance(obj, type):
         return False
@@ -41,7 +41,7 @@ def _is_provider(obj: type) -> bool:
 
 
 def _is_bond(obj: type) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     if not isinstance(obj, type):
         return False
@@ -56,7 +56,7 @@ def _is_bond(obj: type) -> bool:
 
 
 def _is_context(obj: type) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     if not isinstance(obj, type):
         return False
@@ -100,38 +100,38 @@ _DEFAULT_REPOSITORY = {
 
 
 class Repository:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, repo: dict[str, object]):
         self._repo = repo
 
     def contexts(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._repo["v1"]["contexts"]
 
     def components(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._repo["v1"]["components"]
 
     def links(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._repo["v1"]["links"]
 
     def providers(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._repo["v1"]["providers"]
 
     def bonds(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._repo["v1"]["bonds"]
 
     def context(self, name: str) -> v1.deployment.Context:
-        """TODO"""
+        """DOCSTRING"""
 
         contexts = self.contexts()
 
@@ -141,7 +141,7 @@ class Repository:
         return contexts[name]
 
     def component(self, name: str) -> v1.component.Component:
-        """TODO"""
+        """DOCSTRING"""
 
         components = self.components()
 
@@ -151,7 +151,7 @@ class Repository:
         return components[name]
 
     def link(self, name: str) -> v1.link.Link:
-        """TODO"""
+        """DOCSTRING"""
 
         links = self.links()
 
@@ -161,7 +161,7 @@ class Repository:
         return links[name]
 
     def provider(self, name: str) -> v1.provider.Provider:
-        """TODO"""
+        """DOCSTRING"""
 
         providers = self.providers()
 
@@ -171,7 +171,7 @@ class Repository:
         return providers[name]
 
     def bond(self, name: str) -> v1.bond.Bond:
-        """TODO"""
+        """DOCSTRING"""
 
         bonds = self.bonds()
 
@@ -182,7 +182,7 @@ class Repository:
 
 
 def _system_repository() -> list:
-    """TODO"""
+    """DOCSTRING"""
 
     entry_points = importlib.metadata.entry_points()
 
@@ -193,7 +193,7 @@ def _system_repository() -> list:
 
 
 def _local_repository() -> list:
-    """TODO"""
+    """DOCSTRING"""
 
     try:
         importlib.import_module("local")
@@ -209,7 +209,7 @@ def _local_repository() -> list:
 
 
 def _process_items(repository: dict[str, object], name: str) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     if name not in repository["v1"]:
         return repository
@@ -223,7 +223,7 @@ def _process_items(repository: dict[str, object], name: str) -> dict[str, object
 
 
 def load() -> Repository:
-    """TODO"""
+    """DOCSTRING"""
 
     repository = {} | _DEFAULT_REPOSITORY
 

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import io
 import os
@@ -15,7 +15,7 @@ from torque import v1
 
 
 class _V2Project(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,7 +29,7 @@ class _V2Project(dolib.Resource):
             self._project_id = self._object["metadata"]["id"]
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get("v2/projects")
         data = res.json()
@@ -53,7 +53,7 @@ class _V2Project(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/projects", self._object["params"])
         data = res.json()
@@ -64,7 +64,7 @@ class _V2Project(dolib.Resource):
         self._project_id = data["project"]["id"]
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self._object["params"] == self._current_params:
             return
@@ -79,7 +79,7 @@ class _V2Project(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -94,7 +94,7 @@ class _V2Project(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.delete(f"v2/projects/{self._project_id}")
 
@@ -103,7 +103,7 @@ class _V2Project(dolib.Resource):
 
 
 class _V2Vpc(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,7 +120,7 @@ class _V2Vpc(dolib.Resource):
             self._vpc_id = self._object["metadata"]["id"]
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get("v2/vpcs")
         data = res.json()
@@ -143,7 +143,7 @@ class _V2Vpc(dolib.Resource):
         return self._vpc_id is not None
 
     def _create_default_vpc(self):
-        """TODO"""
+        """DOCSTRING"""
 
         default_vpc_name = f"{self._region}-vpc-default"
 
@@ -159,7 +159,7 @@ class _V2Vpc(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{default_vpc_name}: {data['message']}")
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._has_default_vpc:
             self._create_default_vpc()
@@ -173,7 +173,7 @@ class _V2Vpc(dolib.Resource):
         self._vpc_id = data["vpc"]["id"]
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         current_region = self._current_params["region"]
         new_region = self._object["params"]["region"]
@@ -182,7 +182,7 @@ class _V2Vpc(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: cannot change region")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -197,7 +197,7 @@ class _V2Vpc(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         def cond():
             res = self._client.delete(f"v2/vpcs/{self._vpc_id}")
@@ -214,7 +214,7 @@ class _V2Vpc(dolib.Resource):
 
 
 class _V2Resources(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -226,7 +226,7 @@ class _V2Resources(dolib.Resource):
             self._project_id = self._object["params"]["project_id"]
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get(f"v2/projects/{self._project_id}/resources")
         data = res.json()
@@ -241,7 +241,7 @@ class _V2Resources(dolib.Resource):
         }
 
     def _assign(self, params: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         if not params["resources"]:
             return
@@ -253,12 +253,12 @@ class _V2Resources(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._assign(self._object["params"])
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         params = {
             "resources": sorted(self._object["params"]["resources"])
@@ -270,7 +270,7 @@ class _V2Resources(dolib.Resource):
         self._assign(params)
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -283,11 +283,11 @@ class _V2Resources(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {
@@ -326,24 +326,24 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("delete", self._delete)
 
     def _load_state(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             self._current_state = ctx.get_data("state", v1.utils.fqcn(self)) or {}
 
     def _store_state(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             ctx.set_data("state", v1.utils.fqcn(self), self._current_state)
 
     def _connect(self) -> dolib.Client:
-        """TODO"""
+        """DOCSTRING"""
 
         self._client = dolib.connect(self.configuration["endpoint"], self.token())
 
     def _update_object(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         overrides = self.configuration.get("overrides", {})
         overrides = overrides.get(name, {})
@@ -372,7 +372,7 @@ class V1Provider(v1.provider.Provider):
         self._current_state[name] = handler.update()
 
     def _delete_object(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         obj = self._current_state.get(name)
 
@@ -393,7 +393,7 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("collect-garbage", _delete_object)
 
     def _apply_project(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self.add_object({
             "kind": "v2/project",
@@ -407,7 +407,7 @@ class V1Provider(v1.provider.Provider):
         })
 
     def _apply_vpc(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self.add_object({
             "kind": "v2/vpc",
@@ -419,7 +419,7 @@ class V1Provider(v1.provider.Provider):
         })
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self.add_object({
             "kind": "v2/resources",
@@ -442,7 +442,7 @@ class V1Provider(v1.provider.Provider):
             self._store_state()
 
     def _delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         try:
             self._connect()
@@ -456,32 +456,32 @@ class V1Provider(v1.provider.Provider):
             self._store_state()
 
     def metadata(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._current_state[name]["metadata"]
 
     def object_id(self, name: str) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return v1.utils.Future(lambda: self.metadata(name)["id"])
 
     def project_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self.object_id(f"v2/project/{self._project_name}")
 
     def vpc_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self.object_id(f"v2/vpc/{self._vpc_name}")
 
     def region(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._region
 
     def token(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         token = os.getenv("DO_TOKEN")
 
@@ -491,12 +491,12 @@ class V1Provider(v1.provider.Provider):
         return token
 
     def client(self) -> dolib.Client:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._client
 
     def add_resource(self, type: str, resource_id: object):
-        """TODO"""
+        """DOCSTRING"""
 
         resource = v1.utils.Future(lambda: f"{type}:{v1.utils.resolve_futures(resource_id)}")
 
@@ -504,7 +504,7 @@ class V1Provider(v1.provider.Provider):
             self._resources.append(resource)
 
     def add_object(self, obj: dict[str, object]) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         with self._lock:
             name = f"{obj['kind']}/{obj['name']}"
@@ -517,7 +517,7 @@ class V1Provider(v1.provider.Provider):
             return name
 
     def object(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if name not in self._new_state:
             raise v1.exceptions.RuntimeError(f"{name}: object not found")
@@ -525,13 +525,13 @@ class V1Provider(v1.provider.Provider):
         return self._new_state[name]
 
     def objects(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._new_state
 
 
 class V1Context(v1.deployment.Context):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {
@@ -577,7 +577,7 @@ class V1Context(v1.deployment.Context):
             pass
 
     def _get_s3_key(self, key: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         key = f"{self.configuration['path']}/{key}"
 
@@ -591,7 +591,7 @@ class V1Context(v1.deployment.Context):
             return io.BytesIO(b"")
 
     def _put_s3_key(self, key: str, body: bytes):
-        """TODO"""
+        """DOCSTRING"""
 
         key = f"{self.configuration['path']}/{key}"
 
@@ -601,14 +601,14 @@ class V1Context(v1.deployment.Context):
                                 ACL='private')
 
     def load_bucket(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         key = f"{self.deployment_name}/{name}.yaml"
 
         return yaml.safe_load(self._get_s3_key(key)) or {}
 
     def store_bucket(self, name: str, data: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         data = yaml.safe_dump(data,
                               default_flow_style=False,

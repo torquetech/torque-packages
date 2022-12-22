@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import kubernetes
 
@@ -11,11 +11,11 @@ from torque import k8s
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Client(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = k8s.V1ClientInterface
@@ -29,7 +29,7 @@ class V1Client(v1.bond.Bond):
     }
 
     def connect(self) -> kubernetes.client.ApiClient:
-        """TODO"""
+        """DOCSTRING"""
 
         return kubernetes.config.new_client_from_config(self.configuration.get("config_file"),
                                                         self.configuration.get("context"))

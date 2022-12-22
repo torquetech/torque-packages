@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import difflib
 import inspect
@@ -26,7 +26,7 @@ _TORQUE_ROOT = None
 def torque_cwd() -> str:
     # pylint: disable=W0603
 
-    """TODO"""
+    """DOCSTRING"""
 
     global _TORQUE_CWD
 
@@ -41,7 +41,7 @@ def torque_cwd() -> str:
 def torque_root() -> str:
     # pylint: disable=W0603
 
-    """TODO"""
+    """DOCSTRING"""
 
     global _TORQUE_ROOT
 
@@ -65,7 +65,7 @@ def torque_root() -> str:
 
 
 def torque_path(path: str) -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     if os.path.isabs(path):
         return path
@@ -80,13 +80,13 @@ def torque_path(path: str) -> str:
 
 
 def torque_dir() -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     return f"{torque_root()}/.torque"
 
 
 def resolve_path(path: str) -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     if os.path.isabs(path):
         return path
@@ -98,7 +98,7 @@ def resolve_path(path: str) -> str:
 
 
 def fqcn(obj: object) -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     if not inspect.isclass(obj):
         return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
@@ -109,7 +109,7 @@ def fqcn(obj: object) -> str:
 def merge_dicts(dict1: dict[str, object],
                 dict2: dict[str, object],
                 allow_overwrites: bool = True) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     new_dict = {} | dict1
 
@@ -134,7 +134,7 @@ def merge_dicts(dict1: dict[str, object],
 
 
 def validate_schema(schema: object, defaults: object, instance: object) -> object:
-    """TODO"""
+    """DOCSTRING"""
 
     return schema_v1.Schema(schema).validate(merge_dicts(defaults, instance))
 
@@ -143,7 +143,7 @@ T = typing.TypeVar("T")
 
 
 class Future(typing.Generic[T]):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, obj: object):
         self._obj = obj
@@ -163,7 +163,7 @@ class Future(typing.Generic[T]):
 
 
 def resolve_futures(obj: object) -> object:
-    """TODO"""
+    """DOCSTRING"""
 
     if isinstance(obj, dict):
         return {
@@ -182,7 +182,7 @@ def resolve_futures(obj: object) -> object:
 
 
 def diff_objects(name: str, obj1: dict[str, object], obj2: dict[str, object]):
-    """TODO"""
+    """DOCSTRING"""
 
     obj1 = yaml.safe_dump(obj1,
                           default_flow_style=False,
@@ -205,7 +205,7 @@ def apply_objects(current_state: dict[str, object],
                   new_state: dict[str, object],
                   update_fn: typing.Callable,
                   delete_fn: typing.Callable):
-    """TODO"""
+    """DOCSTRING"""
 
     for name in list(new_state.keys()):
         update_fn(name)
@@ -252,7 +252,7 @@ def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
 
 
 def random_suffix(length: int):
-    """TODO"""
+    """DOCSTRING"""
 
     return ''.join([_SYMBOLS[i % len(_SYMBOLS)]
                     for i in secrets.token_bytes(length)])

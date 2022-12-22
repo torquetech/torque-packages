@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import do
 from torque import k8s
@@ -11,11 +11,11 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Implementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = k8s_volumes.V1Interface
@@ -31,7 +31,7 @@ class V1Implementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -51,7 +51,7 @@ class V1Implementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         self.interfaces.k8s.add_object({
             "apiVersion": "v1",
@@ -74,12 +74,12 @@ class V1Implementation(v1.bond.Bond):
         })
 
     def ref_name(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self.name
 
     def spec(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "name": self.name,

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import re
 import typing
@@ -29,7 +29,7 @@ def bind_to_bond(obj_type: type,
                  bond_type: type,
                  create_bond: typing.Callable,
                  bind_provider: typing.Callable) -> [object]:
-    """TODO"""
+    """DOCSTRING"""
 
     interfaces = types.SimpleNamespace()
     requirements = bond_type.on_requirements()
@@ -66,7 +66,7 @@ def bind_to_bond(obj_type: type,
 def bind_to_provider(provider_type: type,
                      create_bond: typing.Callable,
                      bind_provider: typing.Callable) -> [object]:
-    """TODO"""
+    """DOCSTRING"""
 
     interfaces = types.SimpleNamespace()
     requirements = provider_type.on_requirements()
@@ -103,7 +103,7 @@ def bind_to_provider(provider_type: type,
 def bind_to_component(component_type: type,
                       component_name: str,
                       create_bond: typing.Callable) -> [object]:
-    """TODO"""
+    """DOCSTRING"""
 
     interfaces = types.SimpleNamespace()
     requirements = component_type.on_requirements()
@@ -139,7 +139,7 @@ def bind_to_link(link_type: type,
                  source: model.Component,
                  destination: model.Component,
                  create_bond: typing.Callable) -> [object]:
-    """TODO"""
+    """DOCSTRING"""
 
     interfaces = types.SimpleNamespace()
     requirements = link_type.on_requirements()

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import yaml
 
@@ -13,7 +13,7 @@ from torque import v1
 
 
 class _V2KubernetesClusters(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +31,7 @@ class _V2KubernetesClusters(dolib.Resource):
             self._cluster_id = self._object["metadata"]["id"]
 
     def _update_pool(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if name not in self._current_pools:
             res = self._client.post(f"v2/kubernetes/clusters/{self._cluster_id}/"
@@ -71,7 +71,7 @@ class _V2KubernetesClusters(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {name}: {data['message']}")
 
     def _delete_pool(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         pool_id = self._current_pool_map[name]
 
@@ -81,7 +81,7 @@ class _V2KubernetesClusters(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {res.json()['message']}")
 
     def _update_pools(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._pools = {
             pool["name"]: pool for pool in self._object["params"]["node_pools"]
@@ -93,7 +93,7 @@ class _V2KubernetesClusters(dolib.Resource):
                                self._delete_pool)
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         page = 1
 
@@ -150,7 +150,7 @@ class _V2KubernetesClusters(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/kubernetes/clusters", self._object["params"])
         data = res.json()
@@ -161,7 +161,7 @@ class _V2KubernetesClusters(dolib.Resource):
         self._cluster_id = data["kubernetes_cluster"]["id"]
 
     def _check_immutable_params(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self._current_params["ha"] != self._object["params"]["ha"]:
             raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify ha parameter")
@@ -173,7 +173,7 @@ class _V2KubernetesClusters(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify region parameter")
 
     def _update_cluster(self):
-        """TODO"""
+        """DOCSTRING"""
 
         current_maintenance_policy = {} | self._current_params["maintenance_policy"]
         current_maintenance_policy.pop("duration")
@@ -215,7 +215,7 @@ class _V2KubernetesClusters(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._check_immutable_params()
 
@@ -223,7 +223,7 @@ class _V2KubernetesClusters(dolib.Resource):
         self._update_pools()
 
     def _wait(self):
-        """TODO"""
+        """DOCSTRING"""
 
         def cond():
             res = self._client.get(f"v2/kubernetes/clusters/{self._cluster_id}")
@@ -244,7 +244,7 @@ class _V2KubernetesClusters(dolib.Resource):
         v1.utils.wait_for(cond, f"waiting for cluster {self._name} to become ready")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -261,7 +261,7 @@ class _V2KubernetesClusters(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._context as ctx:
             ctx.delete_secret_data(self._object["name"], "kubeconfig")
@@ -274,7 +274,7 @@ class _V2KubernetesClusters(dolib.Resource):
 
 
 def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     res = client.get(f"v2/kubernetes/clusters/{cluster_id}/kubeconfig?expiry_seconds=315360000")
 
@@ -285,7 +285,7 @@ def _kubeconfig(client: dolib.Client, cluster_id: str) -> dict[str, object]:
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {
@@ -342,7 +342,7 @@ class V1Provider(v1.provider.Provider):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -361,7 +361,7 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         obj = {
             "kind": "v2/kubernetes",
@@ -385,25 +385,25 @@ class V1Provider(v1.provider.Provider):
         self.interfaces.do.add_resource("do:kubernetes", self._cluster_id)
 
     def cluster_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._cluster_id
 
     def cluster_name(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._cluster_name
 
 
 class V1Client(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = k8s.V1ClientInterface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -417,7 +417,7 @@ class V1Client(v1.bond.Bond):
         }
 
     def kubeconfig(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             config = ctx.get_secret_data(self.interfaces.impl.cluster_name(), "kubeconfig")

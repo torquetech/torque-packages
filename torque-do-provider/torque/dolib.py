@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import requests
 
@@ -10,7 +10,7 @@ from torque import v1
 
 
 class Client:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, endpoint: str, token: str):
         self._endpoint = endpoint
@@ -21,28 +21,28 @@ class Client:
         }
 
     def post(self, path: str, params: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._session.post(f"{self._endpoint}/{path}",
                                   headers=self._headers,
                                   json=params)
 
     def put(self, path: str, params: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._session.put(f"{self._endpoint}/{path}",
                                  headers=self._headers,
                                  json=params)
 
     def get(self, path: str, params=None) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._session.get(f"{self._endpoint}/{path}",
                                  headers=self._headers,
                                  params=params)
 
     def delete(self, path: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._session.delete(f"{self._endpoint}/{path}",
                                     headers=self._headers,
@@ -50,7 +50,7 @@ class Client:
 
 
 class Resource:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  client: Client,
@@ -66,7 +66,7 @@ class Resource:
 
 
 def connect(endpoint: str, token: str) -> Client:
-    """TODO"""
+    """DOCSTRING"""
 
     return Client(endpoint, token)
 

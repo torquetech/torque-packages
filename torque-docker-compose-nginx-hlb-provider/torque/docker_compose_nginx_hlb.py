@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import hashlib
 
@@ -46,11 +46,11 @@ server {
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Implementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = hlb.V1ImplementationInterface
@@ -66,7 +66,7 @@ class V1Implementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "dc": {
@@ -88,7 +88,7 @@ class V1Implementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         domain = self.configuration["domain"]
         hosts = sorted(list({i.host for i in self._ingress_list}))
@@ -123,7 +123,7 @@ class V1Implementation(v1.bond.Bond):
         })
 
     def add(self, ingress: hlb.Ingress):
-        """TODO"""
+        """DOCSTRING"""
 
         self._ingress_list.append(ingress)
 

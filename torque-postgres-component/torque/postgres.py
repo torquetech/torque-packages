@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import functools
 
@@ -26,41 +26,41 @@ Service = namedtuple("Service", [
 
 
 class V1ImplementationInterface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
-        """TODO"""
+        """DOCSTRING"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1SourceInterface(v1.component.SourceInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
-        """TODO"""
+        """DOCSTRING"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1DestinationInterface(v1.component.DestinationInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add(self,
             name: str,
             auth: v1.utils.Future[Authorization],
             service: v1.utils.Future[Service] | Service):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1Component(v1.component.Component):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "impl": {
@@ -70,7 +70,7 @@ class V1Component(v1.component.Component):
         }
 
     def on_interfaces(self) -> [v1.component.Interface]:
-        """TODO"""
+        """DOCSTRING"""
 
         return [
             V1SourceInterface(auth=self.interfaces.impl.auth,
@@ -79,7 +79,7 @@ class V1Component(v1.component.Component):
 
 
 class V1EnvironmentLink(environment.V1BaseLink):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = environment.V1BaseLink.PARAMETERS | {
         "defaults": {},
@@ -91,7 +91,7 @@ class V1EnvironmentLink(environment.V1BaseLink):
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return super().on_requirements() | {
             "src": {
@@ -103,7 +103,7 @@ class V1EnvironmentLink(environment.V1BaseLink):
     def _resolve_uri(self,
                      auth: v1.utils.Future[Authorization],
                      service: v1.utils.Future[Service] | Service) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         auth = v1.utils.resolve_futures(auth)
         service = v1.utils.resolve_futures(service)
@@ -113,7 +113,7 @@ class V1EnvironmentLink(environment.V1BaseLink):
         return f"postgres://{auth.user}:{auth.password}@{service.host}:{service.port}/{auth.database}?{args}"
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         auth = self.interfaces.src.auth(self.parameters["database"],
                                         self.parameters["user"])
@@ -127,7 +127,7 @@ class V1EnvironmentLink(environment.V1BaseLink):
 
 
 class V1ServiceLink(v1.link.Link):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {},
@@ -139,7 +139,7 @@ class V1ServiceLink(v1.link.Link):
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "src": {
@@ -153,7 +153,7 @@ class V1ServiceLink(v1.link.Link):
         }
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self.interfaces.dst.add(self.source,
                                 self.interfaces.src.auth(self.parameters["database"],

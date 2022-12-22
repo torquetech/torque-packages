@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 import subprocess
@@ -15,7 +15,7 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {
@@ -40,7 +40,7 @@ class V1Provider(v1.provider.Provider):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "k8s": {
@@ -64,19 +64,19 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("delete", self._delete)
 
     def _load_state(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             self._current_state = ctx.get_data("state", v1.utils.fqcn(self)) or {}
 
     def _store_state(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             ctx.set_data("state", v1.utils.fqcn(self), self._current_state)
 
     def _generate_kubeconfig(self):
-        """TODO"""
+        """DOCSTRING"""
 
         kubeconfig = self.interfaces.k8s.kubeconfig()
 
@@ -89,7 +89,7 @@ class V1Provider(v1.provider.Provider):
                            sort_keys=False)
 
     def _update_object(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         old_obj = self._current_state.get(name)
         obj = v1.utils.resolve_futures(self._new_state.get(name))
@@ -128,7 +128,7 @@ class V1Provider(v1.provider.Provider):
         }
 
     def _delete_object(self, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         obj = self._current_state.get(name)
 
@@ -150,7 +150,7 @@ class V1Provider(v1.provider.Provider):
         self._current_state.pop(name)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         for name, obj in self.configuration["instances"].items():
             self.add(name,
@@ -173,7 +173,7 @@ class V1Provider(v1.provider.Provider):
             self._store_state()
 
     def _delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         try:
             self._generate_kubeconfig()
@@ -197,7 +197,7 @@ class V1Provider(v1.provider.Provider):
             repo_url: str,
             namespace: str,
             values: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         fd, values_file = tempfile.mkstemp(prefix=f"{name}-values-", suffix=".yaml")
 

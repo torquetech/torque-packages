@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import argparse
 import pathlib
@@ -15,17 +15,17 @@ from torque import workspace
 
 
 class InvalidWorkspace(Exception):
-    """TODO"""
+    """DOCSTRING"""
 
 
 def torque_cwd() -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     return os.getenv("PWD", os.getcwd())
 
 
 def torque_root() -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     cwd = pathlib.Path(torque_cwd())
 
@@ -42,7 +42,7 @@ def torque_root() -> str:
 
 
 def pass_through_command(root: str, argv):
-    """TODO"""
+    """DOCSTRING"""
 
     cmd = [
         f"{root}/.torque/local/venv/bin/python",
@@ -59,7 +59,7 @@ def pass_through_command(root: str, argv):
 
 
 def main() -> int:
-    """TODO"""
+    """DOCSTRING"""
 
     # pylint: disable=W0703
     try:

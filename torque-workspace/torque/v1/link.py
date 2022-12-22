@@ -2,14 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from . import deployment
 from . import utils
 
 
 class Link:
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {},
@@ -41,7 +41,7 @@ class Link:
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.PARAMETERS["schema"],
                                      cls.PARAMETERS["defaults"],
@@ -49,7 +49,7 @@ class Link:
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.CONFIGURATION["schema"],
                                      cls.CONFIGURATION["defaults"],
@@ -57,18 +57,18 @@ class Link:
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {}
 
     def on_create(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_remove(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_build(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""

@@ -2,18 +2,18 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from . import deployment
 from . import utils
 
 
 class Interface:
-    """TODO"""
+    """DOCSTRING"""
 
 
 class Bond:
-    """TODO"""
+    """DOCSTRING"""
 
     IMPLEMENTS = None
 
@@ -34,7 +34,7 @@ class Bond:
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.CONFIGURATION["schema"],
                                      cls.CONFIGURATION["defaults"],
@@ -42,6 +42,6 @@ class Bond:
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {}

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import basics
 from torque import k8s
@@ -11,11 +11,11 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1TaskImplementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = basics.V1TaskImplementationInterface
@@ -34,7 +34,7 @@ class V1TaskImplementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "k8s": {
@@ -61,7 +61,7 @@ class V1TaskImplementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._task_apply)
 
     def _task_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         namespace = self.interfaces.k8s.namespace()
         image_tag = self.interfaces.k8s.register_image(self._image_tag, namespace)
@@ -146,34 +146,34 @@ class V1TaskImplementation(v1.bond.Bond):
         self.interfaces.k8s.add_object(obj)
 
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._environment.append((name, value))
 
     def set_image(self, tag: str, id: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._image_tag = tag
         self._image_id = id
 
     def set_command(self, command: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._command = command
 
     def set_arguments(self, arguments: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._arguments = arguments
 
     def set_working_directory(self, working_directory: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._working_directory = working_directory
 
 
 class V1ServiceImplementation(V1TaskImplementation):
-    """TODO"""
+    """DOCSTRING"""
 
     IMPLEMENTS = basics.V1ServiceImplementationInterface
 
@@ -187,7 +187,7 @@ class V1ServiceImplementation(V1TaskImplementation):
             p.add_hook("apply-objects", self._svc_apply)
 
     def _svc_apply(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         namespace = self.interfaces.k8s.namespace()
 
@@ -213,17 +213,17 @@ class V1ServiceImplementation(V1TaskImplementation):
         self.interfaces.k8s.add_object(obj)
 
     def set_proto(self, proto: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._proto = proto
 
     def set_port(self, port: int):
-        """TODO"""
+        """DOCSTRING"""
 
         self._port = port
 
     def service(self) -> basics.Service:
-        """TODO"""
+        """DOCSTRING"""
 
         host = f"{self.name}.{self.interfaces.k8s.namespace()}"
 

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from copy import deepcopy
 
@@ -12,7 +12,7 @@ from torque import exceptions
 
 
 class Component:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  name: str,
@@ -37,7 +37,7 @@ class Component:
                f", outbound_links=[{outbound_links}])"
 
     def add_inbound_link(self, component: str, link: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if component not in self.inbound_links:
             self.inbound_links[component] = set()
@@ -45,7 +45,7 @@ class Component:
         self.inbound_links[component].add(link)
 
     def remove_inbound_link(self, component: str, link: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if component not in self.inbound_links:
             raise exceptions.ComponentsNotConnected(component, self.name)
@@ -61,7 +61,7 @@ class Component:
             self.inbound_links.pop(component)
 
     def add_outbound_link(self, component: str, link: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if component not in self.outbound_links:
             self.outbound_links[component] = set()
@@ -69,7 +69,7 @@ class Component:
         self.outbound_links[component].add(link)
 
     def remove_outbound_link(self, component: str, link: str):
-        """TODO"""
+        """DOCSTRING"""
 
         if component not in self.outbound_links:
             raise exceptions.ComponentsNotConnected(self.name, component)
@@ -86,7 +86,7 @@ class Component:
 
 
 class Link:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  name: str,
@@ -110,7 +110,7 @@ class Link:
 
 
 class DAG:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, revision: int):
         self.revision = revision
@@ -123,7 +123,7 @@ class DAG:
                          parameters: object) -> Component:
         # pylint: disable=W0622
 
-        """TODO"""
+        """DOCSTRING"""
 
         if name in self.components:
             raise exceptions.ComponentExists(name)
@@ -134,7 +134,7 @@ class DAG:
         return component
 
     def get_component(self, name: str) -> Component:
-        """TODO"""
+        """DOCSTRING"""
 
         if name not in self.components:
             raise exceptions.ComponentNotFound(name)
@@ -142,7 +142,7 @@ class DAG:
         return self.components[name]
 
     def remove_component(self, name: str) -> Component:
-        """TODO"""
+        """DOCSTRING"""
 
         component = self.get_component(name)
 
@@ -162,7 +162,7 @@ class DAG:
                     parameters: object) -> Link:
         # pylint: disable=R0913,W0622
 
-        """TODO"""
+        """DOCSTRING"""
 
         if name in self.links:
             raise exceptions.LinkExists(name)
@@ -185,7 +185,7 @@ class DAG:
         return link
 
     def get_link(self, name: str) -> Component:
-        """TODO"""
+        """DOCSTRING"""
 
         if name not in self.links:
             raise exceptions.LinkNotFound(name)
@@ -193,7 +193,7 @@ class DAG:
         return self.links[name]
 
     def remove_link(self, name: str) -> Link:
-        """TODO"""
+        """DOCSTRING"""
 
         link = self.get_link(name)
 
@@ -206,7 +206,7 @@ class DAG:
                    visited_components: set[str],
                    seen_components: set[str],
                    component: str) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         if component in seen_components:
             raise exceptions.CycleDetected()
@@ -220,7 +220,7 @@ class DAG:
         seen_components.remove(component)
 
     def verify(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         seen_components: set[str] = set()
         visited_components: set[str] = set()
@@ -232,17 +232,17 @@ class DAG:
             self._dfs_check(visited_components, seen_components, root)
 
     def used_component_types(self) -> set[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {i.type for i in self.components.values()}
 
     def used_link_types(self) -> set[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {i.type for i in self.links.values()}
 
     def subset(self, components: [str]) -> "DAG":
-        """TODO"""
+        """DOCSTRING"""
 
         subset = deepcopy(self)
 
@@ -281,7 +281,7 @@ class DAG:
         return subset
 
     def dot(self, name: str) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         graph = pydot.Dot(name, graph_type="digraph")
 

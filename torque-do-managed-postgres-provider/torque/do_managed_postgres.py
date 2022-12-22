@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import functools
 import threading
@@ -14,7 +14,7 @@ from torque import v1
 
 
 class _V2PostgresCluster(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,7 +32,7 @@ class _V2PostgresCluster(dolib.Resource):
             self._cluster_id = self._object["metadata"]["id"]
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get("v2/databases")
         data = res.json()
@@ -67,7 +67,7 @@ class _V2PostgresCluster(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/databases", self._object["params"])
         data = res.json()
@@ -86,7 +86,7 @@ class _V2PostgresCluster(dolib.Resource):
         self._ssl = conn["ssl"]
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self._object["params"] == self._current_params:
             return
@@ -94,7 +94,7 @@ class _V2PostgresCluster(dolib.Resource):
         raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify database")
 
     def _wait(self):
-        """TODO"""
+        """DOCSTRING"""
 
         def cond():
             res = self._client.get(f"v2/databases/{self._cluster_id}")
@@ -111,7 +111,7 @@ class _V2PostgresCluster(dolib.Resource):
         v1.utils.wait_for(cond, f"waiting for cluster {self._name} to become ready")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -131,7 +131,7 @@ class _V2PostgresCluster(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.delete(f"v2/databases/{self._cluster_id}")
 
@@ -140,7 +140,7 @@ class _V2PostgresCluster(dolib.Resource):
 
 
 class _V2PostgresDatabase(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -149,7 +149,7 @@ class _V2PostgresDatabase(dolib.Resource):
         self._db_name = self._object["db_name"]
 
     def _get(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get(f"v2/databases/{self._cluster_id}/dbs")
         data = res.json()
@@ -164,7 +164,7 @@ class _V2PostgresDatabase(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post(f"v2/databases/{self._cluster_id}/dbs", self._object["params"])
         data = res.json()
@@ -173,10 +173,10 @@ class _V2PostgresDatabase(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -189,7 +189,7 @@ class _V2PostgresDatabase(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.delete(f"v2/databases/{self._cluster_id}/dbs/{self._db_name}")
 
@@ -198,7 +198,7 @@ class _V2PostgresDatabase(dolib.Resource):
 
 
 class _V2PostgresUser(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -207,7 +207,7 @@ class _V2PostgresUser(dolib.Resource):
         self._user_name = self._object["user"]
 
     def _get(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get(f"v2/databases/{self._cluster_id}/users")
         data = res.json()
@@ -227,7 +227,7 @@ class _V2PostgresUser(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post(f"v2/databases/{self._cluster_id}/users", self._object["params"])
         data = res.json()
@@ -243,10 +243,10 @@ class _V2PostgresUser(dolib.Resource):
                                 user["password"])
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
     def update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -259,7 +259,7 @@ class _V2PostgresUser(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._context as ctx:
             ctx.delete_secret_data(self._object["name"], "password")
@@ -271,11 +271,11 @@ class _V2PostgresUser(dolib.Resource):
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1Implementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = postgres.V1ImplementationInterface
@@ -295,7 +295,7 @@ class V1Implementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -319,7 +319,7 @@ class V1Implementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         name = f"{self.context.deployment_name}-{self.name}"
 
@@ -371,7 +371,7 @@ class V1Implementation(v1.bond.Bond):
             })
 
     def _resolve_auth(self, database: str, user: str) -> postgres.Authorization:
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             password = ctx.get_secret_data(self._users[user], "password")
@@ -379,7 +379,7 @@ class V1Implementation(v1.bond.Bond):
         return postgres.Authorization(database, user, password)
 
     def _resolve_service(self) -> postgres.Service:
-        """TODO"""
+        """DOCSTRING"""
 
         metadata = self.interfaces.do.metadata(self._cluster_name)
 
@@ -392,7 +392,7 @@ class V1Implementation(v1.bond.Bond):
         })
 
     def auth(self, database: str, user: str) -> v1.utils.Future[postgres.Authorization]:
-        """TODO"""
+        """DOCSTRING"""
 
         with self._lock:
             if database not in self._databases:
@@ -404,7 +404,7 @@ class V1Implementation(v1.bond.Bond):
         return v1.utils.Future(functools.partial(self._resolve_auth, database, user))
 
     def service(self) -> v1.utils.Future[postgres.Service]:
-        """TODO"""
+        """DOCSTRING"""
 
         return v1.utils.Future(self._resolve_service)
 

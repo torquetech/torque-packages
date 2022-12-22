@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 
 import argparse
@@ -15,7 +15,7 @@ from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -37,7 +37,7 @@ def _create(arguments: argparse.Namespace):
 
 
 def _remove(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -46,7 +46,7 @@ def _remove(arguments: argparse.Namespace):
 
 
 def _update(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name, False, False)
@@ -56,7 +56,7 @@ def _update(arguments: argparse.Namespace):
 
 
 def _show(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name, False)
@@ -65,7 +65,7 @@ def _show(arguments: argparse.Namespace):
 
 
 def _list(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -74,7 +74,7 @@ def _list(arguments: argparse.Namespace):
 
 
 def _build(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
@@ -87,7 +87,7 @@ def _build(arguments: argparse.Namespace):
 
 
 def _apply(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
@@ -100,7 +100,7 @@ def _apply(arguments: argparse.Namespace):
 
 
 def _delete(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
     deployment = ws.load_deployment(arguments.name)
@@ -113,7 +113,7 @@ def _delete(arguments: argparse.Namespace):
 
 
 def _get(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -127,7 +127,7 @@ def _get(arguments: argparse.Namespace):
 
 
 def _set(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -138,7 +138,7 @@ def _set(arguments: argparse.Namespace):
 
 
 def _dot(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
@@ -147,7 +147,7 @@ def _dot(arguments: argparse.Namespace):
 
 
 def add_arguments(subparsers):
-    """TODO"""
+    """DOCSTRING"""
 
     parser = subparsers.add_parser("deployment", help="deployment management")
     parser.add_argument("--deployments",
@@ -225,7 +225,7 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     cmds = {
         "create": _create,

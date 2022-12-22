@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import basics
 from torque import docker_compose
@@ -10,11 +10,11 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1TaskImplementation(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = basics.V1TaskImplementationInterface
@@ -33,7 +33,7 @@ class V1TaskImplementation(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "dc": {
@@ -56,7 +56,7 @@ class V1TaskImplementation(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         obj = {
             "image": self._image_tag,
@@ -93,34 +93,34 @@ class V1TaskImplementation(v1.bond.Bond):
         self.interfaces.dc.add_object("services", self.name, obj)
 
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._environment.append((name, value))
 
     def set_image(self, tag: str, id: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._image_tag = tag
         self._image_id = id
 
     def set_command(self, command: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._command = command
 
     def set_arguments(self, arguments: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._arguments = arguments
 
     def set_working_directory(self, working_directory: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._working_directory = working_directory
 
 
 class V1ServiceImplementation(V1TaskImplementation):
-    """TODO"""
+    """DOCSTRING"""
 
     IMPLEMENTS = basics.V1ServiceImplementationInterface
 
@@ -131,17 +131,17 @@ class V1ServiceImplementation(V1TaskImplementation):
         self._port = None
 
     def set_proto(self, proto: str):
-        """TODO"""
+        """DOCSTRING"""
 
         self._proto = proto
 
     def set_port(self, port: int):
-        """TODO"""
+        """DOCSTRING"""
 
         self._port = port
 
     def service(self) -> basics.Service:
-        """TODO"""
+        """DOCSTRING"""
 
         return basics.Service(self._proto, self.name, self._port)
 

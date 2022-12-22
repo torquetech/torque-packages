@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from threading import Lock
 
@@ -11,7 +11,7 @@ from torque.jobs import Runner
 
 
 class Checker:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, jobs: [Job], fail_on: [str]):
         self._jobs = jobs
@@ -21,7 +21,7 @@ class Checker:
         self._finished = []
 
     def __iter__(self):
-        """TODO"""
+        """DOCSTRING"""
 
         for name, depends in self._jobs.items():
             yield Job(name, depends, self._handler)
@@ -30,7 +30,7 @@ class Checker:
         return len(self._jobs)
 
     def _handler(self, job_name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._lock:
             assert job_name not in self._finished
@@ -42,13 +42,13 @@ class Checker:
             assert job_name not in self._fail_on
 
     def verify(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         assert sorted(self._finished) == sorted(self._jobs.keys())
 
 
 def test_test1():
-    """TODO"""
+    """DOCSTRING"""
 
     defs = {
         "job1": ["job2"],

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import json
 import os
@@ -18,7 +18,7 @@ _URI = r"^[^:]+://"
 
 
 def initialize_venv(root: str):
-    """TODO"""
+    """DOCSTRING"""
 
     subprocess.run([sys.executable,
                     "-m", "venv",
@@ -66,7 +66,7 @@ def initialize_venv(root: str):
 
 
 def install_torque(root: str, uri: str):
-    """TODO"""
+    """DOCSTRING"""
 
     if re.match(_URI, uri) is None and os.path.exists(uri):
         if not os.path.isabs(uri):
@@ -124,7 +124,7 @@ def install_torque(root: str, uri: str):
 
 
 def install_deps(root: str):
-    """TODO"""
+    """DOCSTRING"""
 
     cmd = [
         ".torque/local/venv/bin/python",

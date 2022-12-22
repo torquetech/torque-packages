@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import base64
 
@@ -13,7 +13,7 @@ from torque import v1
 
 
 class _V2ContainerRegistry(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,7 +21,7 @@ class _V2ContainerRegistry(dolib.Resource):
         self._current_params = None
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get("v2/registry")
         data = res.json()
@@ -42,7 +42,7 @@ class _V2ContainerRegistry(dolib.Resource):
         return True
 
     def _get_tier(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.get("v2/registry/subscription")
         data = res.json()
@@ -55,7 +55,7 @@ class _V2ContainerRegistry(dolib.Resource):
         return subscription["tier"]["slug"]
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/registry", self._object["params"])
         data = res.json()
@@ -64,7 +64,7 @@ class _V2ContainerRegistry(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _update_tier(self, tier: str):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/registry/subscription", {
             "tier_slug": tier
@@ -76,7 +76,7 @@ class _V2ContainerRegistry(dolib.Resource):
             raise v1.exceptions.RuntimeError(f"{self._name}: {data['message']}")
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         params = self._object["params"]
 
@@ -95,7 +95,7 @@ class _V2ContainerRegistry(dolib.Resource):
         self._update_tier(tier)
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -108,7 +108,7 @@ class _V2ContainerRegistry(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._context as ctx:
             ctx.delete_secret_data(self._object["name"], "auth")
@@ -120,7 +120,7 @@ class _V2ContainerRegistry(dolib.Resource):
 
 
 def _auth(client: dolib.Client, name: str) -> dict[str, str]:
-    """TODO"""
+    """DOCSTRING"""
 
     res = client.get("v2/registry/docker-credentials?read_write=true")
     data = res.json()
@@ -156,7 +156,7 @@ def _auth(client: dolib.Client, name: str) -> dict[str, str]:
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {
@@ -169,7 +169,7 @@ class V1Provider(v1.provider.Provider):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -187,7 +187,7 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         obj = {
             "kind": "v2/registry",
@@ -203,7 +203,7 @@ class V1Provider(v1.provider.Provider):
         self.interfaces.do.add_object(obj)
 
     def auth(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             auth = ctx.get_secret_data(self._name, "auth")
@@ -218,14 +218,14 @@ class V1Provider(v1.provider.Provider):
 
 
 class V1Client(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = container_registry.V1Interface
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "cr": {
@@ -235,7 +235,7 @@ class V1Client(v1.bond.Bond):
         }
 
     def auth(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self.interfaces.cr.auth()
 

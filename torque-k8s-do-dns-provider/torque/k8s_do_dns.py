@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import base64
 import jinja2
@@ -116,11 +116,11 @@ spec:
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -144,7 +144,7 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("apply-utils", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         token = self.interfaces.do.token()
 

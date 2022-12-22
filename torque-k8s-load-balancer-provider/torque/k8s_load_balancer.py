@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from collections import namedtuple
 
@@ -18,11 +18,11 @@ Entry = namedtuple("Entry", [
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "dc": {
@@ -37,12 +37,12 @@ class V1Provider(v1.provider.Provider):
         self._entries = []
 
     def add_entry(self, entry: Entry):
-        """TODO"""
+        """DOCSTRING"""
 
         self._entries.append(entry)
 
     def get_entries(self) -> [Entry]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._entries
 

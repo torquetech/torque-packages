@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 import subprocess
@@ -13,7 +13,7 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
@@ -43,19 +43,19 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("delete", self._delete)
 
     def _load_state(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             self._current_services = ctx.get_data("state", v1.utils.fqcn(self)) or []
 
     def _store_state(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             ctx.set_data("state", v1.utils.fqcn(self), self._current_services)
 
     def _get_ip(self, service: str) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         network = self.context.deployment_name
 
@@ -76,7 +76,7 @@ class V1Provider(v1.provider.Provider):
         return p.stdout.decode("utf8").strip()
 
     def _load_hosts(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._hosts = [
             "#!/bin/bash",
@@ -91,7 +91,7 @@ class V1Provider(v1.provider.Provider):
             pass
 
     def _clear_hosts(self):
-        """TODO"""
+        """DOCSTRING"""
 
         for service in self._current_services:
             entry_id = f"### {service}"
@@ -110,7 +110,7 @@ class V1Provider(v1.provider.Provider):
         self._current_services = []
 
     def _store_hosts(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._hosts += ["EOF", ""]
 
@@ -132,7 +132,7 @@ class V1Provider(v1.provider.Provider):
                        check=True)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._new_entries = self.interfaces.lb.get_entries()
 
@@ -152,7 +152,7 @@ class V1Provider(v1.provider.Provider):
         self._store_state()
 
     def _delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._load_hosts()
         self._clear_hosts()

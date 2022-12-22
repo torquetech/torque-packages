@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import secrets
 import threading
@@ -13,7 +13,7 @@ from . import utils
 
 
 class _ContextData:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  buckets: dict[str, object],
@@ -22,7 +22,7 @@ class _ContextData:
         self._load_bucket = load_bucket
 
     def _get(self, bucket: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         if bucket not in self._buckets:
             self._buckets[bucket] = self._load_bucket(bucket)
@@ -30,43 +30,43 @@ class _ContextData:
         return self._buckets[bucket]
 
     def set_data(self, bucket: str, name: type, data: object):
-        """TODO"""
+        """DOCSTRING"""
 
         bucket = self._get(bucket)
         bucket[name] = data
 
     def delete_data(self, bucket: str, name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         bucket = self._get(bucket)
         return bucket.pop(name, None)
 
     def get_data(self, bucket: str, name: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         bucket = self._get(bucket)
         return bucket.get(name)
 
     def set_secret_data(self, object_name: str, secret_name: str, data: object):
-        """TODO"""
+        """DOCSTRING"""
 
         name = f"{object_name}-{secret_name}"
         self.set_data("secrets", name, data)
 
     def delete_secret_data(self, object_name: str, secret_name: str):
-        """TODO"""
+        """DOCSTRING"""
 
         name = f"{object_name}-{secret_name}"
         return self.delete_data("secrets", name)
 
     def get_secret_data(self, object_name: str, secret_name: str) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         name = f"{object_name}-{secret_name}"
         return self.get_data("secrets", name)
 
     def secret(self, object_name: str, secret_name: str, length: int = 16) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         s = self.get_secret_data(object_name, secret_name)
 
@@ -78,7 +78,7 @@ class _ContextData:
 
 
 class Context:
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {},
@@ -87,7 +87,7 @@ class Context:
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:
-        """TODO"""
+        """DOCSTRING"""
 
         return utils.validate_schema(cls.CONFIGURATION["schema"],
                                      cls.CONFIGURATION["defaults"],
@@ -109,23 +109,23 @@ class Context:
         self._lock.release()
 
     def store(self):
-        """TODO"""
+        """DOCSTRING"""
 
         for name, data in self._buckets.items():
             self.store_bucket(name, data)
 
     def load_bucket(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
     def store_bucket(self, name: str, data: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
     def path(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         raise exceptions.RuntimeError(f"{utils.fqcn(self)}: no path defined for this context")
 
     def external_path(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self.path()

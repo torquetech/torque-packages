@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import argparse
 
@@ -11,7 +11,7 @@ from torque import workspace
 
 
 def _create(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
@@ -31,7 +31,7 @@ def _create(arguments: argparse.Namespace):
 
 
 def _remove(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
 
@@ -40,7 +40,7 @@ def _remove(arguments: argparse.Namespace):
 
 
 def _show(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
     link = ws.get_link(arguments.name)
@@ -51,7 +51,7 @@ def _show(arguments: argparse.Namespace):
 def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
 
@@ -60,7 +60,7 @@ def _list(arguments: argparse.Namespace):
 
 
 def _show_type(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
 
@@ -71,7 +71,7 @@ def _show_type(arguments: argparse.Namespace):
 def _list_types(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
     link_types = ws.repo.links()
@@ -81,7 +81,7 @@ def _list_types(arguments: argparse.Namespace):
 
 
 def add_arguments(subparsers):
-    """TODO"""
+    """DOCSTRING"""
 
     parser = subparsers.add_parser("link", help="link management")
     subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
@@ -120,7 +120,7 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     cmds = {
         "create": _create,

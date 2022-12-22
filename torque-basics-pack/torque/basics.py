@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import functools
 import os
@@ -23,68 +23,68 @@ Service = namedtuple("Service", [
 
 
 class V1TaskImplementationInterface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_image(self, tag: str, id: str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_command(self, command: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_arguments(self, arguments: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_working_directory(self, working_directory: str):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1ServiceImplementationInterface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add_environment(self, name: str, value: v1.utils.Future[str] | str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_image(self, tag: str, id: str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_command(self, command: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_arguments(self, arguments: [str]):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_working_directory(self, working_directory: str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_proto(self, proto: str):
-        """TODO"""
+        """DOCSTRING"""
 
     def set_port(self, port: int):
-        """TODO"""
+        """DOCSTRING"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1TCPSourceInterface(v1.component.SourceInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1HttpSourceInterface(v1.component.SourceInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def service(self) -> v1.utils.Future[Service] | Service:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class BaseComponent(v1.component.Component):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {
@@ -110,7 +110,7 @@ class BaseComponent(v1.component.Component):
     }
 
     def _resolve_cmd(self) -> [str]:
-        """TODO"""
+        """DOCSTRING"""
 
         cmd = []
 
@@ -121,7 +121,7 @@ class BaseComponent(v1.component.Component):
         return cmd
 
     def _build(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         path = v1.utils.resolve_path(self.parameters["path"])
         cmd = self._resolve_cmd()
@@ -135,7 +135,7 @@ class BaseComponent(v1.component.Component):
         return f"{self.name}:latest"
 
     def _id(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         cmd = [
             "docker", "image", "inspect",
@@ -153,14 +153,14 @@ class BaseComponent(v1.component.Component):
         return p.stdout.decode("utf8").strip()
 
     def on_interfaces(self):
-        """TODO"""
+        """DOCSTRING"""
 
         return [
             environment.V1DestinationInterface(add=self.interfaces.impl.add_environment)
         ]
 
     def on_build(self):
-        """TODO"""
+        """DOCSTRING"""
 
         image = {
             "tag": self._build(),
@@ -171,7 +171,7 @@ class BaseComponent(v1.component.Component):
             ctx.set_data("images", self.name, image)
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self.context as ctx:
             image = ctx.get_data("images", self.name)
@@ -186,11 +186,11 @@ class BaseComponent(v1.component.Component):
 
 
 class V1Task(BaseComponent):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "impl": {
@@ -201,7 +201,7 @@ class V1Task(BaseComponent):
 
 
 class BaseService(BaseComponent):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = v1.utils.merge_dicts(BaseComponent.PARAMETERS, {
         "defaults": {},
@@ -212,7 +212,7 @@ class BaseService(BaseComponent):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "impl": {
@@ -227,7 +227,7 @@ class BaseService(BaseComponent):
         self._proto = None
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         super().on_apply()
 
@@ -236,7 +236,7 @@ class BaseService(BaseComponent):
 
 
 class V1TCPService(BaseService):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = v1.utils.merge_dicts(BaseService.PARAMETERS, {
         "defaults": {
@@ -253,7 +253,7 @@ class V1TCPService(BaseService):
         self._proto = self.parameters["proto"]
 
     def on_interfaces(self):
-        """TODO"""
+        """DOCSTRING"""
 
         return super().on_interfaces() + [
             V1TCPSourceInterface(service=self.interfaces.impl.service)
@@ -261,7 +261,7 @@ class V1TCPService(BaseService):
 
 
 class V1HttpService(BaseService):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -269,7 +269,7 @@ class V1HttpService(BaseService):
         self._proto = "http"
 
     def on_interfaces(self):
-        """TODO"""
+        """DOCSTRING"""
 
         return super().on_interfaces() + [
             V1HttpSourceInterface(service=self.interfaces.impl.service)
@@ -277,7 +277,7 @@ class V1HttpService(BaseService):
 
 
 class V1IngressLink(v1.link.Link):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {},
@@ -289,7 +289,7 @@ class V1IngressLink(v1.link.Link):
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "src": {
@@ -303,7 +303,7 @@ class V1IngressLink(v1.link.Link):
         }
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         service = self.interfaces.src.service()
 
@@ -319,17 +319,17 @@ class V1IngressLink(v1.link.Link):
 
 
 class BaseLink(environment.V1BaseLink):
-    """TODO"""
+    """DOCSTRING"""
 
     def _resolve_uri(self, service: v1.utils.Future[Service] | Service):
-        """TODO"""
+        """DOCSTRING"""
 
         service = v1.utils.resolve_futures(service)
 
         return f"{service.proto}://{service.host}:{service.port}"
 
     def on_apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         service = self.interfaces.src.service()
 
@@ -339,11 +339,11 @@ class BaseLink(environment.V1BaseLink):
 
 
 class V1TCPServiceLink(BaseLink):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return super().on_requirements() | {
             "src": {
@@ -354,11 +354,11 @@ class V1TCPServiceLink(BaseLink):
 
 
 class V1HttpServiceLink(BaseLink):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return super().on_requirements() | {
             "src": {

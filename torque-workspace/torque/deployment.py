@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import sys
 import threading
@@ -70,7 +70,7 @@ CONFIGURATION_SCHEMA = v1.schema.Schema({
 
 
 def _validate_type_config(name: str, type: object, config: dict[str, object]):
-    """TODO"""
+    """DOCSTRING"""
 
     try:
         return type.on_configuration(config or {})
@@ -92,7 +92,7 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
 
 
 def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     try:
         return CONFIGURATION_SCHEMA.validate(config)
@@ -105,7 +105,7 @@ def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[st
 
 
 class _DummyInterfaceImplementation:
-    """TODO"""
+    """DOCSTRING"""
 
     def __getattribute__(self, attr):
         """TOOD"""
@@ -114,63 +114,63 @@ class _DummyInterfaceImplementation:
 
 
 class _Configuration:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, config: dict[str, object]):
         self._config = config
 
     def set_revision(self, revision: int):
-        """TODO"""
+        """DOCSTRING"""
 
         self._config["dag"]["revision"] = revision
 
     def revision(self) -> int:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config["dag"]["revision"]
 
     def interfaces(self) -> [str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config["interfaces"]
 
     def bonds(self, interface: str) -> [str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config["interfaces"][interface]["bonds"]
 
     def providers(self) -> [str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config["providers"].keys()
 
     def provider(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config["providers"][name]
 
     def component(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         dag_config = self._config["dag"]
 
         return dag_config["components"][name]
 
     def link(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         dag_config = self._config["dag"]
 
         return dag_config["links"][name]
 
     def get(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._config
 
 
 class Deployment:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  context: v1.deployment.Context,
@@ -191,7 +191,7 @@ class Deployment:
         self._lock = threading.Lock()
 
     def _setup_providers(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._providers = {}
 
@@ -212,7 +212,7 @@ class Deployment:
     def _bind_provider(self,
                        interface: type,
                        required: bool) -> v1.provider.Provider:
-        """TODO"""
+        """DOCSTRING"""
 
         if self._providers is None:
             return None
@@ -234,7 +234,7 @@ class Deployment:
                    interface: type,
                    required: bool,
                    profile: dict[str, object]) -> (v1.bond.Bond, dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         interfaces = self._configuration.interfaces()
         interface_name = v1.utils.fqcn(interface)
@@ -284,7 +284,7 @@ class Deployment:
                      bond_path: [str],
                      interface: type,
                      required: bool) -> v1.bond.Bond:
-        """TODO"""
+        """DOCSTRING"""
 
         if self._providers is None:
             return _DummyInterfaceImplementation()
@@ -323,7 +323,7 @@ class Deployment:
                     bound_interfaces)
 
     def _component(self, name: str) -> v1.component.Component:
-        """TODO"""
+        """DOCSTRING"""
 
         if name in self._components:
             return self._components[name]
@@ -351,7 +351,7 @@ class Deployment:
         return component
 
     def _link(self, name: str) -> v1.link.Link:
-        """TODO"""
+        """DOCSTRING"""
 
         if name in self._links:
             return self._links[name]
@@ -386,7 +386,7 @@ class Deployment:
         return link
 
     def _execute(self, workers: int, callback: typing.Callable):
-        """TODO"""
+        """DOCSTRING"""
 
         def _callback_helper(name: str) -> bool:
             type = name[:name.index("/")]
@@ -414,10 +414,10 @@ class Deployment:
         jobs.execute(workers, _jobs)
 
     def build(self, workers: int):
-        """TODO"""
+        """DOCSTRING"""
 
         def _on_build(type: str, name: str):
-            """TODO"""
+            """DOCSTRING"""
 
             print(f"building {name}...")
 
@@ -436,12 +436,12 @@ class Deployment:
         self._execute(workers, _on_build)
 
     def apply(self, workers: int):
-        """TODO"""
+        """DOCSTRING"""
 
         self._setup_providers()
 
         def _on_apply(type: str, name: str):
-            """TODO"""
+            """DOCSTRING"""
 
             print(f"applying {name}...")
 
@@ -468,7 +468,7 @@ class Deployment:
             provider.run_hooks("collect-garbage", reverse=True)
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._setup_providers()
 
@@ -479,17 +479,17 @@ class Deployment:
             provider.run_hooks("collect-garbage", reverse=True)
 
     def load_object(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._context.load_bucket(name)
 
     def store_object(self, name: str, data: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._context.store_bucket(name, data)
 
     def update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._configuration.set_revision(self._dag.revision)
 
@@ -499,12 +499,12 @@ class Deployment:
                          self._configuration.get())
 
     def store(self):
-        """TODO"""
+        """DOCSTRING"""
 
         self._context.store()
 
     def dot(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._dag.dot(self._context.deployment_name)
 
@@ -513,14 +513,14 @@ def _create_context(name: str,
                     type: str,
                     config: dict,
                     repo: repository.Repository) -> v1.deployment.Context:
-    """TODO"""
+    """DOCSTRING"""
 
     context_type = repo.context(type)
     return context_type(name, config)
 
 
 def _bond_defaults(type: v1.bond.Bond) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     config = type.on_configuration({})
 
@@ -531,7 +531,7 @@ def _bond_defaults(type: v1.bond.Bond) -> dict[str, object]:
 
 def _provider_defaults(name: str,
                        repo: repository.Repository) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     type = repo.provider(name)
 
@@ -545,7 +545,7 @@ def _provider_defaults(name: str,
 
 def _component_defaults(component: model.Component,
                         repo: repository.Repository) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     type = repo.component(component.type)
     config = type.on_configuration({})
@@ -558,7 +558,7 @@ def _component_defaults(component: model.Component,
 
 def _link_defaults(link: model.Link,
                    repo: repository.Repository) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     type = repo.link(link.type)
     config = type.on_configuration({})
@@ -572,7 +572,7 @@ def _link_defaults(link: model.Link,
 def _load_defaults(providers: [str],
                    dag: model.DAG,
                    repo: repository.Repository) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     if len(set(providers)) != len(providers):
         raise v1.exceptions.RuntimeError("provider specified more than once")
@@ -631,7 +631,7 @@ def _load_configuration(context: v1.deployment.Context,
                         dag: model.DAG,
                         repo: repository.Repository,
                         strict: bool) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     with context as ctx:
         config = ctx.get_data("configuration", v1.utils.fqcn(Deployment))
@@ -659,7 +659,7 @@ def load(name: str,
          repo: repository.Repository) -> Deployment:
     # pylint: disable=R0913
 
-    """TODO"""
+    """DOCSTRING"""
 
     context = _create_context(name, context_type, context_config, repo)
     config = _load_configuration(context, providers, dag, repo, strict)

@@ -2,14 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import exceptions
 from torque import model
 
 
 def _has_cycles(dag: model.DAG) -> bool:
-    """TODO"""
+    """DOCSTRING"""
 
     try:
         dag.verify()
@@ -22,7 +22,7 @@ def _has_cycles(dag: model.DAG) -> bool:
 
 
 def test_test1():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -48,7 +48,7 @@ def test_test1():
 
 
 def test_test2():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -63,7 +63,7 @@ def test_test2():
 
 
 def test_test3():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -81,7 +81,7 @@ def test_test3():
 
 
 def test_test4():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -97,7 +97,7 @@ def test_test4():
 
 
 def test_test5():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -113,7 +113,7 @@ def test_test5():
 
 
 def test_test6():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -129,7 +129,7 @@ def test_test6():
 
 
 def test_test7():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 
@@ -137,7 +137,7 @@ def test_test7():
 
 
 def test_test8():
-    """TODO"""
+    """DOCSTRING"""
 
     dag = model.DAG(0)
 

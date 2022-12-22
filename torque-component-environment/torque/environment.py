@@ -2,20 +2,20 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 from torque import v1
 
 
 class V1DestinationInterface(v1.component.DestinationInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add(self, name: str, value: v1.utils.Future[str] | str):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1BaseLink(v1.link.Link):
-    """TODO"""
+    """DOCSTRING"""
 
     PARAMETERS = {
         "defaults": {},
@@ -26,7 +26,7 @@ class V1BaseLink(v1.link.Link):
 
     @classmethod
     def on_requirements(cls):
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "dst": {
@@ -36,7 +36,7 @@ class V1BaseLink(v1.link.Link):
         }
 
     def _name(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         name = self.parameters.get("name", self.source)
         name = name.replace("-", "_")

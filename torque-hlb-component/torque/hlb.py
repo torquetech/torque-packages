@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import collections
 
@@ -20,25 +20,25 @@ Ingress = collections.namedtuple("Ingress", [
 
 
 class V1ImplementationInterface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add(self, ingress: Ingress):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1DestinationInterface(v1.component.DestinationInterface):
-    """TODO"""
+    """DOCSTRING"""
 
     def add(self, ingress: Ingress):
-        """TODO"""
+        """DOCSTRING"""
 
 
 class V1Component(v1.component.Component):
-    """TODO"""
+    """DOCSTRING"""
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "impl": {
@@ -48,7 +48,7 @@ class V1Component(v1.component.Component):
         }
 
     def on_interfaces(self) -> [v1.component.Interface]:
-        """TODO"""
+        """DOCSTRING"""
 
         return [
             V1DestinationInterface(add=self.interfaces.impl.add)

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 import threading
@@ -15,7 +15,7 @@ from torque import v1
 
 
 class Job:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  name: str,
@@ -31,7 +31,7 @@ class Job:
 
 
 class _Job:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self,
                  name: str,
@@ -45,7 +45,7 @@ class _Job:
 
 
 class Runner:
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, worker_count: int):
         self._worker_count = worker_count
@@ -60,7 +60,7 @@ class Runner:
         self._exception = False
 
     def _pop(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._queue_cond:
             while True:
@@ -73,28 +73,28 @@ class Runner:
                 self._queue_cond.wait()
 
     def _push(self, job):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._queue_cond:
             self._queue.append(job)
             self._queue_cond.notify()
 
     def _quit(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._queue_cond:
             self._queue.append(None)
             self._queue_cond.notify_all()
 
     def _abort(self):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._queue_cond:
             self._queue.insert(0, None)
             self._queue_cond.notify_all()
 
     def _worker(self):
-        """TODO"""
+        """DOCSTRING"""
 
         while True:
             job = self._pop()
@@ -136,7 +136,7 @@ class Runner:
                 self._abort()
 
     def execute(self, jobs: [Job]):
-        """TODO"""
+        """DOCSTRING"""
 
         self._jobs = {
             job.name: _Job(job.name, [], len(job.depends), job.handler) for job in jobs
@@ -181,7 +181,7 @@ class Runner:
 
 
 def execute(worker_count: int, jobs: [Job]):
-    """TODO"""
+    """DOCSTRING"""
 
     runner = Runner(worker_count)
     runner.execute(jobs)

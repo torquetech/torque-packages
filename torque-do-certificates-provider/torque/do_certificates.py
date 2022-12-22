@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import hashlib
 import ssl
@@ -14,17 +14,17 @@ from torque import do_domains
 
 
 class V1Interface(v1.bond.Interface):
-    """TODO"""
+    """DOCSTRING"""
 
     def domain(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
     def certificate_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
 
 class _V2Certificates(dolib.Resource):
-    """TODO"""
+    """DOCSTRING"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,7 +38,7 @@ class _V2Certificates(dolib.Resource):
             self._cert_id = self._object["metadata"]["id"]
 
     def _get(self) -> bool:
-        """TODO"""
+        """DOCSTRING"""
 
         page = 1
 
@@ -70,7 +70,7 @@ class _V2Certificates(dolib.Resource):
         return False
 
     def _create(self):
-        """TODO"""
+        """DOCSTRING"""
 
         res = self._client.post("v2/certificates", self._object["params"])
         data = res.json()
@@ -81,7 +81,7 @@ class _V2Certificates(dolib.Resource):
         self._cert_id = data["certificate"]["id"]
 
     def _update(self):
-        """TODO"""
+        """DOCSTRING"""
 
         params = self._object["params"]
         params = {
@@ -95,7 +95,7 @@ class _V2Certificates(dolib.Resource):
         raise v1.exceptions.RuntimeError(f"{self._name}: cannot modify certificate")
 
     def update(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if not self._get():
             self._create()
@@ -110,7 +110,7 @@ class _V2Certificates(dolib.Resource):
         }
 
     def delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         def cond():
             res = self._client.delete(f"v2/certificates/{self._cert_id}")
@@ -127,11 +127,11 @@ class _V2Certificates(dolib.Resource):
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1External(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = V1Interface
@@ -151,7 +151,7 @@ class V1External(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -174,7 +174,7 @@ class V1External(v1.bond.Bond):
             p.add_hook("apply-objects", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self.interfaces.domains:
             self.interfaces.domains.create(self._domain)
@@ -203,18 +203,18 @@ class V1External(v1.bond.Bond):
         }))
 
     def domain(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._domain
 
     def certificate_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._cert_id
 
 
 class V1LetsEncrypt(v1.bond.Bond):
-    """TODO"""
+    """DOCSTRING"""
 
     PROVIDER = V1Provider
     IMPLEMENTS = V1Interface
@@ -230,7 +230,7 @@ class V1LetsEncrypt(v1.bond.Bond):
 
     @classmethod
     def on_requirements(cls) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return {
             "do": {
@@ -253,7 +253,7 @@ class V1LetsEncrypt(v1.bond.Bond):
             p.add_hook("apply", self._apply)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         if self.interfaces.domains:
             self.interfaces.domains.create(self._domain)
@@ -271,12 +271,12 @@ class V1LetsEncrypt(v1.bond.Bond):
         }))
 
     def domain(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._domain
 
     def certificate_id(self) -> v1.utils.Future[str]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._cert_id
 

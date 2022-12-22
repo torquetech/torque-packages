@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 
@@ -12,7 +12,7 @@ from torque import v1
 
 
 def _create_path(context_path: str) -> str:
-    """TODO"""
+    """DOCSTRING"""
 
     path = f"{v1.utils.torque_dir()}/{context_path}"
 
@@ -23,11 +23,11 @@ def _create_path(context_path: str) -> str:
 
 
 class V1DependencyLink(v1.link.Link):
-    """TODO"""
+    """DOCSTRING"""
 
 
 class V1LocalContext(v1.deployment.Context):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {},
@@ -51,7 +51,7 @@ class V1LocalContext(v1.deployment.Context):
             self._external_path = self._path
 
     def load_bucket(self, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         bucket_path = f"{self._path}/{name}.yaml"
 
@@ -62,7 +62,7 @@ class V1LocalContext(v1.deployment.Context):
             return yaml.safe_load(file)
 
     def store_bucket(self, name: str, data: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         bucket_path = f"{self._path}/{name}.yaml"
 
@@ -75,7 +75,7 @@ class V1LocalContext(v1.deployment.Context):
         os.replace(f"{bucket_path}.tmp", bucket_path)
 
     def path(self) -> str:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._path
 

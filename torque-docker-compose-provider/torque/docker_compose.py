@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import os
 import subprocess
@@ -13,7 +13,7 @@ from torque import v1
 
 
 class V1Provider(v1.provider.Provider):
-    """TODO"""
+    """DOCSTRING"""
 
     CONFIGURATION = {
         "defaults": {},
@@ -45,7 +45,7 @@ class V1Provider(v1.provider.Provider):
             p.add_hook("delete", self._delete)
 
     def _apply(self):
-        """TODO"""
+        """DOCSTRING"""
 
         compose = f"{self.context.path()}/docker-compose.yaml"
 
@@ -68,7 +68,7 @@ class V1Provider(v1.provider.Provider):
         subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=True)
 
     def _delete(self):
-        """TODO"""
+        """DOCSTRING"""
 
         cmd = [
             "docker", "compose",
@@ -80,7 +80,7 @@ class V1Provider(v1.provider.Provider):
         subprocess.run(cmd, env=os.environ, cwd=self.context.path(), check=False)
 
     def add_object(self, section: str, name: str, obj: dict[str, object]):
-        """TODO"""
+        """DOCSTRING"""
 
         with self._lock:
             if section not in self._objects:
@@ -91,7 +91,7 @@ class V1Provider(v1.provider.Provider):
             return (section, name)
 
     def object(self, section: str, name: str) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         if section not in self._objects:
             raise v1.exceptions.RuntimeError(f"{section}: section not found")
@@ -102,7 +102,7 @@ class V1Provider(v1.provider.Provider):
         return self._objects[section][name]
 
     def objects(self) -> dict[str, object]:
-        """TODO"""
+        """DOCSTRING"""
 
         return self._objects
 

@@ -4,7 +4,7 @@
 # 2.0, this file is an exception and is released under Apache 2.0 license. Apache 2.0
 # license text can be found at https://www.apache.org/licenses/LICENSE-2.0.html
 
-"""TODO"""
+"""DOCSTRING"""
 
 import re
 
@@ -53,7 +53,7 @@ def _get_api_for(client: kubernetes.client.ApiClient, obj: dict[str, object]):
 
 def update_object(client: kubernetes.client.ApiClient,
                   obj: dict[str, object]) -> dict[str, object]:
-    """TODO"""
+    """DOCSTRING"""
 
     api = _get_api_for(client, obj)
     create, get, _, replace, namespaced = api
@@ -92,7 +92,7 @@ def update_object(client: kubernetes.client.ApiClient,
 
 def delete_object(client: kubernetes.client.ApiClient,
                   obj: dict[str, object]):
-    """TODO"""
+    """DOCSTRING"""
 
     api = _get_api_for(client, obj)
     _, _, delete, _, namespaced = api

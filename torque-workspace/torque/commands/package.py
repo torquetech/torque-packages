@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-"""TODO"""
+"""DOCSTRING"""
 
 import argparse
 
@@ -12,7 +12,7 @@ from torque import package
 def _install(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     package.install_package(arguments.uri)
     package.install_deps()
@@ -21,7 +21,7 @@ def _install(arguments: argparse.Namespace):
 def _uninstall(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     package.uninstall_package(arguments.name)
 
@@ -29,13 +29,13 @@ def _uninstall(arguments: argparse.Namespace):
 def _list(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     package.list_packages()
 
 
 def _upgrade(arguments: argparse.Namespace):
-    """TODO"""
+    """DOCSTRING"""
 
     package.upgrade_package(arguments.name)
 
@@ -43,13 +43,13 @@ def _upgrade(arguments: argparse.Namespace):
 def _upgrade_all(arguments: argparse.Namespace):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     package.upgrade_all_packages()
 
 
 def add_arguments(subparsers):
-    """TODO"""
+    """DOCSTRING"""
 
     parser = subparsers.add_parser("package", help="package management")
     subparsers = parser.add_subparsers(required=True, dest="package_cmd", metavar="command")
@@ -70,7 +70,7 @@ def add_arguments(subparsers):
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     # pylint: disable=W0613
 
-    """TODO"""
+    """DOCSTRING"""
 
     cmds = {
         "install": _install,
