@@ -4,7 +4,6 @@
 
 """TODO"""
 
-import kubernetes
 import yaml
 
 from torque import do
@@ -411,20 +410,20 @@ class V1Client(v1.bond.Bond):
                 "interface": do.V1Provider,
                 "required": True
             },
-            "k8s": {
+            "impl": {
                 "interface": V1Provider,
                 "required": True
             }
         }
 
-    def connect(self) -> kubernetes.client.ApiClient:
+    def kubeconfig(self) -> dict[str, object]:
         """TODO"""
 
         with self.context as ctx:
-            config = ctx.get_secret_data(self.interfaces.k8s.cluster_name(), "kubeconfig")
+            config = ctx.get_secret_data(self.interfaces.impl.cluster_name(), "kubeconfig")
 
             if not config:
-                cluster_id = self.interfaces.k8s.cluster_id()
+                cluster_id = self.interfaces.impl.cluster_id()
 
                 if not cluster_id:
                     raise k8s.ClusterNotInitialized("digitalocean k8s cluster not initialized")
@@ -438,9 +437,9 @@ class V1Client(v1.bond.Bond):
                 client = self.interfaces.do.client()
                 config = _kubeconfig(client, cluster_id)
 
-                ctx.set_secret_data(self.interfaces.k8s.cluster_name(), "kubeconfig", config)
+                ctx.set_secret_data(self.interfaces.impl.cluster_name(), "kubeconfig", config)
 
-            return kubernetes.config.load_kube_config_from_dict(config)
+            return config
 
 
 dolib.HANDLERS.update({

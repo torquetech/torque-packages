@@ -18,7 +18,7 @@ class ClusterNotInitialized(v1.exceptions.TorqueException):
 class V1ClientInterface(v1.bond.Interface):
     """TODO"""
 
-    def connect(self) -> kubernetes.client.ApiClient:
+    def kubeconfig(self) -> dict[str, object]:
         """TODO"""
 
 
@@ -54,6 +54,7 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._kubeconfig = None
         self._client = None
 
         self._current_state = {}
@@ -85,7 +86,8 @@ class V1Provider(v1.provider.Provider):
     def _connect(self):
         """TODO"""
 
-        self._client = self.interfaces.client.connect()
+        self._kubeconfig = self.interfaces.client.kubeconfig()
+        self._client = kubernetes.config.new_client_from_config_dict(self._kubeconfig)
 
     def _apply_namespace(self):
         """TODO"""
@@ -190,6 +192,11 @@ class V1Provider(v1.provider.Provider):
 
         finally:
             self._store_state()
+
+    def kubeconfig(self) -> dict[str, object]:
+        """TODO"""
+
+        return self._kubeconfig
 
     def add_object(self, obj: dict[str, object]) -> str:
         """TODO"""
