@@ -53,7 +53,10 @@ class V1Provider(v1.provider.Provider):
         objects = v1.utils.merge_dicts(objects, self.configuration.get("overrides", {}))
 
         with open(compose, "w", encoding="utf8") as file:
-            file.write(yaml.safe_dump(objects, sort_keys=False))
+            yaml.safe_dump(objects,
+                           stream=file,
+                           default_flow_style=False,
+                           sort_keys=False)
 
         cmd = [
             "docker", "compose",
