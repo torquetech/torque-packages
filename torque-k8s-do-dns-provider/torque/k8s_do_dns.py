@@ -103,7 +103,7 @@ spec:
       - name: external-dns
         image: k8s.gcr.io/external-dns/external-dns:v0.12.2
         args:
-        - --source=service
+        - --source=ingress
         - --provider=digitalocean
         env:
         - name: DO_TOKEN
@@ -156,16 +156,6 @@ class V1Provider(v1.provider.Provider):
 
         for obj in objs.split("---"):
             self.interfaces.k8s.add_object(yaml.safe_load(obj))
-
-        for entry in self.interfaces.lb.get_entries():
-            hosts = sorted([f"{host}.{entry.domain}." for host in entry.hosts])
-            hosts = ",".join(hosts)
-
-            service_obj = self.interfaces.k8s.object(entry.service)
-
-            service_obj["metadata"]["annotations"].update({
-                "external-dns.alpha.kubernetes.io/hostname": hosts
-            })
 
 
 repository = {
