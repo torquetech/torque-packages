@@ -113,6 +113,9 @@ class _V2ContainerRegistry(dolib.Resource):
         with self._context as ctx:
             ctx.delete_secret_data(self._object["name"], "auth")
 
+        if self._object["shared"]:
+            return
+
         res = self._client.delete("v2/registry")
 
         if res.status_code != 204:
@@ -160,10 +163,15 @@ class V1Provider(v1.provider.Provider):
 
     CONFIGURATION = {
         "defaults": {
-            "subscription_tier_slug": "starter"
+            "subscription_tier_slug": "starter",
+            "shared": False
         },
         "schema": {
-            "subscription_tier_slug": str
+            "subscription_tier_slug": str,
+            "shared": bool,
+            v1.schema.Optional("name"): str,
+            v1.schema.Optional("prefix"): str,
+            v1.schema.Optional("region"): str
         }
     }
 
@@ -181,7 +189,26 @@ class V1Provider(v1.provider.Provider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._name = f"{self.context.deployment_name}-registry"
+        self._tier = self.configuration["subscription_tier_slug"]
+        self._region = self.configuration.get("region", self.interfaces.do.region())
+
+        prefix = self.configuration.get("prefix")
+
+        if prefix:
+            self._name = self.configuration.get("name", self.interfaces.do.project())
+            self._prefix = f"{self._name}/{prefix}"
+
+        else:
+            self._name = self.configuration.get("name")
+
+            if self._name:
+                self._prefix = f"{self._name}/{self.context.deployment_name}"
+
+            else:
+                self._name = self.interfaces.do.project()
+                self._prefix = self._name
+
+        self._shared = self.configuration["shared"]
 
         with self.interfaces.do as p:
             p.add_hook("apply-objects", self._apply)
@@ -189,18 +216,16 @@ class V1Provider(v1.provider.Provider):
     def _apply(self):
         """DOCSTRING"""
 
-        obj = {
+        self.interfaces.do.add_object({
             "kind": "v2/registry",
             "name": self._name,
+            "shared": self._shared,
             "params": {
                 "name": self._name,
-                "region": self.interfaces.do.region()
+                "region": self._region,
+                "subscription_tier_slug": self._tier
             }
-        }
-
-        obj["params"] = v1.utils.merge_dicts(obj["params"], self.configuration)
-
-        self.interfaces.do.add_object(obj)
+        })
 
     def auth(self) -> dict[str, object]:
         """DOCSTRING"""
@@ -210,7 +235,7 @@ class V1Provider(v1.provider.Provider):
 
             if not auth:
                 auth = _auth(self.interfaces.do.client(), self._name)
-                auth["prefix"] = self._name
+                auth["prefix"] = self._prefix
 
                 ctx.set_secret_data(self._name, "auth", auth)
 
