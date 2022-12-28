@@ -475,6 +475,11 @@ class V1Provider(v1.provider.Provider):
 
         return self.object_id(f"v2/vpc/{self._vpc}")
 
+    def project(self) -> str:
+        """DOCSTRING"""
+
+        return self._project
+
     def region(self) -> str:
         """DOCSTRING"""
 
