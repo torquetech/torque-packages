@@ -20,11 +20,11 @@ class V1Provider(v1.provider.Provider):
     CONFIGURATION = {
         "defaults": {
             "debug": False,
-            "instances": {}
+            "install": {}
         },
         "schema": {
             "debug": bool,
-            "instances": {
+            "install": {
                 v1.schema.Optional(str): {
                     "chart": str,
                     "repo": {
@@ -152,13 +152,13 @@ class V1Provider(v1.provider.Provider):
     def _apply(self):
         """DOCSTRING"""
 
-        for name, obj in self.configuration["instances"].items():
-            self.add(name,
-                     obj["chart"],
-                     obj["repo"]["name"],
-                     obj["repo"]["url"],
-                     obj["namespace"],
-                     obj["values"])
+        for name, obj in self.configuration["install"].items():
+            self.install(name,
+                         obj["chart"],
+                         obj["repo"]["name"],
+                         obj["repo"]["url"],
+                         obj["namespace"],
+                         obj["values"])
 
         try:
             self._generate_kubeconfig()
@@ -190,7 +190,7 @@ class V1Provider(v1.provider.Provider):
             os.unlink(self._kubeconfig)
             self._store_state()
 
-    def add(self,
+    def install(self,
             name: str,
             chart: str,
             repo_name: str,
