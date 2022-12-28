@@ -145,10 +145,10 @@ class _V2Vpc(dolib.Resource):
     def _create_default_vpc(self):
         """DOCSTRING"""
 
-        default_vpc_name = f"{self._region}-vpc-default"
+        default_vpc = f"{self._region}-vpc-default"
 
         res = self._client.post("v2/vpcs", {
-            "name": default_vpc_name,
+            "name": default_vpc,
             "region": self._region,
             "default": True
         })
@@ -156,7 +156,7 @@ class _V2Vpc(dolib.Resource):
         data = res.json()
 
         if res.status_code not in (201, 202):
-            raise v1.exceptions.RuntimeError(f"{default_vpc_name}: {data['message']}")
+            raise v1.exceptions.RuntimeError(f"{default_vpc}: {data['message']}")
 
     def _create(self):
         """DOCSTRING"""
@@ -308,8 +308,8 @@ class V1Provider(v1.provider.Provider):
 
         self._region = self.configuration["region"]
 
-        self._project_name = self.context.deployment_name
-        self._vpc_name = self.context.deployment_name
+        self._project = self.context.deployment_name
+        self._vpc = self.context.deployment_name
 
         self._client = None
 
@@ -397,9 +397,9 @@ class V1Provider(v1.provider.Provider):
 
         self.add_object({
             "kind": "v2/project",
-            "name": self._project_name,
+            "name": self._project,
             "params": {
-                "name": self._project_name,
+                "name": self._project,
                 "description": "torquetech.io deployment",
                 "purpose": "Other: Torque deployment",
                 "environment": "Production"
@@ -411,9 +411,9 @@ class V1Provider(v1.provider.Provider):
 
         self.add_object({
             "kind": "v2/vpc",
-            "name": self._vpc_name,
+            "name": self._vpc,
             "params": {
-                "name": self._vpc_name,
+                "name": self._vpc,
                 "region": self._region
             }
         })
@@ -423,7 +423,7 @@ class V1Provider(v1.provider.Provider):
 
         self.add_object({
             "kind": "v2/resources",
-            "name": self._project_name,
+            "name": self._project,
             "params": {
                 "project_id": self.project_id(),
                 "resources": self._resources
@@ -468,12 +468,12 @@ class V1Provider(v1.provider.Provider):
     def project_id(self) -> v1.utils.Future[str]:
         """DOCSTRING"""
 
-        return self.object_id(f"v2/project/{self._project_name}")
+        return self.object_id(f"v2/project/{self._project}")
 
     def vpc_id(self) -> v1.utils.Future[str]:
         """DOCSTRING"""
 
-        return self.object_id(f"v2/vpc/{self._vpc_name}")
+        return self.object_id(f"v2/vpc/{self._vpc}")
 
     def region(self) -> str:
         """DOCSTRING"""
