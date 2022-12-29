@@ -117,6 +117,23 @@ class DAG:
         self.components = {}
         self.links = {}
 
+    def _dfs_check(self,
+                   visited_components: set[str],
+                   seen_components: set[str],
+                   component: str) -> bool:
+        """DOCSTRING"""
+
+        if component in seen_components:
+            raise exceptions.CycleDetected()
+
+        seen_components.add(component)
+        visited_components.add(component)
+
+        for child_component in self.components[component].outbound_links:
+            self._dfs_check(visited_components, seen_components, child_component)
+
+        seen_components.remove(component)
+
     def create_component(self,
                          name: str,
                          type: str,
@@ -201,23 +218,6 @@ class DAG:
         self.components[link.source].remove_outbound_link(link.destination, name)
 
         return self.links.pop(name)
-
-    def _dfs_check(self,
-                   visited_components: set[str],
-                   seen_components: set[str],
-                   component: str) -> bool:
-        """DOCSTRING"""
-
-        if component in seen_components:
-            raise exceptions.CycleDetected()
-
-        seen_components.add(component)
-        visited_components.add(component)
-
-        for child_component in self.components[component].outbound_links:
-            self._dfs_check(visited_components, seen_components, child_component)
-
-        seen_components.remove(component)
 
     def verify(self) -> bool:
         """DOCSTRING"""
