@@ -20,7 +20,7 @@ def load_file(name: str) -> str:
 setup(name="torque-do-managed-k8s-provider",
       version=load_file("VERSION"),
       author="Torque Team",
-      author_email="team@torquetech.io",
+      author_email="team@torque.cloud",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
