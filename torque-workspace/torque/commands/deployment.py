@@ -23,6 +23,7 @@ def _create(arguments: argparse.Namespace):
                              arguments.context,
                              arguments.provider,
                              arguments.extra_configs,
+                             arguments.filters,
                              arguments.components,
                              arguments.strict,
                              arguments.no_suffix)
@@ -176,6 +177,11 @@ def add_arguments(subparsers):
                                metavar="COMPONENT",
                                dest="components",
                                help="component")
+    create_parser.add_argument("--filter",
+                               action="append",
+                               metavar="FILTER",
+                               dest="filters",
+                               help="filter")
     create_parser.add_argument("--no-suffix",
                                action="store_true",
                                help="don't append unique suffix to the name")

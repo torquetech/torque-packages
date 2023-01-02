@@ -60,6 +60,7 @@ _DEPLOYMENTS_SCHEMA = v1.schema.Schema({
             "strict": bool,
             "providers": [str],
             "extra_configuration": [str],
+            "filters": v1.schema.Or([str], None),
             "components": v1.schema.Or([str], None)
         }
     }
@@ -76,6 +77,7 @@ class Deployment:
                  strict: bool,
                  providers: str,
                  extra_configs: [str],
+                 filters: [str],
                  components: [str]):
         self.name = name
         self.context_type = context_type
@@ -83,6 +85,7 @@ class Deployment:
         self.strict = strict
         self.providers = providers
         self.extra_configs = extra_configs
+        self.filters = filters
         self.components = components
 
     def __repr__(self) -> str:
@@ -90,6 +93,7 @@ class Deployment:
             f"Deployment({self.name}" \
             f", context_type={self.context_type}" \
             f", providers={self.providers}" \
+            f", filters={self.filters}" \
             f", components={self.components})"
 
 
@@ -159,6 +163,7 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
                 "strict": deployment.strict,
                 "providers": deployment.providers,
                 "extra_configuration": deployment.extra_configs or [],
+                "filters": deployment.filters,
                 "components": deployment.components
             } for deployment in deployments.values()
         }
@@ -346,6 +351,7 @@ class Workspace:
                           context_type: str,
                           providers: [str],
                           extra_configs: [str],
+                          filters: [str],
                           components: [str],
                           strict: bool,
                           no_suffix: bool) -> Deployment:
@@ -379,6 +385,7 @@ class Workspace:
                                 strict,
                                 providers,
                                 extra_configs,
+                                filters,
                                 components)
 
         self.deployments[name] = deployment
@@ -408,6 +415,7 @@ class Workspace:
         d = self.deployments[name]
 
         return deployment.load(d.name,
+                               d.filters,
                                d.components,
                                d.context_type,
                                d.context_config,
@@ -625,6 +633,7 @@ def _load_deployments(path: str) -> dict[str, Deployment]:
                          deployment["strict"],
                          deployment["providers"],
                          deployment["extra_configuration"],
+                         deployment["filters"],
                          deployment["components"])
         for name, deployment in deployments["deployments"].items()
     }

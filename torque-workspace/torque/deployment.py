@@ -649,6 +649,7 @@ def _load_configuration(context: v1.deployment.Context,
 
 
 def load(name: str,
+         filters: [str],
          components: [str],
          context_type: str,
          context_config: dict,
@@ -683,9 +684,9 @@ def load(name: str,
 
         print(f"WARNING: {name}: deployment out of date", file=sys.stderr)
 
-    if components is not None and len(components) == 0:
-        raise exceptions.NoComponentsSelected()
+    dag = dag.filter(filters, components)
 
-    dag = dag.subset(components)
+    if dag.empty():
+        raise exceptions.DAGEmpty()
 
     return Deployment(context, config, dag, repo)

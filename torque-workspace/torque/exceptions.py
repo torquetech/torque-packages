@@ -130,6 +130,13 @@ class InvalidName(v1.exceptions.TorqueException):
         return f"{self.args[0]}: invalid name"
 
 
+class InvalidFilter(v1.exceptions.TorqueException):
+    """DOCSTRING"""
+
+    def __str__(self) -> str:
+        return f"{self.args[0]}: invalid filter"
+
+
 class DeploymentExists(v1.exceptions.TorqueException):
     """DOCSTRING"""
 
@@ -151,11 +158,11 @@ class ContextNotFound(v1.exceptions.TorqueException):
         return f"{self.args[0]}: context not found"
 
 
-class NoComponentsSelected(v1.exceptions.TorqueException):
+class DAGEmpty(v1.exceptions.TorqueException):
     """DOCSTRING"""
 
     def __str__(self) -> str:
-        return f"{self.args[0]}: no components selected"
+        return "DAG empty, can't continue"
 
 
 class OperationAborted(v1.exceptions.TorqueException):

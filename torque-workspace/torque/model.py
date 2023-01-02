@@ -4,11 +4,16 @@
 
 """DOCSTRING"""
 
+import re
+
 from copy import deepcopy
 
 import pydot
 
 from torque import exceptions
+
+
+_FILTER = re.compile(r"^\s*([a-z0-9.\-_/]+)\s*(=|!=|~=|~!)\s*(.*)$")
 
 
 class Component:
@@ -113,6 +118,128 @@ class Link:
                f", destination={self.destination})"
 
 
+def _eval_filter(filter: str, labels: dict[str, str]):
+    """DOCSTRING"""
+
+    m = _FILTER.match(filter)
+
+    if not m:
+        raise exceptions.InvalidFilter(filter)
+
+    key = m[1]
+    op = m[2]
+    value = m[3]
+
+    if key not in labels:
+        return False
+
+    target_value = labels[key]
+
+    if op == "=":
+        return value == target_value
+
+    elif op == "!=":
+        return value != target_value
+
+    elif op == "~=":
+        value = re.compile(value)
+        return value.match(target_value) is not None
+
+    elif op == "~!":
+        value = re.compile(value)
+        return value.match(target_value) is None
+
+    else:
+        raise exceptions.InternalError(f"{op}: unknown filter operation")
+
+    return True
+
+
+def _eval_filters(filters: [str], labels: dict[str, str]):
+    """DOCSTRING"""
+
+    for filter in filters:
+        if not _eval_filter(filter, labels):
+            return False
+
+    return True
+
+
+def _trim(dag: "DAG", components_to_keep: set[Component], links_to_keep: set[Link]):
+    """DOCSTRING"""
+
+    components_to_remove = set(dag.components.keys()) - components_to_keep
+    links_to_remove = set(dag.links.keys()) - links_to_keep
+
+    for component_name in components_to_remove:
+        dag.components.pop(component_name)
+
+    for link_name in links_to_remove:
+        dag.links.pop(link_name)
+
+    for component in dag.components.values():
+        for component_name in components_to_remove:
+            component.inbound_links.pop(component_name, None)
+            component.outbound_links.pop(component_name, None)
+
+
+def _apply_filters(dag: "DAG", filters: [str]) -> "DAG":
+    """DOCSTRING"""
+
+    if not filters:
+        return dag
+
+    components_to_keep = set()
+    links_to_keep = set()
+
+    for c in dag.components.values():
+        if _eval_filters(filters, c.labels):
+            components_to_keep.add(c.name)
+
+    for l in dag.links.values():
+        if _eval_filters(filters, l.labels):
+            has_source = l.source in components_to_keep
+            has_destination = l.destination in components_to_keep
+
+            if has_source and has_destination:
+                links_to_keep.add(l.name)
+
+    _trim(dag, components_to_keep, links_to_keep)
+
+    return dag
+
+
+def _select_components(dag: "DAG", components: [str]) -> "DAG":
+    """DOCSTRING"""
+
+    if not components:
+        return dag
+
+    components_to_keep = set()
+    links_to_keep = set()
+
+    while len(components) != 0:
+        component = components.pop()
+
+        if component not in dag.components:
+            raise exceptions.ComponentNotFound(component)
+
+        component = dag.components[component]
+
+        if component.name not in components_to_keep:
+            components_to_keep.add(component.name)
+
+            for component_name, inbound_links in component.inbound_links.items():
+                components.append(component_name)
+
+                for link in inbound_links:
+                    links_to_keep.add(link)
+
+    _trim(dag, components_to_keep, links_to_keep)
+
+    return dag
+
+
 class DAG:
     """DOCSTRING"""
 
@@ -137,6 +264,11 @@ class DAG:
             self._dfs_check(visited_components, seen_components, child_component)
 
         seen_components.remove(component)
+
+    def empty(self) -> bool:
+        """DOCSTRING"""
+
+        return not self.components
 
     def create_component(self,
                          name: str,
@@ -228,8 +360,8 @@ class DAG:
     def verify(self) -> bool:
         """DOCSTRING"""
 
-        seen_components: set[str] = set()
-        visited_components: set[str] = set()
+        seen_components = set()
+        visited_components = set()
 
         for root in self.components:
             if root in visited_components:
@@ -237,54 +369,15 @@ class DAG:
 
             self._dfs_check(visited_components, seen_components, root)
 
-    def used_component_types(self) -> set[str]:
+    def filter(self, filters: [str], components: [str]) -> "DAG":
         """DOCSTRING"""
 
-        return {i.type for i in self.components.values()}
+        dag = deepcopy(self)
 
-    def used_link_types(self) -> set[str]:
-        """DOCSTRING"""
+        dag = _apply_filters(dag, filters)
+        dag = _select_components(dag, components)
 
-        return {i.type for i in self.links.values()}
-
-    def subset(self, components: [str]) -> "DAG":
-        """DOCSTRING"""
-
-        subset = deepcopy(self)
-
-        if components is None:
-            return subset
-
-        components_to_keep = set()
-        links_to_keep = set()
-
-        while len(components) != 0:
-            component = subset.components[components.pop()]
-
-            if component.name not in components_to_keep:
-                components_to_keep.add(component.name)
-
-                for component_name, inbound_links in component.inbound_links.items():
-                    components.append(component_name)
-
-                    for link in inbound_links:
-                        links_to_keep.add(link)
-
-        components_to_remove = set(subset.components.keys()) - components_to_keep
-        links_to_remove = set(subset.links.keys()) - links_to_keep
-
-        for component_name in components_to_remove:
-            subset.components.pop(component_name)
-
-        for link_name in links_to_remove:
-            subset.links.pop(link_name)
-
-        for component in subset.components.values():
-            for component_name in components_to_remove:
-                component.inbound_links.pop(component_name, None)
-                component.outbound_links.pop(component_name, None)
-
-        return subset
+        return dag
 
     def dot(self, name: str) -> str:
         """DOCSTRING"""
