@@ -20,6 +20,7 @@ from torque import v1
 
 
 _NAME = re.compile(r"^[a-z-][a-z0-9-]*$")
+_KEY = re.compile(r"^[a-z0-9.\-_/]+$")
 
 _MAX_DEPLOYMENT_NAME_LENGTH = 16
 _MAX_COMPONENT_NAME_LENGTH = 32
@@ -32,7 +33,8 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
         "components": {
             v1.schema.Optional(str): {
                 "type": str,
-                "parameters": dict
+                "parameters": dict,
+                "labels": [str]
             }
         },
         "links": {
@@ -40,7 +42,8 @@ _WORKSPACE_SCHEMA = v1.schema.Schema({
                 "type": str,
                 "source": str,
                 "destination": str,
-                "parameters": dict
+                "parameters": dict,
+                "labels": [str]
             }
         }
     }
@@ -90,13 +93,38 @@ class Deployment:
             f", components={self.components})"
 
 
+def _from_key_value_pairs(pairs: [str]) -> dict[str, str]:
+    """DOCSTRING"""
+
+    if not pairs:
+        return {}
+
+    _pairs = {}
+
+    for p in pairs:
+        ndx = p.index("=")
+
+        key = p[:ndx]
+        value = p[ndx+1:]
+
+        if not _KEY.match(key):
+            raise v1.exceptions.RuntimeError(f"{key}: invalid key")
+
+        _pairs[key] = value
+
+    return _pairs
+
+
 def _from_components(components: dict[str, model.Component]) -> dict[str, object]:
     """DOCSTRING"""
 
     return {
         component.name: {
             "type": component.type,
-            "parameters": component.parameters
+            "parameters": component.parameters,
+            "labels": [
+                f"{name}={value}" for name, value in component.labels.items()
+            ]
         } for component in components.values()
     }
 
@@ -109,7 +137,10 @@ def _from_links(links: dict[str, model.Link]) -> dict[str, object]:
             "type": link.type,
             "source": link.source,
             "destination": link.destination,
-            "parameters": link.parameters
+            "parameters": link.parameters,
+            "labels": [
+                f"{name}={value}" for name, value in link.labels.items()
+            ]
         } for link in links.values()
     }
 
@@ -143,14 +174,16 @@ def _generate_dag(workspace: dict[str, object]):
     for name, component in workspace_dag["components"].items():
         dag.create_component(name,
                              component["type"],
-                             component["parameters"])
+                             component["parameters"],
+                             _from_key_value_pairs(component["labels"]))
 
     for name, link in workspace_dag["links"].items():
         dag.create_link(name,
                         link["type"],
                         link["source"],
                         link["destination"],
-                        link["parameters"])
+                        link["parameters"],
+                        _from_key_value_pairs(link["labels"]))
 
     dag.verify()
 
@@ -387,7 +420,8 @@ class Workspace:
     def create_component(self,
                          name: str,
                          type: str,
-                         params: object,
+                         parameters: [str],
+                         labels: [str],
                          no_suffix: bool) -> model.Component:
         # pylint: disable=W0622
 
@@ -402,15 +436,21 @@ class Workspace:
         if not no_suffix:
             name = f"{name}-{v1.utils.random_suffix(4)}"
 
+        parameters = _from_key_value_pairs(parameters)
+        labels = _from_key_value_pairs(labels)
+
         component_type = self.repo.component(type)
 
         try:
-            params = component_type.on_parameters(params)
+            parameters = component_type.on_parameters(parameters)
 
         except v1.schema.SchemaError as exc:
             raise v1.exceptions.RuntimeError(f"component parameters: {name}: {exc}") from exc
 
-        component = self.dag.create_component(name, type, params)
+        component = self.dag.create_component(name,
+                                              type,
+                                              parameters,
+                                              labels)
 
         instance = self._component(component)
         instance.on_create()
@@ -441,7 +481,8 @@ class Workspace:
     def create_link(self,
                     name: str,
                     type: str,
-                    params: object,
+                    parameters: [str],
+                    labels: [str],
                     source: str,
                     destination: str,
                     no_suffix: bool) -> model.Link:
@@ -462,10 +503,13 @@ class Workspace:
             if not no_suffix:
                 name = f"{name}-{v1.utils.random_suffix(4)}"
 
+        parameters = _from_key_value_pairs(parameters)
+        labels = _from_key_value_pairs(labels)
+
         link_type = self.repo.link(type)
 
         try:
-            params = link_type.on_parameters(params)
+            parameters = link_type.on_parameters(parameters)
 
         except v1.schema.SchemaError as exc:
             raise v1.exceptions.RuntimeError(f"link parameters: {name}: {exc}") from exc
@@ -473,7 +517,12 @@ class Workspace:
         source = self._get_full_component_name(source)
         destination = self._get_full_component_name(destination)
 
-        link = self.dag.create_link(name, type, source, destination, params)
+        link = self.dag.create_link(name,
+                                    type,
+                                    source,
+                                    destination,
+                                    parameters,
+                                    labels)
 
         self.dag.verify()
 
@@ -615,38 +664,3 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     dag = _generate_dag(workspace)
 
     return Workspace(workspace_path, deployments_path, deployments, dag, repo)
-
-
-def _load_params(path: str) -> object:
-    """DOCSTRING"""
-
-    if not path:
-        return {}
-
-    if path == "-":
-        params = sys.stdin.read()
-
-    else:
-        with open(path, encoding="utf8") as file:
-            params = file.read()
-
-    return yaml.safe_load(params)
-
-
-def process_parameters(path: str, params: [str]) -> object:
-    """DOCSTRING"""
-
-    _params = _load_params(path)
-
-    if not params:
-        return _params
-
-    for p in params:
-        ndx = p.index("=")
-
-        name = p[:ndx]
-        value = p[ndx+1:]
-
-        _params[name] = value
-
-    return _params

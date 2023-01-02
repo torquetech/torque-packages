@@ -13,7 +13,6 @@ from torque import workspace
 def _create(arguments: argparse.Namespace):
     """DOCSTRING"""
 
-    params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
     if arguments.no_suffix and not arguments.name:
@@ -21,7 +20,8 @@ def _create(arguments: argparse.Namespace):
 
     link = ws.create_link(arguments.name,
                           arguments.type,
-                          params,
+                          arguments.params,
+                          arguments.labels,
                           arguments.source,
                           arguments.destination,
                           arguments.no_suffix)
@@ -87,12 +87,16 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="link_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create link")
-    create_parser.add_argument("--params-file", help="link parameters file")
     create_parser.add_argument("--param", "-p",
                                action="append",
                                metavar="NAME=VALUE",
                                dest="params",
                                help="link parameter")
+    create_parser.add_argument("--label", "-l",
+                               action="append",
+                               metavar="NAME=VALUE",
+                               dest="labels",
+                               help="link label")
     create_parser.add_argument("--no-suffix",
                                action="store_true",
                                help="don't append unique suffix to the name")

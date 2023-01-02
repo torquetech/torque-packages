@@ -17,12 +17,14 @@ class Component:
     def __init__(self,
                  name: str,
                  type: str,
-                 parameters: object):
+                 parameters: dict[str, str],
+                 labels: dict[str, str]):
         # pylint: disable=W0622
 
         self.name = name
         self.type = type
         self.parameters = parameters
+        self.labels = labels
 
         self.inbound_links: dict[str, set()] = {}
         self.outbound_links: dict[str, set()] = {}
@@ -93,7 +95,8 @@ class Link:
                  type: str,
                  source: str,
                  destination: str,
-                 parameters: object):
+                 parameters: dict[str, str],
+                 labels: dict[str, str]):
         # pylint: disable=R0913,W0622
 
         self.name = name
@@ -101,6 +104,7 @@ class Link:
         self.source = source
         self.destination = destination
         self.parameters = parameters
+        self.labels = labels
 
     def __repr__(self) -> str:
         return f"Link({self.name}" \
@@ -137,7 +141,8 @@ class DAG:
     def create_component(self,
                          name: str,
                          type: str,
-                         parameters: object) -> Component:
+                         parameters: dict[str, str],
+                         labels: dict[str, str]) -> Component:
         # pylint: disable=W0622
 
         """DOCSTRING"""
@@ -145,7 +150,7 @@ class DAG:
         if name in self.components:
             raise exceptions.ComponentExists(name)
 
-        component = Component(name, type, parameters)
+        component = Component(name, type, parameters, labels)
 
         self.components[name] = component
         return component
@@ -176,7 +181,8 @@ class DAG:
                     type: str,
                     source: str,
                     destination: str,
-                    parameters: object) -> Link:
+                    parameters: dict[str, str],
+                    labels: dict[str, str]) -> Link:
         # pylint: disable=R0913,W0622
 
         """DOCSTRING"""
@@ -193,7 +199,7 @@ class DAG:
         if destination not in self.components:
             raise exceptions.ComponentNotFound(destination)
 
-        link = Link(name, type, source, destination, parameters)
+        link = Link(name, type, source, destination, parameters, labels)
 
         self.components[destination].add_inbound_link(source, name)
         self.components[source].add_outbound_link(destination, name)

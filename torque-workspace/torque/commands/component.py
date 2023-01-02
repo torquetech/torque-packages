@@ -12,10 +12,13 @@ from torque import workspace
 def _create(arguments: argparse.Namespace):
     """DOCSTRING"""
 
-    params = workspace.process_parameters(arguments.params_file, arguments.params)
     ws = workspace.load(arguments.workspace)
 
-    component = ws.create_component(arguments.name, arguments.type, params, arguments.no_suffix)
+    component = ws.create_component(arguments.name,
+                                    arguments.type,
+                                    arguments.params,
+                                    arguments.labels,
+                                    arguments.no_suffix)
     ws.store()
 
     print(component.name)
@@ -78,12 +81,16 @@ def add_arguments(subparsers):
     subparsers = parser.add_subparsers(required=True, dest="component_cmd", metavar="command")
 
     create_parser = subparsers.add_parser("create", help="create component")
-    create_parser.add_argument("--params-file", help="component parameters file")
     create_parser.add_argument("--param", "-p",
                                action="append",
                                metavar="NAME=VALUE",
                                dest="params",
                                help="component parameter")
+    create_parser.add_argument("--label", "-l",
+                               action="append",
+                               metavar="NAME=VALUE",
+                               dest="labels",
+                               help="component label")
     create_parser.add_argument("--no-suffix",
                                action="store_true",
                                help="don't append unique suffix to the name")
