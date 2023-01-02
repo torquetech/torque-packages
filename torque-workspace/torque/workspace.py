@@ -231,23 +231,6 @@ class Workspace:
                     destination.name,
                     bound_interfaces)
 
-    def _collect_components_for(self, name: str) -> [str]:
-        """DOCSTRING"""
-
-        deployment = self.deployments[name]
-
-        if deployment.components is None:
-            return None
-
-        components = set(deployment.components or [])
-        collected_components = set()
-
-        for component in self.dag.components.values():
-            if component.name in components:
-                collected_components.add(component.name)
-
-        return list(collected_components)
-
     def _get_full_component_name(self, name: str) -> str:
         """DOCSTRING"""
 
@@ -389,11 +372,10 @@ class Workspace:
         if name not in self.deployments:
             raise exceptions.DeploymentNotFound(name)
 
-        components = self._collect_components_for(name)
         d = self.deployments[name]
 
         return deployment.load(d.name,
-                               components,
+                               d.components,
                                d.context_type,
                                d.context_config,
                                strict if strict is not None else d.strict,
