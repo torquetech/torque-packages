@@ -91,6 +91,28 @@ def _validate_type_config(name: str, type: object, config: dict[str, object]):
         raise v1.exceptions.RuntimeError(f"{type} configuration: {name}:\n{exc_str}") from exc
 
 
+def _validate_type_params(name: str, type: object, params: dict[str, object]):
+    """DOCSTRING"""
+
+    try:
+        return type.on_parameters(params or {})
+
+    except v1.schema.SchemaError as exc:
+        if issubclass(type, v1.component.Component):
+            type = "component"
+
+        elif issubclass(type, v1.link.Link):
+            type = "link"
+
+        elif issubclass(type, v1.bond.Bond):
+            type = "bond"
+
+        exc_str = str(exc)
+        exc_str = " " + exc_str.replace("\n", "\n ")
+
+        raise v1.exceptions.RuntimeError(f"{type} parameters: {name}:\n{exc_str}") from exc
+
+
 def _validate_deployment_config(name: str, config: dict[str, object]) -> dict[str, object]:
     """DOCSTRING"""
 
@@ -322,17 +344,20 @@ class Deployment:
         component = self._dag.components[name]
         profile = self._configuration.component(name)
 
-        config = profile["configuration"]
         type = self._repo.component(component.type)
 
+        config = profile["configuration"]
+        params = component.parameters
+
         config = _validate_type_config(component.name, type, config)
+        params = _validate_type_params(component.name, type, params)
 
         bound_interfaces = interfaces.bind_to_component(type,
                                                         component.name,
                                                         self._create_bond)
 
         component = type(component.name,
-                         component.parameters,
+                         params,
                          config,
                          self._context,
                          bound_interfaces)
@@ -350,10 +375,13 @@ class Deployment:
         link = self._dag.links[name]
         profile = self._configuration.link(name)
 
-        config = profile["configuration"]
         type = self._repo.link(link.type)
 
+        config = profile["configuration"]
+        params = link.parameters
+
         config = _validate_type_config(link.name, type, config)
+        params = _validate_type_params(link.name, type, params)
 
         source = self._component(link.source)
         destination = self._component(link.destination)
@@ -365,7 +393,7 @@ class Deployment:
                                                    self._create_bond)
 
         link = type(link.name,
-                    link.parameters,
+                    params,
                     config,
                     self._context,
                     source.name,
