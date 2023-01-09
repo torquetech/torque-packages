@@ -170,46 +170,97 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
     }
 
 
-def _generate_dag(workspace: dict[str, object]) -> dag.DAG:
-    """DOCSTRING"""
-
-    workspace_dag = workspace["dag"]
-    dag = model.DAG(workspace_dag["revision"])
-
-    for name, component in workspace_dag["components"].items():
-        dag.create_component(name,
-                             component["type"],
-                             component["parameters"],
-                             _from_key_value_pairs(component["labels"]))
-
-    for name, link in workspace_dag["links"].items():
-        dag.create_link(name,
-                        link["type"],
-                        link["source"],
-                        link["destination"],
-                        link["parameters"],
-                        _from_key_value_pairs(link["labels"]))
-
-    dag.verify()
-
-    return dag
-
-
 class Workspace:
     """DOCSTRING"""
 
-    def __init__(self,
-                 workspace_path: str,
-                 deployments_path: str,
-                 deployments: dict[str, Deployment],
-                 dag: model.DAG,
-                 repo: repository.Repository):
-        self.dag = dag
-        self.repo = repo
-        self.deployments = deployments
-
+    def __init__(self, workspace_path: str, deployments_path: str):
         self._workspace_path = workspace_path
         self._deployments_path = deployments_path
+
+        self.repo = repository.load()
+
+        self.dag = None
+        self.deployments = None
+
+        self._generate_dag()
+        self._load_deployments()
+
+    def _load_workspace_dag(self) -> dict[str, object]:
+        """DOCSTRING"""
+
+        if os.path.exists(self._workspace_path):
+            with open(self._workspace_path, encoding="utf8") as file:
+                workspace = yaml.safe_load(file)
+
+        else:
+            workspace = {
+                "version": "torquetech.io/v1",
+                "dag": {
+                    "revision": 0,
+                    "components": {},
+                    "links": {}
+                }
+            }
+
+        workspace = _WORKSPACE_SCHEMA.validate(workspace)
+
+        if workspace["version"] != "torquetech.io/v1":
+            raise v1.exceptions.RuntimeError(f"{workspace['version']}: invalid workspace version")
+
+        return workspace["dag"]
+
+    def _generate_dag(self) -> dag.DAG:
+        """DOCSTRING"""
+
+        workspace = self._load_workspace_dag()
+        self.dag = dag.DAG(workspace["revision"])
+
+        for name, component in workspace["components"].items():
+            self.dag.create_component(name,
+                                      component["type"],
+                                      component["parameters"],
+                                      _from_key_value_pairs(component["labels"]))
+
+        for name, link in workspace["links"].items():
+            self.dag.create_link(name,
+                                 link["type"],
+                                 link["source"],
+                                 link["destination"],
+                                 link["parameters"],
+                                 _from_key_value_pairs(link["labels"]))
+
+        self.dag.verify()
+
+    def _load_deployments(self):
+        """DOCSTRING"""
+
+        self.deployments = {}
+
+        if not self._deployments_path:
+            return
+
+        if not os.path.exists(self._deployments_path):
+            return
+
+        with open(self._deployments_path, encoding="utf8") as file:
+            deployments = yaml.safe_load(file)
+
+        deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
+
+        if deployments["version"] != "torquetech.io/v1":
+            raise v1.exceptions.RuntimeError(f"{deployments['version']}: invalid deployments version")
+
+        self.deployments = {
+            name: Deployment(name,
+                             deployment["context"]["type"],
+                             deployment["context"]["configuration"],
+                             deployment["strict"],
+                             deployment["providers"],
+                             deployment["extra_configuration"],
+                             deployment["filters"],
+                             deployment["components"])
+            for name, deployment in deployments["deployments"].items()
+        }
 
     def _create_bond(self,
                      obj_type: type,
@@ -598,38 +649,6 @@ class Workspace:
         self._store_deployments()
 
 
-def _load_deployments(path: str) -> dict[str, Deployment]:
-    """DOCSTRING"""
-
-    if not path:
-        return {}
-
-    path = v1.utils.resolve_path(path)
-
-    if not os.path.exists(path):
-        return {}
-
-    with open(path, encoding="utf8") as file:
-        deployments = yaml.safe_load(file)
-
-    deployments = _DEPLOYMENTS_SCHEMA.validate(deployments)
-
-    if deployments["version"] != "torquetech.io/v1":
-        raise v1.exceptions.RuntimeError(f"{deployments['version']}: invalid deployments version")
-
-    return {
-        name: Deployment(name,
-                         deployment["context"]["type"],
-                         deployment["context"]["configuration"],
-                         deployment["strict"],
-                         deployment["providers"],
-                         deployment["extra_configuration"],
-                         deployment["filters"],
-                         deployment["components"])
-        for name, deployment in deployments["deployments"].items()
-    }
-
-
 def load(workspace_path: str, deployments_path: str = None) -> Workspace:
     """DOCSTRING"""
 
@@ -640,27 +659,4 @@ def load(workspace_path: str, deployments_path: str = None) -> Workspace:
         deployments_path = v1.utils.torque_path(deployments_path)
         deployments_path = v1.utils.resolve_path(deployments_path)
 
-    if os.path.exists(workspace_path):
-        with open(workspace_path, encoding="utf8") as file:
-            workspace = yaml.safe_load(file)
-
-    else:
-        workspace = {
-            "version": "torquetech.io/v1",
-            "dag": {
-                "revision": 0,
-                "components": {},
-                "links": {}
-            }
-        }
-
-    workspace = _WORKSPACE_SCHEMA.validate(workspace)
-
-    if workspace["version"] != "torquetech.io/v1":
-        raise v1.exceptions.RuntimeError(f"{workspace['version']}: invalid workspace version")
-
-    deployments = _load_deployments(deployments_path)
-    repo = repository.load()
-    dag = _generate_dag(workspace)
-
-    return Workspace(workspace_path, deployments_path, deployments, dag, repo)
+    return Workspace(workspace_path, deployments_path)
