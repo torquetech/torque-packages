@@ -8,8 +8,8 @@ import re
 import typing
 import types
 
+from torque import dag
 from torque import exceptions
-from torque import model
 from torque import v1
 
 
@@ -136,8 +136,8 @@ def bind_to_component(component_type: type,
 
 def bind_to_link(link_type: type,
                  link_name: str,
-                 source: model.Component,
-                 destination: model.Component,
+                 source: dag.Component,
+                 destination: dag.Component,
                  create_bond: typing.Callable) -> [object]:
     """DOCSTRING"""
 

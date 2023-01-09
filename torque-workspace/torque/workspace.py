@@ -11,10 +11,10 @@ import sys
 import pytrie
 import yaml
 
+from torque import dag
 from torque import deployment
 from torque import exceptions
 from torque import interfaces
-from torque import model
 from torque import repository
 from torque import v1
 
@@ -119,7 +119,7 @@ def _from_key_value_pairs(pairs: [str]) -> dict[str, str]:
     return _pairs
 
 
-def _from_components(components: dict[str, model.Component]) -> dict[str, object]:
+def _from_components(components: dict[str, dag.Component]) -> dict[str, object]:
     """DOCSTRING"""
 
     return {
@@ -133,7 +133,7 @@ def _from_components(components: dict[str, model.Component]) -> dict[str, object
     }
 
 
-def _from_links(links: dict[str, model.Link]) -> dict[str, object]:
+def _from_links(links: dict[str, dag.Link]) -> dict[str, object]:
     """DOCSTRING"""
 
     return {
@@ -170,7 +170,7 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
     }
 
 
-def _generate_dag(workspace: dict[str, object]):
+def _generate_dag(workspace: dict[str, object]) -> dag.DAG:
     """DOCSTRING"""
 
     workspace_dag = workspace["dag"]
@@ -232,7 +232,7 @@ class Workspace:
 
         return _DummyInterfaceImplementation()
 
-    def _component(self, component: model.Component):
+    def _component(self, component: dag.Component):
         """DOCSTRING"""
 
         type = self.repo.component(component.type)
@@ -248,7 +248,7 @@ class Workspace:
                     bound_interfaces)
 
     def _link(self,
-              link: model.Link,
+              link: dag.Link,
               source: v1.component.Component,
               destination: v1.component.Component) -> v1.link.Link:
         """DOCSTRING"""
@@ -430,7 +430,7 @@ class Workspace:
                          type: str,
                          parameters: [str],
                          labels: [str],
-                         no_suffix: bool) -> model.Component:
+                         no_suffix: bool) -> dag.Component:
         # pylint: disable=W0622
 
         """DOCSTRING"""
@@ -467,7 +467,7 @@ class Workspace:
 
         return component
 
-    def remove_component(self, name: str) -> model.Component:
+    def remove_component(self, name: str) -> dag.Component:
         """DOCSTRING"""
 
         name = self._get_full_component_name(name)
@@ -480,7 +480,7 @@ class Workspace:
 
         return component
 
-    def get_component(self, name: str) -> model.Component:
+    def get_component(self, name: str) -> dag.Component:
         """DOCSTRING"""
 
         name = self._get_full_component_name(name)
@@ -493,7 +493,7 @@ class Workspace:
                     labels: [str],
                     source: str,
                     destination: str,
-                    no_suffix: bool) -> model.Link:
+                    no_suffix: bool) -> dag.Link:
         # pylint: disable=W0622,R0913
 
         """DOCSTRING"""
@@ -544,7 +544,7 @@ class Workspace:
 
         return link
 
-    def remove_link(self, name: str) -> model.Link:
+    def remove_link(self, name: str) -> dag.Link:
         """DOCSTRING"""
 
         name = self._get_full_link_name(name)
@@ -560,7 +560,7 @@ class Workspace:
 
         return link
 
-    def get_link(self, name: str) -> model.Component:
+    def get_link(self, name: str) -> dag.Component:
         """DOCSTRING"""
 
         name = self._get_full_link_name(name)
