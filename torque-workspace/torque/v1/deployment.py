@@ -25,7 +25,7 @@ class _ContextData:
         """DOCSTRING"""
 
         if bucket not in self._buckets:
-            self._buckets[bucket] = self._load_bucket(bucket)
+            self._buckets[bucket] = self._load_bucket(bucket) or {}
 
         return self._buckets[bucket]
 
