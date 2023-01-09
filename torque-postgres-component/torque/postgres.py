@@ -81,13 +81,13 @@ class V1Component(v1.component.Component):
 class V1EnvironmentLink(environment.V1BaseLink):
     """DOCSTRING"""
 
-    PARAMETERS = environment.V1BaseLink.PARAMETERS | {
+    PARAMETERS = v1.utils.merge_dicts(environment.V1BaseLink.PARAMETERS, {
         "defaults": {},
         "schema": {
             "database": str,
             "user": str
         }
-    }
+    })
 
     @classmethod
     def on_requirements(cls):
