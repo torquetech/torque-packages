@@ -14,6 +14,15 @@ from . import deployment
 from . import utils
 
 
+class DummyInterfaceImplementation:
+    """DOCSTRING"""
+
+    def __getattribute__(self, attr):
+        """DOCSTRING"""
+
+        return None
+
+
 class Interface:
     """DOCSTRING"""
 

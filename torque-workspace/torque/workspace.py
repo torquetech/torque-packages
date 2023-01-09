@@ -195,15 +195,6 @@ def _generate_dag(workspace: dict[str, object]) -> dag.DAG:
     return dag
 
 
-class _DummyInterfaceImplementation:
-    """DOCSTRING"""
-
-    def __getattribute__(self, attr):
-        """TOOD"""
-
-        return None
-
-
 class Workspace:
     """DOCSTRING"""
 
@@ -230,7 +221,7 @@ class Workspace:
 
         """DOCSTRING"""
 
-        return _DummyInterfaceImplementation()
+        return v1.component.DummyInterfaceImplementation()
 
     def _component(self, component: dag.Component):
         """DOCSTRING"""
