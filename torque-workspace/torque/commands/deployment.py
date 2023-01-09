@@ -55,9 +55,12 @@ def _describe(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
-    deployment = ws.load_deployment(arguments.name, False)
+    deployment = ws.get_deployment(arguments.name)
 
-    print(deployment)
+    yaml.safe_dump(deployment.describe(),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _list(arguments: argparse.Namespace):
@@ -65,8 +68,10 @@ def _list(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
-    for deployment in ws.deployments.values():
-        print(deployment)
+    yaml.safe_dump(sorted(list(ws.deployments)),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _build(arguments: argparse.Namespace):

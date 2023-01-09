@@ -8,6 +8,8 @@ import inspect
 import threading
 import typing
 
+from pprint import pformat
+
 from . import deployment
 from . import utils
 
@@ -79,6 +81,25 @@ class Provider:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._lock.release()
+
+    @classmethod
+    def describe(cls) -> dict[str, object]:
+        """DOCSTRING"""
+
+        return {
+            "type": utils.fqcn(cls),
+            "configuration": {
+                "defaults": pformat(cls.CONFIGURATION["defaults"]),
+                "schema": pformat(cls.CONFIGURATION["schema"])
+            },
+            "requirements": {
+                name: {
+                    "interface": utils.fqcn(r["interface"]),
+                    "required": r["required"]
+                } for name, r in cls.on_requirements().items()
+            },
+            "description": cls.__doc__
+        }
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

@@ -4,6 +4,8 @@
 
 """DOCSTRING"""
 
+from pprint import pformat
+
 from . import deployment
 from . import utils
 
@@ -38,6 +40,29 @@ class Link:
         self.source = source
         self.destination = destination
         self.interfaces = interfaces
+
+    @classmethod
+    def describe(cls) -> dict[str, object]:
+        """DOCSTRING"""
+
+        return {
+            "type": utils.fqcn(cls),
+            "parameters": {
+                "defaults": pformat(cls.PARAMETERS["defaults"]),
+                "schema": pformat(cls.PARAMETERS["schema"])
+            },
+            "configuration": {
+                "defaults": pformat(cls.CONFIGURATION["defaults"]),
+                "schema": pformat(cls.CONFIGURATION["schema"])
+            },
+            "requirements": {
+                name: {
+                    "interface": utils.fqcn(r["interface"]),
+                    "required": r["required"]
+                } for name, r in cls.on_requirements().items()
+            },
+            "description": cls.__doc__
+        }
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

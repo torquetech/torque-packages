@@ -240,13 +240,6 @@ def uninstall_package(name: str):
                 raise
 
 
-def list_packages():
-    """DOCSTRING"""
-
-    for name, metadata in sorted(installed_packages().items()):
-        print(f"{name}: version: {metadata['version']}, uri: {metadata['uri']}")
-
-
 def upgrade_package(name: str):
     """DOCSTRING"""
 
@@ -269,3 +262,27 @@ def upgrade_all_packages():
         install_package(metadata["uri"])
 
     install_deps()
+
+
+def describe_package(name: str) -> dict[str, object]:
+    """DOCSTRING"""
+
+    packages = installed_packages()
+
+    if name not in packages:
+        raise PackageNotFound(name)
+
+    package = packages[name]
+
+    dist = _package_dist(package["path"])
+    metadata = dist.metadata
+
+    return {
+        "name": metadata["Name"],
+        "version": metadata["Version"],
+        "home-page": metadata["Home-page"],
+        "author": metadata["Author"],
+        "author-email": metadata["Author-email"],
+        "license": metadata["License"],
+        "uri": package["uri"]
+    }

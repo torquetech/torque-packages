@@ -34,14 +34,30 @@ class Component:
         self.inbound_links: dict[str, set()] = {}
         self.outbound_links: dict[str, set()] = {}
 
-    def __repr__(self) -> str:
-        inbound_links = ",".join(self.inbound_links)
-        outbound_links = ",".join(self.outbound_links)
+    def describe(self) -> dict[str, object]:
+        """DOCSTRING"""
 
-        return f"Component({self.name}" \
-               f", type={self.type}" \
-               f", inbound_links=[{inbound_links}]" \
-               f", outbound_links=[{outbound_links}])"
+        inbound_links = []
+        outbound_links = []
+
+        for component, links in self.inbound_links.items():
+            for link in links:
+                inbound_links.append({link: component})
+
+        for component, links in self.outbound_links.items():
+            for link in links:
+                outbound_links.append({link: component})
+
+        return {
+            "name": self.name,
+            "type": self.type,
+            "parameters": self.parameters,
+            "labels": [
+                f"{key}={value}" for key, value in self.labels.items()
+            ],
+            "inbound_links": inbound_links,
+            "outbound_links": outbound_links
+        }
 
     def add_inbound_link(self, component: str, link: str):
         """DOCSTRING"""
@@ -111,11 +127,19 @@ class Link:
         self.parameters = parameters
         self.labels = labels
 
-    def __repr__(self) -> str:
-        return f"Link({self.name}" \
-               f", type={self.type}" \
-               f", source={self.source}" \
-               f", destination={self.destination})"
+    def describe(self) -> dict[str, object]:
+        """DOCSTRING"""
+
+        return {
+            "name": self.name,
+            "type": self.type,
+            "source": self.source,
+            "destination": self.destination,
+            "parameters": self.parameters,
+            "labels": [
+                f"{key}={value}" for key, value in self.labels.items()
+            ]
+        }
 
 
 def _eval_filter(filter: str, labels: dict[str, str]):

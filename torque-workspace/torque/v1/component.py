@@ -7,7 +7,10 @@
 import functools
 import inspect
 import threading
+import types
 import warnings
+
+from pprint import pformat
 
 from . import exceptions
 from . import deployment
@@ -111,6 +114,43 @@ class Component:
             return None
 
         return self._torque_interfaces[cls_type]
+
+    @classmethod
+    def describe(cls) -> dict[str, object]:
+        """DOCSTRING"""
+
+        bound_interfaces = types.SimpleNamespace()
+
+        for name in cls.on_requirements():
+            setattr(bound_interfaces, name, DummyInterfaceImplementation())
+
+        component = cls("internal",
+                        cls.PARAMETERS["defaults"],
+                        cls.CONFIGURATION["defaults"],
+                        deployment.Context("internal", {}),
+                        bound_interfaces)
+
+        return {
+            "type": utils.fqcn(cls),
+            "parameters": {
+                "defaults": pformat(cls.PARAMETERS["defaults"]),
+                "schema": pformat(cls.PARAMETERS["schema"])
+            },
+            "configuration": {
+                "defaults": pformat(cls.CONFIGURATION["defaults"]),
+                "schema": pformat(cls.CONFIGURATION["schema"])
+            },
+            "interfaces": [
+                utils.fqcn(type) for type in component.on_interfaces()
+            ],
+            "requirements": {
+                name: {
+                    "interface": utils.fqcn(r["interface"]),
+                    "required": r["required"]
+                } for name, r in cls.on_requirements().items()
+            },
+            "description": cls.__doc__
+        }
 
     @classmethod
     def on_parameters(cls, parameters: object) -> object:

@@ -5,8 +5,12 @@
 """DOCSTRING"""
 
 import argparse
+import sys
+
+import yaml
 
 from torque import package
+from torque import repository
 
 
 def _install(arguments: argparse.Namespace):
@@ -31,7 +35,32 @@ def _list(arguments: argparse.Namespace):
 
     """DOCSTRING"""
 
-    package.list_packages()
+    yaml.safe_dump(sorted(list(package.installed_packages())),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
+
+
+def _describe(arguments: argparse.Namespace):
+    """DOCSTRING"""
+
+    desc = package.describe_package(arguments.name)
+    repo = repository.package_repository(arguments.name)
+
+    repo = repo["v1"]
+
+    desc.update({
+        "contexts": sorted(list(repo["contexts"])),
+        "components": sorted(list(repo["components"])),
+        "links": sorted(list(repo["links"])),
+        "providers": sorted(list(repo["providers"])),
+        "bonds": sorted(list(repo["bonds"]))
+    })
+
+    yaml.safe_dump(desc,
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _upgrade(arguments: argparse.Namespace):
@@ -66,6 +95,9 @@ def add_arguments(subparsers):
     subparsers.add_parser("upgrade-all", help="upgrade all packages")
     subparsers.add_parser("list", help="list installed packages")
 
+    describe_parser = subparsers.add_parser("describe", help="describe package")
+    describe_parser.add_argument("name", help="package name")
+
 
 def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     # pylint: disable=W0613
@@ -77,7 +109,8 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
         "uninstall": _uninstall,
         "upgrade": _upgrade,
         "upgrade-all": _upgrade_all,
-        "list": _list
+        "list": _list,
+        "describe": _describe
     }
 
     cmds[arguments.package_cmd](arguments)

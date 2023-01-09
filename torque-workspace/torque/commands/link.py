@@ -5,7 +5,11 @@
 """DOCSTRING"""
 
 import argparse
+import sys
 
+import yaml
+
+from torque import repository
 from torque import v1
 from torque import workspace
 
@@ -45,7 +49,10 @@ def _describe(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
     link = ws.get_link(arguments.name)
 
-    print(link)
+    yaml.safe_dump(link.describe(),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _list(arguments: argparse.Namespace):
@@ -55,17 +62,22 @@ def _list(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    for link in ws.dag.links.values():
-        print(link)
+    yaml.safe_dump(sorted(list(ws.dag.links)),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _describe_type(arguments: argparse.Namespace):
     """DOCSTRING"""
 
-    ws = workspace.load(arguments.workspace)
+    repo = repository.load()
+    link_type = repo.link(arguments.name)
 
-    link_type = ws.repo.link(arguments.name)
-    print(f"{arguments.name}: {link_type}")
+    yaml.safe_dump(link_type.describe(),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _list_types(arguments: argparse.Namespace):
@@ -73,11 +85,12 @@ def _list_types(arguments: argparse.Namespace):
 
     """DOCSTRING"""
 
-    ws = workspace.load(arguments.workspace)
-    link_types = ws.repo.links()
+    repo = repository.load()
 
-    for link in link_types:
-        print(f"{link}: {link_types[link]}")
+    yaml.safe_dump(sorted(list(repo.links())),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def add_arguments(subparsers):

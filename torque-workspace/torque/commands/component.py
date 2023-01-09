@@ -5,7 +5,11 @@
 """DOCSTRING"""
 
 import argparse
+import sys
 
+import yaml
+
+from torque import repository
 from torque import workspace
 
 
@@ -39,7 +43,10 @@ def _describe(arguments: argparse.Namespace):
     ws = workspace.load(arguments.workspace)
     component = ws.get_component(arguments.name)
 
-    print(component)
+    yaml.safe_dump(component.describe(),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _list(arguments: argparse.Namespace):
@@ -49,17 +56,22 @@ def _list(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace)
 
-    for component in ws.dag.components.values():
-        print(component)
+    yaml.safe_dump(sorted(list(ws.dag.components)),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _describe_type(arguments: argparse.Namespace):
     """DOCSTRING"""
 
-    ws = workspace.load(arguments.workspace)
+    repo = repository.load()
+    component_type = repo.component(arguments.name)
 
-    component_type = ws.repo.component(arguments.name)
-    print(f"{arguments.name}: {component_type}")
+    yaml.safe_dump(component_type.describe(),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def _list_types(arguments: argparse.Namespace):
@@ -67,11 +79,12 @@ def _list_types(arguments: argparse.Namespace):
 
     """DOCSTRING"""
 
-    ws = workspace.load(arguments.workspace)
-    component_types = ws.repo.components()
+    repo = repository.load()
 
-    for component in component_types:
-        print(f"{component}: {component_types[component]}")
+    yaml.safe_dump(sorted(list(repo.components())),
+                   stream=sys.stdout,
+                   default_flow_style=False,
+                   sort_keys=False)
 
 
 def add_arguments(subparsers):

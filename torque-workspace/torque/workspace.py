@@ -6,7 +6,6 @@
 
 import os
 import re
-import sys
 
 import pytrie
 import yaml
@@ -88,13 +87,21 @@ class Deployment:
         self.filters = filters
         self.components = components
 
-    def __repr__(self) -> str:
-        return \
-            f"Deployment({self.name}" \
-            f", context_type={self.context_type}" \
-            f", providers={self.providers}" \
-            f", filters={self.filters}" \
-            f", components={self.components})"
+    def describe(self) -> dict[str, object]:
+        """DOCSTRING"""
+
+        return {
+            "name": self.name,
+            "context": {
+                "type": self.context_type,
+                "configuration": self.context_config
+            },
+            "strict": self.strict,
+            "providers": self.providers,
+            "extra_configs": self.extra_configs,
+            "filters": self.filters,
+            "components": self.components
+        }
 
 
 def _from_key_value_pairs(pairs: [str]) -> dict[str, str]:
@@ -466,6 +473,12 @@ class Workspace:
                                d.extra_configs if load_extra_configs else [],
                                self.dag,
                                self.repo)
+
+    def get_deployment(self, name: str) -> dag.Component:
+        """DOCSTRING"""
+
+        name = self._get_full_deployment_name(name)
+        return self.deployments[name]
 
     def create_component(self,
                          name: str,

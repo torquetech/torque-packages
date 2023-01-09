@@ -8,6 +8,8 @@ import secrets
 import threading
 import typing
 
+from pprint import pformat
+
 from . import exceptions
 from . import utils
 
@@ -84,6 +86,18 @@ class Context:
         "defaults": {},
         "schema": {}
     }
+
+    @classmethod
+    def describe(cls) -> dict[str, object]:
+        """DOCSTRING"""
+
+        return {
+            "type": utils.fqcn(cls),
+            "configuration": {
+                "defaults": pformat(cls.CONFIGURATION["defaults"]),
+                "schema": pformat(cls.CONFIGURATION["schema"])
+            }
+        }
 
     @classmethod
     def on_configuration(cls, configuration: object) -> object:

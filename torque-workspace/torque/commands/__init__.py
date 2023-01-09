@@ -9,3 +9,6 @@ from . import package
 from . import component
 from . import link
 from . import deployment
+from . import provider
+from . import bond
+from . import context
