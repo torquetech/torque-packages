@@ -34,7 +34,7 @@ def torque_root() -> str:
             break
 
         if cwd.parent == cwd:
-            raise RuntimeError("workspace root not found!")
+            return None
 
         cwd = cwd.parent
 
@@ -63,6 +63,8 @@ def main() -> int:
 
     # pylint: disable=W0703
     try:
+        root = torque_root()
+
         if len(sys.argv) > 1:
             parser = argparse.ArgumentParser(description="torque command line interface.")
             subparsers = parser.add_subparsers(required=True,
@@ -76,13 +78,18 @@ def main() -> int:
 
                 return 0
 
-        root = torque_root()
+            if not root and (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
+                parser.parse_args()
 
-        if not os.path.isfile(f"{root}/.torque/local/venv/bin/python"):
-            workspace.initialize_venv(root)
-            workspace.install_deps(root)
+        if root:
+            if not os.path.isfile(f"{root}/.torque/local/venv/bin/python"):
+                workspace.initialize_venv(root)
+                workspace.install_deps(root)
 
-        pass_through_command(root, sys.argv[1:])
+            pass_through_command(root, sys.argv[1:])
+
+        else:
+            raise RuntimeError("workspace root not found!")
 
         return 0
 
