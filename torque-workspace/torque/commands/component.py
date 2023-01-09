@@ -33,7 +33,7 @@ def _remove(arguments: argparse.Namespace):
     ws.store()
 
 
-def _show(arguments: argparse.Namespace):
+def _describe(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
@@ -53,7 +53,7 @@ def _list(arguments: argparse.Namespace):
         print(component)
 
 
-def _show_type(arguments: argparse.Namespace):
+def _describe_type(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
@@ -100,13 +100,14 @@ def add_arguments(subparsers):
     remove_parser = subparsers.add_parser("remove", help="remove component")
     remove_parser.add_argument("name", help="component name")
 
-    show_parser = subparsers.add_parser("show", help="show component")
-    show_parser.add_argument("name", help="component name")
+    describe_parser = subparsers.add_parser("describe", help="describe component")
+    describe_parser.add_argument("name", help="component name")
 
     subparsers.add_parser("list", help="list components")
 
-    show_type_parser = subparsers.add_parser("show-type", help="show component type")
-    show_type_parser.add_argument("name", help="component type name")
+    describe_type_parser = subparsers.add_parser("describe-type",
+                                                 help="describe component type")
+    describe_type_parser.add_argument("name", help="component type name")
 
     subparsers.add_parser("list-types", help="list component types")
 
@@ -119,9 +120,9 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     cmds = {
         "create": _create,
         "remove": _remove,
-        "show": _show,
+        "describe": _describe,
         "list": _list,
-        "show-type": _show_type,
+        "describe-type": _describe_type,
         "list-types": _list_types
     }
 

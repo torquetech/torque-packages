@@ -56,7 +56,7 @@ def _update(arguments: argparse.Namespace):
     deployment.store()
 
 
-def _show(arguments: argparse.Namespace):
+def _describe(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
@@ -194,8 +194,8 @@ def add_arguments(subparsers):
     update_parser = subparsers.add_parser("update", help="update deployment")
     update_parser.add_argument("name", help="deployment name")
 
-    show_parser = subparsers.add_parser("show", help="show deployment")
-    show_parser.add_argument("name", help="deployment name")
+    describe_parser = subparsers.add_parser("describe", help="describe deployment")
+    describe_parser.add_argument("name", help="deployment name")
 
     subparsers.add_parser("list", help="list deployments")
 
@@ -237,7 +237,7 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
         "create": _create,
         "remove": _remove,
         "update": _update,
-        "show": _show,
+        "describe": _describe,
         "list": _list,
         "build": _build,
         "apply": _apply,

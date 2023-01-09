@@ -39,7 +39,7 @@ def _remove(arguments: argparse.Namespace):
     ws.store()
 
 
-def _show(arguments: argparse.Namespace):
+def _describe(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
@@ -59,7 +59,7 @@ def _list(arguments: argparse.Namespace):
         print(link)
 
 
-def _show_type(arguments: argparse.Namespace):
+def _describe_type(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace)
@@ -110,13 +110,14 @@ def add_arguments(subparsers):
     remove_parser = subparsers.add_parser("remove", help="remove link")
     remove_parser.add_argument("name", help="link name")
 
-    show_parser = subparsers.add_parser("show", help="show link")
-    show_parser.add_argument("name", help="link name")
+    describe_parser = subparsers.add_parser("describe", help="describe link")
+    describe_parser.add_argument("name", help="link name")
 
     subparsers.add_parser("list", help="list links")
 
-    show_type_parser = subparsers.add_parser("show-type", help="show link type")
-    show_type_parser.add_argument("name", help="link type name")
+    describe_type_parser = subparsers.add_parser("describe-type",
+                                                 help="describe link type")
+    describe_type_parser.add_argument("name", help="link type name")
 
     subparsers.add_parser("list-types", help="list link types")
 
@@ -129,9 +130,9 @@ def run(arguments: argparse.Namespace, unparsed_argv: [str]):
     cmds = {
         "create": _create,
         "remove": _remove,
-        "show": _show,
+        "describe": _describe,
         "list": _list,
-        "show-type": _show_type,
+        "describe-type": _describe_type,
         "list-types": _list_types
     }
 
