@@ -112,10 +112,11 @@ class BaseComponent(v1.component.Component):
     def _resolve_cmd(self) -> [str]:
         """DOCSTRING"""
 
+        image = f"{self.context.deployment_name}-{self.name}:latest"
         cmd = []
 
         for i in self.parameters["build"]["command"]:
-            i = i.replace("$IMAGE", f"{self.name}:latest")
+            i = i.replace("$IMAGE", image)
             cmd.append(i)
 
         return cmd
@@ -137,10 +138,11 @@ class BaseComponent(v1.component.Component):
     def _id(self) -> str:
         """DOCSTRING"""
 
+        image = f"{self.context.deployment_name}-{self.name}:latest"
         cmd = [
             "docker", "image", "inspect",
             "-f", "{{.Id}}",
-            f"{self.name}:latest"
+            image
         ]
 
         print(f"+ {' '.join(cmd)}")
