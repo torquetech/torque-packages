@@ -21,7 +21,7 @@ def _create(arguments: argparse.Namespace):
 
     d = ws.create_deployment(arguments.name,
                              arguments.context,
-                             arguments.provider,
+                             arguments.providers,
                              arguments.extra_configs,
                              arguments.filters,
                              arguments.components,
@@ -167,6 +167,11 @@ def add_arguments(subparsers):
     create_parser.add_argument("--context",
                                default="torque.defaults.V1LocalContext",
                                help="deployment context, default: %(default)s")
+    create_parser.add_argument("--provider", "-p",
+                               action="append",
+                               metavar="PROVIDER",
+                               dest="providers",
+                               help="provider name")
     create_parser.add_argument("--extra-config",
                                action="append",
                                metavar="CONFIG",
@@ -186,7 +191,6 @@ def add_arguments(subparsers):
                                action="store_true",
                                help="don't append unique suffix to the name")
     create_parser.add_argument("name", help="deployment name")
-    create_parser.add_argument("provider", nargs="+", help="provider name")
 
     remove_parser = subparsers.add_parser("remove", help="remove deployment")
     remove_parser.add_argument("name", help="deployment name")

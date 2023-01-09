@@ -161,7 +161,7 @@ def _from_deployments(deployments: dict[str, Deployment]) -> dict[str, object]:
                     "configuration": deployment.context_config
                 },
                 "strict": deployment.strict,
-                "providers": deployment.providers,
+                "providers": deployment.providers or [],
                 "extra_configuration": deployment.extra_configs or [],
                 "filters": deployment.filters,
                 "components": deployment.components
