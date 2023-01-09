@@ -44,9 +44,11 @@ def torque_root() -> str:
 def pass_through_command(root: str, argv):
     """DOCSTRING"""
 
+    hook = os.getenv("TORQUE_HOOK", "torque.hooks.main")
+
     cmd = [
         f"{root}/.torque/local/venv/bin/python",
-        "-m", "torque.hooks.main"
+        "-m", hook
     ]
 
     cmd += argv
