@@ -80,7 +80,7 @@ class V1LocalContext(v1.deployment.Context):
         return self._path
 
     def external_path(self) -> str:
-        """TOOD"""
+        """DOCSTRING"""
 
         return self._external_path
 

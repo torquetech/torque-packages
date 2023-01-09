@@ -218,7 +218,7 @@ def apply_objects(current_state: dict[str, object],
 
 
 def wait_for(cond_fn: typing.Callable, message: str, interval: int = 10):
-    """TOOD"""
+    """DOCSTRING"""
 
     if cond_fn():
         return
