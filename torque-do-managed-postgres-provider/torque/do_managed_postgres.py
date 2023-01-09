@@ -356,7 +356,6 @@ class V1Implementation(v1.bond.Bond):
                 }
             })
 
-
         for name, do_name in self._users.items():
             self.interfaces.do.add_object({
                 "kind": "v2/database/postgres/user",

@@ -191,12 +191,12 @@ class V1Provider(v1.provider.Provider):
             self._store_state()
 
     def install(self,
-            name: str,
-            chart: str,
-            repo_name: str,
-            repo_url: str,
-            namespace: str,
-            values: dict[str, object]):
+                name: str,
+                chart: str,
+                repo_name: str,
+                repo_url: str,
+                namespace: str,
+                values: dict[str, object]):
         """DOCSTRING"""
 
         fd, values_file = tempfile.mkstemp(prefix=f"{name}-values-", suffix=".yaml")

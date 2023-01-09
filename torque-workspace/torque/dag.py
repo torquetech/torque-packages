@@ -162,21 +162,18 @@ def _eval_filter(filter: str, labels: dict[str, str]):
     if op == "=":
         return value == target_value
 
-    elif op == "!=":
+    if op == "!=":
         return value != target_value
 
-    elif op == "~=":
+    if op == "~=":
         value = re.compile(value)
         return value.match(target_value) is not None
 
-    elif op == "~!":
+    if op == "~!":
         value = re.compile(value)
         return value.match(target_value) is None
 
-    else:
-        raise exceptions.InternalError(f"{op}: unknown filter operation")
-
-    return True
+    raise exceptions.InternalError(f"{op}: unknown filter operation")
 
 
 def _eval_filters(filters: [str], labels: dict[str, str]):
@@ -216,17 +213,17 @@ def _apply_filters(dag: "DAG", filters: [str]) -> "DAG":
     components_to_keep = set()
     links_to_keep = set()
 
-    for c in dag.components.values():
-        if _eval_filters(filters, c.labels):
-            components_to_keep.add(c.name)
+    for component in dag.components.values():
+        if _eval_filters(filters, component.labels):
+            components_to_keep.add(component.name)
 
-    for l in dag.links.values():
-        if _eval_filters(filters, l.labels):
-            has_source = l.source in components_to_keep
-            has_destination = l.destination in components_to_keep
+    for link in dag.links.values():
+        if _eval_filters(filters, link.labels):
+            has_source = link.source in components_to_keep
+            has_destination = link.destination in components_to_keep
 
             if has_source and has_destination:
-                links_to_keep.add(l.name)
+                links_to_keep.add(link.name)
 
     _trim(dag, components_to_keep, links_to_keep)
 
