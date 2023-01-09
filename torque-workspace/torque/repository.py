@@ -84,20 +84,6 @@ _REPOSITORY_SCHEMA = v1.schema.Schema({
     })
 }, ignore_extra_keys=True)
 
-_DEFAULT_REPOSITORY = {
-    "v1": {
-        "contexts": {
-            v1.utils.fqcn(defaults.V1LocalContext): defaults.V1LocalContext
-        },
-        "components": {},
-        "links": {
-            v1.utils.fqcn(defaults.V1DependencyLink): defaults.V1DependencyLink
-        },
-        "providers": {},
-        "bonds": {}
-    }
-}
-
 
 class Repository:
     """DOCSTRING"""
@@ -225,10 +211,11 @@ def _process_items(repository: dict[str, object], name: str) -> dict[str, object
 def load() -> Repository:
     """DOCSTRING"""
 
-    repository = {} | _DEFAULT_REPOSITORY
 
     entry_points = _system_repository()
     entry_points += _local_repository()
+
+    repository = {}
 
     for entry_point in entry_points:
         # pylint: disable=W0703

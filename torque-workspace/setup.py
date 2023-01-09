@@ -37,4 +37,9 @@ setup(name="torque-workspace",
           "pydot",
           "pytrie",
           "schema"
-      ])
+      ],
+      entry_points={
+          "torque": [
+              "torque-workspace=torque.defaults:repository"
+          ]
+      })

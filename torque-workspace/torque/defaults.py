@@ -83,3 +83,15 @@ class V1LocalContext(v1.deployment.Context):
         """TOOD"""
 
         return self._external_path
+
+
+repository = {
+    "v1": {
+        "contexts": [
+            V1LocalContext
+        ],
+        "links": [
+            V1DependencyLink
+        ]
+    }
+}
