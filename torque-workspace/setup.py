@@ -25,7 +25,7 @@ setup(name="torque-workspace",
       description="",
       long_description=load_file("README.md"),
       long_description_content_type="text/markdown",
-      url="https://github.com/torquetech/workspace",
+      url="https://github.com/torquetech/torque-workspace",
       license="MPL v2.0",
       classifiers=[
           "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
