@@ -15,6 +15,7 @@ class Interface:
 class Bond:
     """DOCSTRING"""
 
+    PROVIDER = None
     IMPLEMENTS = None
 
     CONFIGURATION = {
