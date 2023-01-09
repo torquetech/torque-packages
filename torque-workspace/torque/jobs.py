@@ -121,7 +121,7 @@ class Runner:
                         self._quit()
 
             except v1.exceptions.TorqueException as exc:
-                if os.getenv("VERBOSE"):
+                if os.getenv("TORQUE_DEBUG"):
                     traceback.print_exc()
 
                 print(exc, file=sys.stderr)
