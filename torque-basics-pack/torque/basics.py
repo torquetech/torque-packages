@@ -104,7 +104,7 @@ class BaseComponent(v1.component.Component):
             "run": {
                 v1.schema.Optional("command"): [str],
                 v1.schema.Optional("arguments"): [str],
-                v1.schema.Optional("work_directory"): str
+                v1.schema.Optional("working_directory"): str
             }
         }
     }
@@ -208,7 +208,7 @@ class BaseService(BaseComponent):
     PARAMETERS = v1.utils.merge_dicts(BaseComponent.PARAMETERS, {
         "defaults": {},
         "schema": {
-            "port": str
+            "port": int
         }
     })
 
