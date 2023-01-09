@@ -19,22 +19,17 @@ def _create(arguments: argparse.Namespace):
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
 
-    d = ws.create_deployment(arguments.name,
-                             arguments.context,
-                             arguments.providers,
-                             arguments.extra_configs,
-                             arguments.filters,
-                             arguments.components,
-                             arguments.strict,
-                             arguments.no_suffix)
-    deployment = ws.load_deployment(d.name, False)
-
-    deployment.update()
-    deployment.store()
-
+    deployment = ws.create_deployment(arguments.name,
+                                      arguments.context,
+                                      arguments.providers,
+                                      arguments.extra_configs,
+                                      arguments.filters,
+                                      arguments.components,
+                                      arguments.strict,
+                                      arguments.no_suffix)
     ws.store()
 
-    print(d.name)
+    print(deployment.name)
 
 
 def _remove(arguments: argparse.Namespace):
