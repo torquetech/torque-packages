@@ -4,6 +4,7 @@
 
 """DOCSTRING"""
 
+import importlib.metadata
 import json
 import os
 import pathlib
@@ -12,8 +13,6 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
-
-from importlib import metadata
 
 
 _URI = r"^[^:]+://"
@@ -39,7 +38,7 @@ class WorkspaceNotFound(Exception):
         return "workspace not found!"
 
 
-def torque_cwd() -> str:
+def _torque_cwd() -> str:
     # pylint: disable=W0603
 
     """DOCSTRING"""
@@ -54,7 +53,7 @@ def torque_cwd() -> str:
     return _TORQUE_CWD
 
 
-def torque_root() -> str:
+def _torque_root() -> str:
     # pylint: disable=W0603
 
     """DOCSTRING"""
@@ -64,7 +63,7 @@ def torque_root() -> str:
     if _TORQUE_ROOT:
         return _TORQUE_ROOT
 
-    cwd = pathlib.Path(torque_cwd())
+    cwd = pathlib.Path(_torque_cwd())
 
     while True:
         if os.path.isdir(f"{cwd}/.torque"):
@@ -80,16 +79,16 @@ def torque_root() -> str:
     return _TORQUE_ROOT
 
 
-def torque_dir() -> str:
+def _torque_dir() -> str:
     """DOCSTRING"""
 
-    return f"{torque_root()}/.torque"
+    return f"{_torque_root()}/.torque"
 
 
-def package_dist(path: str):
+def _package_dist(path: str):
     """DOCSTRING"""
 
-    return metadata.Distribution.at(path)
+    return importlib.metadata.Distribution.at(path)
 
 
 def installed_packages():
@@ -97,12 +96,12 @@ def installed_packages():
 
     packages = {}
 
-    for entry in os.listdir(f"{torque_dir()}/system"):
+    for entry in os.listdir(f"{_torque_dir()}/system"):
         if not entry.endswith(".dist-info"):
             continue
 
-        path = f"{torque_dir()}/system/{entry}"
-        dist = package_dist(path)
+        path = f"{_torque_dir()}/system/{entry}"
+        dist = _package_dist(path)
 
         with open(f"{path}/direct_url.json", encoding="utf-8") as f:
             uri = json.loads(f.read())["url"]
@@ -122,19 +121,19 @@ def install_deps():
     requirements = []
 
     for metadata in installed_packages().values():
-        dist = package_dist(metadata["path"])
+        dist = _package_dist(metadata["path"])
         dist_requires = dist.metadata.get_all("Requires-Dist")
 
         if dist_requires:
             requirements += dist_requires
 
-    if os.path.isfile(f"{torque_dir()}/requirements.txt"):
-        with open(f"{torque_dir()}/requirements.txt", encoding="utf8") as file:
+    if os.path.isfile(f"{_torque_dir()}/requirements.txt"):
+        with open(f"{_torque_dir()}/requirements.txt", encoding="utf8") as file:
             requirements += [i.strip() for i in file]
 
     requirements += [""]
 
-    with open(f"{torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
+    with open(f"{_torque_dir()}/local/requirements.txt", "w", encoding="utf8") as req:
         req.write("\n".join(requirements))
 
     env = os.environ | {
@@ -148,7 +147,7 @@ def install_deps():
         "--upgrade"
     ]
 
-    subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
+    subprocess.run(cmd, cwd=_torque_root(), env=env, check=True)
 
 
 def install_package(uri: str):
@@ -156,7 +155,7 @@ def install_package(uri: str):
 
     if re.match(_URI, uri) is None and os.path.exists(uri):
         if not os.path.isabs(uri):
-            uri = os.path.join(torque_cwd(), uri)
+            uri = os.path.join(_torque_cwd(), uri)
             uri = os.path.normpath(uri)
 
     tmp = tempfile.mkdtemp()
@@ -175,7 +174,7 @@ def install_package(uri: str):
     ]
 
     try:
-        subprocess.run(cmd, cwd=torque_root(), env=env, check=True)
+        subprocess.run(cmd, cwd=_torque_root(), env=env, check=True)
 
         files = os.listdir(tmp)
 
@@ -185,7 +184,7 @@ def install_package(uri: str):
 
             with zipfile.ZipFile(f"{tmp}/{file}") as whl:
                 for item in whl.infolist():
-                    path = whl.extract(item, f"{torque_dir()}/system")
+                    path = whl.extract(item, f"{_torque_dir()}/system")
 
                     if item.create_system == 3:
                         attrs = item.external_attr >> 16
@@ -193,14 +192,14 @@ def install_package(uri: str):
 
             package = file.replace("-py3-none-torque.whl", ".dist-info")
 
-            direct_url = f"{torque_dir()}/system/{package}/direct_url.json"
+            direct_url = f"{_torque_dir()}/system/{package}/direct_url.json"
             with open(direct_url, "w", encoding="utf-8") as file:
                 file.write(json.dumps({
                     "dir_info": {},
                     "url": uri
                 }))
 
-            record = f"{torque_dir()}/system/{package}/RECORD"
+            record = f"{_torque_dir()}/system/{package}/RECORD"
             with open(record, "a", encoding="utf-8") as file:
                 file.write(f"{package}/direct_url.json,,\n")
 
@@ -216,7 +215,7 @@ def uninstall_package(name: str):
     if name not in packages:
         raise PackageNotFound(name)
 
-    dist = metadata.Distribution.at(packages[name]["path"])
+    dist = importlib.metadata.Distribution.at(packages[name]["path"])
     files = set()
 
     for file in dist.files:
@@ -224,7 +223,7 @@ def uninstall_package(name: str):
             files.add(os.path.join(*file.parts[:i+1]))
 
     for file in sorted(files, reverse=True):
-        path = f"{torque_dir()}/system/{file}"
+        path = f"{_torque_dir()}/system/{file}"
 
         try:
             if os.path.isdir(path):
