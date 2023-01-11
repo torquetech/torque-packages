@@ -208,7 +208,7 @@ class BaseService(BaseComponent):
     PARAMETERS = v1.utils.merge_dicts(BaseComponent.PARAMETERS, {
         "defaults": {},
         "schema": {
-            "port": int
+            "port": str
         }
     })
 
