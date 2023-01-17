@@ -8,7 +8,7 @@ Read more about Torque Framework at [torque.cloud](https://www.torque.cloud).
 
 ## Getting Started
 
-The best way to get familiar with using Torque Framework is to follow ["Getting Started with a new Project" guide](https://docs.torque.cloud/2-getting-started-new/index.html).
+The best way to get familiar with using Torque Framework is to follow ["Getting Started with a new Project" guide](https://docs.torque.cloud/getting-started-new/).
 
 ## Get in Touch
 
