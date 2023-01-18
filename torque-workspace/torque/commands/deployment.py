@@ -45,7 +45,7 @@ def _update(arguments: argparse.Namespace):
     """DOCSTRING"""
 
     ws = workspace.load(arguments.workspace, arguments.deployments)
-    deployment = ws.load_deployment(arguments.name, False, False)
+    deployment = ws.load_deployment(arguments.name, False)
 
     deployment.update()
     deployment.store()

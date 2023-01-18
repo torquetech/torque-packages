@@ -452,8 +452,7 @@ class Workspace:
 
     def load_deployment(self,
                         name: str,
-                        load_extra_configs: bool = True,
-                        strict: bool = None) -> deployment.Deployment:
+                        load_configs: bool = True) -> deployment.Deployment:
         """DOCSTRING"""
 
         name = self._get_full_deployment_name(name)
@@ -468,9 +467,10 @@ class Workspace:
                                d.components,
                                d.context_type,
                                d.context_config,
-                               strict if strict is not None else d.strict,
                                d.providers,
-                               d.extra_configs if load_extra_configs else [],
+                               d.extra_configs,
+                               d.strict,
+                               load_configs,
                                self.dag,
                                self.repo)
 

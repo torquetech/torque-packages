@@ -645,44 +645,23 @@ def _load_defaults(providers: [str],
     }
 
 
-def _load_configuration(context: v1.deployment.Context,
+def _load_configuration(name: str,
+                        context: v1.deployment.Context,
                         providers: [str],
+                        extra_configs: [str],
+                        strict: bool,
+                        load_configs: bool,
                         dag: dag.DAG,
-                        repo: repository.Repository,
-                        strict: bool) -> dict[str, object]:
+                        repo: repository.Repository) -> _Configuration:
     """DOCSTRING"""
+
+    defaults = _load_defaults(providers, dag, repo)
+
+    if not load_configs:
+        return _Configuration(defaults)
 
     with context as ctx:
-        config = ctx.get_data("configuration", v1.utils.fqcn(Deployment))
-
-    if not strict:
-        defaults = _load_defaults(providers, dag, repo)
-
-    else:
-        defaults = {}
-
-    if not config:
-        return defaults
-
-    return v1.utils.merge_dicts(defaults, config)
-
-
-def load(name: str,
-         filters: [str],
-         components: [str],
-         context_type: str,
-         context_config: dict,
-         strict: bool,
-         providers: [str],
-         extra_configs: [str],
-         dag: dag.DAG,
-         repo: repository.Repository) -> Deployment:
-    # pylint: disable=R0913
-
-    """DOCSTRING"""
-
-    context = _create_context(name, context_type, context_config, repo)
-    config = _load_configuration(context, providers, dag, repo, strict)
+        config = ctx.get_data("configuration", v1.utils.fqcn(Deployment)) or {}
 
     for extra_config in extra_configs:
         extra_config = v1.utils.resolve_path(extra_config)
@@ -690,12 +669,42 @@ def load(name: str,
         with open(extra_config, "r", encoding="utf-8") as file:
             config = v1.utils.merge_dicts(config, yaml.safe_load(file))
 
+    if not strict:
+        config = v1.utils.merge_dicts(defaults, config)
+
     config = _validate_deployment_config(name, config)
 
     if config["version"] != "torquetech.io/v1":
         raise v1.exceptions.RuntimeError(f"{config['version']}: invalid configuration version")
 
-    config = _Configuration(config)
+    return _Configuration(config)
+
+
+def load(name: str,
+         filters: [str],
+         components: [str],
+         context_type: str,
+         context_config: dict,
+         providers: [str],
+         extra_configs: [str],
+         strict: bool,
+         load_configs: bool,
+         dag: dag.DAG,
+         repo: repository.Repository) -> Deployment:
+    # pylint: disable=R0913
+
+    """DOCSTRING"""
+
+    context = _create_context(name, context_type, context_config, repo)
+
+    config = _load_configuration(name,
+                                 context,
+                                 providers,
+                                 extra_configs,
+                                 strict,
+                                 load_configs,
+                                 dag,
+                                 repo)
 
     if dag.revision != config.revision():
         if strict:
