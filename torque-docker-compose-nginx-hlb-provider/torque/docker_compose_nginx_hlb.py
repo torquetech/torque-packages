@@ -57,7 +57,7 @@ class V1Implementation(v1.bond.Bond):
 
     CONFIGURATION = {
         "defaults": {
-            "domain": "my-domain.com"
+            "domain": "example.com"
         },
         "schema": {
             "domain": str

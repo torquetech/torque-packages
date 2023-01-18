@@ -138,7 +138,7 @@ class V1External(v1.bond.Bond):
 
     CONFIGURATION = {
         "defaults": {
-            "domain": "my-domain.com",
+            "domain": "example.com",
             "key_file": "key.pem",
             "certificate_file": "cert.pem"
         },
