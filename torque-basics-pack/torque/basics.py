@@ -298,20 +298,22 @@ class V1IngressLink(v1.link.Link):
             }
         }
 
+    def _resolve_ingress(self, service: v1.utils.Future[Service]) -> str:
+        """DOCSTRING"""
+
+        service = v1.utils.resolve_futures(service)
+
+        return hlb.Ingress(self.name,
+                           service.host,
+                           service.port,
+                           self.parameters["host"],
+                           self.parameters["path"],
+                           {})
+
     def on_apply(self):
         """DOCSTRING"""
 
-        service = self.interfaces.src.service()
-
-        if isinstance(service, v1.utils.Future):
-            raise v1.exceptions.RuntimeError(f"{self.source}: cannot link remote object")
-
-        self.interfaces.dst.add(hlb.Ingress(self.name,
-                                            service.host,
-                                            service.port,
-                                            self.parameters["host"],
-                                            self.parameters["path"],
-                                            {}))
+        self.interfaces.dst.add(v1.utils.Future(self._resolve_ingress, self.interfaces.src.service()))
 
 
 class BaseLink(environment.V1BaseLink):

@@ -22,14 +22,14 @@ Ingress = collections.namedtuple("Ingress", [
 class V1ImplementationInterface(v1.bond.Interface):
     """DOCSTRING"""
 
-    def add(self, ingress: Ingress):
+    def add(self, ingress: v1.utils.Future[Ingress]):
         """DOCSTRING"""
 
 
 class V1DestinationInterface(v1.component.DestinationInterface):
     """DOCSTRING"""
 
-    def add(self, ingress: Ingress):
+    def add(self, ingress: v1.utils.Future[Ingress]):
         """DOCSTRING"""
 
 

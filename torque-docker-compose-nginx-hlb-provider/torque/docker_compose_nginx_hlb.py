@@ -90,24 +90,28 @@ class V1Implementation(v1.bond.Bond):
     def _apply(self):
         """DOCSTRING"""
 
+        ingress_list = [
+            v1.utils.resolve_futures(i) for i in self._ingress_list
+        ]
+
         domain = self.configuration["domain"]
-        hosts = sorted(list({i.host for i in self._ingress_list}))
+        hosts = sorted(list({i.host for i in ingress_list}))
 
         self.interfaces.lb.add_entry(docker_compose_load_balancer.Entry(self.name,
                                                                         domain,
                                                                         hosts))
 
-        local_conf_path = f"{self.context.path()}/{self.name}.conf"
-        external_conf_path = f"{self.context.external_path()}/{self.name}.conf"
-
-        conf = _INGRESS_LB.render(domain=domain, hosts=hosts, ingress_list=self._ingress_list)
+        conf = _INGRESS_LB.render(domain=domain, hosts=hosts, ingress_list=ingress_list)
         conf_hash = hashlib.sha1(bytes(conf, encoding="utf-8"))
 
-        with open(local_conf_path, "w", encoding="utf-8") as f:
+        local_conf = f"{self.context.path()}/{self.name}.conf"
+        external_conf = f"{self.context.external_path()}/{self.name}.conf"
+
+        with open(local_conf, "w", encoding="utf-8") as f:
             f.write(conf)
 
         self.interfaces.dc.add_object("configs", self.name, {
-            "file": external_conf_path
+            "file": external_conf
         })
 
         self.interfaces.dc.add_object("services", self.name, {

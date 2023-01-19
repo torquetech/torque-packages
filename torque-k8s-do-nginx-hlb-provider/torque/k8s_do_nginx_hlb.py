@@ -450,10 +450,14 @@ class V1Implementation(v1.bond.Bond):
     def _apply(self):
         """DOCSTRING"""
 
+        ingress_list = [
+            v1.utils.resolve_futures(i) for i in self._ingress_list
+        ]
+
         domain = self.interfaces.cert.domain()
         cert_id = self.interfaces.cert.certificate_id()
 
-        hosts = sorted([f"{i.host}" for i in self._ingress_list])
+        hosts = sorted([f"{i.host}" for i in ingress_list])
 
         objs = _INGRESS_LB.render(instance=self.name)
 
@@ -474,9 +478,7 @@ class V1Implementation(v1.bond.Bond):
 
                 self.interfaces.lb.add_entry(k8s_load_balancer.Entry(svc_name, domain, hosts))
 
-        for ingress in self._ingress_list:
-            assert not isinstance(ingress.service, v1.utils.Future)
-
+        for ingress in ingress_list:
             service, namespace = ingress.service.split(".")
 
             self.interfaces.k8s.add_object({
