@@ -145,8 +145,11 @@ T = typing.TypeVar("T")
 class Future(typing.Generic[T]):
     """DOCSTRING"""
 
-    def __init__(self, obj: object):
+    def __init__(self, obj: object, *args, **kwargs):
         self._obj = obj
+        self._args = args
+        self._kwargs = kwargs
+
         self._cached_value = None
 
     def __call__(self):
@@ -154,7 +157,7 @@ class Future(typing.Generic[T]):
             return self._cached_value
 
         if callable(self._obj):
-            self._cached_value = self._obj()
+            self._cached_value = self._obj(*self._args, **self._kwargs)
 
         else:
             self._cached_value = self._obj

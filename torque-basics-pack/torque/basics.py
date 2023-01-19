@@ -4,7 +4,6 @@
 
 """DOCSTRING"""
 
-import functools
 import os
 import subprocess
 
@@ -330,9 +329,7 @@ class BaseLink(environment.V1BaseLink):
 
         service = self.interfaces.src.service()
 
-        self.interfaces.dst.add(self._name(),
-                                v1.utils.Future(functools.partial(self._resolve_uri,
-                                                                  service)))
+        self.interfaces.dst.add(self._name(), v1.utils.Future(self._resolve_uri, service))
 
 
 class V1TCPServiceLink(BaseLink):

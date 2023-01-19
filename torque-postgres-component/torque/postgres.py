@@ -4,8 +4,6 @@
 
 """DOCSTRING"""
 
-import functools
-
 from collections import namedtuple
 
 from torque import environment
@@ -120,10 +118,7 @@ class V1EnvironmentLink(environment.V1BaseLink):
 
         service = self.interfaces.src.service()
 
-        self.interfaces.dst.add(self._name(),
-                                v1.utils.Future(functools.partial(self._resolve_uri,
-                                                                  auth,
-                                                                  service)))
+        self.interfaces.dst.add(self._name(), v1.utils.Future(self._resolve_uri, auth, service))
 
 
 class V1ServiceLink(v1.link.Link):

@@ -5,7 +5,6 @@
 """DOCSTRING"""
 
 import base64
-import functools
 import json
 import os
 import subprocess
@@ -127,7 +126,7 @@ class V1Provider(v1.provider.Provider):
 
         with self._lock:
             if image not in self._tags:
-                self._tags[image] = v1.utils.Future(functools.partial(self._resolve_tag, image))
+                self._tags[image] = v1.utils.Future(self._resolve_tag, image)
 
             return self._tags[image]
 

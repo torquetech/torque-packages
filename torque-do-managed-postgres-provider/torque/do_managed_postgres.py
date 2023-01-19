@@ -4,7 +4,6 @@
 
 """DOCSTRING"""
 
-import functools
 import threading
 
 from torque import do
@@ -400,7 +399,7 @@ class V1Implementation(v1.bond.Bond):
             if user not in self._users:
                 self._users[user] = f"{self.name}-user-{user}"
 
-        return v1.utils.Future(functools.partial(self._resolve_auth, database, user))
+        return v1.utils.Future(self._resolve_auth, database, user)
 
     def service(self) -> v1.utils.Future[postgres.Service]:
         """DOCSTRING"""
