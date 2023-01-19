@@ -29,7 +29,7 @@ class V1ImplementationInterface(v1.bond.Interface):
     def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
         """DOCSTRING"""
 
-    def service(self) -> v1.utils.Future[Service] | Service:
+    def service(self) -> v1.utils.Future[Service]:
         """DOCSTRING"""
 
 
@@ -39,7 +39,7 @@ class V1SourceInterface(v1.component.SourceInterface):
     def auth(self, database: str, user: str) -> v1.utils.Future[Authorization]:
         """DOCSTRING"""
 
-    def service(self) -> v1.utils.Future[Service] | Service:
+    def service(self) -> v1.utils.Future[Service]:
         """DOCSTRING"""
 
 
@@ -49,7 +49,7 @@ class V1DestinationInterface(v1.component.DestinationInterface):
     def add(self,
             name: str,
             auth: v1.utils.Future[Authorization],
-            service: v1.utils.Future[Service] | Service):
+            service: v1.utils.Future[Service]):
         """DOCSTRING"""
 
 

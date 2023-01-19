@@ -64,21 +64,21 @@ class V1ServiceImplementationInterface(v1.bond.Interface):
     def set_port(self, port: int):
         """DOCSTRING"""
 
-    def service(self) -> v1.utils.Future[Service] | Service:
+    def service(self) -> v1.utils.Future[Service]:
         """DOCSTRING"""
 
 
 class V1TCPSourceInterface(v1.component.SourceInterface):
     """DOCSTRING"""
 
-    def service(self) -> v1.utils.Future[Service] | Service:
+    def service(self) -> v1.utils.Future[Service]:
         """DOCSTRING"""
 
 
 class V1HttpSourceInterface(v1.component.SourceInterface):
     """DOCSTRING"""
 
-    def service(self) -> v1.utils.Future[Service] | Service:
+    def service(self) -> v1.utils.Future[Service]:
         """DOCSTRING"""
 
 
@@ -317,7 +317,7 @@ class V1IngressLink(v1.link.Link):
 class BaseLink(environment.V1BaseLink):
     """DOCSTRING"""
 
-    def _resolve_uri(self, service: v1.utils.Future[Service] | Service):
+    def _resolve_uri(self, service: v1.utils.Future[Service]):
         """DOCSTRING"""
 
         service = v1.utils.resolve_futures(service)

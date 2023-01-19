@@ -241,14 +241,14 @@ class V1Implementation(v1.bond.Bond):
                                                       user,
                                                       self._create_access(database, user)))
 
-    def service(self) -> postgres.Service:
+    def service(self) -> v1.utils.Future[postgres.Service]:
         """DOCSTRING"""
 
         host = f"{self.name}.{self._namespace}"
 
-        return postgres.Service(host, 5432, {
+        return v1.utils.Future(postgres.Service(host, 5432, {
             "sslmode": "disable"
-        })
+        }))
 
 
 repository = {

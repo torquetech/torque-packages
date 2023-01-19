@@ -238,12 +238,12 @@ class V1Implementation(v1.bond.Bond):
                                                    user,
                                                    self._create_access(database, user)))
 
-    def service(self) -> mysql.Service:
+    def service(self) -> v1.utils.Future[mysql.Service]:
         """DOCSTRING"""
 
         host = f"{self.name}.{self._namespace}"
 
-        return mysql.Service(host, 3306, {})
+        return v1.utils.Future(mysql.Service(host, 3306, {}))
 
 
 repository = {

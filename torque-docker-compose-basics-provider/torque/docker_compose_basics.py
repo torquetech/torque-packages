@@ -140,10 +140,10 @@ class V1ServiceImplementation(V1TaskImplementation):
 
         self._port = port
 
-    def service(self) -> basics.Service:
+    def service(self) -> v1.utils.Future[basics.Service]:
         """DOCSTRING"""
 
-        return basics.Service(self._proto, self.name, self._port)
+        return v1.utils.Future(basics.Service(self._proto, self.name, self._port))
 
 
 repository = {

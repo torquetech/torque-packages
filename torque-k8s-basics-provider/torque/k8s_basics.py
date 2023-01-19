@@ -222,12 +222,12 @@ class V1ServiceImplementation(V1TaskImplementation):
 
         self._port = port
 
-    def service(self) -> basics.Service:
+    def service(self) -> v1.utils.Future[basics.Service]:
         """DOCSTRING"""
 
         host = f"{self.name}.{self.interfaces.k8s.namespace()}"
 
-        return basics.Service(self._proto, host, self._port)
+        return v1.utils.Future(basics.Service(self._proto, host, self._port))
 
 
 repository = {
