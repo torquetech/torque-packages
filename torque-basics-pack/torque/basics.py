@@ -109,10 +109,9 @@ class BaseComponent(v1.component.Component):
         }
     }
 
-    def _resolve_cmd(self) -> [str]:
+    def _resolve_cmd(self, image: str) -> [str]:
         """DOCSTRING"""
 
-        image = f"{self.context.deployment_name}-{self.name}:latest"
         cmd = []
 
         for i in self.parameters["build"]["command"]:
@@ -121,24 +120,9 @@ class BaseComponent(v1.component.Component):
 
         return cmd
 
-    def _build(self) -> str:
+    def _id(self, image: str) -> str:
         """DOCSTRING"""
 
-        path = v1.utils.resolve_path(self.parameters["path"])
-        cmd = self._resolve_cmd()
-
-        print(f"+ {' '.join(cmd)}")
-        subprocess.run(cmd,
-                       env=os.environ,
-                       cwd=path,
-                       check=True)
-
-        return f"{self.name}:latest"
-
-    def _id(self) -> str:
-        """DOCSTRING"""
-
-        image = f"{self.context.deployment_name}-{self.name}:latest"
         cmd = [
             "docker", "image", "inspect",
             "-f", "{{.Id}}",
@@ -164,9 +148,20 @@ class BaseComponent(v1.component.Component):
     def on_build(self):
         """DOCSTRING"""
 
+        image = f"{self.context.deployment_name}-{self.name}:latest"
+
+        path = v1.utils.resolve_path(self.parameters["path"])
+        cmd = self._resolve_cmd(image)
+
+        print(f"+ {' '.join(cmd)}")
+        subprocess.run(cmd,
+                       env=os.environ,
+                       cwd=path,
+                       check=True)
+
         image = {
-            "tag": self._build(),
-            "id": self._id()
+            "tag": image,
+            "id": self._id(image)
         }
 
         with self.context as ctx:
