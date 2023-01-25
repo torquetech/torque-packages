@@ -7,6 +7,7 @@
 import os
 import subprocess
 import tempfile
+import threading
 
 import yaml
 
@@ -58,6 +59,8 @@ class V1Provider(v1.provider.Provider):
         self._new_state = {}
 
         self._load_state()
+
+        self._lock = threading.Lock()
 
         with self as p:
             p.add_hook("apply", self._apply)
@@ -207,15 +210,16 @@ class V1Provider(v1.provider.Provider):
                            default_flow_style=False,
                            sort_keys=False)
 
-        self._new_state[name] = {
-            "chart": chart,
-            "repo": {
-                "name": repo_name,
-                "url": repo_url
-            },
-            "namespace": namespace,
-            "values_file": values_file
-        }
+        with self._lock:
+            self._new_state[name] = {
+                "chart": chart,
+                "repo": {
+                    "name": repo_name,
+                    "url": repo_url
+                },
+                "namespace": namespace,
+                "values_file": values_file
+            }
 
 
 repository = {
