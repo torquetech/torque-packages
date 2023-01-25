@@ -192,16 +192,28 @@ def _trim(dag: "DAG", components_to_keep: set[Component], links_to_keep: set[Lin
     components_to_remove = set(dag.components.keys()) - components_to_keep
     links_to_remove = set(dag.links.keys()) - links_to_keep
 
-    for component_name in components_to_remove:
-        dag.components.pop(component_name)
-
     for link_name in links_to_remove:
+        link = dag.links[link_name]
+
+        source = dag.components[link.source]
+        destination = dag.components[link.destination]
+
+        outbound_links = source.outbound_links[destination.name]
+        outbound_links.remove(link_name)
+
+        if not outbound_links:
+            source.outbound_links.pop(destination.name)
+
+        inbound_links = destination.inbound_links[source.name]
+        inbound_links.remove(link_name)
+
+        if not inbound_links:
+            destination.inbound_links.pop(source.name)
+
         dag.links.pop(link_name)
 
-    for component in dag.components.values():
-        for component_name in components_to_remove:
-            component.inbound_links.pop(component_name, None)
-            component.outbound_links.pop(component_name, None)
+    for component_name in components_to_remove:
+        dag.components.pop(component_name)
 
 
 def _apply_filters(dag: "DAG", filters: [str]) -> "DAG":
