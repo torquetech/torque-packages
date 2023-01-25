@@ -181,12 +181,12 @@ def add_arguments(subparsers):
                                action="append",
                                metavar="COMPONENT",
                                dest="components",
-                               help="component")
+                               help="component name")
     create_parser.add_argument("--filter",
                                action="append",
                                metavar="FILTER",
                                dest="filters",
-                               help="filter")
+                               help="filter expression")
     create_parser.add_argument("--no-suffix",
                                action="store_true",
                                help="don't append unique suffix to the name")

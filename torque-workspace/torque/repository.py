@@ -9,7 +9,6 @@ import importlib.metadata
 import traceback
 import sys
 
-from torque import defaults
 from torque import exceptions
 from torque import v1
 

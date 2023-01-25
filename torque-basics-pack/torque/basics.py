@@ -137,7 +137,7 @@ class BaseComponent(v1.component.Component):
 
         return p.stdout.decode("utf8").strip()
 
-    def on_interfaces(self):
+    def on_interfaces(self) -> [v1.component.Interface]:
         """DOCSTRING"""
 
         return [
@@ -248,7 +248,7 @@ class V1TCPService(BaseService):
 
         self._proto = self.parameters["proto"]
 
-    def on_interfaces(self):
+    def on_interfaces(self) -> [v1.component.Interface]:
         """DOCSTRING"""
 
         return super().on_interfaces() + [
@@ -264,7 +264,7 @@ class V1HttpService(BaseService):
 
         self._proto = "http"
 
-    def on_interfaces(self):
+    def on_interfaces(self) -> [v1.component.Interface]:
         """DOCSTRING"""
 
         return super().on_interfaces() + [
