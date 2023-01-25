@@ -85,7 +85,8 @@ def main() -> int:
             "deployment": commands.deployment,
             "provider": commands.provider,
             "bond": commands.bond,
-            "context": commands.context
+            "context": commands.context,
+            "dag": commands.dag
         }
 
         for cmd in cmds.values():
